@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { supabaseServer } from "@/lib/supabase/server"
 import { generateEmbedding } from "@/lib/ai/embeddings"
+import type { Database } from "@/lib/supabase/database.types"
 
 const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+
+type SourceInsert = Database['public']['Tables']['sources']['Insert']
 
 // GET - List all sources
 export async function GET(req: NextRequest) {
@@ -34,18 +37,22 @@ export async function POST(req: NextRequest) {
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
 
-    // Generate embedding
-    const embedding = await generateEmbedding(content)
+    // Generate embedding (returns number[])
+    const embeddingArray = await generateEmbedding(content)
+    // Convert to pgvector string format: "[1,2,3]"
+    const embedding = JSON.stringify(embeddingArray)
 
     // Insert source
+    const sourceData: SourceInsert = {
+      chatbot_id: activeChatbotId,
+      title: title || null,
+      content,
+      embedding,
+    }
+
     const { data, error } = await supabaseServer
       .from('sources')
-      .insert({
-        chatbot_id: activeChatbotId,
-        title: title || null,
-        content,
-        embedding,
-      })
+      .insert([sourceData])
       .select()
       .single()
 
@@ -54,9 +61,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ source: data })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating source:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

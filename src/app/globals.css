@@ -126,3 +126,23 @@ input[type='file'][aria-label='Upload files'] {
 .contents {
   width: 100%;
 }
+.gradient {
+  filter: blur(16px);
+  /* opacity: 0.9; */
+  pointer-events: none;
+  z-index: 0;
+  background-image: linear-gradient(
+    90deg,
+    #8c69b8,
+    #b3d99a,
+    #fde385,
+    #87d4e9,
+    #8c69b8,
+    #b3d99a
+  );
+  height: 0.75rem;
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 90%;
+}

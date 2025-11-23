@@ -198,24 +198,9 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
   }
 
   const showButton = !isRunning || currentIndex >= demoConversation.length
-  const styles = {
-    gradient: {
-      filter: 'blur(16px)',
-      opacity: .9,
-      pointerEvents: 'none' as const,
-      zIndex: 0,
-      backgroundImage: 'linear-gradient(90deg, #8C69B8, #B3D99A, #FDE385, #87D4E9, #8C69B8, #B3D99A)',
-      height: '0.75rem',
-      position: 'absolute' as const,
-      left: '16px',
-      right: '16px',
-      top: '90%'
-    },
-  }
 
   return (
     <div
-      onClick={handleInterrupt}
       style={{
         width: '100%',
         maxWidth: '600px',
@@ -223,7 +208,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         display: 'flex',
         flexDirection: 'column',
         gap: 'var(--op-space-medium)',
-        cursor: isRunning ? 'pointer' : 'default',
       }}
     >
       {/* Messages Container */}
@@ -236,7 +220,10 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           maxHeight: '400px',
           height: 400,
           overflowY: 'auto',
-          paddingRight: 'var(--op-space-small)',
+          paddingInline: 'var(--op-space-small)',
+          paddingBlockStart: 'var(--op-space-small)',
+          borderTop: '1px solid',
+          borderColor: 'var(--op-color-border)',
         }}
       >
         <AnimatePresence mode="popLayout">
@@ -264,13 +251,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 transition={{
                   delay: 0.2,
                   duration: 0.3
-                }}
-                whileHover={{
-                  scale: 1.02,
-                  boxShadow: message.role === 'user'
-                    ? '0 8px 16px -4px rgba(0, 0, 0, 0.15), 0 4px 8px -2px rgba(0, 0, 0, 0.08)'
-                    : '0 4px 12px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.06)',
-                  transition: { duration: 0.2 }
                 }}
                 style={{
                   maxWidth: '75%',
@@ -421,12 +401,17 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
       </div>
 
       {/* Real PromptInput Component with Typing Animation */}
-      <div style={{ width: '100%', position: 'relative' }}>
-        <div style={styles.gradient} />
+      <div
+        onClick={handleInterrupt}
+        style={{
+          width: '100%', position: 'relative',
+          cursor: isRunning ? 'pointer' : 'default',
+        }}>
+        <div className="gradient" />
         <PromptInputProvider>
           <PromptInput
             onSubmit={() => { }} // No-op during demo
-            style={{ width: '100%' }}
+            style={{ width: '100%', zIndex: 1 }}
           >
             <PromptInputAttachments>
               {(attachment) => <PromptInputAttachment key={attachment.id} data={attachment} />}
@@ -485,6 +470,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             </PromptInputFooter>
           </PromptInput>
         </PromptInputProvider>
+
       </div>
 
       {/* Start Your Own Conversation Button */}

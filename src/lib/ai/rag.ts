@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server'
 import { generateEmbedding } from './embeddings'
+import type { Database } from '@/lib/supabase/database.types'
 
 export interface Source {
   id: string
@@ -7,6 +8,8 @@ export interface Source {
   content: string
   similarity?: number
 }
+
+type Chatbot = Database['public']['Tables']['chatbots']['Row']
 
 /**
  * Retrieve relevant sources for a query using vector similarity search
@@ -19,10 +22,12 @@ export async function retrieveRelevantSources(
 ): Promise<Source[]> {
   try {
     // Generate embedding for the query
-    const queryEmbedding = await generateEmbedding(query)
+    const queryEmbeddingArray = await generateEmbedding(query)
+    // Convert to pgvector string format
+    const queryEmbedding = JSON.stringify(queryEmbeddingArray)
 
     // Perform vector similarity search
-    const { data, error } = await supabaseServer.rpc('match_sources', {
+    const { data, error} = await supabaseServer.rpc('match_sources', {
       chatbot_id: chatbotId,
       query_embedding: queryEmbedding,
       match_threshold: threshold,
@@ -76,7 +81,7 @@ Use the above information to provide accurate, helpful responses. When referenci
 /**
  * Get chatbot configuration
  */
-export async function getChatbot(chatbotId: string): Promise<any> {
+export async function getChatbot(chatbotId: string): Promise<Chatbot | null> {
   const { data, error } = await supabaseServer
     .from('chatbots')
     .select('*')

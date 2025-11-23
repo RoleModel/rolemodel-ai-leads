@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 
-import { SidebarLeftIcon, Globe02Icon, PlusSignIcon, Settings02Icon, Delete02Icon } from '@hugeicons-pro/core-stroke-standard'
+import { SidebarLeftIcon, PlusSignIcon, Settings02Icon, Delete02Icon, Globe02Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,29 +17,20 @@ import { useChat } from "@ai-sdk/react"
 import { TextStreamChatTransport, isTextUIPart, type UIMessage } from "ai"
 import { AnimatedConversationDemo } from "@/components/leads-page/AnimatedConversationDemo"
 import {
-  Conversation,
-  ConversationContent,
-} from "@/components/ai-elements/conversation"
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message"
-import {
   PromptInput,
   PromptInputProvider,
   PromptInputTextarea,
   PromptInputBody,
   PromptInputFooter,
+  PromptInputTools,
   PromptInputButton,
   PromptInputSubmit,
   PromptInputAttachments,
   PromptInputAttachment,
-  PromptInputTools,
   PromptInputActionMenu,
+  PromptInputActionMenuTrigger,
   PromptInputActionMenuContent,
   PromptInputActionAddAttachments,
-  PromptInputActionMenuTrigger,
   PromptInputSpeechButton,
   type PromptInputMessage,
 } from "@/components/ai-elements/prompt-input"
@@ -54,6 +45,13 @@ interface CustomButton {
   id: string
   text: string
   url: string
+}
+
+interface ChatHistory {
+  id: string
+  title: string
+  messages: UIMessage[]
+  timestamp: number
 }
 
 interface LeadsPageViewProps {
@@ -117,18 +115,6 @@ const styles = {
     margin: '0 auto',
     position: 'relative' as const,
   },
-  gradient: {
-    filter: 'blur(16px)',
-    opacity: .9,
-    pointerEvents: 'none' as const,
-    zIndex: 0,
-    backgroundImage: 'linear-gradient(90deg, #8C69B8, #B3D99A, #FDE385, #87D4E9, #8C69B8, #B3D99A)',
-    height: '0.75rem',
-    position: 'absolute' as const,
-    left: '16px',
-    right: '16px',
-    top: '90%'
-  },
 }
 
 export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false }: LeadsPageViewProps) {
@@ -140,6 +126,23 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
   const [customButtons, setCustomButtons] = useState<CustomButton[]>([])
   const [showDemo, setShowDemo] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Chat history - read from localStorage on each render (no setState in effects)
+  const getChatHistory = useCallback((): ChatHistory[] => {
+    if (typeof window === 'undefined') return []
+    const saved = localStorage.getItem('leads-page-chat-history')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return []
+      }
+    }
+    return []
+  }, [])
+
+  const chatHistory = getChatHistory()
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
 
   // Edit mode states for custom buttons
   const [editingButtonId, setEditingButtonId] = useState<string | null>(null)
@@ -286,6 +289,49 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
     ))
   }
 
+  // Chat history handlers
+  const handleNewChat = () => {
+    setCurrentChatId(`chat-${Date.now()}`)
+    setShowDemo(true)
+    window.location.reload() // Simple way to clear messages for now
+  }
+
+  const handleSwitchChat = (chatId: string) => {
+    const chat = chatHistory.find(c => c.id === chatId)
+    if (chat) {
+      setCurrentChatId(chatId)
+      setShowDemo(false)
+      // For now, just show that chat is selected. Full message loading would require useChat integration
+      alert(`Switching to chat: ${chat.title}\n\nFull chat loading will be implemented in next iteration.`)
+    }
+  }
+
+  // Save current chat to localStorage when messages change (external system sync)
+  useEffect(() => {
+    if (messages.length > 0 && !showDemo && currentChatId) {
+      // Generate title from first user message
+      const firstUserMessage = messages.find(m => m.role === 'user')
+      const title = firstUserMessage
+        ? getMessageContent(firstUserMessage).slice(0, 50) + (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
+        : 'New Chat'
+
+      // Create new chat entry
+      const newChat: ChatHistory = {
+        id: currentChatId,
+        title,
+        messages,
+        timestamp: Date.now()
+      }
+
+      // Update localStorage (external system)
+      const currentHistory = getChatHistory()
+      const updatedHistory = currentHistory.filter(c => c.id !== currentChatId)
+      updatedHistory.unshift(newChat)
+      const trimmedHistory = updatedHistory.slice(0, 50)
+      localStorage.setItem('leads-page-chat-history', JSON.stringify(trimmedHistory))
+    }
+  }, [messages, currentChatId, showDemo, getMessageContent, getChatHistory])
+
   return (
     <div style={styles.container}>
       {/* Sidebar */}
@@ -309,6 +355,48 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
               <HugeiconsIcon icon={SidebarLeftIcon} size={20} />
             </Button>
           </div>
+
+          {/* New Chat Button */}
+          <Button
+            variant="ghost"
+            style={{ justifyContent: sidebarCollapsed ? 'center' : 'flex-start', gap: 'var(--op-space-small)', marginTop: 20, border: '1px dashed var(--op-color-border)' }}
+            onClick={handleNewChat}
+          >
+            <HugeiconsIcon icon={PlusSignIcon} size={20} /> {!sidebarCollapsed && 'New chat'}
+          </Button>
+
+          {/* Chat History List */}
+          {!sidebarCollapsed && chatHistory.length > 0 && (
+            <div style={{
+              marginTop: 'var(--op-space-medium)',
+              flex: 1,
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--op-space-2x-small)'
+            }}>
+              {chatHistory.map((chat) => (
+                <Button
+                  key={chat.id}
+                  variant="ghost"
+                  style={{
+                    justifyContent: 'flex-start',
+                    fontSize: 'var(--op-font-x-small)',
+                    padding: 'var(--op-space-small)',
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+
+                    backgroundColor: currentChatId === chat.id ? 'var(--op-color-primary-minus-eight)' : 'transparent'
+                  }}
+                  onClick={() => handleSwitchChat(chat.id)}
+                >
+                  {chat.title}
+                </Button>
+              ))}
+            </div>
+          )}
 
           {/* Custom Buttons at bottom */}
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
@@ -470,7 +558,7 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
 
       {/* Main Content */}
       <div style={styles.content}>
-        {messages.length === 0 ? (
+        {showDemo ? (
           <div style={styles.hero}>
             <div style={{ width: 56, height: 56, fontSize: 28, borderRadius: 12, backgroundColor: favicon ? 'transparent' : 'var(--op-color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               {favicon ? (
@@ -482,42 +570,7 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
             <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 0 }}>{pageTitle}</h2>
 
             {/* Animated Conversation Demo */}
-            {showDemo ? (
-              <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} />
-            ) : (
-              <div style={styles.inputWrapper}>
-
-                <PromptInputProvider>
-                  <PromptInput onSubmit={handlePromptSubmit} style={{ width: '100%', maxWidth: '600px', zIndex: 2, position: 'relative' as const }}>
-                    <PromptInputAttachments>
-                      {(attachment) => <PromptInputAttachment key={attachment.id} data={attachment} />}
-                    </PromptInputAttachments>
-                    <PromptInputBody>
-                      <PromptInputTextarea placeholder="Ask me anything..." />
-                    </PromptInputBody>
-                    <PromptInputFooter>
-                      <PromptInputTools>
-                        <PromptInputActionMenu>
-                          <PromptInputActionMenuTrigger>
-                            <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                          </PromptInputActionMenuTrigger>
-                          <PromptInputActionMenuContent>
-                            <PromptInputActionAddAttachments />
-                          </PromptInputActionMenuContent>
-                        </PromptInputActionMenu>
-                        <PromptInputSpeechButton textareaRef={textareaRef} />
-                        <PromptInputButton>
-                          <HugeiconsIcon icon={Globe02Icon} size={20} />
-                          <span>Search</span>
-                        </PromptInputButton>
-                      </PromptInputTools>
-                      <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-                    </PromptInputFooter>
-                  </PromptInput>
-                </PromptInputProvider>
-                <div style={styles.gradient} />
-              </div>
-            )}
+            <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} />
 
             {/* Suggestions */}
             <div style={{ display: 'flex', gap: 'var(--op-space-small)', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
@@ -569,33 +622,78 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
           </div>
         ) : (
           <>
-            <div style={styles.messages}>
-              <Conversation>
-                <ConversationContent>
-                  {messages.map((message) => (
-                    <Message
-                      key={message.id}
-                      from={message.role === 'user' ? 'user' : 'assistant'}
-                    >
-                      <MessageContent>
-                        <MessageResponse>
-                          {getMessageContent(message)}
-                        </MessageResponse>
-                      </MessageContent>
-                    </Message>
-                  ))}
-                </ConversationContent>
-              </Conversation>
+            {/* Conversation Messages */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: 'var(--op-space-large)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--op-space-medium)',
+            }}>
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <div
+                    style={{
+                      maxWidth: '75%',
+                      padding: 'var(--op-space-medium)',
+                      borderRadius: 'var(--op-radius-medium)',
+                      backgroundColor: message.role === 'user'
+                        ? 'var(--op-color-primary-base)'
+                        : 'var(--op-color-neutral-plus-six)',
+                      color: message.role === 'user'
+                        ? 'var(--op-color-primary-on-base)'
+                        : 'var(--op-color-on-background)',
+                      fontSize: 'var(--op-font-small)',
+                      lineHeight: 1.5,
+                      textAlign: 'left',
+                      whiteSpace: 'pre-line',
+                      boxShadow: message.role === 'user'
+                        ? '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                        : '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04)'
+                    }}
+                  >
+                    {getMessageContent(message)}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div style={styles.inputWrapper}>
-              <PromptInput onSubmit={handlePromptSubmit} maxFiles={0} accept="">
-                <PromptInputTextarea placeholder="Ask me anything..." />
-                <PromptInputFooter>
-                  <div />
-                  <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-                </PromptInputFooter>
-              </PromptInput>
+            <div style={{ padding: 'var(--op-space-large)', paddingTop: 0 }}>
+              <PromptInputProvider>
+                <PromptInput onSubmit={handlePromptSubmit}>
+                  <PromptInputAttachments>
+                    {(attachment) => <PromptInputAttachment key={attachment.id} data={attachment} />}
+                  </PromptInputAttachments>
+                  <PromptInputBody>
+                    <PromptInputTextarea placeholder="Ask me anything..." ref={textareaRef} />
+                  </PromptInputBody>
+                  <PromptInputFooter>
+                    <PromptInputTools>
+                      <PromptInputActionMenu>
+                        <PromptInputActionMenuTrigger>
+                          <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                        </PromptInputActionMenuTrigger>
+                        <PromptInputActionMenuContent>
+                          <PromptInputActionAddAttachments />
+                        </PromptInputActionMenuContent>
+                      </PromptInputActionMenu>
+                      <PromptInputSpeechButton textareaRef={textareaRef} />
+                      <PromptInputButton>
+                        <HugeiconsIcon icon={Globe02Icon} size={20} />
+                        <span>Search</span>
+                      </PromptInputButton>
+                    </PromptInputTools>
+                    <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+                  </PromptInputFooter>
+                </PromptInput>
+              </PromptInputProvider>
             </div>
           </>
         )}
