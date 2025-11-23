@@ -1,26 +1,128 @@
-@import "tailwindcss";
+/* -------------------------------------------------
+   Import Optics Design System
+   ------------------------------------------------- */
+@import '@rolemodel/optics/dist/css/optics.css';
+
+/* -------------------------------------------------
+   Optics overrides + app globals
+   ------------------------------------------------- */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --op-font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  --op-color-primary-h: 208;
+  --op-color-primary-s: 56%;
+  --op-color-primary-l: 53%;
+  --op-shadow-color: #0000000d;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* -------------------------------------------------
+   Global Helpers
+   ------------------------------------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  letter-spacing: -0.04em;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.icon-sm {
+  width: 16px;
+  height: 16px;
+}
+
+.btn svg {
+  stroke-width: 2;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.justify-between {
+  justify-content: space-between !important;
+}
+
+.justify-start {
+  justify-content: flex-start !important;
+}
+
+.justify-center {
+  justify-content: center !important;
+}
+
+.justify-end {
+  justify-content: flex-end !important;
+}
+
+.inner-shadow {
+  box-shadow: inset 0 2px 4px 0 var(--op-shadow-color);
+}
+
+/* Loading animation */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.loading-dots span {
+  animation: blink 1.4s infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Card component */
+.card {
+  background-color: var(--op-color-background);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--op-space-medium) var(--op-space-large);
+  border-bottom: 1px solid var(--op-color-border);
+  background-color: var(--op-color-neutral-plus-seven);
+}
+
+.card-body {
+  padding: var(--op-space-large);
+}
+
+/* Alert component */
+.alert {
+  padding: var(--op-space-medium);
+  border-radius: var(--op-radius-medium);
+  border: 1px solid var(--op-color-border);
+}
+
+/* Hide elements */
+.hidden {
+  display: none !important;
+}
+
+/* Hide file inputs */
+input[type='file'].hidden,
+input[type='file'][aria-label='Upload files'] {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+.contents {
+  width: 100%;
 }
