@@ -14,8 +14,17 @@ export function WidgetPreviewArea() {
   const [isOpen, setIsOpen] = useState(true)
   const [showNotice, setShowNotice] = useState(true)
 
-  const widgetBackgroundColor = config.theme === 'light' ? 'white' : '#1a1a1a'
-  const widgetTextColor = config.theme === 'light' ? '#000' : '#fff'
+  const styles = {
+    grid: {
+      position: 'absolute' as const,
+      inset: 0,
+      backgroundImage:
+        'radial-gradient(var(--op-color-neutral-plus-four) 1px, transparent 0)',
+      backgroundSize: '10px 10px',
+      pointerEvents: 'none' as const,
+      zIndex: 0,
+    },
+  }
 
   return (
     <main
@@ -37,6 +46,7 @@ export function WidgetPreviewArea() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          zIndex: 1,
         }}
       >
         <div>
@@ -68,6 +78,7 @@ export function WidgetPreviewArea() {
       {/* Widget Preview Container */}
       <div
         style={{
+          ...styles.grid,
           flex: 1,
           display: 'flex',
           alignItems: 'flex-end',
@@ -87,16 +98,17 @@ export function WidgetPreviewArea() {
           {/* Widget - only shown when open */}
           {isOpen && (
             <div
+              data-theme-mode={config.theme}
               style={{
                 width: '400px',
                 height: '600px',
                 borderRadius: 'var(--op-radius-large)',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                backgroundColor: widgetBackgroundColor,
+                backgroundColor: 'var(--op-color-background)',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                animation: 'slideUp 0.3s ease-out',
+                colorScheme: config.theme,
               }}
             >
               {/* Widget Header */}
@@ -122,16 +134,24 @@ export function WidgetPreviewArea() {
                       width: '32px',
                       height: '32px',
                       borderRadius: 'var(--op-radius-small)',
-                      backgroundColor: 'white',
+                      backgroundColor: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
+                        ? 'transparent'
+                        : 'white',
                       color: config.primaryColor,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 'var(--op-font-weight-bold)',
                       fontSize: 'var(--op-font-medium)',
+                      overflow: 'hidden',
+                      backgroundImage: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
+                        ? `url(${config.profilePicture})`
+                        : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
                     }}
                   >
-                    {config.profilePicture}
+                    {!config.profilePicture?.startsWith('data:') && !config.profilePicture?.startsWith('http') && (config.profilePicture || 'R')}
                   </div>
                   <span
                     style={{
@@ -143,7 +163,7 @@ export function WidgetPreviewArea() {
                   </span>
                 </div>
                 <Button variant="ghost">
-                  <HugeiconsIcon icon={RefreshIcon} size={20} />
+                  <HugeiconsIcon icon={RefreshIcon} color='white' size={20} />
                 </Button>
               </div>
 
@@ -152,10 +172,12 @@ export function WidgetPreviewArea() {
                 <div
                   style={{
                     padding: 'var(--op-space-small) var(--op-space-medium)',
-                    backgroundColor: config.theme === 'light' ? '#f0f9ff' : '#1e3a5f',
+                    backgroundColor: config.theme === 'light'
+                      ? `color-mix(in srgb, ${config.primaryColor} 15%, white)`
+                      : `color-mix(in srgb, ${config.primaryColor} 20%, black)`,
                     borderBottom: '1px solid var(--op-color-border)',
                     display: 'flex',
-                    alignItems: 'flex-start',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: 'var(--op-space-small)',
                   }}
@@ -163,7 +185,7 @@ export function WidgetPreviewArea() {
                   <div
                     style={{
                       fontSize: 'var(--op-font-x-small)',
-                      color: widgetTextColor,
+                      color: 'var(--op-color-on-background)',
                       flex: 1,
                     }}
                     dangerouslySetInnerHTML={{ __html: config.dismissibleNotice }}
@@ -175,7 +197,7 @@ export function WidgetPreviewArea() {
                       border: 'none',
                       cursor: 'pointer',
                       padding: 0,
-                      color: widgetTextColor,
+                      color: 'var(--op-color-on-background)',
                       opacity: 0.6,
                       fontSize: '16px',
                     }}
@@ -192,8 +214,8 @@ export function WidgetPreviewArea() {
                   display: 'flex',
                   flexDirection: 'column',
                   overflow: 'hidden',
-                  backgroundColor: widgetBackgroundColor,
-                  color: widgetTextColor,
+                  backgroundColor: 'var(--op-color-background)',
+                  color: 'var(--op-color-on-background)',
                 }}
               >
                 <ChatInterface
@@ -238,20 +260,6 @@ export function WidgetPreviewArea() {
           </button>
         </div>
       </div>
-
-      {/* Add keyframe animation */}
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </main>
   )
 }

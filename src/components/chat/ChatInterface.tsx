@@ -1,10 +1,11 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useChat } from '@ai-sdk/react'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
@@ -66,40 +67,44 @@ export function ChatInterface({
     transport: chatTransport,
   })
 
-  const handleFeedback = (messageId: string, feedback: 'positive' | 'negative') => {
-    const isTogglingOff = messageFeedback.get(messageId) === feedback
+  const handleFeedback = useCallback(
+    (messageId: string, feedback: 'positive' | 'negative') => {
+      const isTogglingOff = messageFeedback.get(messageId) === feedback
 
-    setMessageFeedback((prev) => {
-      const next = new Map(prev)
-      if (isTogglingOff) {
-        // Toggle off if clicking the same button
-        next.delete(messageId)
-      } else {
-        next.set(messageId, feedback)
+      setMessageFeedback((prev) => {
+        const next = new Map(prev)
+        if (isTogglingOff) {
+          // Toggle off if clicking the same button
+          next.delete(messageId)
+        } else {
+          next.set(messageId, feedback)
+        }
+        return next
+      })
+
+      // Store feedback in localStorage
+      const existingFeedback = JSON.parse(
+        localStorage.getItem('chat-message-feedback') || '[]'
+      ) as MessageFeedback[]
+
+      // Remove existing feedback for this message
+      const filteredFeedback = existingFeedback.filter((f) => f.messageId !== messageId)
+
+      // Add new feedback if not toggling off
+      if (!isTogglingOff) {
+        const now = Date.now()
+        const feedbackData: MessageFeedback = {
+          messageId,
+          feedback,
+          timestamp: now,
+        }
+        filteredFeedback.push(feedbackData)
       }
-      return next
-    })
 
-    // Store feedback in localStorage
-    const existingFeedback = JSON.parse(
-      localStorage.getItem('chat-message-feedback') || '[]'
-    ) as MessageFeedback[]
-
-    // Remove existing feedback for this message
-    const filteredFeedback = existingFeedback.filter((f) => f.messageId !== messageId)
-
-    // Add new feedback if not toggling off
-    if (!isTogglingOff) {
-      const feedbackData: MessageFeedback = {
-        messageId,
-        feedback,
-        timestamp: Date.now(),
-      }
-      filteredFeedback.push(feedbackData)
-    }
-
-    localStorage.setItem('chat-message-feedback', JSON.stringify(filteredFeedback))
-  }
+      localStorage.setItem('chat-message-feedback', JSON.stringify(filteredFeedback))
+    },
+    [messageFeedback]
+  )
 
   // Set initial message on mount
   useEffect(() => {
@@ -161,52 +166,26 @@ export function ChatInterface({
                         marginTop: 'var(--op-space-small)',
                       }}
                     >
-                      <button
+                      <Button
+                        variant="icon"
                         onClick={() => handleFeedback(message.id, 'positive')}
-                        style={{
-                          background: 'none',
-                          border: '1px solid var(--op-color-border)',
-                          borderRadius: 'var(--op-radius-small)',
-                          padding: 'var(--op-space-x-small)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          color:
-                            messageFeedback.get(message.id) === 'positive'
-                              ? 'var(--op-color-alerts-notice-base)'
-                              : 'var(--op-color-neutral-on-plus-max)',
-                          backgroundColor:
-                            messageFeedback.get(message.id) === 'positive'
-                              ? 'var(--op-color-alerts-notice-minus-eight)'
-                              : 'transparent',
-                        }}
                         aria-label="Thumbs up"
+                        style={{
+                          backgroundColor: 'var(--op-color-background)',
+                        }}
                       >
                         <HugeiconsIcon icon={ThumbsUpIcon} size={16} />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="icon"
                         onClick={() => handleFeedback(message.id, 'negative')}
                         style={{
-                          background: 'none',
-                          border: '1px solid var(--op-color-border)',
-                          borderRadius: 'var(--op-radius-small)',
-                          padding: 'var(--op-space-x-small)',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          color:
-                            messageFeedback.get(message.id) === 'negative'
-                              ? 'var(--op-color-alerts-danger-base)'
-                              : 'var(--op-color-neutral-on-plus-max)',
-                          backgroundColor:
-                            messageFeedback.get(message.id) === 'negative'
-                              ? 'var(--op-color-alerts-danger-minus-eight)'
-                              : 'transparent',
+                          backgroundColor: 'var(--op-color-background)',
                         }}
                         aria-label="Thumbs down"
                       >
                         <HugeiconsIcon icon={ThumbsDownIcon} size={16} />
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </MessageContent>

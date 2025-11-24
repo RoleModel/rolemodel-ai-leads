@@ -7,7 +7,7 @@ import {
   Upload01Icon,
 } from 'hugeicons-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,9 +22,10 @@ import { useWidgetConfig } from '@/contexts/WidgetConfigContext'
 export function WidgetEditorSidebar() {
   const router = useRouter()
   const { config, updateConfig } = useWidgetConfig()
+  const [alertMessage, setAlertMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const origin = useSyncExternalStore(
-    () => () => {},
+    () => () => { },
     () => (typeof window !== 'undefined' ? window.location.origin : ''),
     () => ''
   )
@@ -59,15 +60,18 @@ export function WidgetEditorSidebar() {
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Failed to save widget settings:', errorText)
-        alert('Failed to save settings: ' + errorText)
+        setAlertMessage({ type: 'error', text: 'Failed to save settings' })
+        setTimeout(() => setAlertMessage(null), 3000)
       } else {
         const result = await response.json()
         console.log('Save successful:', result)
-        alert('Settings saved successfully!')
+        setAlertMessage({ type: 'success', text: 'Settings saved successfully!' })
+        setTimeout(() => setAlertMessage(null), 3000)
       }
     } catch (error) {
       console.error('Error saving widget config:', error)
-      alert('Error saving settings: ' + error)
+      setAlertMessage({ type: 'error', text: 'Error saving settings' })
+      setTimeout(() => setAlertMessage(null), 3000)
     }
   }
 
@@ -93,24 +97,15 @@ export function WidgetEditorSidebar() {
           Back to Deploy
         </Button>
 
-        <div
+        <h1
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            fontSize: 'var(--op-font-large)',
+            fontWeight: 'var(--op-font-weight-bold)',
+            margin: 0,
           }}
         >
-          <h1
-            style={{
-              fontSize: 'var(--op-font-large)',
-              fontWeight: 'var(--op-font-weight-bold)',
-              margin: 0,
-            }}
-          >
-            Chat widget
-          </h1>
-          <Switch defaultChecked />
-        </div>
+          Chat widget
+        </h1>
       </div>
 
       <Tabs
@@ -127,7 +122,7 @@ export function WidgetEditorSidebar() {
           <TabsList
             style={{
               display: 'flex',
-              padding: 'var(--op-space-small)',
+              padding: '0 var(--op-space-small)',
               gap: 'var(--op-space-2x-small)',
             }}
           >
@@ -284,68 +279,6 @@ export function WidgetEditorSidebar() {
                 onChange={(e) => updateConfig({ messagePlaceholder: e.target.value })}
                 placeholder="Message..."
               />
-            </div>
-
-            <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Label
-                  htmlFor="widget-collect-feedback"
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--op-space-2x-small)',
-                  }}
-                >
-                  Collect user feedback
-                  <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
-                </Label>
-                <Switch
-                  id="widget-collect-feedback"
-                  checked={config.collectFeedback}
-                  onCheckedChange={(checked) =>
-                    updateConfig({ collectFeedback: checked })
-                  }
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Label
-                  htmlFor="widget-regenerate-messages"
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--op-space-2x-small)',
-                  }}
-                >
-                  Regenerate messages
-                  <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
-                </Label>
-                <Switch
-                  id="widget-regenerate-messages"
-                  checked={config.regenerateMessages}
-                  onCheckedChange={(checked) =>
-                    updateConfig({ regenerateMessages: checked })
-                  }
-                />
-              </div>
             </div>
 
             <div>
@@ -592,47 +525,61 @@ export function WidgetEditorSidebar() {
                     width: '48px',
                     height: '48px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--op-color-primary)',
+                    backgroundColor: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
+                      ? 'transparent'
+                      : 'var(--op-color-primary)',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 'var(--op-font-large)',
                     fontWeight: 'bold',
+                    overflow: 'hidden',
+                    backgroundImage: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
+                      ? `url(${config.profilePicture})`
+                      : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
                   }}
                 >
-                  R
+                  {!config.profilePicture?.startsWith('data:') && !config.profilePicture?.startsWith('http') && (config.profilePicture || 'R')}
                 </div>
-                <Button variant="icon">
+                <input
+                  type="file"
+                  id="profile-picture-upload"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      // Check file size (max 1MB)
+                      if (file.size > 1024 * 1024) {
+                        setAlertMessage({ type: 'error', text: 'File size must be less than 1MB' })
+                        setTimeout(() => setAlertMessage(null), 3000)
+                        return
+                      }
+                      // Convert to base64
+                      const reader = new FileReader()
+                      reader.onloadend = () => {
+                        updateConfig({ profilePicture: reader.result as string })
+                      }
+                      reader.readAsDataURL(file)
+                    }
+                  }}
+                />
+                <Button
+                  variant="icon"
+                  onClick={() => document.getElementById('profile-picture-upload')?.click()}
+                >
                   <Upload01Icon className="icon-sm" />
                 </Button>
-                <Button variant="icon">
+                <Button
+                  variant="icon"
+                  onClick={() => updateConfig({ profilePicture: 'R' })}
+                >
                   <Cancel01Icon className="icon-sm" />
                 </Button>
               </div>
-            </div>
-
-            <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--op-font-small)',
-                  marginBottom: 'var(--op-space-small)',
-                }}
-              >
-                Chat icon
-              </Label>
-              <p
-                style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  marginBottom: 'var(--op-space-small)',
-                }}
-              >
-                JPG, PNG, and SVG up to 1MB
-              </p>
-              <Button variant="secondary">
-                <Upload01Icon className="icon-sm" /> Upload
-              </Button>
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
@@ -653,15 +600,35 @@ export function WidgetEditorSidebar() {
                   gap: 'var(--op-space-small)',
                 }}
               >
-                <div
+                <label
+                  htmlFor="widget-primary-color-picker"
                   style={{
                     width: '40px',
                     height: '40px',
                     borderRadius: 'var(--op-radius-small)',
                     backgroundColor: config.primaryColor,
                     border: '1px solid var(--op-color-border)',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
-                />
+                >
+                  <input
+                    id="widget-primary-color-picker"
+                    type="color"
+                    value={config.primaryColor || '#007BFF'}
+                    onChange={(e) => updateConfig({ primaryColor: e.target.value })}
+                    style={{
+                      position: 'absolute',
+                      width: '200%',
+                      height: '200%',
+                      top: '-50%',
+                      left: '-50%',
+                      cursor: 'pointer',
+                      border: 'none',
+                    }}
+                  />
+                </label>
                 <Input
                   id="widget-primary-color"
                   value={config.primaryColor || ''}
@@ -674,32 +641,6 @@ export function WidgetEditorSidebar() {
                 >
                   <RefreshIcon className="icon-sm" />
                 </Button>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Label
-                  htmlFor="widget-primary-header"
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                  }}
-                >
-                  Use primary color for header
-                </Label>
-                <Switch
-                  id="widget-primary-header"
-                  checked={config.usePrimaryForHeader}
-                  onCheckedChange={(checked) =>
-                    updateConfig({ usePrimaryForHeader: checked })
-                  }
-                />
               </div>
             </div>
 
@@ -721,15 +662,35 @@ export function WidgetEditorSidebar() {
                   gap: 'var(--op-space-small)',
                 }}
               >
-                <div
+                <label
+                  htmlFor="widget-button-color-picker"
                   style={{
                     width: '40px',
                     height: '40px',
                     borderRadius: 'var(--op-radius-small)',
                     backgroundColor: config.buttonColor,
                     border: '1px solid var(--op-color-border)',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
-                />
+                >
+                  <input
+                    id="widget-button-color-picker"
+                    type="color"
+                    value={config.buttonColor || '#000000'}
+                    onChange={(e) => updateConfig({ buttonColor: e.target.value })}
+                    style={{
+                      position: 'absolute',
+                      width: '200%',
+                      height: '200%',
+                      top: '-50%',
+                      left: '-50%',
+                      cursor: 'pointer',
+                      border: 'none',
+                    }}
+                  />
+                </label>
                 <Input
                   id="widget-button-color"
                   value={config.buttonColor || ''}
@@ -981,6 +942,32 @@ export function WidgetEditorSidebar() {
           Save Changes
         </Button>
       </div>
+
+      {/* Alert Toast */}
+      {alertMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 'var(--op-space-large)',
+            right: 'var(--op-space-large)',
+            backgroundColor: alertMessage.type === 'success'
+              ? 'var(--op-color-alerts-notice-base)'
+              : 'var(--op-color-alerts-danger-base)',
+            color: 'white',
+            padding: 'var(--op-space-medium) var(--op-space-large)',
+            borderRadius: 'var(--op-radius-medium)',
+            boxShadow: 'var(--op-shadow-large)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--op-space-small)',
+            animation: 'slideIn 0.2s ease-out',
+          }}
+        >
+          <InformationCircleIcon className="icon-sm" />
+          <span style={{ fontSize: 'var(--op-font-small)' }}>{alertMessage.text}</span>
+        </div>
+      )}
     </aside>
   )
 }
