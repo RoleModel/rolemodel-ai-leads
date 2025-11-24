@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useEffect, KeyboardEvent } from "react"
+import { useMemo, useEffect } from "react"
 import { useChat } from "@ai-sdk/react"
 import { TextStreamChatTransport, isTextUIPart, type UIMessage } from "ai"
 import {
@@ -12,9 +12,13 @@ import {
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message"
-import { HugeiconsIcon } from '@hugeicons/react'
-import { SentIcon, SmartIcon } from '@hugeicons-pro/core-stroke-standard'
-import { Button } from "@/components/ui/button"
+import {
+  PromptInput,
+  PromptInputProvider,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputSubmit,
+} from "@/components/ai-elements/prompt-input"
 
 interface ChatInterfaceProps {
   chatbotId?: string
@@ -22,8 +26,6 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ chatbotId, initialMessage }: ChatInterfaceProps) {
-  const [input, setInput] = useState('')
-
   const chatTransport = useMemo(
     () => new TextStreamChatTransport<UIMessage>({
       api: "/api/chat",
@@ -61,22 +63,10 @@ export function ChatInterface({ chatbotId, initialMessage }: ChatInterfaceProps)
     }
   }, [initialMessage, messages.length, setMessages])
 
-  const handleSubmit = async () => {
-    if (!input.trim()) return
-
-    const messageText = input
-    setInput('')
-
+  const handleSubmit = async (text: string) => {
     await sendMessage({
-      text: messageText,
+      text,
     })
-  }
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit()
-    }
   }
 
   const getMessageContent = (message: UIMessage) => {
@@ -122,57 +112,21 @@ export function ChatInterface({ chatbotId, initialMessage }: ChatInterfaceProps)
         padding: 'var(--op-space-medium)',
         backgroundColor: 'inherit',
       }}>
-        <div style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--op-space-small)',
-          backgroundColor: 'var(--op-color-background)',
-          border: '1px solid var(--op-color-border)',
-          borderRadius: 'var(--op-radius-large)',
-          padding: 'var(--op-space-small)',
-        }}>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Message..."
-            disabled={isStreaming}
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              backgroundColor: 'transparent',
-              fontFamily: 'inherit',
-              fontSize: 'var(--op-font-medium)',
-              minHeight: '24px',
-              maxHeight: '120px',
-              padding: '8px',
-            }}
-            rows={1}
-          />
-          <Button
-            onClick={() => { }}
-            variant="ghost"
-            style={{
-              flexShrink: 0,
-              width: '32px',
-              height: '32px',
-              padding: 0,
-            }}
-          >
-            <HugeiconsIcon icon={SmartIcon} size={24} />
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isStreaming || !input.trim()}
-            size="md"
-            variant="ghost"
-          >
-            <HugeiconsIcon icon={SentIcon} size={24} />
-          </Button>
-        </div>
+        <PromptInputProvider>
+          <PromptInput onSubmit={async (message) => {
+            if (message.text) {
+              await handleSubmit(message.text)
+            }
+          }}>
+            <PromptInputBody>
+              <PromptInputTextarea
+                placeholder="Message..."
+                disabled={isStreaming}
+              />
+            </PromptInputBody>
+            <PromptInputSubmit disabled={isStreaming} />
+          </PromptInput>
+        </PromptInputProvider>
       </div>
     </div>
   )
