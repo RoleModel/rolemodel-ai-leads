@@ -2,7 +2,10 @@
 # This script sets up .npmrc with tokens from environment variables
 # Used during Vercel builds
 
-echo "Setting up .npmrc..."
+echo "=== Setting up .npmrc ==="
+echo "Current directory: $(pwd)"
+echo "OPTICS_TOKEN set: $([ -n "$OPTICS_TOKEN" ] && echo "yes" || echo "no")"
+echo "HUGEICONS_TOKEN set: $([ -n "$HUGEICONS_TOKEN" ] && echo "yes" || echo "no")"
 
 # Create .npmrc file
 cat > .npmrc << EOF
@@ -13,15 +16,19 @@ EOF
 # Add Hugeicons token if available
 if [ -n "$HUGEICONS_TOKEN" ]; then
   echo "//npm.hugeicons.com/:_authToken=${HUGEICONS_TOKEN}" >> .npmrc
+  echo "✓ Added HUGEICONS_TOKEN"
 else
-  echo "Warning: HUGEICONS_TOKEN not found in environment"
+  echo "✗ Warning: HUGEICONS_TOKEN not found in environment"
 fi
 
 # Add Optics/GitHub token if available
 if [ -n "$OPTICS_TOKEN" ]; then
   echo "//npm.pkg.github.com/:_authToken=${OPTICS_TOKEN}" >> .npmrc
+  echo "✓ Added OPTICS_TOKEN"
 else
-  echo "Warning: OPTICS_TOKEN not found in environment"
+  echo "✗ Warning: OPTICS_TOKEN not found in environment"
 fi
 
-echo ".npmrc setup complete"
+echo "=== .npmrc contents ==="
+cat .npmrc
+echo "=== Setup complete ==="
