@@ -65,13 +65,15 @@ const styles = {
   container: {
     display: 'flex',
     backgroundColor: 'var(--op-color-neutral-plus-seven)',
-    height: '100%',
+    height: '100vh',
     width: '100%',
     overflow: 'auto',
   },
   sidebar: {
     '--_op-sidebar-background-color': 'var(--op-color-neutral-plus-seven)',
-    '--_op-sidebar-rail-width': 'var(--op-space-5x-large)',
+    '--_op-sidebar-rail-width': 'calc(var(--op-space-scale-unit) * 6)',
+    '--_op-sidebar-drawer-width': 'calc(var(--op-space-scale-unit) * 30)',
+
     display: 'flex',
     flexDirection: 'column' as const,
     justifyContent: 'center' as const,
@@ -293,10 +295,10 @@ const styles = {
     outlineOffset: '2px',
   },
   chatContainer: {
-    flex: 1,
+    // flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
-    alignItems: 'flex-start' as const,
+    alignItems: 'center' as const,
     paddingTop: 'var(--op-space-3x-large)',
     paddingRight: 'var(--op-space-3x-large)',
     paddingBottom: 'var(--op-space-large)',
@@ -343,18 +345,20 @@ const styles = {
   },
   messagesOuterContainer: {
     width: '100%',
-    maxWidth: '600px',
+    maxWidth: '700px',
     height: '100%',
     display: 'flex',
+    justifyContent: 'start',
+    flexGrow: '1',
     flexDirection: 'column' as const,
   },
   messagesInnerContainer: {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 'var(--op-space-small)',
-    height: '400px',
-    flexGrow: 1,
-    flexShrink: 0,
+    // maxHeight: '400px',
+    flexGrow: '1',
+    flexShrink: '0',
     overflowY: 'auto' as const,
     paddingInline: 'var(--op-space-small)',
   },
@@ -1007,7 +1011,7 @@ export function LeadsPageView({
             </div>
 
             {/* BANT Progress Indicator */}
-            {messages.length > 0 && bantProgress < 100 && (
+            {bantProgress < 100 && (
               <div style={styles.bantProgressContainer}>
                 <div style={styles.bantProgressBar}>
                   <div

@@ -204,6 +204,34 @@ export function LeadSummary({
         </PlanHeader>
 
         <PlanContent>
+          {/* Qualification Score */}
+          {data.qualificationScore !== undefined && (
+            <Item variants={itemVariants}>
+              <h4 style={styles.sectionTitle}>Qualification Score</h4>
+              <div style={styles.scoreContainer}>
+                <div style={styles.scoreBar}>
+                  <motion.div
+                    initial={animated ? { width: 0 } : undefined}
+                    animate={animated ? { width: `${data.qualificationScore}%` } : undefined}
+                    transition={animated ? { duration: 0.8, delay: 0.2 } : undefined}
+                    style={{
+                      width: animated ? undefined : `${data.qualificationScore}%`,
+                      height: '100%',
+                      backgroundColor:
+                        data.qualificationScore >= 75
+                          ? 'var(--op-color-alerts-notice-base)'
+                          : data.qualificationScore >= 50
+                            ? 'var(--op-color-alerts-warning-base)'
+                            : 'var(--op-color-alerts-danger-base)',
+                      borderRadius: 'var(--op-radius-pill)',
+                    }}
+                  />
+                </div>
+                <span style={styles.scoreLabel}>{data.qualificationScore}%</span>
+              </div>
+            </Item>
+          )}
+
           {/* Timeline */}
           {(data.timeline?.urgency || data.timeline?.implementationDate) && (
             <Item variants={itemVariants}>

@@ -314,7 +314,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     <div
       style={{
         width: '100%',
-        maxWidth: 600,
+        maxWidth: 700,
         height: '100%',
         margin: '0 auto',
         display: 'flex',
@@ -379,9 +379,8 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--op-space-small)',
-          height: '400px',
-          flexGrow: 1,
-          flexShrink: 0,
+          // height: '400px',
+          flexGrow: '1',
           overflowY: 'auto',
           paddingInline: 'var(--op-space-small)',
         }}
