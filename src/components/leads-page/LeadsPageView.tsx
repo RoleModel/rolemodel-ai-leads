@@ -118,10 +118,17 @@ const styles = {
   },
 }
 
+const DEFAULT_SUGGESTIONS: Suggestion[] = [
+  { id: '1', text: "What types of software do you build?" },
+  { id: '2', text: "How much does custom software cost?" },
+  { id: '3', text: "How long does a project typically take?" },
+  { id: '4', text: "Do you work with startups?" },
+]
+
 export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false }: LeadsPageViewProps) {
   const { settings } = useLeadsPageSettings()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([])
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const [customButtons, setCustomButtons] = useState<CustomButton[]>([])
   const [showDemo, setShowDemo] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -147,21 +154,6 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
   const [editingButtonId, setEditingButtonId] = useState<string | null>(null)
   const [editingButtonText, setEditingButtonText] = useState('')
   const [editingButtonUrl, setEditingButtonUrl] = useState('')
-
-  // Set default suggestions on mount
-  useEffect(() => {
-    setDefaultSuggestions()
-  }, [])
-
-  // Set default prospect-focused suggestions
-  const setDefaultSuggestions = () => {
-    setSuggestions([
-      { id: '1', text: "What types of software do you build?" },
-      { id: '2', text: "How much does custom software cost?" },
-      { id: '3', text: "How long does a project typically take?" },
-      { id: '4', text: "Do you work with startups?" },
-    ])
-  }
 
   const chatTransport = useMemo(
     () => new TextStreamChatTransport<UIMessage>({

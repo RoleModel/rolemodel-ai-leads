@@ -176,7 +176,16 @@ export const InlineCitationCarouselHeader = ({
       return;
     }
 
-    setCount(api.scrollSnapList().length);
+    const updateCount = () => {
+      setCount(api.scrollSnapList().length);
+    };
+
+    updateCount();
+    api.on('reInit', updateCount);
+
+    return () => {
+      api.off('reInit', updateCount);
+    };
   }, [api]);
 
   if (count <= 1) {
@@ -216,12 +225,24 @@ export const InlineCitationCarouselIndex = ({
       return;
     }
 
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
+    const updateState = () => {
+      setCount(api.scrollSnapList().length);
       setCurrent(api.selectedScrollSnap() + 1);
-    });
+    };
+
+    updateState();
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    };
+
+    api.on("select", onSelect);
+    api.on("reInit", updateState);
+
+    return () => {
+      api.off("select", onSelect);
+      api.off("reInit", updateState);
+    };
   }, [api]);
 
   return (

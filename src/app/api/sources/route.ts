@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   // Add type to metadata for old sources that don't have it
   const sourcesWithType = data?.map(source => {
     if (source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata)) {
-      const metadata = source.metadata as any
+      const metadata = source.metadata as Record<string, unknown>
       if (!metadata.type) {
         // Infer type from other metadata fields
         if (metadata.url) {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       }
     } else if (!source.metadata) {
       // No metadata at all, assume it's text
-      source.metadata = { type: 'text' } as any
+      source.metadata = { type: 'text' }
     }
     return source
   })
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     console.log('[Sources API] Embedding generated, length:', embeddingArray.length)
 
     // Insert source with metadata containing URL and type
-    const metadata: { url?: string; type?: string } = {}
+    const metadata: Record<string, string> = {}
     if (url) metadata.url = url
     if (type) metadata.type = type
 
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       title: finalTitle || null,
       content: finalContent,
       embedding,
-      metadata: Object.keys(metadata).length > 0 ? metadata as any : null,
+      metadata: Object.keys(metadata).length > 0 ? (metadata as unknown as Database['public']['Tables']['sources']['Insert']['metadata']) : null,
     }
 
     console.log('[Sources API] Inserting source:', {

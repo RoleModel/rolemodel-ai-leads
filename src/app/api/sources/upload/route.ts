@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             filename: file.name,
             size: file.size,
             mimeType: file.type,
-          } as any,
+          } as unknown as Database['public']['Tables']['sources']['Insert']['metadata'],
         }
 
         const { data, error } = await supabaseServer

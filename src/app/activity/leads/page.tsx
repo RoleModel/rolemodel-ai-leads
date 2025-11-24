@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
 import { LeadSummary, LeadSummaryData } from "@/components/leads-page/LeadSummary"
@@ -21,16 +21,12 @@ interface Lead {
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [dateRange, setDateRange] = useState({
+  const [dateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0]
   })
 
-  useEffect(() => {
-    loadLeads()
-  }, [dateRange])
-
-  async function loadLeads() {
+  const loadLeads = useCallback(async () => {
     setIsLoading(true)
     try {
       const res = await fetch(`/api/leads?startDate=${dateRange.start}&endDate=${dateRange.end}`)
@@ -41,7 +37,11 @@ export default function LeadsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [dateRange])
+
+  useEffect(() => {
+    loadLeads()
+  }, [loadLeads])
 
   async function handleExport() {
     try {

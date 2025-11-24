@@ -165,7 +165,7 @@ export function EditorSidebar() {
     }
 
     loadSettings()
-  }, [])
+  }, [updateSettings])
 
   const handleSave = async () => {
     setIsSaving(true)
