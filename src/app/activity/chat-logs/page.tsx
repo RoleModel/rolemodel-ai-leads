@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -61,7 +61,9 @@ export default function ChatLogsPage() {
       <TopBar />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <NavigationSidebar />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationSidebar />
+        </Suspense>
 
         <main style={{
           flex: 1,

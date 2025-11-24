@@ -181,14 +181,14 @@ function formatLeadSummaryForSlack(lead: any, summary: any): any {
   ]
 
   if (lead.visitor_email) {
-    blocks[1].fields.push({
+    blocks[1]?.fields?.push({
       type: 'mrkdwn',
       text: `*Email:*\n${lead.visitor_email}`,
     })
   }
 
   if (summary.qualificationScore !== undefined) {
-    blocks[1].fields.push({
+    blocks[1]?.fields?.push({
       type: 'mrkdwn',
       text: `*Qualification Score:*\n${summary.qualificationScore}%`,
     })

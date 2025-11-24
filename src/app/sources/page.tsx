@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
+
+export const runtime = 'edge'
 import {
   Add01Icon,
   Delete02Icon,
@@ -207,7 +209,9 @@ export default function SourcesPage() {
       <TopBar />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <NavigationSidebar />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationSidebar />
+        </Suspense>
 
         {/* Main Content */}
         <main style={{

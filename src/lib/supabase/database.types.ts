@@ -154,6 +154,7 @@ export type Database = {
           id: string
           light_primary_color: string | null
           logo: string | null
+          page_description: string | null
           page_title: string | null
           updated_at: string | null
         }
@@ -168,6 +169,7 @@ export type Database = {
           id?: string
           light_primary_color?: string | null
           logo?: string | null
+          page_description?: string | null
           page_title?: string | null
           updated_at?: string | null
         }
@@ -182,6 +184,7 @@ export type Database = {
           id?: string
           light_primary_color?: string | null
           logo?: string | null
+          page_description?: string | null
           page_title?: string | null
           updated_at?: string | null
         }
@@ -191,6 +194,41 @@ export type Database = {
             columns: ["chatbot_id"]
             isOneToOne: true
             referencedRelation: "chatbots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          id: string
+          summary: Json
+          visitor_email: string | null
+          visitor_name: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          summary: Json
+          visitor_email?: string | null
+          visitor_name?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          id?: string
+          summary?: Json
+          visitor_email?: string | null
+          visitor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -261,6 +299,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "sources_chatbot_id_fkey"
+            columns: ["chatbot_id"]
+            isOneToOne: false
+            referencedRelation: "chatbots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      widget_configs: {
+        Row: {
+          chatbot_id: string | null
+          config: Json
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          chatbot_id?: string | null
+          config: Json
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          chatbot_id?: string | null
+          config?: Json
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_configs_chatbot_id_fkey"
             columns: ["chatbot_id"]
             isOneToOne: false
             referencedRelation: "chatbots"

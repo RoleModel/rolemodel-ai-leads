@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { Suspense } from "react"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
 import { LeadSummary, LeadSummaryData } from "@/components/leads-page/LeadSummary"
@@ -105,7 +106,9 @@ export default function LeadsPage() {
       <TopBar />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <NavigationSidebar />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationSidebar />
+        </Suspense>
 
         <main style={{
           flex: 1,

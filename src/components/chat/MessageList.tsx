@@ -1,11 +1,11 @@
 "use client"
 
-import { Message } from "@ai-sdk/react"
+import type { UIMessage } from "@ai-sdk/react"
 import { MessageBubble } from "./MessageBubble"
 import { useEffect, useRef } from "react"
 
 interface MessageListProps {
-  messages: Message[]
+  messages: UIMessage[]
   isLoading: boolean
 }
 
@@ -35,7 +35,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
             id: 'loading',
             role: 'assistant',
             content: '...',
-          }}
+          } as any}
           isLoading
         />
       )}

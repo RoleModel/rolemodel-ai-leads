@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
 import { EditorSidebar } from "@/components/layout/EditorSidebar"
@@ -13,7 +14,9 @@ export default function HelpPageDesignerPage() {
         <TopBar />
 
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          <NavigationSidebar />
+          <Suspense fallback={<div>Loading...</div>}>
+            <NavigationSidebar />
+          </Suspense>
           <EditorSidebar />
           <PreviewArea />
         </div>

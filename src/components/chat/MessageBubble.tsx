@@ -1,14 +1,15 @@
 "use client"
 
-import { Message } from "@ai-sdk/react"
+import type { UIMessage } from "@ai-sdk/react"
 
 interface MessageBubbleProps {
-  message: Message
+  message: UIMessage
   isLoading?: boolean
 }
 
 export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
   const isUser = message.role === 'user'
+  const content = (message as any).content || ''
 
   return (
     <div style={{
@@ -39,7 +40,7 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
             <span>.</span><span>.</span><span>.</span>
           </span>
         ) : (
-          message.content
+          content
         )}
       </div>
     </div>

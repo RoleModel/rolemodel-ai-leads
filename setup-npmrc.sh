@@ -2,6 +2,12 @@
 # This script sets up .npmrc with tokens from environment variables
 # Used during Vercel builds
 
+# Load .env.local if it exists (for local development)
+if [ -f .env.local ]; then
+  echo "Loading .env.local..."
+  export $(cat .env.local | grep -v '^#' | xargs)
+fi
+
 echo "=== Setting up .npmrc ==="
 echo "Current directory: $(pwd)"
 echo "OPTICS_TOKEN set: $([ -n "$OPTICS_TOKEN" ] && echo "yes" || echo "no")"

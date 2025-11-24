@@ -57,8 +57,8 @@ export async function GET(req: NextRequest) {
 
   // Data rows
   for (const lead of leads) {
-    const summary = lead.summary || {}
-    const date = new Date(lead.created_at).toLocaleDateString()
+    const summary = (typeof lead.summary === 'object' && lead.summary !== null && !Array.isArray(lead.summary)) ? lead.summary as Record<string, any> : {}
+    const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : ''
 
     const row = [
       date,

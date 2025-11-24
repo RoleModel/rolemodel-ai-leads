@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { TopBar } from "@/components/layout/TopBar"
 import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
 import { Message01Icon, UserIcon } from "hugeicons-react"
@@ -60,7 +60,9 @@ export default function ActivityPage() {
       <TopBar />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <NavigationSidebar />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationSidebar />
+        </Suspense>
 
         <main style={{
           flex: 1,
