@@ -14,6 +14,7 @@ interface LeadsPageWithProviderProps {
   showSidebar?: boolean
   editMode?: boolean
   loadFromApi?: boolean
+  isEmbed?: boolean
 }
 
 function LeadsPageLoader({
@@ -21,6 +22,7 @@ function LeadsPageLoader({
   showSidebar,
   editMode,
   loadFromApi,
+  isEmbed,
 }: LeadsPageWithProviderProps) {
   const { updateSettings, isLoading } = useLeadsPageSettings()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -72,6 +74,7 @@ function LeadsPageLoader({
       editMode={editMode}
       theme={theme}
       onThemeChange={setTheme}
+      isEmbed={isEmbed}
     />
   )
 }

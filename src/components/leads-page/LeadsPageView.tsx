@@ -45,12 +45,6 @@ interface Suggestion {
   isSelected?: boolean
 }
 
-interface CustomButton {
-  id: string
-  text: string
-  url: string
-}
-
 interface ChatHistory {
   id: string
   title: string
@@ -64,19 +58,20 @@ interface LeadsPageViewProps {
   editMode?: boolean
   theme?: 'light' | 'dark'
   onThemeChange?: (theme: 'light' | 'dark') => void
+  isEmbed?: boolean
 }
 
 const styles = {
   container: {
     display: 'flex',
+    backgroundColor: 'var(--op-color-neutral-plus-seven)',
     height: '100%',
     width: '100%',
     overflow: 'auto',
   },
   sidebar: {
-    '--_op-sidebar-background-color': 'var(--op-color-background)',
+    '--_op-sidebar-background-color': 'var(--op-color-neutral-plus-seven)',
     '--_op-sidebar-rail-width': 'var(--op-space-5x-large)',
-    backgroundColor: 'var(--op-color-background)',
     display: 'flex',
     flexDirection: 'column' as const,
     justifyContent: 'center' as const,
@@ -228,7 +223,7 @@ const styles = {
     display: 'flex',
     width: '100%',
     flexDirection: 'column' as const,
-    overflow: 'hidden',
+    overflow: 'auto',
   },
   hero: {
     display: 'flex',
@@ -270,7 +265,7 @@ const styles = {
   suggestionsContainer: {
     display: 'flex',
     gap: 'var(--op-space-small)',
-    flexWrap: 'wrap' as const,
+    flexWrap: 'nowrap' as const,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
   },
@@ -301,7 +296,7 @@ const styles = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
-    alignItems: 'center' as const,
+    alignItems: 'flex-start' as const,
     paddingTop: 'var(--op-space-3x-large)',
     paddingRight: 'var(--op-space-3x-large)',
     paddingBottom: 'var(--op-space-large)',
@@ -357,7 +352,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 'var(--op-space-small)',
-    height: '50vh',
+    height: '400px',
     flexGrow: 1,
     flexShrink: 0,
     overflowY: 'auto' as const,
@@ -536,8 +531,7 @@ const styles = {
 
 const DEFAULT_SUGGESTIONS: Suggestion[] = [
   { id: '1', text: 'What types of software do you build?' },
-  { id: '2', text: 'How much does custom software cost?' },
-  { id: '3', text: 'How long does a project typically take?' },
+  { id: '2', text: 'How long does a project typically take?' },
 ]
 
 export function LeadsPageView({
@@ -546,12 +540,12 @@ export function LeadsPageView({
   editMode = false,
   theme,
   onThemeChange,
+  isEmbed = false,
 }: LeadsPageViewProps) {
   const { settings } = useLeadsPageSettings()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const [showSuggestions, setShowSuggestions] = useState(true)
-  const [customButtons, setCustomButtons] = useState<CustomButton[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Chat history - use state to avoid hydration mismatch
@@ -567,7 +561,10 @@ export function LeadsPageView({
         try {
           const history = JSON.parse(saved)
           setChatHistory(history)
-          setShowDemo(history.length === 0)
+          // Only hide demo based on chat history if in embed mode
+          if (isEmbed) {
+            setShowDemo(history.length === 0)
+          }
         } catch {
           setChatHistory([])
           setShowDemo(true)
@@ -578,12 +575,8 @@ export function LeadsPageView({
       }
     }
     loadChatHistory()
-  }, [])
+  }, [isEmbed])
 
-  // Edit mode states for custom buttons
-  const [editingButtonId, setEditingButtonId] = useState<string | null>(null)
-  const [editingButtonText, setEditingButtonText] = useState('')
-  const [editingButtonUrl, setEditingButtonUrl] = useState('')
 
   const chatTransport = useMemo(
     () =>
@@ -682,44 +675,6 @@ export function LeadsPageView({
 
   const bantProgress = messages.length > 0 ? calculateBANTProgress() : 0
 
-  // Custom button handlers
-  const handleAddCustomButton = () => {
-    const newButton: CustomButton = {
-      id: `button-${Date.now()}`,
-      text: 'Button',
-      url: 'https://example.com',
-    }
-    setCustomButtons([...customButtons, newButton])
-    setEditingButtonId(newButton.id)
-    setEditingButtonText(newButton.text)
-    setEditingButtonUrl(newButton.url)
-  }
-
-  const handleDeleteCustomButton = (id: string) => {
-    // Prevent deleting the default button
-    if (id === 'default-button') return
-    setCustomButtons(customButtons.filter((b) => b.id !== id))
-    setEditingButtonId(null)
-  }
-
-  const handleOpenEditPopover = (button: CustomButton) => {
-    setEditingButtonId(button.id)
-    setEditingButtonText(button.text)
-    setEditingButtonUrl(button.url)
-  }
-
-  const handleSaveCustomButton = () => {
-    if (editingButtonId) {
-      setCustomButtons(
-        customButtons.map((b) =>
-          b.id === editingButtonId
-            ? { ...b, text: editingButtonText, url: editingButtonUrl }
-            : b
-        )
-      )
-      setEditingButtonId(null)
-    }
-  }
 
   // Suggestion handlers
   const handleAddSuggestion = () => {
@@ -874,6 +829,8 @@ export function LeadsPageView({
             </Button>
           </div>
 
+
+
           {/* New Chat Button */}
           <Button
             variant={!sidebarCollapsed ? 'secondary' : 'icon'}
@@ -885,153 +842,6 @@ export function LeadsPageView({
             <HugeiconsIcon icon={PlusSignIcon} size={20} />{' '}
             {!sidebarCollapsed && 'New chat'}
           </Button>
-
-          {/* Custom Buttons at top */}
-          <div style={styles.customButtonsContainer}>
-            {!sidebarCollapsed && (
-              <>
-                {/* Custom Buttons */}
-                {customButtons.map((button) => (
-                  <div key={button.id} style={styles.customButtonWrapper}>
-                    {editMode ? (
-                      <>
-                        {/* Action buttons absolutely positioned */}
-                        {editingButtonId === button.id && (
-                          <div style={styles.buttonActionsContainer}>
-                            {button.id !== 'default-button' && (
-                              <Button
-                                variant="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteCustomButton(button.id)
-                                }}
-                              >
-                                <HugeiconsIcon icon={Delete02Icon} size={16} />
-                              </Button>
-                            )}
-                            <Popover
-                              open={editingButtonId === button.id}
-                              onOpenChange={(open) => {
-                                if (open) {
-                                  handleOpenEditPopover(button)
-                                } else {
-                                  setEditingButtonId(null)
-                                }
-                              }}
-                            >
-                              <PopoverTrigger asChild>
-                                <Button variant="icon">
-                                  <HugeiconsIcon icon={Settings02Icon} size={16} />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent align="end" style={styles.popoverContent}>
-                                <div style={styles.popoverInnerContent}>
-                                  <div style={styles.popoverHeaderRow}>
-                                    <h3 style={styles.popoverHeaderTitle}>
-                                      {button.text}
-                                    </h3>
-                                    <Button
-                                      variant="ghosticon"
-                                      onClick={() => setEditingButtonId(null)}
-                                    >
-                                      <span style={styles.closeButtonText}>×</span>
-                                    </Button>
-                                  </div>
-
-                                  <div>
-                                    <Label style={styles.labelBlock}>
-                                      Button label
-                                    </Label>
-                                    <Input
-                                      value={editingButtonText}
-                                      onChange={(e) =>
-                                        setEditingButtonText(e.target.value)
-                                      }
-                                      placeholder="Contact us"
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <Label style={styles.labelBlock}>
-                                      Link
-                                    </Label>
-                                    <div style={styles.urlInputWrapper}>
-                                      <div style={styles.httpsPrefix}>
-                                        https://
-                                      </div>
-                                      <Input
-                                        value={editingButtonUrl.replace(
-                                          /^https?:\/\//,
-                                          ''
-                                        )}
-                                        onChange={(e) =>
-                                          setEditingButtonUrl(
-                                            e.target.value.replace(/^https?:\/\//, '')
-                                          )
-                                        }
-                                        placeholder="example.com"
-                                        style={styles.urlInputField}
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <Button
-                                    variant="primary"
-                                    onClick={handleSaveCustomButton}
-                                  >
-                                    Save
-                                  </Button>
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                        )}
-
-                        {/* Button with outline when selected */}
-                        <Button
-                          variant="secondary"
-                          style={{
-                            ...styles.buttonFullWidth,
-                            ...(editingButtonId === button.id ? styles.buttonOutlined : styles.buttonNoOutline),
-                          }}
-                          onClick={() => handleOpenEditPopover(button)}
-                        >
-                          {button.text}
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        style={styles.buttonFullWidth}
-                        onClick={() =>
-                          window.open(
-                            button.url.startsWith('http')
-                              ? button.url
-                              : `https://${button.url}`,
-                            '_blank'
-                          )
-                        }
-                      >
-                        {button.text}
-                      </Button>
-                    )}
-                  </div>
-                ))}
-
-                {/* Add Button */}
-                {editMode && (
-                  <Button
-                    variant="ghost"
-                    style={styles.addButtonContainer}
-                    onClick={handleAddCustomButton}
-                  >
-                    <HugeiconsIcon icon={PlusSignIcon} size={16} /> Add button
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-
 
           {/* Chat History List */}
           {!sidebarCollapsed && chatHistory.length > 0 && (
@@ -1067,6 +877,10 @@ export function LeadsPageView({
               ))}
             </div>
           )}
+
+
+
+
 
           {/* Dark Mode Toggle at bottom */}
           <div style={styles.darkModeToggleContainer}>

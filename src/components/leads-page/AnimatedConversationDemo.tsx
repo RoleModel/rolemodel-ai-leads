@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar03Icon, Globe02Icon, Mail01Icon } from '@hugeicons-pro/core-stroke-standard'
+import { Calendar03Icon, Mail01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
@@ -28,7 +28,6 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
   PromptInputProvider,
   PromptInputSpeechButton,
@@ -320,7 +319,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
-        gap: 'var(--op-space-medium)',
       }}
     >
       {/* Progress Indicator */}
@@ -381,7 +379,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--op-space-small)',
-          height: '40vh',
+          height: '400px',
           flexGrow: 1,
           flexShrink: 0,
           overflowY: 'auto',
@@ -419,16 +417,16 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 }}
                 style={{
                   maxWidth: '75%',
-                  padding: 'var(--op-space-small)',
+                  padding: 'var(--op-space-x-small)',
                   borderRadius: 'var(--op-radius-medium)',
                   backgroundColor:
                     message.role === 'user'
                       ? 'var(--op-color-primary-base)'
-                      : 'var(--op-color-neutral-plus-six)',
+                      : 'var(--op-color-neutral-plus-five)',
                   color:
                     message.role === 'user'
                       ? 'var(--op-color-primary-on-base)'
-                      : 'var(--op-color-on-background)',
+                      : 'var(--op-color-neutral-on-plus-five)',
                   fontSize: 'var(--op-font-small)',
                   lineHeight: 1.5,
                   textAlign: 'left',
@@ -508,7 +506,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           >
             <h3
               style={{
-                fontSize: 'var(--op-font-large)',
+                fontSize: 'var(--op-font-small)',
                 fontWeight: 600,
                 textAlign: 'left',
               }}
@@ -519,7 +517,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               style={{
                 fontSize: 'var(--op-font-small)',
                 color: 'var(--op-color-neutral-on-plus-max)',
-                marginBottom: 'var(--op-space-x-large)',
                 textAlign: 'left',
                 lineHeight: 1.6,
               }}
@@ -532,13 +529,13 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 'var(--op-space-large)',
+                gap: 'var(--op-space-small)',
               }}
             >
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     fontWeight: 600,
                     textAlign: 'left',
                   }}
@@ -563,7 +560,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     fontWeight: 600,
                     textAlign: 'left',
                   }}
@@ -585,7 +582,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     fontWeight: 600,
                     textAlign: 'left',
                   }}
@@ -702,10 +699,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                   </PromptInputActionMenuContent>
                 </PromptInputActionMenu>
                 <PromptInputSpeechButton textareaRef={textareaRef} />
-                <PromptInputButton>
-                  <HugeiconsIcon icon={Globe02Icon} size={20} />
-                  <span>Search</span>
-                </PromptInputButton>
               </PromptInputTools>
               <PromptInputSubmit disabled={true} />
             </PromptInputFooter>
@@ -745,6 +738,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             cursor: 'pointer',
             alignSelf: 'left',
             justifySelf: 'flex-end',
+            marginTop: 'var(--op-space-small)',
             boxShadow:
               '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           }}

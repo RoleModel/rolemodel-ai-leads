@@ -89,15 +89,15 @@ h5 {
     #fcf496 10%,
     #7f51b1,
     #76ba6f,
-    #59a6d6,
+    #59a6d6 10%,
     #7f51b1,
     #fcf496
   );
   height: 0.75rem;
   position: absolute;
-  left: 10px;
-  right: 10px;
-  top: 98%;
+  left: var(--op-space-medium);
+  right: var(--op-space-medium);
+  top: 94%;
 }
 
 [data-radix-popper-content-wrapper] {

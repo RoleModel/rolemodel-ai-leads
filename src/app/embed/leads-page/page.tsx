@@ -26,6 +26,7 @@ export default function EmbedLeadsPage() {
         chatbotId={chatbotId}
         showSidebar={true}
         loadFromApi={true}
+        isEmbed={true}
       />
     </div>
   )
