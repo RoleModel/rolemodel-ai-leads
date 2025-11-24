@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import '@rolemodel/optics/dist/css/components/switch.css'
 
 interface SwitchProps {
   id?: string

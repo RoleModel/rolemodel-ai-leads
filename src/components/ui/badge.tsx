@@ -1,7 +1,6 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
-import '@rolemodel/optics/dist/css/components/badge.css'
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: "default" | "secondary" | "danger" | "outline" | 'warning' | "notice" | 'primary' | 'outline'

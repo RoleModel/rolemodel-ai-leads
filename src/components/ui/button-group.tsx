@@ -1,6 +1,5 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import '@rolemodel/optics/dist/css/components/button_group.css'
 
 export interface ButtonGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   orientation?: "horizontal" | "vertical"

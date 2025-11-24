@@ -1,5 +1,4 @@
 import * as React from "react"
-import '@rolemodel/optics/dist/css/components/card.css';
 
 import { cn } from "@/lib/utils"
 

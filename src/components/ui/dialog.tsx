@@ -3,7 +3,6 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Cancel01Icon } from "hugeicons-react"
-import '@rolemodel/optics/dist/css/components/confirm-dialog.css'
 
 import { cn } from "@/lib/utils"
 

@@ -1,7 +1,6 @@
 /* -------------------------------------------------
    Import Optics Design System
    ------------------------------------------------- */
-@import '@rolemodel/optics/dist/css/optics.css';
 
 @import '../styles/shadows.css';
 @import '../styles/utilities.css';
