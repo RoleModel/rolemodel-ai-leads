@@ -46,6 +46,7 @@ next-env.d.ts
 .cursor/rules/byterover-rules.mdc
 .kiro/steering/byterover-rules.md
 .qoder/rules/byterover-rules.md
-.augment/rules/byterover-rules.md.npmrc
+.augment/rules/byterover-rules.md
+.npmrc
 
 screenshots/
