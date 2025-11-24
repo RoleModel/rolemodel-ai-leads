@@ -22,7 +22,28 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ sources: data })
+  // Add type to metadata for old sources that don't have it
+  const sourcesWithType = data?.map(source => {
+    if (source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata)) {
+      const metadata = source.metadata as any
+      if (!metadata.type) {
+        // Infer type from other metadata fields
+        if (metadata.url) {
+          metadata.type = 'website'
+        } else if (metadata.filename) {
+          metadata.type = 'file'
+        } else {
+          metadata.type = 'text'
+        }
+      }
+    } else if (!source.metadata) {
+      // No metadata at all, assume it's text
+      source.metadata = { type: 'text' } as any
+    }
+    return source
+  })
+
+  return NextResponse.json({ sources: sourcesWithType })
 }
 
 // POST - Create new source

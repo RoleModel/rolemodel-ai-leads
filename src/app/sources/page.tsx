@@ -106,8 +106,6 @@ export default function SourcesPage() {
   }
 
   async function handleDeleteSource(id: string) {
-    if (!confirm('Are you sure you want to delete this source?')) return
-
     try {
       await fetch(`/api/sources?id=${id}`, { method: 'DELETE' })
       setNeedsRetraining(true)
