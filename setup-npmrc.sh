@@ -10,6 +10,8 @@ fi
 
 echo "=== Setting up .npmrc ==="
 echo "Current directory: $(pwd)"
+echo "Environment variables:"
+env | grep -E "OPTICS|HUGEICONS" || echo "No OPTICS or HUGEICONS env vars found"
 echo "OPTICS_TOKEN set: $([ -n "$OPTICS_TOKEN" ] && echo "yes" || echo "no")"
 echo "HUGEICONS_TOKEN set: $([ -n "$HUGEICONS_TOKEN" ] && echo "yes" || echo "no")"
 
