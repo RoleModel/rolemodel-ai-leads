@@ -236,6 +236,18 @@ const styles = {
     padding: 'var(--op-space-3x-large)',
     textAlign: 'center' as const,
     flex: 1,
+    height: '100%',
+  },
+  heroSection: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 'var(--op-space-large)',
+    padding: 'var(--op-space-3x-large)',
+    textAlign: 'center' as const,
+    flex: 1,
+    height: '100%',
   },
   favicon: {
     width: 56,
@@ -356,7 +368,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 'var(--op-space-small)',
-    // maxHeight: '400px',
+    height: '400px',
     flexGrow: '1',
     flexShrink: '0',
     overflowY: 'auto' as const,
@@ -384,7 +396,7 @@ const styles = {
     paddingBottom: 'var(--op-space-medium)',
   },
   inputContainer: {
-    // paddingTop: 'var(--op-space-medium)',
+    paddingTop: 'var(--op-space-medium)',
     position: 'relative' as const,
   },
   messages: {
@@ -495,16 +507,7 @@ const styles = {
   faviconTransparent: {
     backgroundColor: 'transparent',
   },
-  heroSection: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
-    paddingTop: 'var(--op-space-3x-large)',
-    paddingRight: 'var(--op-space-3x-large)',
-    paddingBottom: 'var(--op-space-large)',
-    paddingLeft: 'var(--op-space-3x-large)',
-  },
+
   headerSection: {
     display: 'flex',
     flexDirection: 'column' as const,
@@ -794,7 +797,7 @@ export function LeadsPageView({
   }, [messages, currentChatId, showDemo, getMessageContent])
 
   return (
-    <div style={styles.container} >
+    <div className="app-with-sidebar" style={{ height: "100%" }}>
       {/* Sidebar */}
       {showSidebar && (
         <div
@@ -900,7 +903,7 @@ export function LeadsPageView({
       )}
 
       {/* Main Content */}
-      <div style={styles.content}>
+      <div className="app__content">
         {showDemo ? (
           <div style={styles.hero}>
 
@@ -1061,7 +1064,7 @@ export function LeadsPageView({
                         <PromptInputAttachment key={attachment.id} data={attachment} />
                       )}
                     </PromptInputAttachments>
-                    <PromptInputBody>
+                    <PromptInputBody style={{ height: "80px" }}>
                       <PromptInputTextarea
                         placeholder="Ask me anything..."
                         ref={textareaRef}

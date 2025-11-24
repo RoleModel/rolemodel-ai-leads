@@ -315,7 +315,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
       style={{
         width: '100%',
         maxWidth: 700,
-        height: '100%',
         margin: '0 auto',
         display: 'flex',
         flexDirection: 'column',
@@ -379,7 +378,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--op-space-small)',
-          // height: '400px',
+          height: '400px',
           flexGrow: '1',
           overflowY: 'auto',
           paddingInline: 'var(--op-space-small)',
@@ -653,7 +652,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 <PromptInputAttachment key={attachment.id} data={attachment} />
               )}
             </PromptInputAttachments>
-            <PromptInputBody>
+            <PromptInputBody style={{ height: "80px" }}>
               <div style={{ position: 'relative', width: '100%' }}>
                 {isTypingInInput && typingText ? (
                   <div
@@ -727,12 +726,12 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           }}
           onClick={handleInterrupt}
           style={{
-            padding: 'var(--op-space-medium) var(--op-space-large)',
+            padding: 'var(--op-space-small) var(--op-space-large)',
             backgroundColor: 'var(--op-color-primary-base)',
             color: 'var(--op-color-primary-on-base)',
             border: 'none',
             borderRadius: 'var(--op-radius-medium)',
-            fontSize: 'var(--op-font-medium)',
+            fontSize: 'var(--op-font-small)',
             fontWeight: 600,
             cursor: 'pointer',
             alignSelf: 'left',
