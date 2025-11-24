@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
 
 // POST - Retrain agent (placeholder for now)
 export async function POST(req: NextRequest) {

@@ -1,8 +1,9 @@
-"use client"
+'use client'
 
-import type { UIMessage } from "@ai-sdk/react"
-import { MessageBubble } from "./MessageBubble"
-import { useEffect, useRef } from "react"
+import type { UIMessage } from '@ai-sdk/react'
+import { useEffect, useRef } from 'react'
+
+import { MessageBubble } from './MessageBubble'
 
 interface MessageListProps {
   messages: UIMessage[]
@@ -17,25 +18,29 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
   }, [messages])
 
   return (
-    <div style={{
-      flex: 1,
-      overflowY: 'auto',
-      padding: 'var(--op-space-large)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 'var(--op-space-medium)',
-    }}>
+    <div
+      style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: 'var(--op-space-large)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--op-space-medium)',
+      }}
+    >
       {messages.map((message) => (
         <MessageBubble key={message.id} message={message} />
       ))}
 
       {isLoading && (
         <MessageBubble
-          message={{
-            id: 'loading',
-            role: 'assistant',
-            content: '...',
-          } as any}
+          message={
+            {
+              id: 'loading',
+              role: 'assistant',
+              content: '...',
+            } as any
+          }
           isLoading
         />
       )}

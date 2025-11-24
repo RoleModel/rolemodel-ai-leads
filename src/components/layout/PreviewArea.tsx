@@ -1,18 +1,19 @@
 'use client'
-import { useState } from 'react'
 import {
-  SmartPhone01Icon,
-  Sun01Icon,
-  Moon02Icon,
   ComputerIcon,
+  Moon02Icon,
+  SmartPhone01Icon,
   SparklesIcon,
-} from "hugeicons-react"
+  Sun01Icon,
+} from 'hugeicons-react'
+import { useState } from 'react'
+
+import { LeadsPageView } from '@/components/leads-page/LeadsPageView'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 // Default chatbot ID for RoleModel
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { LeadsPageView } from "@/components/leads-page/LeadsPageView"
 
 const styles = {
   main: {
@@ -26,7 +27,8 @@ const styles = {
   grid: {
     position: 'absolute' as const,
     inset: 0,
-    backgroundImage: 'radial-gradient(var(--op-color-neutral-plus-four) 1px, transparent 0)',
+    backgroundImage:
+      'radial-gradient(var(--op-color-neutral-plus-four) 1px, transparent 0)',
     backgroundSize: '10px 10px',
     pointerEvents: 'none' as const,
   },
@@ -61,7 +63,14 @@ const styles = {
     overflow: 'hidden',
   },
   bottomToolbarWrapper: {
-    position: 'absolute' as const, bottom: 'var(--op-space-large)', left: 0, right: 0, display: 'flex', justifyContent: 'center', padding: '0 var(--op-space-small)'
+    position: 'absolute' as const,
+    bottom: 'var(--op-space-large)',
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'center',
+    zIndex: 1000,
+    padding: '0 var(--op-space-small)',
   },
   bottomToolbar: {
     display: 'flex',
@@ -90,13 +99,13 @@ const styles = {
 }
 
 export function PreviewArea() {
-  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
-  const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [editMode, setEditMode] = useState(true)
 
   return (
     <main style={styles.main}>
-      <div style={styles.grid} className='inner-shadow' />
+      <div style={styles.grid} className="inner-shadow" />
       <Card
         style={{
           ...styles.previewCard,
@@ -108,12 +117,22 @@ export function PreviewArea() {
         <div style={styles.browserBar}>
           <div style={styles.browserButton}>
             <svg height="12" width="12">
-              <circle r="6" cx="6" cy="6" fill="var(--op-color-alerts-notice-minus-two)" />
+              <circle
+                r="6"
+                cx="6"
+                cy="6"
+                fill="var(--op-color-alerts-notice-minus-two)"
+              />
             </svg>
           </div>
           <div style={styles.browserButton}>
             <svg height="12" width="12">
-              <circle r="6" cx="6" cy="6" fill="var(--op-color-alerts-warning-plus-one)" />
+              <circle
+                r="6"
+                cx="6"
+                cy="6"
+                fill="var(--op-color-alerts-warning-plus-one)"
+              />
             </svg>
           </div>
           <div style={styles.browserButton}>
@@ -129,6 +148,8 @@ export function PreviewArea() {
             chatbotId={DEFAULT_CHATBOT_ID}
             showSidebar={previewMode === 'desktop'}
             editMode={editMode}
+            theme={theme}
+            onThemeChange={setTheme}
           />
         </div>
       </Card>
@@ -136,19 +157,37 @@ export function PreviewArea() {
       {/* Bottom Toolbar */}
       <div style={styles.bottomToolbarWrapper}>
         <div style={styles.bottomToolbar}>
-          <Button variant="ghost" onClick={() => setEditMode(!editMode)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-x-small)' }}>
+          <Button
+            variant="ghost"
+            onClick={() => setEditMode(!editMode)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--op-space-x-small)',
+            }}
+          >
             <SparklesIcon className="icon-sm" /> Edit mode
-            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: editMode ? 'var(--op-color-alerts-notice-base)' : 'transparent', marginLeft: 'var(--op-space-x-small)' }}></span>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: editMode
+                  ? 'var(--op-color-alerts-notice-base)'
+                  : 'transparent',
+                marginLeft: 'var(--op-space-x-small)',
+              }}
+            ></span>
             {editMode && <span style={{ fontSize: 12 }}>On</span>}
           </Button>
 
           <div style={styles.topBarDivider} />
 
           <div style={styles.topBarTools}>
-            <Button variant="ghosticon" onClick={() => setPreviewMode("desktop")}>
+            <Button variant="ghosticon" onClick={() => setPreviewMode('desktop')}>
               <ComputerIcon className="icon-sm" />
             </Button>
-            <Button variant="ghosticon" onClick={() => setPreviewMode("mobile")}>
+            <Button variant="ghosticon" onClick={() => setPreviewMode('mobile')}>
               <SmartPhone01Icon className="icon-sm" />
             </Button>
           </div>
@@ -156,10 +195,10 @@ export function PreviewArea() {
           <div style={styles.topBarDivider} />
 
           <div style={styles.topBarTools}>
-            <Button variant="ghosticon" onClick={() => setTheme("light")}>
+            <Button variant="ghosticon" onClick={() => setTheme('light')}>
               <Sun01Icon className="icon-sm" />
             </Button>
-            <Button variant="ghosticon" onClick={() => setTheme("dark")}>
+            <Button variant="ghosticon" onClick={() => setTheme('dark')}>
               <Moon02Icon className="icon-sm" />
             </Button>
           </div>

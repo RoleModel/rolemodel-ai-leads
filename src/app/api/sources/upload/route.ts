@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
-import { generateEmbedding } from "@/lib/ai/embeddings"
-import type { Database } from "@/lib/supabase/database.types"
+import { NextRequest, NextResponse } from 'next/server'
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+import { generateEmbedding } from '@/lib/ai/embeddings'
+import type { Database } from '@/lib/supabase/database.types'
+import { supabaseServer } from '@/lib/supabase/server'
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 type SourceInsert = Database['public']['Tables']['sources']['Insert']
 
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const files = formData.getAll('files') as File[]
-    const chatbotId = formData.get('chatbotId') as string || DEFAULT_CHATBOT_ID
+    const chatbotId = (formData.get('chatbotId') as string) || DEFAULT_CHATBOT_ID
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 })

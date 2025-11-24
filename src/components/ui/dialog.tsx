@@ -1,14 +1,12 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Cancel01Icon } from "hugeicons-react"
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { Cancel01Icon } from 'hugeicons-react'
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
-function Dialog({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
@@ -31,9 +29,7 @@ function DialogPortal({
   )
 }
 
-function DialogClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
@@ -44,10 +40,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "confirm-dialog-wrapper__backdrop",
-        className
-      )}
+      className={cn('confirm-dialog-wrapper__backdrop', className)}
       {...props}
     />
   )
@@ -62,11 +55,11 @@ function DialogContent({
   showCloseButton?: boolean
 }) {
   return (
-    <DialogPortal data-slot="dialog-portal" >
+    <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn("confirm-dialog", className)}
+        className={cn('confirm-dialog', className)}
         {...props}
       >
         {children}
@@ -85,7 +78,17 @@ function DialogContent({
             }}
           >
             <Cancel01Icon className="icon-sm" />
-            <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Close</span>
+            <span
+              style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                overflow: 'hidden',
+                clip: 'rect(0,0,0,0)',
+              }}
+            >
+              Close
+            </span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -93,21 +96,21 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("confirm-dialog__header", className)}
+      className={cn('confirm-dialog__header', className)}
       {...props}
     />
   )
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("confirm-dialog__footer", className)}
+      className={cn('confirm-dialog__footer', className)}
       {...props}
     />
   )
@@ -138,7 +141,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn('text-muted-foreground text-sm', className)}
       {...props}
     />
   )

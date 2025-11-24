@@ -1,30 +1,32 @@
 'use client'
-import { useSyncExternalStore, useEffect } from "react"
 import {
   ArrowLeft01Icon,
-  Upload01Icon,
   Cancel01Icon,
-  RefreshIcon,
   InformationCircleIcon,
-} from "hugeicons-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useRouter } from "next/navigation"
-import { useWidgetConfig } from "@/contexts/WidgetConfigContext"
+  RefreshIcon,
+  Upload01Icon,
+} from 'hugeicons-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useSyncExternalStore } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+
+import { useWidgetConfig } from '@/contexts/WidgetConfigContext'
 
 export function WidgetEditorSidebar() {
   const router = useRouter()
   const { config, updateConfig } = useWidgetConfig()
 
   const origin = useSyncExternalStore(
-    () => () => { },
-    () => typeof window !== "undefined" ? window.location.origin : "",
-    () => ""
+    () => () => {},
+    () => (typeof window !== 'undefined' ? window.location.origin : ''),
+    () => ''
   )
 
   // Load saved config on mount
@@ -47,6 +49,7 @@ export function WidgetEditorSidebar() {
 
   const handleSave = async () => {
     try {
+      console.log('Saving config:', config)
       const response = await fetch('/api/widget-config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,58 +57,80 @@ export function WidgetEditorSidebar() {
       })
 
       if (!response.ok) {
-        console.error('Failed to save widget settings')
+        const errorText = await response.text()
+        console.error('Failed to save widget settings:', errorText)
+        alert('Failed to save settings: ' + errorText)
+      } else {
+        const result = await response.json()
+        console.log('Save successful:', result)
+        alert('Settings saved successfully!')
       }
     } catch (error) {
       console.error('Error saving widget config:', error)
+      alert('Error saving settings: ' + error)
     }
   }
 
   return (
-    <aside style={{
-      width: '25%',
-      borderRight: '1px solid var(--op-color-border)',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: 'var(--op-color-background)',
-      minWidth: 400,
-    }}>
-      <div style={{
-        padding: 'var(--op-space-large)',
-        borderBottom: '1px solid var(--op-color-border)',
-      }}>
-        <Button
-          onClick={() => router.push('/deploy')}
-          variant="ghost"
-          size="md"
-        >
+    <aside
+      style={{
+        width: '25%',
+        borderRight: '1px solid var(--op-color-border)',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'var(--op-color-background)',
+        minWidth: 400,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--op-space-large)',
+          borderBottom: '1px solid var(--op-color-border)',
+        }}
+      >
+        <Button onClick={() => router.push('/deploy')} variant="ghost" size="md">
           <ArrowLeft01Icon className="icon-sm" />
           Back to Deploy
         </Button>
 
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <h1 style={{
-            fontSize: 'var(--op-font-large)',
-            fontWeight: 'var(--op-font-weight-bold)',
-            margin: 0,
-          }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 'var(--op-font-large)',
+              fontWeight: 'var(--op-font-weight-bold)',
+              margin: 0,
+            }}
+          >
             Chat widget
           </h1>
           <Switch defaultChecked />
         </div>
       </div>
 
-      <Tabs defaultValue="content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+      <Tabs
+        defaultValue="content"
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          minHeight: 0,
+        }}
+      >
         <div style={{ borderBottom: '1px solid var(--op-color-border)' }}>
-          <TabsList style={{
-            display: 'flex',
-            padding: 'var(--op-space-small)',
-            gap: 'var(--op-space-2x-small)',
-          }}>
+          <TabsList
+            style={{
+              display: 'flex',
+              padding: 'var(--op-space-small)',
+              gap: 'var(--op-space-2x-small)',
+            }}
+          >
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="style">Style</TabsTrigger>
             <TabsTrigger value="ai">AI</TabsTrigger>
@@ -117,11 +142,14 @@ export function WidgetEditorSidebar() {
           {/* CONTENT TAB */}
           <TabsContent value="content" style={{ padding: 'var(--op-space-large)' }}>
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-display-name" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-display-name"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Display name
               </Label>
               <Input
@@ -133,11 +161,14 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-initial-messages" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-initial-messages"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Initial messages
               </Label>
               <Textarea
@@ -148,26 +179,33 @@ export function WidgetEditorSidebar() {
                 style={{ resize: 'vertical' }}
                 aria-describedby="widget-initial-messages-help"
               />
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: 'var(--op-space-small)',
-              }}>
-                <p id="widget-initial-messages-help" style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  margin: 0,
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--op-space-2x-small)',
-                }}>
+                  justifyContent: 'space-between',
+                  marginTop: 'var(--op-space-small)',
+                }}
+              >
+                <p
+                  id="widget-initial-messages-help"
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-2x-small)',
+                  }}
+                >
                   <InformationCircleIcon className="icon-sm" />
                   Enter each message in a new line.
                 </p>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => updateConfig({ initialMessage: 'Hi! Let\'s talk about your project!' })}
+                  onClick={() =>
+                    updateConfig({ initialMessage: "Hi! Let's talk about your project!" })
+                  }
                 >
                   Reset
                 </Button>
@@ -175,34 +213,53 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-suggested-messages-persist" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
-                Suggested messages <InformationCircleIcon className="icon-sm" style={{ display: 'inline', opacity: 0.5 }} />
+              <Label
+                htmlFor="widget-suggested-messages-persist"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
+                Suggested messages{' '}
+                <InformationCircleIcon
+                  className="icon-sm"
+                  style={{ display: 'inline', opacity: 0.5 }}
+                />
               </Label>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 'var(--op-space-medium)',
-                padding: 'var(--op-space-small)',
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                border: '1px solid var(--op-color-border)',
-                borderRadius: 'var(--op-radius-small)',
-                gap: 'var(--op-space-small)'
-              }}>
-                <Label htmlFor="widget-suggested-messages-persist" style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 'var(--op-space-medium)',
+                  padding: 'var(--op-space-small)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  border: '1px solid var(--op-color-border)',
+                  borderRadius: 'var(--op-radius-small)',
+                  gap: 'var(--op-space-small)',
+                }}
+              >
+                <Label
+                  htmlFor="widget-suggested-messages-persist"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-small)',
+                  }}
+                >
                   <span style={{ fontSize: 'var(--op-font-small)' }}>
-                    Keep showing the suggested messages after the users&apos; first message
+                    Keep showing the suggested messages after the users&apos; first
+                    message
                   </span>
                   <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
                 </Label>
                 <Switch
                   id="widget-suggested-messages-persist"
                   checked={config.suggestedMessagesPersist}
-                  onCheckedChange={(checked) => updateConfig({ suggestedMessagesPersist: checked })}
+                  onCheckedChange={(checked) =>
+                    updateConfig({ suggestedMessagesPersist: checked })
+                  }
                 />
               </div>
               <Button variant="ghost" size="sm">
@@ -211,11 +268,14 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-message-placeholder" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-message-placeholder"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Message placeholder
               </Label>
               <Input
@@ -227,114 +287,79 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                <Label htmlFor="widget-collect-feedback" style={{
-                  fontSize: 'var(--op-font-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--op-space-2x-small)',
-                }}>
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Label
+                  htmlFor="widget-collect-feedback"
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-2x-small)',
+                  }}
+                >
                   Collect user feedback
                   <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
                 </Label>
                 <Switch
                   id="widget-collect-feedback"
                   checked={config.collectFeedback}
-                  onCheckedChange={(checked) => updateConfig({ collectFeedback: checked })}
+                  onCheckedChange={(checked) =>
+                    updateConfig({ collectFeedback: checked })
+                  }
                 />
               </div>
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                <Label htmlFor="widget-regenerate-messages" style={{
-                  fontSize: 'var(--op-font-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--op-space-2x-small)',
-                }}>
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Label
+                  htmlFor="widget-regenerate-messages"
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-2x-small)',
+                  }}
+                >
                   Regenerate messages
                   <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
                 </Label>
                 <Switch
                   id="widget-regenerate-messages"
                   checked={config.regenerateMessages}
-                  onCheckedChange={(checked) => updateConfig({ regenerateMessages: checked })}
+                  onCheckedChange={(checked) =>
+                    updateConfig({ regenerateMessages: checked })
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="widget-dismissible-notice" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-dismissible-notice"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Dismissible notice
               </Label>
-
-              {/* Rich text toolbar */}
-              <div style={{
-                display: 'flex',
-                gap: 'var(--op-space-3x-small)',
-                padding: 'var(--op-space-small)',
-                borderBottom: '1px solid var(--op-color-border)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
-                <Button variant="icon">
-                  <strong>B</strong>
-                </Button>
-                <Button variant="icon">
-                  <em>I</em>
-                </Button>
-                <Button variant="icon">
-                  <u>U</u>
-                </Button>
-                <div style={{ width: '1px', backgroundColor: 'var(--op-color-border)' }} />
-                <Button variant="icon">
-                  🔗
-                </Button>
-                <Button variant="icon">
-                  ⭐
-                </Button>
-                <div style={{ width: '1px', backgroundColor: 'var(--op-color-border)' }} />
-                <Button variant="icon">
-                  ☰
-                </Button>
-                <Button variant="icon">
-                  ≡
-                </Button>
-                <Button variant="icon">
-                  ⋮
-                </Button>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: 'var(--op-space-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
-                <Button variant="icon">
-                  ↶
-                </Button>
-                <Button variant="icon">
-                  ↷
-                </Button>
-                <span style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
-                  0/200
-                </span>
-              </div>
 
               <Textarea
                 id="widget-dismissible-notice"
@@ -345,16 +370,23 @@ export function WidgetEditorSidebar() {
                 aria-describedby="widget-dismissible-notice-help"
               />
 
-              <p id="widget-dismissible-notice-help" style={{
-                fontSize: 'var(--op-font-x-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                marginTop: 'var(--op-space-small)',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 'var(--op-space-2x-small)',
-              }}>
-                <InformationCircleIcon className="icon-sm" style={{ flexShrink: 0, marginTop: '2px' }} />
-                You can use this to add a dismissable notice. It will be dismissed after the user sends a message.
+              <p
+                id="widget-dismissible-notice-help"
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  marginTop: 'var(--op-space-small)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 'var(--op-space-2x-small)',
+                }}
+              >
+                <InformationCircleIcon
+                  className="icon-sm"
+                  style={{ flexShrink: 0, marginTop: '2px' }}
+                />
+                You can use this to add a dismissable notice. It will be dismissed after
+                the user sends a message.
               </p>
             </div>
           </TabsContent>
@@ -362,20 +394,26 @@ export function WidgetEditorSidebar() {
           {/* STYLE TAB */}
           <TabsContent value="style" style={{ padding: 'var(--op-space-large)' }}>
             <div style={{ marginBottom: 'var(--op-space-x-large)' }}>
-              <Label style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
+              <Label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
                 Appearance
               </Label>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--op-space-medium)',
-              }} role="radiogroup" aria-labelledby="widget-theme-label">
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 'var(--op-space-medium)',
+                }}
+                role="radiogroup"
+                aria-labelledby="widget-theme-label"
+              >
                 {/* Light theme card */}
                 <div
                   role="radio"
@@ -390,51 +428,66 @@ export function WidgetEditorSidebar() {
                     cursor: 'pointer',
                   }}
                 >
-                  <div style={{
-                    backgroundColor: '#f5f5f5',
-                    padding: 'var(--op-space-large)',
-                    minHeight: '160px',
-                    position: 'relative',
-                  }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: 'var(--op-space-small)',
-                      left: 'var(--op-space-small)',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      backgroundColor: '#000',
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                    }}>
+                  <div
+                    style={{
+                      backgroundColor: '#f5f5f5',
+                      padding: 'var(--op-space-large)',
+                      minHeight: '160px',
+                      position: 'relative',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'var(--op-space-small)',
+                        left: 'var(--op-space-small)',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: '#000',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                      }}
+                    >
                       +
                     </div>
-                    <div style={{
-                      marginTop: 'var(--op-space-x-large)',
-                      backgroundColor: '#e0e0e0',
-                      height: '12px',
-                      borderRadius: '4px',
-                      width: '60%',
-                    }} />
+                    <div
+                      style={{
+                        marginTop: 'var(--op-space-x-large)',
+                        backgroundColor: '#e0e0e0',
+                        height: '12px',
+                        borderRadius: '4px',
+                        width: '60%',
+                      }}
+                    />
                   </div>
-                  <div style={{
-                    padding: 'var(--op-space-medium)',
-                    backgroundColor: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}>
-                    <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 500 }}>Light</span>
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '2px solid var(--op-color-border)',
-                      backgroundColor: config.theme === 'light' ? 'var(--op-color-primary)' : 'transparent',
-                    }} />
+                  <div
+                    style={{
+                      padding: 'var(--op-space-medium)',
+                      backgroundColor: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 500 }}>
+                      Light
+                    </span>
+                    <div
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: '2px solid var(--op-color-border)',
+                        backgroundColor:
+                          config.theme === 'light'
+                            ? 'var(--op-color-primary)'
+                            : 'transparent',
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -452,77 +505,102 @@ export function WidgetEditorSidebar() {
                     cursor: 'pointer',
                   }}
                 >
-                  <div style={{
-                    backgroundColor: '#1a1a1a',
-                    padding: 'var(--op-space-large)',
-                    minHeight: '160px',
-                    position: 'relative',
-                  }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: 'var(--op-space-small)',
-                      left: 'var(--op-space-small)',
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      backgroundColor: 'white',
-                      color: '#000',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                    }}>
+                  <div
+                    style={{
+                      backgroundColor: '#1a1a1a',
+                      padding: 'var(--op-space-large)',
+                      minHeight: '160px',
+                      position: 'relative',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 'var(--op-space-small)',
+                        left: 'var(--op-space-small)',
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        backgroundColor: 'white',
+                        color: '#000',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                      }}
+                    >
                       +
                     </div>
-                    <div style={{
-                      marginTop: 'var(--op-space-x-large)',
-                      backgroundColor: '#333',
-                      height: '12px',
-                      borderRadius: '4px',
-                      width: '60%',
-                    }} />
+                    <div
+                      style={{
+                        marginTop: 'var(--op-space-x-large)',
+                        backgroundColor: '#333',
+                        height: '12px',
+                        borderRadius: '4px',
+                        width: '60%',
+                      }}
+                    />
                   </div>
-                  <div style={{
-                    padding: 'var(--op-space-medium)',
-                    backgroundColor: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}>
-                    <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 500 }}>Dark</span>
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      border: '2px solid var(--op-color-border)',
-                      backgroundColor: config.theme === 'dark' ? 'var(--op-color-primary)' : 'transparent',
-                    }} />
+                  <div
+                    style={{
+                      padding: 'var(--op-space-medium)',
+                      backgroundColor: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 500 }}>
+                      Dark
+                    </span>
+                    <div
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        border: '2px solid var(--op-color-border)',
+                        backgroundColor:
+                          config.theme === 'dark'
+                            ? 'var(--op-color-primary)'
+                            : 'transparent',
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Profile picture
               </Label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--op-color-primary)',
-                  color: 'white',
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 'var(--op-font-large)',
-                  fontWeight: 'bold',
-                }}>
+                  gap: 'var(--op-space-medium)',
+                }}
+              >
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--op-color-primary)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 'var(--op-font-large)',
+                    fontWeight: 'bold',
+                  }}
+                >
                   R
                 </div>
                 <Button variant="icon">
@@ -535,17 +613,21 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Chat icon
               </Label>
-              <p style={{
-                fontSize: 'var(--op-font-x-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 JPG, PNG, and SVG up to 1MB
               </p>
               <Button variant="secondary">
@@ -554,21 +636,32 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-primary-color" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-primary-color"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Primary color
               </Label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: 'var(--op-radius-small)',
-                  backgroundColor: config.primaryColor,
-                  border: '1px solid var(--op-color-border)',
-                }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--op-space-small)',
+                }}
+              >
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: 'var(--op-radius-small)',
+                    backgroundColor: config.primaryColor,
+                    border: '1px solid var(--op-color-border)',
+                  }}
+                />
                 <Input
                   id="widget-primary-color"
                   value={config.primaryColor || ''}
@@ -585,40 +678,58 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                <Label htmlFor="widget-primary-header" style={{
-                  fontSize: 'var(--op-font-small)',
-                }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Label
+                  htmlFor="widget-primary-header"
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                  }}
+                >
                   Use primary color for header
                 </Label>
                 <Switch
                   id="widget-primary-header"
                   checked={config.usePrimaryForHeader}
-                  onCheckedChange={(checked) => updateConfig({ usePrimaryForHeader: checked })}
+                  onCheckedChange={(checked) =>
+                    updateConfig({ usePrimaryForHeader: checked })
+                  }
                 />
               </div>
             </div>
 
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-button-color" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-button-color"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Chat bubble Button color
               </Label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: 'var(--op-radius-small)',
-                  backgroundColor: config.buttonColor,
-                  border: '1px solid var(--op-color-border)',
-                }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--op-space-small)',
+                }}
+              >
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: 'var(--op-radius-small)',
+                    backgroundColor: config.buttonColor,
+                    border: '1px solid var(--op-color-border)',
+                  }}
+                />
                 <Input
                   id="widget-button-color"
                   value={config.buttonColor || ''}
@@ -635,15 +746,33 @@ export function WidgetEditorSidebar() {
             </div>
 
             <div>
-              <Label id="widget-alignment-label" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                id="widget-alignment-label"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Align chat bubble Button
               </Label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }} role="radiogroup" aria-labelledby="widget-alignment-label">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)', cursor: 'pointer' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--op-space-small)',
+                }}
+                role="radiogroup"
+                aria-labelledby="widget-alignment-label"
+              >
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-small)',
+                    cursor: 'pointer',
+                  }}
+                >
                   <input
                     id="widget-alignment-left"
                     type="radio"
@@ -653,7 +782,14 @@ export function WidgetEditorSidebar() {
                   />
                   <span style={{ fontSize: 'var(--op-font-small)' }}>Left align</span>
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)', cursor: 'pointer' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-small)',
+                    cursor: 'pointer',
+                  }}
+                >
                   <input
                     id="widget-alignment-right"
                     type="radio"
@@ -670,35 +806,45 @@ export function WidgetEditorSidebar() {
           {/* AI TAB */}
           <TabsContent value="ai" style={{ padding: 'var(--op-space-large)' }}>
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
-                <Label htmlFor="widget-sync-instructions" style={{
-                  fontSize: 'var(--op-font-small)',
+              <div
+                style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 'var(--op-space-2x-small)',
-                }}>
+                  justifyContent: 'space-between',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
+                <Label
+                  htmlFor="widget-sync-instructions"
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-2x-small)',
+                  }}
+                >
                   Sync with base instructions
                   <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
                 </Label>
                 <Switch
                   id="widget-sync-instructions"
                   checked={config.syncInstructions}
-                  onCheckedChange={(checked) => updateConfig({ syncInstructions: checked })}
+                  onCheckedChange={(checked) =>
+                    updateConfig({ syncInstructions: checked })
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="widget-instructions-textarea" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-instructions-textarea"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Chat widget instructions
               </Label>
 
@@ -719,23 +865,32 @@ export function WidgetEditorSidebar() {
           {/* EMBED TAB */}
           <TabsContent value="embed" style={{ padding: 'var(--op-space-large)' }}>
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label htmlFor="widget-embed-code" style={{
-                display: 'block',
-                fontSize: 'var(--op-font-small)',
-                marginBottom: 'var(--op-space-small)',
-              }}>
+              <Label
+                htmlFor="widget-embed-code"
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--op-font-small)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Embed code
               </Label>
-              <p id="widget-embed-code-help" style={{
-                fontSize: 'var(--op-font-x-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
-                Copy and paste this code into your website before the closing &lt;/body&gt; tag.
+              <p
+                id="widget-embed-code-help"
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
+                Copy and paste this code into your website before the closing
+                &lt;/body&gt; tag.
               </p>
-              <div style={{
-                position: 'relative',
-              }}>
+              <div
+                style={{
+                  position: 'relative',
+                }}
+              >
                 <Textarea
                   id="widget-embed-code"
                   readOnly
@@ -758,7 +913,9 @@ export function WidgetEditorSidebar() {
                     right: 'var(--op-space-small)',
                   }}
                   onClick={() => {
-                    navigator.clipboard.writeText(`<script src="${window.location.origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`)
+                    navigator.clipboard.writeText(
+                      `<script src="${window.location.origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`
+                    )
                   }}
                 >
                   Copy
@@ -766,31 +923,42 @@ export function WidgetEditorSidebar() {
               </div>
             </div>
 
-            <div style={{
-              backgroundColor: 'var(--op-color-neutral-plus-seven)',
-              padding: 'var(--op-space-medium)',
-              borderRadius: 'var(--op-radius-medium)',
-              border: '1px solid var(--op-color-border)',
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 'var(--op-space-small)',
-              }}>
-                <InformationCircleIcon className="icon-sm" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div
+              style={{
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                padding: 'var(--op-space-medium)',
+                borderRadius: 'var(--op-radius-medium)',
+                border: '1px solid var(--op-color-border)',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 'var(--op-space-small)',
+                }}
+              >
+                <InformationCircleIcon
+                  className="icon-sm"
+                  style={{ flexShrink: 0, marginTop: '2px' }}
+                />
                 <div>
-                  <p style={{
-                    fontSize: 'var(--op-font-x-small)',
-                    margin: 0,
-                  }}>
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-x-small)',
+                      margin: 0,
+                    }}
+                  >
                     <strong>Installation tips:</strong>
                   </p>
-                  <ul style={{
-                    fontSize: 'var(--op-font-x-small)',
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                    marginTop: 'var(--op-space-small)',
-                    paddingLeft: 'var(--op-space-medium)',
-                  }}>
+                  <ul
+                    style={{
+                      fontSize: 'var(--op-font-x-small)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      marginTop: 'var(--op-space-small)',
+                      paddingLeft: 'var(--op-space-medium)',
+                    }}
+                  >
                     <li>Add the script tag before the closing &lt;/body&gt; tag</li>
                     <li>The widget will appear as a button in the bottom-right corner</li>
                     <li>Works on all modern browsers</li>
@@ -803,10 +971,12 @@ export function WidgetEditorSidebar() {
       </Tabs>
 
       {/* Save Button at Bottom */}
-      <div style={{
-        padding: 'var(--op-space-large)',
-        borderTop: '1px solid var(--op-color-border)',
-      }}>
+      <div
+        style={{
+          padding: 'var(--op-space-large)',
+          borderTop: '1px solid var(--op-color-border)',
+        }}
+      >
         <Button variant="primary" onClick={handleSave} style={{ width: '100%' }}>
           Save Changes
         </Button>

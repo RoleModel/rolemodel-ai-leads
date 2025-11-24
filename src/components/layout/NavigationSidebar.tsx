@@ -1,35 +1,33 @@
 'use client'
 
-import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
-import { useState } from "react"
-import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  PlayCircle02Icon,
-  Time01Icon,
   Analytics01Icon,
-  Database01Icon,
-  Rocket01Icon,
-  File01Icon,
-  TextIcon,
-  Globe02Icon,
-  QuestionIcon,
-  Idea01Icon,
   ArrowDown01Icon,
+  Database01Icon,
+  File01Icon,
+  Globe02Icon,
   Message01Icon,
+  PlayCircle02Icon,
+  QuestionIcon,
+  Rocket01Icon,
+  TextIcon,
+  Time01Icon,
   UserIcon,
-} from '@hugeicons-pro/core-stroke-standard';
+} from '@hugeicons-pro/core-stroke-standard'
+import { HugeiconsIcon } from '@hugeicons/react'
+import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 
 const styles = {
   navSidebar: {
+    '--_op-sidebar-background-color': 'var(--op-color-neutral-plus-seven)',
     width: '260px',
     display: 'flex',
     flexDirection: 'column' as const,
     padding: 'var(--op-space-x-small)',
-    borderRight: '1px solid var(--op-color-border)',
-    backgroundColor: 'var(--op-color-neutral-plus-seven)',
     color: 'var(--op-color-neutral-on-plus-max)',
     flexShrink: 0,
     gap: 'var(--op-space-2x-small)',
@@ -44,7 +42,7 @@ const styles = {
     cursor: 'pointer',
     transition: 'background-color 0.2s',
     textDecoration: 'none',
-    height: 'var(--op-input-height-large)'
+    height: 'var(--op-input-height-large)',
   },
   navItemActive: {
     backgroundColor: 'var(--op-color-background)',
@@ -58,15 +56,19 @@ const styles = {
 export function NavigationSidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [isSourcesExpanded, setIsSourcesExpanded] = useState(pathname.startsWith('/sources'))
-  const [isActivityExpanded, setIsActivityExpanded] = useState(pathname.startsWith('/activity'))
+  const [isSourcesExpanded, setIsSourcesExpanded] = useState(
+    pathname.startsWith('/sources')
+  )
+  const [isActivityExpanded, setIsActivityExpanded] = useState(
+    pathname.startsWith('/activity')
+  )
 
   const navItems = [
-    { href: "/playground", icon: PlayCircle02Icon, label: "Playground" },
-    { href: "/activity", icon: Time01Icon, label: "Activity", expandable: true },
-    { href: "/analytics", icon: Analytics01Icon, label: "Analytics" },
-    { href: "/sources", icon: Database01Icon, label: "Sources", expandable: true },
-    { href: "/deploy", icon: Rocket01Icon, label: "Deploy" },
+    { href: '/playground', icon: PlayCircle02Icon, label: 'Playground' },
+    { href: '/activity', icon: Time01Icon, label: 'Activity', expandable: true },
+    { href: '/analytics', icon: Analytics01Icon, label: 'Analytics' },
+    { href: '/sources', icon: Database01Icon, label: 'Sources', expandable: true },
+    { href: '/deploy', icon: Rocket01Icon, label: 'Deploy' },
   ]
 
   const activitySubItems = [
@@ -79,13 +81,12 @@ export function NavigationSidebar() {
     { id: 'text', icon: TextIcon, label: 'Text' },
     { id: 'website', icon: Globe02Icon, label: 'Website' },
     { id: 'qna', icon: QuestionIcon, label: 'Q&A' },
-    { id: 'suggestions', icon: Idea01Icon, label: 'Suggestions' },
   ]
 
   const activeSection = searchParams.get('section') || 'files'
 
   return (
-    <aside style={styles.navSidebar}>
+    <aside style={styles.navSidebar} className="sidebar">
       {navItems.map((item) => {
         const ItemIcon = item.icon
         const isActive = pathname.startsWith(item.href)
@@ -112,7 +113,10 @@ export function NavigationSidebar() {
                   justifyContent: 'space-between',
                 }}
               >
-                <div className="flex items-center flex-grow-1" style={{ gap: 'var(--op-space-small)' }}>
+                <div
+                  className="flex items-center flex-grow-1"
+                  style={{ gap: 'var(--op-space-small)' }}
+                >
                   <HugeiconsIcon icon={ItemIcon} size={20} />
                   <span>{item.label}</span>
                 </div>
@@ -120,7 +124,11 @@ export function NavigationSidebar() {
                   icon={ArrowDown01Icon}
                   size={20}
                   style={{
-                    transform: (isSourcesItem && isSourcesExpanded) || (isActivityItem && isActivityExpanded) ? 'rotate(0deg)' : 'rotate(-90deg)',
+                    transform:
+                      (isSourcesItem && isSourcesExpanded) ||
+                        (isActivityItem && isActivityExpanded)
+                        ? 'rotate(0deg)'
+                        : 'rotate(-90deg)',
                     transition: 'transform 0.2s',
                   }}
                 />
@@ -155,11 +163,13 @@ export function NavigationSidebar() {
                         borderLeft: '1px solid',
                         borderColor: 'var(--op-color-border)',
                         fontSize: '13px',
-                        ...(isSubActive ? {
-                          color: 'var(--op-color-primary-base)',
-                          borderColor: 'var(--op-color-primary-base)',
-                          fontWeight: 500,
-                        } : {}),
+                        ...(isSubActive
+                          ? {
+                            color: 'var(--op-color-primary-base)',
+                            borderColor: 'var(--op-color-primary-base)',
+                            fontWeight: 500,
+                          }
+                          : {}),
                       }}
                     >
                       <HugeiconsIcon icon={SubIcon} size={20} />
@@ -187,11 +197,13 @@ export function NavigationSidebar() {
                         borderLeft: '1px solid',
                         borderColor: 'var(--op-color-border)',
                         fontSize: '13px',
-                        ...(isSubActive ? {
-                          color: 'var(--op-color-primary-base)',
-                          borderColor: 'var(--op-color-primary-base)',
-                          fontWeight: 500,
-                        } : {}),
+                        ...(isSubActive
+                          ? {
+                            color: 'var(--op-color-primary-base)',
+                            borderColor: 'var(--op-color-primary-base)',
+                            fontWeight: 500,
+                          }
+                          : {}),
                       }}
                     >
                       <HugeiconsIcon icon={SubIcon} size={20} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
 
 // Default chatbot ID for RoleModel
@@ -13,8 +14,19 @@ export default function EmbedLeadsPage() {
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
   return (
-    <div style={{ width: '100vw', height: '100vh', backgroundColor: 'var(--op-color-background)' }}>
-      <LeadsPageWithProvider chatbotId={chatbotId} showSidebar={true} loadFromApi={true} />
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'var(--op-color-background)',
+        overflow: 'hidden',
+      }}
+    >
+      <LeadsPageWithProvider
+        chatbotId={chatbotId}
+        showSidebar={true}
+        loadFromApi={true}
+      />
     </div>
   )
 }

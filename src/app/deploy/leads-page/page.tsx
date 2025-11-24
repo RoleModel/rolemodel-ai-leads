@@ -1,11 +1,13 @@
-"use client"
+'use client'
 
-import { Suspense } from "react"
-import { TopBar } from "@/components/layout/TopBar"
-import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
-import { EditorSidebar } from "@/components/layout/EditorSidebar"
-import { PreviewArea } from "@/components/layout/PreviewArea"
-import { LeadsPageSettingsProvider } from "@/contexts/LeadsPageSettingsContext"
+import { Suspense } from 'react'
+
+import { EditorSidebar } from '@/components/layout/EditorSidebar'
+import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { PreviewArea } from '@/components/layout/PreviewArea'
+import { TopBar } from '@/components/layout/TopBar'
+
+import { LeadsPageSettingsProvider } from '@/contexts/LeadsPageSettingsContext'
 
 export default function HelpPageDesignerPage() {
   return (

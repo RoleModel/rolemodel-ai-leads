@@ -1,19 +1,19 @@
-"use client"
+'use client'
 
-import { useState, useEffect, Suspense } from "react"
-import { useSearchParams } from "next/navigation"
-import { TopBar } from "@/components/layout/TopBar"
-import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
-
-export const runtime = 'edge'
 import {
   Add01Icon,
   Delete02Icon,
-  Upload01Icon,
-  RefreshIcon,
-  InformationCircleIcon,
   Globe02Icon,
-} from "hugeicons-react"
+  RefreshIcon,
+  Upload01Icon,
+} from 'hugeicons-react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+
+import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { TopBar } from '@/components/layout/TopBar'
+
+export const runtime = 'edge'
 
 interface Source {
   id: string
@@ -21,14 +21,14 @@ interface Source {
   content: string
   created_at: string
   metadata?: {
-    type?: 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion'
+    type?: 'file' | 'text' | 'website' | 'qna'
     url?: string
     filename?: string
     size?: number
   } | null
 }
 
-type SourceType = 'files' | 'text' | 'website' | 'qna' | 'notion' | 'suggestions'
+type SourceType = 'files' | 'text' | 'website' | 'qna'
 
 export default function SourcesPage() {
   const searchParams = useSearchParams()
@@ -39,8 +39,8 @@ export default function SourcesPage() {
   const [isAdding, setIsAdding] = useState(false)
   const [isRetraining, setIsRetraining] = useState(false)
   const [needsRetraining, setNeedsRetraining] = useState(false)
-  const [newTitle, setNewTitle] = useState("")
-  const [newContent, setNewContent] = useState("")
+  const [newTitle, setNewTitle] = useState('')
+  const [newContent, setNewContent] = useState('')
   const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
@@ -90,8 +90,8 @@ export default function SourcesPage() {
       })
 
       if (res.ok) {
-        setNewTitle("")
-        setNewContent("")
+        setNewTitle('')
+        setNewContent('')
         setNeedsRetraining(true)
         await loadSources()
       } else {
@@ -135,7 +135,7 @@ export default function SourcesPage() {
     setIsAdding(true)
     try {
       const formData = new FormData()
-      Array.from(files).forEach(file => formData.append('files', file))
+      Array.from(files).forEach((file) => formData.append('files', file))
 
       const res = await fetch('/api/sources/upload', {
         method: 'POST',
@@ -153,30 +153,36 @@ export default function SourcesPage() {
     }
   }
 
-  function getSectionType(section: SourceType): 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion' {
-    const typeMap: Record<SourceType, 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion'> = {
-      'files': 'file',
-      'text': 'text',
-      'website': 'website',
-      'qna': 'qna',
-      'notion': 'notion',
-      'suggestions': 'suggestion',
+  function getSectionType(
+    section: SourceType
+  ): 'file' | 'text' | 'website' | 'qna' {
+    const typeMap: Record<
+      SourceType,
+      'file' | 'text' | 'website' | 'qna'
+    > = {
+      files: 'file',
+      text: 'text',
+      website: 'website',
+      qna: 'qna',
     }
     return typeMap[section]
   }
 
   // Filter sources by type metadata
-  const filteredSources = sources.filter(s => {
+  const filteredSources = sources.filter((s) => {
     // Only show sources that have the matching type
     return s.metadata?.type === getSectionType(activeSection)
   })
   console.log('[Sources Page] Active section:', activeSection)
   console.log('[Sources Page] Looking for type:', getSectionType(activeSection))
   console.log('[Sources Page] Filtered sources:', filteredSources.length)
-  console.log('[Sources Page] All source types:', sources.map(s => s.metadata?.type))
+  console.log(
+    '[Sources Page] All source types:',
+    sources.map((s) => s.metadata?.type)
+  )
 
   const totalSize = sources.reduce((acc, s) => acc + (s.metadata?.size || 0), 0)
-  const totalLinks = sources.filter(s => s.metadata?.type === 'website').length
+  const totalLinks = sources.filter((s) => s.metadata?.type === 'website').length
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault()
@@ -214,36 +220,46 @@ export default function SourcesPage() {
         </Suspense>
 
         {/* Main Content */}
-        <main style={{
-          flex: 1,
-          display: 'flex',
-          overflow: 'hidden',
-        }}>
-          <div style={{
+        <main
+          style={{
             flex: 1,
-            overflow: 'auto',
-            padding: 'var(--op-space-large)',
-          }}>
+            display: 'flex',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflow: 'auto',
+              padding: 'var(--op-space-large)',
+            }}
+          >
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <h1 style={{
-                fontSize: 'var(--op-font-x-large)',
-                fontWeight: 'var(--op-font-weight-bold)',
-                margin: 0,
-                textTransform: 'capitalize',
-              }}>
-                {activeSection}
+              <h1
+                style={{
+                  fontSize: 'var(--op-font-x-large)',
+                  fontWeight: 'var(--op-font-weight-bold)',
+                  margin: 0,
+                  textTransform: 'capitalize',
+                }}
+              >
+                {activeSection === 'qna' ? 'Q & A' : activeSection}
               </h1>
-              <p style={{
-                fontSize: 'var(--op-font-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                margin: 'var(--op-space-2x-small) 0 0 0',
-              }}>
-                {activeSection === 'files' && 'Upload documents to train your AI. Extract text from PDFs, DOCX, and TXT files.'}
-                {activeSection === 'text' && 'Add plain text content for your chatbot to learn from.'}
-                {activeSection === 'website' && 'Add website URLs to scrape content from.'}
-                {activeSection === 'qna' && 'Add question and answer pairs for precise responses.'}
-                {activeSection === 'notion' && 'Import content from your Notion workspace.'}
-                {activeSection === 'suggestions' && 'View AI-suggested content improvements.'}
+              <p
+                style={{
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  margin: 'var(--op-space-2x-small) 0 0 0',
+                }}
+              >
+                {activeSection === 'files' &&
+                  'Upload documents to train your AI. Extract text from PDFs, DOCX, and TXT files.'}
+                {activeSection === 'text' &&
+                  'Add plain text content for your chatbot to learn from.'}
+                {activeSection === 'website' &&
+                  'Add website URLs to scrape content from.'}
+                {activeSection === 'qna' &&
+                  'Add question and answer pairs for precise responses.'}
               </p>
             </div>
 
@@ -256,32 +272,7 @@ export default function SourcesPage() {
                   </h2>
                 </div>
                 <div className="card-body">
-                  {/* Warning Message */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 'var(--op-space-small)',
-                    padding: 'var(--op-space-medium)',
-                    backgroundColor: 'var(--op-color-warning-background)',
-                    border: '1px solid var(--op-color-warning-border)',
-                    borderRadius: 'var(--op-radius-small)',
-                    marginBottom: 'var(--op-space-medium)',
-                  }}>
-                    <InformationCircleIcon
-                      className="icon-sm"
-                      style={{
-                        color: 'var(--op-color-warning)',
-                        flexShrink: 0,
-                        marginTop: '2px',
-                      }}
-                    />
-                    <span style={{
-                      fontSize: 'var(--op-font-small)',
-                      color: 'var(--op-color-warning)',
-                    }}>
-                      If you are uploading a PDF, make sure you can select/highlight the text.
-                    </span>
-                  </div>
+
 
                   {/* Drag & Drop Area */}
                   <div
@@ -294,7 +285,9 @@ export default function SourcesPage() {
                       borderRadius: 'var(--op-radius-medium)',
                       padding: 'var(--op-space-3x-large)',
                       textAlign: 'center',
-                      backgroundColor: isDragging ? 'var(--op-color-primary-background)' : 'transparent',
+                      backgroundColor: isDragging
+                        ? 'var(--op-color-primary-background)'
+                        : 'transparent',
                       transition: 'all 0.2s',
                       cursor: 'pointer',
                     }}
@@ -307,18 +300,22 @@ export default function SourcesPage() {
                         color: 'var(--op-color-neutral-on-plus-max)',
                       }}
                     />
-                    <p style={{
-                      fontSize: 'var(--op-font-medium)',
-                      margin: 0,
-                      marginBottom: 'var(--op-space-2x-small)',
-                    }}>
+                    <p
+                      style={{
+                        fontSize: 'var(--op-font-medium)',
+                        margin: 0,
+                        marginBottom: 'var(--op-space-2x-small)',
+                      }}
+                    >
                       Drag & drop files here, or click to select files
                     </p>
-                    <p style={{
-                      fontSize: 'var(--op-font-small)',
-                      color: 'var(--op-color-neutral-on-plus-max)',
-                      margin: 0,
-                    }}>
+                    <p
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                        margin: 0,
+                      }}
+                    >
                       Supported file types: pdf, doc, docx, txt
                     </p>
                   </div>
@@ -336,14 +333,26 @@ export default function SourcesPage() {
             )}
 
             {/* Text/Other Content Section */}
-            {activeSection !== 'files' && activeSection !== 'suggestions' && (
+            {activeSection !== 'files' && (
               <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
                 <div className="card-header">
                   <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
-                    Add New {activeSection === 'text' ? 'Text' : activeSection === 'website' ? 'Website' : 'Content'}
+                    Add New{' '}
+                    {activeSection === 'text'
+                      ? 'Text'
+                      : activeSection === 'website'
+                        ? 'Website'
+                        : 'Content'}
                   </h2>
                 </div>
-                <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+                <div
+                  className="card-body"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--op-space-medium)',
+                  }}
+                >
                   <div className="form-group">
                     <label htmlFor="source-title" className="form-label">
                       Title {activeSection === 'text' && '(optional)'}
@@ -354,9 +363,11 @@ export default function SourcesPage() {
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder={
-                        activeSection === 'text' ? 'e.g., Services Overview' :
-                          activeSection === 'website' ? 'e.g., Homepage' :
-                            'Enter a title'
+                        activeSection === 'text'
+                          ? 'e.g., Services Overview'
+                          : activeSection === 'website'
+                            ? 'e.g., Homepage'
+                            : 'Enter a title'
                       }
                     />
                   </div>
@@ -398,7 +409,9 @@ export default function SourcesPage() {
                     style={{ alignSelf: 'flex-start' }}
                   >
                     <Add01Icon className="icon-sm" />
-                    {isAdding ? 'Adding...' : `Add ${activeSection === 'website' ? 'Website' : 'Source'}`}
+                    {isAdding
+                      ? 'Adding...'
+                      : `Add ${activeSection === 'website' ? 'Website' : 'Source'}`}
                   </button>
                 </div>
               </div>
@@ -406,11 +419,13 @@ export default function SourcesPage() {
 
             {/* Sources List */}
             <div>
-              <h2 style={{
-                fontSize: 'var(--op-font-large)',
-                fontWeight: 'var(--op-font-weight-bold)',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
+              <h2
+                style={{
+                  fontSize: 'var(--op-font-large)',
+                  fontWeight: 'var(--op-font-weight-bold)',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
                 Existing Sources ({filteredSources.length})
               </h2>
 
@@ -421,10 +436,23 @@ export default function SourcesPage() {
                   No sources yet. Add your first source above to get started.
                 </p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--op-space-medium)',
+                  }}
+                >
                   {filteredSources.map((source) => (
                     <div key={source.id} className="card">
-                      <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div
+                        className="card-header"
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
                         <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                           {source.title || 'Untitled Source'}
                         </h3>
@@ -438,34 +466,42 @@ export default function SourcesPage() {
                         </button>
                       </div>
                       <div className="card-body">
-                        <p style={{
-                          fontSize: 'var(--op-font-small)',
-                          whiteSpace: 'pre-wrap',
-                          margin: 0,
-                          maxHeight: '200px',
-                          overflow: 'auto',
-                        }}>
+                        <p
+                          style={{
+                            fontSize: 'var(--op-font-small)',
+                            whiteSpace: 'pre-wrap',
+                            margin: 0,
+                            maxHeight: '200px',
+                            overflow: 'auto',
+                          }}
+                        >
                           {source.content}
                         </p>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          marginTop: 'var(--op-space-small)',
-                        }}>
-                          <p style={{
-                            fontSize: 'var(--op-font-x-small)',
-                            color: 'var(--op-color-neutral-on-plus-max)',
-                            margin: 0,
-                          }}>
-                            Added {new Date(source.created_at).toLocaleDateString()}
-                          </p>
-                          {source.metadata?.size && (
-                            <p style={{
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginTop: 'var(--op-space-small)',
+                          }}
+                        >
+                          <p
+                            style={{
                               fontSize: 'var(--op-font-x-small)',
                               color: 'var(--op-color-neutral-on-plus-max)',
                               margin: 0,
-                            }}>
+                            }}
+                          >
+                            Added {new Date(source.created_at).toLocaleDateString()}
+                          </p>
+                          {source.metadata?.size && (
+                            <p
+                              style={{
+                                fontSize: 'var(--op-font-x-small)',
+                                color: 'var(--op-color-neutral-on-plus-max)',
+                                margin: 0,
+                              }}
+                            >
                               {(source.metadata.size / 1024).toFixed(2)} KB
                             </p>
                           )}
@@ -479,60 +515,76 @@ export default function SourcesPage() {
           </div>
 
           {/* Right Sidebar - Stats & Actions */}
-          <aside style={{
-            width: '320px',
-            borderLeft: '1px solid var(--op-color-border)',
-            padding: 'var(--op-space-large)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--op-space-large)',
-            backgroundColor: 'var(--op-color-background)',
-          }}>
+          <aside
+            style={{
+              width: '320px',
+              borderLeft: '1px solid var(--op-color-border)',
+              padding: 'var(--op-space-large)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--op-space-large)',
+              backgroundColor: 'var(--op-color-background)',
+            }}
+          >
             <div>
-              <h3 style={{
-                fontSize: 'var(--op-font-medium)',
-                fontWeight: 'var(--op-font-weight-bold)',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
+              <h3
+                style={{
+                  fontSize: 'var(--op-font-medium)',
+                  fontWeight: 'var(--op-font-weight-bold)',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
                 Sources
               </h3>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--op-space-small)',
-                padding: 'var(--op-space-medium)',
-                backgroundColor: 'var(--op-color-neutral-plus-eight)',
-                borderRadius: 'var(--op-radius-medium)',
-                marginBottom: 'var(--op-space-medium)',
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--op-space-small)',
+                  padding: 'var(--op-space-medium)',
+                  backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                  borderRadius: 'var(--op-radius-medium)',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
                 <Globe02Icon className="icon-sm" />
-                <span style={{ fontSize: 'var(--op-font-small)' }}>{totalLinks} Links</span>
-                <span style={{
-                  marginLeft: 'auto',
-                  fontSize: 'var(--op-font-small)',
-                  fontWeight: 'var(--op-font-weight-bold)',
-                }}>
+                <span style={{ fontSize: 'var(--op-font-small)' }}>
+                  {totalLinks} Links
+                </span>
+                <span
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 'var(--op-font-weight-bold)',
+                  }}
+                >
                   {(totalSize / 1024).toFixed(0)} KB
                 </span>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: 'var(--op-space-medium) 0',
-                borderTop: '1px solid var(--op-color-border)',
-              }}>
-                <span style={{
-                  fontSize: 'var(--op-font-small)',
-                  fontWeight: 'var(--op-font-weight-bold)',
-                }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: 'var(--op-space-medium) 0',
+                  borderTop: '1px solid var(--op-color-border)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 'var(--op-font-weight-bold)',
+                  }}
+                >
                   Total size
                 </span>
-                <span style={{
-                  fontSize: 'var(--op-font-small)',
-                }}>
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                  }}
+                >
                   {(totalSize / 1024).toFixed(0)} KB / 400 KB
                 </span>
               </div>
@@ -548,16 +600,18 @@ export default function SourcesPage() {
               </button>
 
               {needsRetraining && (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--op-space-small)',
-                  padding: 'var(--op-space-medium)',
-                  backgroundColor: 'var(--op-color-warning-background)',
-                  border: '1px solid var(--op-color-warning-border)',
-                  borderRadius: 'var(--op-radius-small)',
-                  marginTop: 'var(--op-space-medium)',
-                }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-small)',
+                    padding: 'var(--op-space-medium)',
+                    backgroundColor: 'var(--op-color-warning-background)',
+                    border: '1px solid var(--op-color-warning-border)',
+                    borderRadius: 'var(--op-radius-small)',
+                    marginTop: 'var(--op-space-medium)',
+                  }}
+                >
                   <RefreshIcon
                     className="icon-sm"
                     style={{
@@ -565,10 +619,12 @@ export default function SourcesPage() {
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{
-                    fontSize: 'var(--op-font-small)',
-                    color: 'var(--op-color-warning)',
-                  }}>
+                  <span
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      color: 'var(--op-color-warning)',
+                    }}
+                  >
                     Retraining is required for changes to apply
                   </span>
                 </div>

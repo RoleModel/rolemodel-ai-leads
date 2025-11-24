@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 const styles = {
   scrollArea: {
@@ -22,7 +22,7 @@ function ScrollArea({
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
-      className={cn("relative overflow-hidden", className)}
+      className={cn('relative overflow-hidden', className)}
       style={style}
       {...props}
     >
@@ -39,7 +39,7 @@ function ScrollArea({
 }
 
 function ScrollBar({
-  orientation = "vertical",
+  orientation = 'vertical',
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
   return (
@@ -52,15 +52,17 @@ function ScrollBar({
         padding: '1px',
         transition: 'colors 200ms',
         userSelect: 'none',
-        ...(orientation === "vertical" ? {
-          height: '100%',
-          width: '10px',
-          borderLeft: '1px solid transparent'
-        } : {
-          height: '10px',
-          flexDirection: 'column',
-          borderTop: '1px solid transparent'
-        })
+        ...(orientation === 'vertical'
+          ? {
+              height: '100%',
+              width: '10px',
+              borderLeft: '1px solid transparent',
+            }
+          : {
+              height: '10px',
+              flexDirection: 'column',
+              borderTop: '1px solid transparent',
+            }),
       }}
       {...props}
     >
@@ -70,7 +72,7 @@ function ScrollBar({
           backgroundColor: 'var(--op-color-neutral-plus-six)',
           position: 'relative',
           flex: 1,
-          borderRadius: '9999px'
+          borderRadius: '9999px',
         }}
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>

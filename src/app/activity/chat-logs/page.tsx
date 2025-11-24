@@ -1,10 +1,11 @@
-"use client"
+'use client'
 
-import { useState, useEffect, Suspense } from "react"
-import { TopBar } from "@/components/layout/TopBar"
-import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Message01Icon, UserIcon } from "hugeicons-react"
+import { Message01Icon, UserIcon } from 'hugeicons-react'
+import { Suspense, useEffect, useState } from 'react'
+
+import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { TopBar } from '@/components/layout/TopBar'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Conversation {
   id: string
@@ -25,7 +26,9 @@ interface Message {
 
 export default function ChatLogsPage() {
   const [conversations, setConversations] = useState<Conversation[]>([])
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
+    null
+  )
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -65,59 +68,90 @@ export default function ChatLogsPage() {
           <NavigationSidebar />
         </Suspense>
 
-        <main style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            padding: 'var(--op-space-large)',
-            borderBottom: '1px solid var(--op-color-border)',
-          }}>
-            <h1 style={{
-              fontSize: 'var(--op-font-x-large)',
-              fontWeight: 'var(--op-font-weight-bold)',
-              margin: 0,
-            }}>
+        <main
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: 'var(--op-space-large)',
+              borderBottom: '1px solid var(--op-color-border)',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: 'var(--op-font-x-large)',
+                fontWeight: 'var(--op-font-weight-bold)',
+                margin: 0,
+              }}
+            >
               Chat logs
             </h1>
-            <p style={{
-              fontSize: 'var(--op-font-small)',
-              color: 'var(--op-color-neutral-on-plus-max)',
-              margin: 'var(--op-space-2x-small) 0 0 0',
-            }}>
+            <p
+              style={{
+                fontSize: 'var(--op-font-small)',
+                color: 'var(--op-color-neutral-on-plus-max)',
+                margin: 'var(--op-space-2x-small) 0 0 0',
+              }}
+            >
               View all conversations and message history
             </p>
           </div>
 
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             {/* Conversations List */}
-            <div style={{
-              width: '350px',
-              borderRight: '1px solid var(--op-color-border)',
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-            }}>
+            <div
+              style={{
+                width: '350px',
+                borderRight: '1px solid var(--op-color-border)',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+              }}
+            >
               <ScrollArea style={{ flex: 1, minHeight: 0 }}>
                 {isLoading ? (
-                  <p style={{ padding: 'var(--op-space-large)', color: 'var(--op-color-neutral-on-plus-max)' }}>
+                  <p
+                    style={{
+                      padding: 'var(--op-space-large)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                    }}
+                  >
                     Loading...
                   </p>
                 ) : conversations.length === 0 ? (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 'var(--op-space-x-large)',
-                    textAlign: 'center',
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                  }}>
-                    <p style={{ margin: 0, fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>No chats found</p>
-                    <p style={{ margin: 'var(--op-space-small) 0 0 0', fontSize: 'var(--op-font-small)' }}>
-                      Try adjusting your filters or check back later for new conversations.
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 'var(--op-space-x-large)',
+                      textAlign: 'center',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 'var(--op-font-medium)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      No chats found
+                    </p>
+                    <p
+                      style={{
+                        margin: 'var(--op-space-small) 0 0 0',
+                        fontSize: 'var(--op-font-small)',
+                      }}
+                    >
+                      Try adjusting your filters or check back later for new
+                      conversations.
                     </p>
                   </div>
                 ) : (
@@ -130,13 +164,15 @@ export default function ChatLogsPage() {
                           padding: 'var(--op-space-medium) var(--op-space-large)',
                           borderBottom: '1px solid var(--op-color-border)',
                           cursor: 'pointer',
-                          backgroundColor: selectedConversation?.id === conv.id
-                            ? 'var(--op-color-primary-plus-eight)'
-                            : 'transparent',
+                          backgroundColor:
+                            selectedConversation?.id === conv.id
+                              ? 'var(--op-color-primary-plus-eight)'
+                              : 'transparent',
                         }}
                         onMouseEnter={(e) => {
                           if (selectedConversation?.id !== conv.id) {
-                            e.currentTarget.style.backgroundColor = 'var(--op-color-neutral-plus-eight)'
+                            e.currentTarget.style.backgroundColor =
+                              'var(--op-color-neutral-plus-eight)'
                           }
                         }}
                         onMouseLeave={(e) => {
@@ -145,18 +181,54 @@ export default function ChatLogsPage() {
                           }
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)', marginBottom: 'var(--op-space-2x-small)' }}>
-                          <UserIcon className="icon-sm" style={{ color: 'var(--op-color-neutral-on-plus-max)' }} />
-                          <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 'var(--op-font-weight-bold)' }}>
-                            {conv.visitor_name || conv.visitor_email || `Visitor ${conv.visitor_id.slice(0, 8)}`}
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--op-space-small)',
+                            marginBottom: 'var(--op-space-2x-small)',
+                          }}
+                        >
+                          <UserIcon
+                            className="icon-sm"
+                            style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                          />
+                          <span
+                            style={{
+                              fontSize: 'var(--op-font-small)',
+                              fontWeight: 'var(--op-font-weight-bold)',
+                            }}
+                          >
+                            {conv.visitor_name ||
+                              conv.visitor_email ||
+                              `Visitor ${conv.visitor_id.slice(0, 8)}`}
                           </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-x-small)' }}>
-                          <Message01Icon className="icon-sm" style={{ color: 'var(--op-color-neutral-on-plus-max)' }} />
-                          <span style={{ fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 'var(--op-space-x-small)',
+                          }}
+                        >
+                          <Message01Icon
+                            className="icon-sm"
+                            style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                          />
+                          <span
+                            style={{
+                              fontSize: 'var(--op-font-x-small)',
+                              color: 'var(--op-color-neutral-on-plus-max)',
+                            }}
+                          >
                             {conv.message_count} messages
                           </span>
-                          <span style={{ fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
+                          <span
+                            style={{
+                              fontSize: 'var(--op-font-x-small)',
+                              color: 'var(--op-color-neutral-on-plus-max)',
+                            }}
+                          >
                             · {new Date(conv.last_message_at).toLocaleString()}
                           </span>
                         </div>
@@ -168,36 +240,49 @@ export default function ChatLogsPage() {
             </div>
 
             {/* Messages View */}
-            <div style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-            }}>
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+              }}
+            >
               <ScrollArea style={{ flex: 1, minHeight: 0 }}>
-                <div style={{
-                  padding: 'var(--op-space-large)',
-                  backgroundColor: 'var(--op-color-neutral-plus-eight)',
-                  minHeight: '100%',
-                }}>
+                <div
+                  style={{
+                    padding: 'var(--op-space-large)',
+                    backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                    minHeight: '100%',
+                  }}
+                >
                   {!selectedConversation ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      color: 'var(--op-color-neutral-on-plus-max)',
-                    }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                      }}
+                    >
                       Select a conversation to view messages
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--op-space-medium)',
+                      }}
+                    >
                       {messages.map((message) => (
                         <div
                           key={message.id}
                           style={{
                             display: 'flex',
-                            justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
+                            justifyContent:
+                              message.role === 'user' ? 'flex-end' : 'flex-start',
                           }}
                         >
                           <div
@@ -205,29 +290,36 @@ export default function ChatLogsPage() {
                               maxWidth: '70%',
                               padding: 'var(--op-space-small) var(--op-space-medium)',
                               borderRadius: 'var(--op-radius-medium)',
-                              backgroundColor: message.role === 'user'
-                                ? 'var(--op-color-primary-base)'
-                                : 'var(--op-color-background)',
-                              color: message.role === 'user'
-                                ? 'var(--op-color-primary-on-base)'
-                                : 'var(--op-color-on-background)',
-                              boxShadow: message.role === 'user'
-                                ? '0 2px 8px -2px rgba(0, 0, 0, 0.1)'
-                                : '0 1px 4px -1px rgba(0, 0, 0, 0.08)',
+                              backgroundColor:
+                                message.role === 'user'
+                                  ? 'var(--op-color-primary-base)'
+                                  : 'var(--op-color-background)',
+                              color:
+                                message.role === 'user'
+                                  ? 'var(--op-color-primary-on-base)'
+                                  : 'var(--op-color-on-background)',
+                              boxShadow:
+                                message.role === 'user'
+                                  ? '0 2px 8px -2px rgba(0, 0, 0, 0.1)'
+                                  : '0 1px 4px -1px rgba(0, 0, 0, 0.08)',
                             }}
                           >
-                            <div style={{
-                              fontSize: 'var(--op-font-small)',
-                              whiteSpace: 'pre-wrap',
-                              wordWrap: 'break-word',
-                            }}>
+                            <div
+                              style={{
+                                fontSize: 'var(--op-font-small)',
+                                whiteSpace: 'pre-wrap',
+                                wordWrap: 'break-word',
+                              }}
+                            >
                               {message.content}
                             </div>
-                            <div style={{
-                              fontSize: 'var(--op-font-x-small)',
-                              opacity: 0.7,
-                              marginTop: 'var(--op-space-2x-small)',
-                            }}>
+                            <div
+                              style={{
+                                fontSize: 'var(--op-font-x-small)',
+                                opacity: 0.7,
+                                marginTop: 'var(--op-space-2x-small)',
+                              }}
+                            >
                               {new Date(message.created_at).toLocaleTimeString()}
                             </div>
                           </div>

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,20 +49,23 @@ export async function POST(request: NextRequest) {
   // Upsert (insert or update)
   const { data, error } = await supabase
     .from('help_page_settings')
-    .upsert({
-      chatbot_id: chatbotId,
-      page_title: pageTitle,
-      page_description: pageDescription,
-      favicon,
-      logo,
-      enable_theme_switch: enableThemeSwitch,
-      default_theme: defaultTheme,
-      light_primary_color: lightPrimaryColor,
-      dark_primary_color: darkPrimaryColor,
-      ai_instructions: aiInstructions,
-    }, {
-      onConflict: 'chatbot_id'
-    })
+    .upsert(
+      {
+        chatbot_id: chatbotId,
+        page_title: pageTitle,
+        page_description: pageDescription,
+        favicon,
+        logo,
+        enable_theme_switch: enableThemeSwitch,
+        default_theme: defaultTheme,
+        light_primary_color: lightPrimaryColor,
+        dark_primary_color: darkPrimaryColor,
+        ai_instructions: aiInstructions,
+      },
+      {
+        onConflict: 'chatbot_id',
+      }
+    )
     .select()
     .single()
 

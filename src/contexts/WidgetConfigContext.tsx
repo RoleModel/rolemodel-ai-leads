@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { ReactNode, createContext, useContext, useState } from 'react'
 
 interface WidgetConfig {
   displayName: string
@@ -30,7 +30,7 @@ const WidgetConfigContext = createContext<WidgetConfigContextType | undefined>(u
 export function WidgetConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<WidgetConfig>({
     displayName: 'RoleModel Software',
-    initialMessage: 'Hi! Let\'s talk about your project!',
+    initialMessage: "Hi! Let's talk about your project!",
     theme: 'light',
     primaryColor: '#007BFF',
     buttonColor: '#000000',
@@ -59,7 +59,7 @@ RoleModel Software is a custom software development company that specializes in 
   })
 
   const updateConfig = (updates: Partial<WidgetConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }))
+    setConfig((prev) => ({ ...prev, ...updates }))
   }
 
   return (

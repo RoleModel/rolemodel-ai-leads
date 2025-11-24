@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import type { UIMessage } from "@ai-sdk/react"
+import type { UIMessage } from '@ai-sdk/react'
 
 interface MessageBubbleProps {
   message: UIMessage
@@ -12,13 +12,19 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
   const content = (message as any).content || ''
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: isUser ? 'flex-end' : 'flex-start',
-      width: '100%',
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: isUser ? 'flex-end' : 'flex-start',
+        width: '100%',
+      }}
+    >
       <div
-        className={isUser ? 'message-bubble message-bubble--user' : 'message-bubble message-bubble--assistant'}
+        className={
+          isUser
+            ? 'message-bubble message-bubble--user'
+            : 'message-bubble message-bubble--assistant'
+        }
         style={{
           maxWidth: '70%',
           padding: 'var(--op-space-small) var(--op-space-medium)',
@@ -37,7 +43,9 @@ export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
       >
         {isLoading ? (
           <span className="loading-dots">
-            <span>.</span><span>.</span><span>.</span>
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
           </span>
         ) : (
           content

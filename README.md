@@ -166,6 +166,7 @@ All styling uses Optics Design System classes. Customize in `/src/app/globals.cs
 ## AI Gateway Setup
 
 Using Cloudflare AI Gateway provides:
+
 - Request caching
 - Analytics
 - Rate limiting

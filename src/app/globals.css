@@ -4,19 +4,11 @@
 
 @import '../styles/shadows.css';
 @import '../styles/utilities.css';
+@import '../styles/overrides.css';
 
 /* -------------------------------------------------
    Optics overrides + app globals
    ------------------------------------------------- */
-
-:root {
-  --op-font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', sans-serif;
-  --op-color-primary-h: 208;
-  --op-color-primary-s: 56%;
-  --op-color-primary-l: 53%;
-  --op-shadow-color: #0000000d;
-}
 
 /* -------------------------------------------------
    Global Helpers
@@ -66,23 +58,6 @@ h5 {
   animation-delay: 0.4s;
 }
 
-/* Card component */
-.card {
-  background-color: var(--op-color-background);
-  overflow: hidden;
-  color-scheme: light dark;
-}
-
-.card-header {
-  padding: var(--op-space-medium) var(--op-space-large);
-  border-bottom: 1px solid var(--op-color-border);
-  background-color: var(--op-color-neutral-plus-seven);
-}
-
-.card-body {
-  padding: var(--op-space-large);
-}
-
 /* Alert component */
 .alert {
   padding: var(--op-space-medium);
@@ -106,22 +81,25 @@ h5 {
   width: 100%;
 }
 .gradient {
-  filter: blur(16px);
-  /* opacity: 0.9; */
+  filter: blur(8px);
   pointer-events: none;
   z-index: 0;
   background-image: linear-gradient(
     90deg,
-    #8c69b8,
-    #b3d99a,
-    #fde385,
-    #87d4e9,
-    #8c69b8,
-    #b3d99a
+    #fcf496 10%,
+    #7f51b1,
+    #76ba6f,
+    #59a6d6,
+    #7f51b1,
+    #fcf496
   );
   height: 0.75rem;
   position: absolute;
-  left: 16px;
-  right: 16px;
-  top: 90%;
+  left: 10px;
+  right: 10px;
+  top: 98%;
+}
+
+[data-radix-popper-content-wrapper] {
+  top: -6px !important;
 }

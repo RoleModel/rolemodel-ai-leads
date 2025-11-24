@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server'
+
+import { supabaseServer } from '@/lib/supabase/server'
 
 // POST - Share lead summary via email or Slack
 export async function POST(req: NextRequest) {
@@ -7,10 +8,7 @@ export async function POST(req: NextRequest) {
   const { leadId, method } = body
 
   if (!leadId || !method) {
-    return NextResponse.json(
-      { error: 'leadId and method are required' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'leadId and method are required' }, { status: 400 })
   }
 
   if (method !== 'email' && method !== 'slack') {
@@ -28,10 +26,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error || !lead) {
-    return NextResponse.json(
-      { error: 'Lead not found' },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
   }
 
   const summary = lead.summary || {}
@@ -98,16 +93,21 @@ function formatLeadSummaryForEmail(lead: any, summary: any): string {
 
   if (summary.companyInfo) {
     html += '<h3>Company</h3><ul>'
-    if (summary.companyInfo.name) html += `<li><strong>Name:</strong> ${summary.companyInfo.name}</li>`
-    if (summary.companyInfo.industry) html += `<li><strong>Industry:</strong> ${summary.companyInfo.industry}</li>`
-    if (summary.companyInfo.size) html += `<li><strong>Size:</strong> ${summary.companyInfo.size}</li>`
+    if (summary.companyInfo.name)
+      html += `<li><strong>Name:</strong> ${summary.companyInfo.name}</li>`
+    if (summary.companyInfo.industry)
+      html += `<li><strong>Industry:</strong> ${summary.companyInfo.industry}</li>`
+    if (summary.companyInfo.size)
+      html += `<li><strong>Size:</strong> ${summary.companyInfo.size}</li>`
     html += '</ul>'
   }
 
   if (summary.budget) {
     html += '<h3>Budget</h3><ul>'
-    if (summary.budget.range) html += `<li><strong>Range:</strong> ${summary.budget.range}</li>`
-    if (summary.budget.timeline) html += `<li><strong>Timeline:</strong> ${summary.budget.timeline}</li>`
+    if (summary.budget.range)
+      html += `<li><strong>Range:</strong> ${summary.budget.range}</li>`
+    if (summary.budget.timeline)
+      html += `<li><strong>Timeline:</strong> ${summary.budget.timeline}</li>`
     if (summary.budget.approved !== undefined) {
       html += `<li><strong>Status:</strong> ${summary.budget.approved ? 'Approved' : 'Pending'}</li>`
     }
@@ -116,7 +116,8 @@ function formatLeadSummaryForEmail(lead: any, summary: any): string {
 
   if (summary.authority) {
     html += '<h3>Authority</h3><ul>'
-    if (summary.authority.role) html += `<li><strong>Role:</strong> ${summary.authority.role}</li>`
+    if (summary.authority.role)
+      html += `<li><strong>Role:</strong> ${summary.authority.role}</li>`
     if (summary.authority.decisionMaker !== undefined) {
       html += `<li><strong>Decision Maker:</strong> ${summary.authority.decisionMaker ? 'Yes' : 'No'}</li>`
     }
@@ -125,8 +126,10 @@ function formatLeadSummaryForEmail(lead: any, summary: any): string {
 
   if (summary.need) {
     html += '<h3>Need</h3><ul>'
-    if (summary.need.problem) html += `<li><strong>Problem:</strong> ${summary.need.problem}</li>`
-    if (summary.need.currentSolution) html += `<li><strong>Current Solution:</strong> ${summary.need.currentSolution}</li>`
+    if (summary.need.problem)
+      html += `<li><strong>Problem:</strong> ${summary.need.problem}</li>`
+    if (summary.need.currentSolution)
+      html += `<li><strong>Current Solution:</strong> ${summary.need.currentSolution}</li>`
     if (summary.need.painPoints && summary.need.painPoints.length > 0) {
       html += '<li><strong>Pain Points:</strong><ul>'
       summary.need.painPoints.forEach((point: string) => {
@@ -139,7 +142,8 @@ function formatLeadSummaryForEmail(lead: any, summary: any): string {
 
   if (summary.timeline) {
     html += '<h3>Timeline</h3><ul>'
-    if (summary.timeline.urgency) html += `<li><strong>Urgency:</strong> ${summary.timeline.urgency}</li>`
+    if (summary.timeline.urgency)
+      html += `<li><strong>Urgency:</strong> ${summary.timeline.urgency}</li>`
     if (summary.timeline.implementationDate) {
       html += `<li><strong>Target Implementation:</strong> ${summary.timeline.implementationDate}</li>`
     }

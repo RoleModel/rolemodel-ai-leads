@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server'
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+import { supabaseServer } from '@/lib/supabase/server'
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 // GET - Fetch widget configuration
 export async function GET(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         config: {
           displayName: 'RoleModel Software',
-          initialMessage: 'Hi! Let\'s talk about your project!',
+          initialMessage: "Hi! Let's talk about your project!",
           theme: 'light',
           primaryColor: '#007BFF',
           buttonColor: '#000000',
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
           usePrimaryForHeader: true,
           syncInstructions: true,
           instructions: '',
-        }
+        },
       })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })

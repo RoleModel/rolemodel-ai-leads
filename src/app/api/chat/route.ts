@@ -1,15 +1,17 @@
-import { NextRequest } from "next/server"
-import { streamText } from "ai"
-import { openai } from "@/lib/ai/gateway"
-import { retrieveRelevantSources, buildSourceContext, getChatbot } from "@/lib/ai/rag"
-import { supabaseServer } from "@/lib/supabase/server"
-import { nanoid } from "nanoid"
-import type { Database } from "@/lib/supabase/database.types"
+import { streamText } from 'ai'
+import { nanoid } from 'nanoid'
+import { NextRequest } from 'next/server'
 
-export const runtime = "edge"
+import { openai } from '@/lib/ai/gateway'
+import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
+import { buildSourceContext, getChatbot, retrieveRelevantSources } from '@/lib/ai/rag'
+import type { Database } from '@/lib/supabase/database.types'
+import { supabaseServer } from '@/lib/supabase/server'
+
+export const runtime = 'edge'
 export const maxDuration = 30
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,15 +23,20 @@ export async function POST(req: NextRequest) {
     // Get chatbot configuration
     const chatbot = await getChatbot(activeChatbotId)
     if (!chatbot) {
-      return new Response(JSON.stringify({ error: "Chatbot not found", chatbotId: activeChatbotId }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({ error: 'Chatbot not found', chatbotId: activeChatbotId }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
     }
 
     // Get the last user message for RAG
-    const lastUserMessage = messages.filter((m: { role: string }) => m.role === 'user').pop()
-    const userQuery = lastUserMessage?.content || ""
+    const lastUserMessage = messages
+      .filter((m: { role: string }) => m.role === 'user')
+      .pop()
+    const userQuery = lastUserMessage?.content || ''
 
     // Retrieve relevant sources using vector search
     const relevantSources = await retrieveRelevantSources(
@@ -39,15 +46,27 @@ export async function POST(req: NextRequest) {
       0.3 // Lower threshold to get more results
     )
 
+    // Debug logging
+    console.log('[RAG Debug] Query:', userQuery)
+    console.log('[RAG Debug] Chatbot ID:', activeChatbotId)
+    console.log('[RAG Debug] Sources retrieved:', relevantSources.length)
+    console.log(
+      '[RAG Debug] Source titles:',
+      relevantSources.map((s) => s.title).join(', ')
+    )
+    if (relevantSources.length > 0) {
+      console.log('[RAG Debug] Top source similarity:', relevantSources[0].similarity)
+    }
+
     // Build context from sources
     const sourceContext = buildSourceContext(relevantSources)
 
     // Build system message
     const systemMessage = {
-      role: "system" as const,
-      content: `${chatbot?.business_context || ""}
+      role: 'system' as const,
+      content: `${chatbot?.business_context || ''}
 
-${chatbot?.instructions || ""}
+${chatbot?.instructions || ''}
 
 ${sourceContext}`,
     }
@@ -101,12 +120,16 @@ ${sourceContext}`,
             conversation_id: activeConversationId,
             role: 'assistant',
             content: text,
-            sources_used: relevantSources.map(s => ({ id: s.id, title: s.title })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
+            sources_used: relevantSources.map((s) => ({
+              id: s.id,
+              title: s.title,
+            })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
           }
           await supabaseServer.from('messages').insert([assistantMessage])
 
           // Track analytics event
-          type AnalyticsInsert = Database['public']['Tables']['analytics_events']['Insert']
+          type AnalyticsInsert =
+            Database['public']['Tables']['analytics_events']['Insert']
           const analyticsData: AnalyticsInsert = {
             chatbot_id: activeChatbotId,
             conversation_id: activeConversationId,
@@ -117,6 +140,58 @@ ${sourceContext}`,
             } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
           }
           await supabaseServer.from('analytics_events').insert([analyticsData])
+
+          // Automatic lead extraction after every 3+ messages
+          const totalMessages = messages.length + 1
+          if (totalMessages >= 3) {
+            try {
+              // Get all conversation messages
+              const { data: allMessages } = await supabaseServer
+                .from('messages')
+                .select('role, content')
+                .eq('conversation_id', activeConversationId)
+                .order('created_at', { ascending: true })
+
+              if (allMessages && allMessages.length > 0) {
+                // Extract lead data
+                const leadData = await extractLeadData(allMessages)
+
+                // Check if lead is qualified and hasn't been saved yet
+                if (leadData && isQualifiedLead(leadData)) {
+                  // Check if lead already exists for this conversation
+                  const { data: existingLead } = await supabaseServer
+                    .from('leads')
+                    .select('id')
+                    .eq('conversation_id', activeConversationId)
+                    .single()
+
+                  if (!existingLead) {
+                    // Save the lead
+                    type LeadInsert = Database['public']['Tables']['leads']['Insert']
+                    const leadInsert: LeadInsert = {
+                      conversation_id: activeConversationId,
+                      visitor_name: leadData.contactInfo?.name || null,
+                      visitor_email: leadData.contactInfo?.email || null,
+                      summary:
+                        leadData as Database['public']['Tables']['leads']['Insert']['summary'],
+                    }
+                    await supabaseServer.from('leads').insert([leadInsert])
+
+                    // Update conversation to mark lead as captured
+                    await supabaseServer
+                      .from('conversations')
+                      .update({ lead_captured: true })
+                      .eq('id', activeConversationId)
+
+                    console.log('[Lead Captured] Conversation:', activeConversationId)
+                  }
+                }
+              }
+            } catch (error) {
+              // Don't fail the chat if lead extraction fails
+              console.error('[Lead Extraction Error]', error)
+            }
+          }
         }
       },
     })
@@ -124,17 +199,22 @@ ${sourceContext}`,
     return result.toTextStreamResponse({
       headers: {
         'X-Conversation-ID': activeConversationId || '',
-        'X-Sources-Used': JSON.stringify(relevantSources.map(s => ({ id: s.id, title: s.title }))),
+        'X-Sources-Used': JSON.stringify(
+          relevantSources.map((s) => ({ id: s.id, title: s.title }))
+        ),
       },
     })
   } catch (error) {
     console.error('Chat API error:', error)
-    return new Response(JSON.stringify({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : String(error)
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error),
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
 }

@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
-import { generateEmbedding } from "@/lib/ai/embeddings"
-import type { Database } from "@/lib/supabase/database.types"
+import { NextRequest, NextResponse } from 'next/server'
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+import { generateEmbedding } from '@/lib/ai/embeddings'
+import type { Database } from '@/lib/supabase/database.types'
+import { supabaseServer } from '@/lib/supabase/server'
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 type SourceInsert = Database['public']['Tables']['sources']['Insert']
 
@@ -23,8 +24,12 @@ export async function GET(req: NextRequest) {
   }
 
   // Add type to metadata for old sources that don't have it
-  const sourcesWithType = data?.map(source => {
-    if (source.metadata && typeof source.metadata === 'object' && !Array.isArray(source.metadata)) {
+  const sourcesWithType = data?.map((source) => {
+    if (
+      source.metadata &&
+      typeof source.metadata === 'object' &&
+      !Array.isArray(source.metadata)
+    ) {
       const metadata = source.metadata as Record<string, unknown>
       if (!metadata.type) {
         // Infer type from other metadata fields
@@ -52,7 +57,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { title, content, url, type, chatbotId } = body
 
-    console.log('[Sources API] Received request:', { title, hasContent: !!content, url, type, chatbotId })
+    console.log('[Sources API] Received request:', {
+      title,
+      hasContent: !!content,
+      url,
+      type,
+      chatbotId,
+    })
 
     if (!content) {
       console.error('[Sources API] Error: Content is required')
@@ -79,8 +90,14 @@ export async function POST(req: NextRequest) {
 
           // Basic HTML to text conversion
           // Remove script and style tags
-          let textContent = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          textContent = textContent.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+          let textContent = html.replace(
+            /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+            ''
+          )
+          textContent = textContent.replace(
+            /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
+            ''
+          )
 
           // Remove HTML tags
           textContent = textContent.replace(/<[^>]+>/g, ' ')
@@ -113,7 +130,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate embedding (returns number[])
-    console.log('[Sources API] Generating embedding for content length:', finalContent.length)
+    console.log(
+      '[Sources API] Generating embedding for content length:',
+      finalContent.length
+    )
     const embeddingArray = await generateEmbedding(finalContent)
     // Convert to pgvector string format: "[1,2,3]"
     const embedding = JSON.stringify(embeddingArray)
@@ -129,7 +149,10 @@ export async function POST(req: NextRequest) {
       title: finalTitle || null,
       content: finalContent,
       embedding,
-      metadata: Object.keys(metadata).length > 0 ? (metadata as unknown as Database['public']['Tables']['sources']['Insert']['metadata']) : null,
+      metadata:
+        Object.keys(metadata).length > 0
+          ? (metadata as unknown as Database['public']['Tables']['sources']['Insert']['metadata'])
+          : null,
     }
 
     console.log('[Sources API] Inserting source:', {
@@ -137,7 +160,7 @@ export async function POST(req: NextRequest) {
       title: sourceData.title,
       contentLength: sourceData.content.length,
       hasEmbedding: !!sourceData.embedding,
-      hasMetadata: !!sourceData.metadata
+      hasMetadata: !!sourceData.metadata,
     })
 
     const { data, error } = await supabaseServer
@@ -169,10 +192,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Source ID is required' }, { status: 400 })
   }
 
-  const { error } = await supabaseServer
-    .from('sources')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabaseServer.from('sources').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

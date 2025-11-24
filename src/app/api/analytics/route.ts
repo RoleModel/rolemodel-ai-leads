@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server'
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+import { supabaseServer } from '@/lib/supabase/server'
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
@@ -21,9 +22,10 @@ export async function GET(req: NextRequest) {
       .eq('chatbot_id', chatbotId)
 
     type ConversationType = { message_count: number }
-    const totalMessages = (conversations as ConversationType[] | null)?.reduce<number>((sum, conv) => {
-      return sum + (conv.message_count || 0)
-    }, 0) || 0
+    const totalMessages =
+      (conversations as ConversationType[] | null)?.reduce<number>((sum, conv) => {
+        return sum + (conv.message_count || 0)
+      }, 0) || 0
 
     // Get total sources
     const { count: sourceCount } = await supabaseServer
@@ -46,7 +48,7 @@ export async function GET(req: NextRequest) {
     const activityByDay: Record<string, { conversations: number; messages: number }> = {}
 
     type RecentConvType = { started_at: string; message_count: number }
-    (recentConversations as RecentConvType[] | null)?.forEach((conv) => {
+    ;(recentConversations as RecentConvType[] | null)?.forEach((conv) => {
       const date = new Date(conv.started_at).toLocaleDateString()
       if (!activityByDay[date]) {
         activityByDay[date] = { conversations: 0, messages: 0 }

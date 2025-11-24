@@ -1,11 +1,13 @@
-"use client"
+'use client'
 
-import { TopBar } from "@/components/layout/TopBar"
-import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
-import { WidgetEditorSidebar } from "@/components/widget/WidgetEditorSidebar"
-import { WidgetPreviewArea } from "@/components/widget/WidgetPreviewArea"
-import { WidgetConfigProvider } from "@/contexts/WidgetConfigContext"
-import { Suspense } from "react"
+import { Suspense } from 'react'
+
+import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { TopBar } from '@/components/layout/TopBar'
+import { WidgetEditorSidebar } from '@/components/widget/WidgetEditorSidebar'
+import { WidgetPreviewArea } from '@/components/widget/WidgetPreviewArea'
+
+import { WidgetConfigProvider } from '@/contexts/WidgetConfigContext'
 
 export default function ChatWidgetDesignerPage() {
   return (

@@ -1,8 +1,9 @@
-"use client"
+'use client'
 
-import { ChatInterface } from "@/components/chat/ChatInterface"
-import { useParams } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
+import { ChatInterface } from '@/components/chat/ChatInterface'
 
 interface Chatbot {
   id: string
@@ -35,15 +36,18 @@ export default function WidgetPage() {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      backgroundColor: 'var(--op-color-background)',
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        backgroundColor: 'var(--op-color-background)',
+      }}
+    >
       <ChatInterface
         chatbotId={chatbotId}
         initialMessage={chatbot.initial_message}
+        collectFeedback={true}
       />
     </div>
   )

@@ -1,18 +1,15 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
+import * as TabsPrimitive from '@radix-ui/react-tabs'
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
-function Tabs({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+function Tabs({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn('flex flex-col', className)}
       {...props}
     />
   )
@@ -25,10 +22,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(
-        "tab-group",
-        className
-      )}
+      className={cn('tab-group', className)}
       {...props}
     />
   )
@@ -41,10 +35,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(
-        "tab",
-        className
-      )}
+      className={cn('tab', className)}
       {...props}
     />
   )
@@ -57,7 +48,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("mt-2 outline-none", className)}
+      className={cn('mt-2 outline-none', className)}
       {...props}
     />
   )

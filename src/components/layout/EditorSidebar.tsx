@@ -1,29 +1,24 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { ArrowLeft01Icon, Image01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  ArrowLeft01Icon,
-  Image01Icon,
-} from '@hugeicons-pro/core-stroke-standard'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import Image from 'next/image'
-import { useLeadsPageSettings } from "@/contexts/LeadsPageSettingsContext"
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { ScrollArea } from '@/components/ui/scroll-area'
+
+import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
 // Default chatbot ID for RoleModel
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 const styles = {
   editorSidebar: {
-    width: "25%",
+    width: '25%',
     height: '100%',
     display: 'flex',
     flexDirection: 'column' as const,
@@ -84,19 +79,6 @@ const styles = {
     alignItems: 'center',
     gap: 'var(--op-space-small)',
   },
-  faviconPreview: {
-    width: 40,
-    height: 40,
-    borderRadius: 'var(--op-radius-medium)',
-    border: '1px solid var(--op-color-border)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '12px',
-    background: 'var(--op-color-background)',
-    fontSize: 'var(--op-font-x-small)',
-    fontWeight: 600,
-  },
   logoPreview: {
     width: 172,
     height: 60,
@@ -130,20 +112,23 @@ export function EditorSidebar() {
   const [isLoading, setIsLoading] = useState(true)
   const [showDeployPopover, setShowDeployPopover] = useState(false)
 
-  const faviconInputRef = useRef<HTMLInputElement>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
 
   // Load settings on mount
   useEffect(() => {
     async function loadSettings() {
       try {
-        const response = await fetch(`/api/leads-page-settings?chatbotId=${DEFAULT_CHATBOT_ID}`)
+        const response = await fetch(
+          `/api/leads-page-settings?chatbotId=${DEFAULT_CHATBOT_ID}`
+        )
         const data = await response.json()
 
         if (data.settings) {
           updateSettings({
             pageTitle: data.settings.page_title || 'Leads page',
-            pageDescription: data.settings.page_description || 'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
+            pageDescription:
+              data.settings.page_description ||
+              'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
             aiInstructions: data.settings.ai_instructions || '',
             favicon: data.settings.favicon || '',
             logo: data.settings.logo || '',
@@ -196,25 +181,10 @@ export function EditorSidebar() {
   const iframeEmbedCode = `<iframe
   src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
   width="100%"
-  height="600"
+  height="100vh"
   frameborder="0"
   allow="clipboard-write"
 ></iframe>`
-
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const dataUrl = event.target.result as string
-          setFaviconPreview(dataUrl)
-          updateSettings({ favicon: dataUrl })
-        }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -256,35 +226,60 @@ export function EditorSidebar() {
               <Button size="sm">Deploy</Button>
             </PopoverTrigger>
             <PopoverContent align="end" style={{ width: '400px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--op-space-medium)',
+                }}
+              >
                 <div>
-                  <h3 style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600, margin: '0 0 var(--op-space-small) 0' }}>
+                  <h3
+                    style={{
+                      fontSize: 'var(--op-font-medium)',
+                      fontWeight: 600,
+                      margin: '0 0 var(--op-space-small) 0',
+                    }}
+                  >
                     Embed Leads Page
                   </h3>
-                  <p style={{ fontSize: 'var(--op-font-small)', margin: '0 0 var(--op-space-medium) 0', color: 'var(--op-color-on-background)' }}>
-                    Copy this code and paste it into your website to embed your leads page.
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      margin: '0 0 var(--op-space-medium) 0',
+                      color: 'var(--op-color-on-background)',
+                    }}
+                  >
+                    Copy this code and paste it into your website to embed your leads
+                    page.
                   </p>
                 </div>
                 <div style={{ position: 'relative' }}>
-                  <pre style={{
-                    padding: 'var(--op-space-medium)',
-                    backgroundColor: 'var(--op-color-neutral-minus-eight)',
-                    color: 'var(--op-color-neutral-on-minus-eight)',
-                    borderRadius: 'var(--op-radius-medium)',
-                    fontSize: 'var(--op-font-x-small)',
-                    fontFamily: 'monospace',
-                    overflow: 'auto',
-                    maxHeight: '200px',
-                    margin: 0,
-                    border: '1px solid',
-                    borderColor: 'var(--op-color-border)',
-                  }}>
+                  <pre
+                    style={{
+                      padding: 'var(--op-space-medium)',
+                      backgroundColor: 'var(--op-color-neutral-minus-eight)',
+                      color: 'var(--op-color-neutral-on-minus-eight)',
+                      borderRadius: 'var(--op-radius-medium)',
+                      fontSize: 'var(--op-font-x-small)',
+                      fontFamily: 'monospace',
+                      overflow: 'auto',
+                      maxHeight: '200px',
+                      margin: 0,
+                      border: '1px solid',
+                      borderColor: 'var(--op-color-border)',
+                    }}
+                  >
                     {iframeEmbedCode}
                   </pre>
                   <Button
                     size="sm"
                     variant="secondary"
-                    style={{ position: 'absolute', top: 'var(--op-space-small)', right: 'var(--op-space-small)' }}
+                    style={{
+                      position: 'absolute',
+                      top: 'var(--op-space-small)',
+                      right: 'var(--op-space-small)',
+                    }}
                     onClick={() => {
                       navigator.clipboard.writeText(iframeEmbedCode)
                     }}
@@ -296,7 +291,12 @@ export function EditorSidebar() {
                   <Button
                     variant="secondary"
                     style={{ flex: 1 }}
-                    onClick={() => window.open(`/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`, '_blank')}
+                    onClick={() =>
+                      window.open(
+                        `/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`,
+                        '_blank'
+                      )
+                    }
                   >
                     Preview
                   </Button>
@@ -309,11 +309,8 @@ export function EditorSidebar() {
 
       <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         <div style={styles.settingsForm}>
-
           <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>
-              Page title
-            </Label>
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>Page title</Label>
             <Input
               value={settings.pageTitle}
               onChange={(e) => updateSettings({ pageTitle: e.target.value })}
@@ -321,9 +318,7 @@ export function EditorSidebar() {
           </div>
 
           <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>
-              Page description
-            </Label>
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>Page description</Label>
             <Input
               value={settings.pageDescription}
               onChange={(e) => updateSettings({ pageDescription: e.target.value })}
@@ -331,50 +326,19 @@ export function EditorSidebar() {
             />
           </div>
 
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>
-              Favicon
-            </Label>
-            <div style={styles.inputGroup}>
-              <div style={{
-                ...styles.faviconPreview,
-                backgroundColor: faviconPreview ? 'transparent' : 'var(--op-color-primary)',
-                color: 'white',
-                overflow: 'hidden',
-              }}>
-                {faviconPreview ? (
-                  <Image src={faviconPreview} alt="Favicon preview" width={44} height={44} />
-                ) : (
-                  'R'
-                )}
-              </div>
-              <input
-                ref={faviconInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFaviconUpload}
-                style={{ display: 'none' }}
-              />
-              <Button
-                onClick={() => faviconInputRef.current?.click()}
-                variant="secondary"
-              >
-                <HugeiconsIcon icon={Image01Icon} size={16} />
-                {settings.favicon ? 'Change image' : 'Upload image'}
-              </Button>
-            </div>
-          </div>
 
           <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>
-              Logo
-            </Label>
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>Logo</Label>
             <div style={styles.inputGroup}>
-              <div style={{
-                ...styles.logoPreview,
-                backgroundColor: logoPreview ? 'transparent' : 'var(--op-color-background)',
-                overflow: 'hidden',
-              }}>
+              <div
+                style={{
+                  ...styles.logoPreview,
+                  backgroundColor: logoPreview
+                    ? 'transparent'
+                    : 'var(--op-color-background)',
+                  overflow: 'hidden',
+                }}
+              >
                 {logoPreview ? (
                   <Image src={logoPreview} alt="Logo preview" width={160} height={48} />
                 ) : (
@@ -388,10 +352,7 @@ export function EditorSidebar() {
                 onChange={handleLogoUpload}
                 style={{ display: 'none' }}
               />
-              <Button
-                onClick={() => logoInputRef.current?.click()}
-                variant="secondary"
-              >
+              <Button onClick={() => logoInputRef.current?.click()} variant="secondary">
                 <HugeiconsIcon icon={Image01Icon} size={16} />
                 {settings.logo ? 'Change image' : 'Upload image'}
               </Button>
@@ -399,26 +360,52 @@ export function EditorSidebar() {
           </div>
 
           <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>
-              AI Instructions
-            </Label>
-            <p style={{ fontSize: 'var(--op-font-small)', margin: '0 0 var(--op-space-x-small) 0' }}>
-              Use the CRIT™ framework to structure your AI prompt for better lead qualification
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>AI Instructions</Label>
+            <p
+              style={{
+                fontSize: 'var(--op-font-small)',
+                margin: '0 0 var(--op-space-x-small) 0',
+              }}
+            >
+              Use the CRIT™ framework to structure your AI prompt for better lead
+              qualification
             </p>
-            <div style={{
-              backgroundColor: 'var(--op-color-neutral-plus-seven)',
-              border: '1px solid var(--op-color-border)',
-              padding: 'var(--op-space-medium)',
-              borderRadius: 'var(--op-radius-medium)',
-              marginBottom: 'var(--op-space-medium)',
-              fontSize: 'var(--op-font-x-small)',
-            }}>
-              <p style={{ margin: '0 0 var(--op-space-x-small) 0', fontWeight: 600 }}>CRIT™ Framework:</p>
-              <ul style={{ margin: 0, paddingLeft: 'var(--op-space-large)', lineHeight: 1.6 }}>
-                <li><strong>Context:</strong> Describe your business, product, and ideal customer profile</li>
-                <li><strong>Role:</strong> Define the AI&apos;s expertise (e.g., &quot;Expert B2B sales qualification specialist&quot;)</li>
-                <li><strong>Interview:</strong> Specify how to qualify leads (e.g., &quot;Ask 3-5 BANT questions one at a time&quot;)</li>
-                <li><strong>Task:</strong> Define the outcome (e.g., &quot;Provide qualification score and next steps&quot;)</li>
+            <div
+              style={{
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                border: '1px solid var(--op-color-border)',
+                padding: 'var(--op-space-medium)',
+                borderRadius: 'var(--op-radius-medium)',
+                marginBottom: 'var(--op-space-medium)',
+                fontSize: 'var(--op-font-x-small)',
+              }}
+            >
+              <p style={{ margin: '0 0 var(--op-space-x-small) 0', fontWeight: 600 }}>
+                CRIT™ Framework:
+              </p>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: 'var(--op-space-large)',
+                  lineHeight: 1.6,
+                }}
+              >
+                <li>
+                  <strong>Context:</strong> Describe your business, product, and ideal
+                  customer profile
+                </li>
+                <li>
+                  <strong>Role:</strong> Define the AI&apos;s expertise (e.g.,
+                  &quot;Expert B2B sales qualification specialist&quot;)
+                </li>
+                <li>
+                  <strong>Interview:</strong> Specify how to qualify leads (e.g.,
+                  &quot;Ask 3-5 BANT questions one at a time&quot;)
+                </li>
+                <li>
+                  <strong>Task:</strong> Define the outcome (e.g., &quot;Provide
+                  qualification score and next steps&quot;)
+                </li>
               </ul>
             </div>
             <textarea

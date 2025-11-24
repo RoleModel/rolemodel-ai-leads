@@ -1,9 +1,12 @@
 'use client'
 
-import { motion } from 'motion/react'
+import { Calendar03Icon, Mail01Icon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Mail01Icon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
+import { motion } from 'motion/react'
+
 import { Button } from '@/components/ui/button'
+
+import { Plan, PlanHeader, PlanTitle, PlanDescription, PlanContent, PlanFooter } from '@/components/ai-elements/plan'
 
 export interface LeadSummaryData {
   // BANT Framework
@@ -46,6 +49,7 @@ interface LeadSummaryProps {
   data: LeadSummaryData
   onEmailShare?: () => void
   onSlackShare?: () => void
+  onScheduleConversation?: () => void
   variant?: 'full' | 'compact'
   animated?: boolean
 }
@@ -54,9 +58,10 @@ const styles = {
   container: {
     width: '100%',
     border: '1px solid var(--op-color-border)',
-    borderRadius: 'var(--op-radius-large)',
-    padding: 'var(--op-space-x-large)',
+    borderRadius: 'var(--op-radius-medium)',
+    padding: 'var(--op-space-large)',
     backgroundColor: 'var(--op-color-background)',
+    boxShadow: 'var(--op-shadow-small)',
   },
   header: {
     display: 'flex',
@@ -65,7 +70,7 @@ const styles = {
     marginBottom: 'var(--op-space-medium)',
   },
   title: {
-    fontSize: 'var(--op-font-x-large)',
+    fontSize: 'var(--op-font-medium)',
     fontWeight: 600,
     margin: 0,
     textAlign: 'left' as const,
@@ -73,7 +78,7 @@ const styles = {
   subtitle: {
     fontSize: 'var(--op-font-small)',
     color: 'var(--op-color-neutral-on-plus-max)',
-    marginBottom: 'var(--op-space-x-large)',
+    marginBottom: 'var(--op-space-large)',
     textAlign: 'left' as const,
     lineHeight: 1.6,
     margin: '0 0 var(--op-space-x-large) 0',
@@ -83,7 +88,7 @@ const styles = {
     gap: 'var(--op-space-small)',
   },
   section: {
-    marginBottom: 'var(--op-space-large)',
+    marginBottom: 'var(--op-space-medium)',
   },
   sectionTitle: {
     fontSize: 'var(--op-font-medium)',
@@ -111,7 +116,7 @@ const styles = {
   list: {
     fontSize: 'var(--op-font-small)',
     margin: 0,
-    paddingLeft: 'var(--op-space-x-large)',
+    paddingLeft: 'var(--op-space-large)',
     textAlign: 'left' as const,
     lineHeight: 2,
   },
@@ -135,42 +140,49 @@ const styles = {
     fontSize: 'var(--op-font-small)',
     fontWeight: 600,
   },
+  contentContainer: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 'var(--op-space-large)',
+  },
+  shareActionsContainer: {
+    marginTop: 'var(--op-space-x-large)',
+    paddingTop: 'var(--op-space-x-large)',
+    borderTop: '1px solid var(--op-color-border)',
+  },
+  shareButtonsGroup: {
+    display: 'flex',
+    gap: 'var(--op-space-small)',
+  },
+  emailButton: {
+    flex: 1,
+  },
 }
 
 export function LeadSummary({
   data,
   onEmailShare,
   onSlackShare,
-  variant = 'full',
-  animated = false
+  onScheduleConversation,
+  animated = false,
 }: LeadSummaryProps) {
-  const containerVariants = animated ? {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, staggerChildren: 0.1 }
+  const containerVariants = animated
+    ? {
+      hidden: { opacity: 0, y: 20 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.4, staggerChildren: 0.1 },
+      },
     }
-  } : undefined
+    : undefined
 
-  const itemVariants = animated ? {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 }
-  } : undefined
-
-  const getQualificationColor = (score?: number) => {
-    if (!score) return 'var(--op-color-neutral-base)'
-    if (score >= 75) return '#22c55e'
-    if (score >= 50) return '#eab308'
-    return '#ef4444'
-  }
-
-  const getQualificationLabel = (score?: number) => {
-    if (!score) return 'Not scored'
-    if (score >= 75) return 'High Quality Lead'
-    if (score >= 50) return 'Medium Quality Lead'
-    return 'Low Quality Lead'
-  }
+  const itemVariants = animated
+    ? {
+      hidden: { opacity: 0, x: -20 },
+      visible: { opacity: 1, x: 0 },
+    }
+    : undefined
 
   const Container = animated ? motion.div : 'div'
   const Item = animated ? motion.div : 'div'
@@ -179,68 +191,73 @@ export function LeadSummary({
     <Container
       style={styles.container}
       variants={containerVariants}
-      initial={animated ? "hidden" : undefined}
-      animate={animated ? "visible" : undefined}
+      initial={animated ? 'hidden' : undefined}
+      animate={animated ? 'visible' : undefined}
     >
-      {/* Header */}
-      <h3 style={styles.title}>Conversation Summary</h3>
-      <p style={styles.subtitle}>
-        Based on our discussion, here's what we covered and the recommended next steps.
-      </p>
+      <Plan>
+        <PlanHeader>
+          <PlanTitle>Conversation Summary</PlanTitle>
+          <PlanDescription>
+            Based on our discussion, here&apos;s what we covered and the recommended
+            next steps.
+          </PlanDescription>
+        </PlanHeader>
 
-      {/* Content */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-large)' }}>
-        {/* Challenge/Need */}
-        {data.need?.problem && (
-          <Item variants={itemVariants}>
-            <h4 style={styles.sectionTitle}>Your Challenge</h4>
-            <p style={styles.value}>{data.need.problem}</p>
-          </Item>
-        )}
+        <PlanContent>
+          {/* Timeline */}
+          {(data.timeline?.urgency || data.timeline?.implementationDate) && (
+            <Item variants={itemVariants}>
+              <h4 style={styles.sectionTitle}>Timeline</h4>
+              <p style={styles.value}>
+                {data.timeline.implementationDate
+                  ? `Looking to have a solution in place ${data.timeline.implementationDate}.`
+                  : data.timeline.urgency}
+              </p>
+            </Item>
+          )}
 
-        {/* Timeline */}
-        {(data.timeline?.urgency || data.timeline?.implementationDate) && (
-          <Item variants={itemVariants}>
-            <h4 style={styles.sectionTitle}>Timeline</h4>
-            <p style={styles.value}>
-              {data.timeline.implementationDate
-                ? `Looking to have a solution in place ${data.timeline.implementationDate}.`
-                : data.timeline.urgency}
-            </p>
-          </Item>
-        )}
+          {/* Next Steps */}
+          {data.nextSteps && data.nextSteps.length > 0 && (
+            <Item variants={itemVariants}>
+              <h4 style={styles.sectionTitle}>Next Steps</h4>
+              <ul style={styles.list}>
+                {data.nextSteps.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ul>
+            </Item>
+          )}
+        </PlanContent>
 
-        {/* Next Steps */}
-        {data.nextSteps && data.nextSteps.length > 0 && (
-          <Item variants={itemVariants}>
-            <h4 style={styles.sectionTitle}>Next Steps</h4>
-            <ul style={styles.list}>
-              {data.nextSteps.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ul>
-          </Item>
-        )}
-      </div>
-
-      {/* Share Actions */}
-      {(onEmailShare || onSlackShare) && (
-        <div style={{ marginTop: 'var(--op-space-x-large)', paddingTop: 'var(--op-space-x-large)', borderTop: '1px solid var(--op-color-border)' }}>
-          <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
-            {onEmailShare && (
-              <Button variant="primary" onClick={onEmailShare} style={{ flex: 1 }}>
-                <HugeiconsIcon icon={Mail01Icon} size={18} />
-                <span>Email me this summary</span>
-              </Button>
-            )}
-            {onSlackShare && (
-              <Button variant="ghosticon" onClick={onSlackShare}>
-                <HugeiconsIcon icon={SlackIcon} size={20} />
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-    </Container>
+        {/* Share Actions */}
+        <PlanFooter>
+          {(onEmailShare || onSlackShare || onScheduleConversation) && (
+            <div style={styles.shareButtonsGroup}>
+              {onEmailShare && (
+                <Button variant="primary" onClick={onEmailShare} style={styles.emailButton}>
+                  <HugeiconsIcon icon={Mail01Icon} size={18} />
+                  <span>Email me this summary</span>
+                </Button>
+              )}
+              {onScheduleConversation && (
+                <Button
+                  variant="secondary"
+                  onClick={onScheduleConversation}
+                  style={styles.emailButton}
+                >
+                  <HugeiconsIcon icon={Calendar03Icon} size={18} />
+                  <span>Schedule a conversation</span>
+                </Button>
+              )}
+              {onSlackShare && (
+                <Button variant="ghosticon" onClick={onSlackShare}>
+                  <HugeiconsIcon icon={SlackIcon} size={20} />
+                </Button>
+              )}
+            </div>
+          )}
+        </PlanFooter>
+      </Plan>
+    </Container >
   )
 }

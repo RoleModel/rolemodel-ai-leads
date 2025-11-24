@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+
 import type { Database } from './database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -23,7 +24,10 @@ export type DatabaseOld = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['chatbots']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: Omit<
+          Database['public']['Tables']['chatbots']['Row'],
+          'id' | 'created_at' | 'updated_at'
+        >
         Update: Partial<Database['public']['Tables']['chatbots']['Insert']>
       }
       sources: {
@@ -52,7 +56,10 @@ export type DatabaseOld = {
           message_count: number
           lead_captured: boolean
         }
-        Insert: Omit<Database['public']['Tables']['conversations']['Row'], 'id' | 'started_at' | 'last_message_at' | 'message_count' | 'lead_captured'>
+        Insert: Omit<
+          Database['public']['Tables']['conversations']['Row'],
+          'id' | 'started_at' | 'last_message_at' | 'message_count' | 'lead_captured'
+        >
         Update: Partial<Database['public']['Tables']['conversations']['Insert']>
       }
       messages: {
@@ -76,7 +83,10 @@ export type DatabaseOld = {
           metadata: Record<string, any>
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['analytics_events']['Row'], 'id' | 'created_at'>
+        Insert: Omit<
+          Database['public']['Tables']['analytics_events']['Row'],
+          'id' | 'created_at'
+        >
         Update: Partial<Database['public']['Tables']['analytics_events']['Insert']>
       }
     }

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check ."
   },
   "dependencies": {
     "@ai-sdk/gateway": "^2.0.14",
@@ -37,6 +39,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@supabase/supabase-js": "^2.84.0",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@xyflow/react": "^12.9.3",
     "ai": "^5.0.100",
     "ai-elements": "^1.6.3",

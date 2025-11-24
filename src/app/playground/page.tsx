@@ -1,10 +1,10 @@
-"use client"
-import { Suspense } from "react"
+'use client'
+import { Suspense } from 'react'
 
-import { TopBar } from "@/components/layout/TopBar"
-import { NavigationSidebar } from "@/components/layout/NavigationSidebar"
-import { PlaygroundConfig } from "@/components/playground/PlaygroundConfig"
-import { PlaygroundPreview } from "@/components/playground/PlaygroundPreview"
+import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { TopBar } from '@/components/layout/TopBar'
+import { PlaygroundConfig } from '@/components/playground/PlaygroundConfig'
+import { PlaygroundPreview } from '@/components/playground/PlaygroundPreview'
 
 export default function PlaygroundPage() {
   return (
@@ -16,12 +16,14 @@ export default function PlaygroundPage() {
           <NavigationSidebar />
         </Suspense>
 
-        <main style={{
-          flex: 1,
-          display: 'flex',
-          overflow: 'hidden',
-          backgroundColor: 'var(--op-color-background)',
-        }}>
+        <main
+          style={{
+            flex: 1,
+            display: 'flex',
+            overflow: 'hidden',
+            backgroundColor: 'var(--op-color-background)',
+          }}
+        >
           {/* Configuration Panel */}
           <PlaygroundConfig />
 

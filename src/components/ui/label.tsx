@@ -1,9 +1,9 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
+import * as LabelPrimitive from '@radix-ui/react-label'
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 function Label({
   className,
@@ -13,9 +13,9 @@ function Label({
     <LabelPrimitive.Root
       data-slot="label"
       className={cn(
-        "form-label flex items-center gap-2 text-sm leading-none font-medium select-none",
-        "group-data-[disabled=true]:opacity-50 group-data-[disabled=true]:pointer-events-none",
-        "peer-disabled:opacity-50 peer-disabled:cursor-not-allowed",
+        'form-label flex items-center gap-2 text-sm leading-none font-medium select-none',
+        'group-data-[disabled=true]:opacity-50 group-data-[disabled=true]:pointer-events-none',
+        'peer-disabled:opacity-50 peer-disabled:cursor-not-allowed',
         className
       )}
       {...props}

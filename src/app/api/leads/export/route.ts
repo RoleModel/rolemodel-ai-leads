@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server'
+
+import { supabaseServer } from '@/lib/supabase/server'
 
 // GET - Export leads as CSV
 export async function GET(req: NextRequest) {
@@ -34,30 +35,37 @@ export async function GET(req: NextRequest) {
   const csvRows = []
 
   // Header row
-  csvRows.push([
-    'Date',
-    'Name',
-    'Email',
-    'Company',
-    'Industry',
-    'Company Size',
-    'Role',
-    'Decision Maker',
-    'Budget Range',
-    'Budget Timeline',
-    'Budget Approved',
-    'Problem',
-    'Current Solution',
-    'Pain Points',
-    'Urgency',
-    'Implementation Date',
-    'Qualification Score',
-    'Next Steps',
-  ].join(','))
+  csvRows.push(
+    [
+      'Date',
+      'Name',
+      'Email',
+      'Company',
+      'Industry',
+      'Company Size',
+      'Role',
+      'Decision Maker',
+      'Budget Range',
+      'Budget Timeline',
+      'Budget Approved',
+      'Problem',
+      'Current Solution',
+      'Pain Points',
+      'Urgency',
+      'Implementation Date',
+      'Qualification Score',
+      'Next Steps',
+    ].join(',')
+  )
 
   // Data rows
   for (const lead of leads) {
-    const summary = (typeof lead.summary === 'object' && lead.summary !== null && !Array.isArray(lead.summary)) ? lead.summary as Record<string, any> : {}
+    const summary =
+      typeof lead.summary === 'object' &&
+      lead.summary !== null &&
+      !Array.isArray(lead.summary)
+        ? (lead.summary as Record<string, any>)
+        : {}
     const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : ''
 
     const row = [

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { FormEvent, ChangeEvent } from "react"
-import { ArrowUp01Icon } from "hugeicons-react"
+import { ArrowUp01Icon } from 'hugeicons-react'
+import { ChangeEvent, FormEvent } from 'react'
 
 interface ChatInputProps {
   input: string
@@ -10,19 +10,28 @@ interface ChatInputProps {
   isLoading: boolean
 }
 
-export function ChatInput({ input, handleInputChange, handleSubmit, isLoading }: ChatInputProps) {
+export function ChatInput({
+  input,
+  handleInputChange,
+  handleSubmit,
+  isLoading,
+}: ChatInputProps) {
   return (
-    <div style={{
-      padding: 'var(--op-space-large)',
-      borderTop: '1px solid var(--op-color-border)',
-      backgroundColor: 'var(--op-color-background)',
-    }}>
+    <div
+      style={{
+        padding: 'var(--op-space-large)',
+        borderTop: '1px solid var(--op-color-border)',
+        backgroundColor: 'var(--op-color-background)',
+      }}
+    >
       <form onSubmit={handleSubmit}>
-        <div style={{
-          display: 'flex',
-          gap: 'var(--op-space-small)',
-          alignItems: 'flex-end',
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 'var(--op-space-small)',
+            alignItems: 'flex-end',
+          }}
+        >
           <textarea
             id="chat-input-message"
             className="form-control"

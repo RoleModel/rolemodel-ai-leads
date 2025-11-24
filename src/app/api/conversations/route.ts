@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { supabaseServer } from "@/lib/supabase/server"
+import { NextRequest, NextResponse } from 'next/server'
 
-const DEFAULT_CHATBOT_ID = "a0000000-0000-0000-0000-000000000001"
+import { supabaseServer } from '@/lib/supabase/server'
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 // GET - List conversations
 export async function GET(req: NextRequest) {

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+
 import type { Database } from './database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -7,5 +8,5 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 // Server-side client with service role (bypasses RLS)
 export const supabaseServer = createClient<Database>(supabaseUrl, supabaseServiceKey, {
   db: { schema: 'public' },
-  auth: { persistSession: false }
+  auth: { persistSession: false },
 })

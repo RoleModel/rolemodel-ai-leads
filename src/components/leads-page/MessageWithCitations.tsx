@@ -1,21 +1,22 @@
 'use client'
 
-import { type UIMessage } from "ai"
+import { type UIMessage } from 'ai'
+
 import {
   InlineCitation,
-  InlineCitationText,
   InlineCitationCard,
-  InlineCitationCardTrigger,
   InlineCitationCardBody,
+  InlineCitationCardTrigger,
   InlineCitationCarousel,
   InlineCitationCarouselContent,
-  InlineCitationCarouselItem,
   InlineCitationCarouselHeader,
   InlineCitationCarouselIndex,
-  InlineCitationCarouselPrev,
+  InlineCitationCarouselItem,
   InlineCitationCarouselNext,
+  InlineCitationCarouselPrev,
   InlineCitationSource,
-} from "@/components/ai-elements/inline-citation"
+  InlineCitationText,
+} from '@/components/ai-elements/inline-citation'
 
 interface Citation {
   url: string
@@ -30,7 +31,12 @@ interface MessageWithCitationsProps {
   style?: React.CSSProperties
 }
 
-export function MessageWithCitations({ message, citations, className, style }: MessageWithCitationsProps) {
+export function MessageWithCitations({
+  message,
+  citations,
+  className,
+  style,
+}: MessageWithCitationsProps) {
   const renderTextWithCitations = (text: string) => {
     if (!citations || citations.length === 0) {
       return text
