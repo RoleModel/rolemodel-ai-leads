@@ -4,6 +4,7 @@ import { openai } from "@/lib/ai/gateway"
 import { retrieveRelevantSources, buildSourceContext, getChatbot } from "@/lib/ai/rag"
 import { supabaseServer } from "@/lib/supabase/server"
 import { nanoid } from "nanoid"
+import type { Database } from "@/lib/supabase/database.types"
 
 export const runtime = "edge"
 export const maxDuration = 30
@@ -65,7 +66,6 @@ ${sourceContext}`,
       }
       const { data: newConversation } = await supabaseServer
         .from('conversations')
-        // @ts-expect-error - Supabase type inference issue, types work at runtime
         .insert([conversationData])
         .select()
         .single()
@@ -75,13 +75,12 @@ ${sourceContext}`,
 
     // Save user message
     if (activeConversationId && userQuery) {
-      type MessageInsert = { conversation_id: string; role: 'user' | 'assistant'; content: string }
+      type MessageInsert = Database['public']['Tables']['messages']['Insert']
       const messageData: MessageInsert = {
         conversation_id: activeConversationId,
         role: 'user',
         content: userQuery,
       }
-      // @ts-expect-error - Supabase type inference issue, types work at runtime
       await supabaseServer.from('messages').insert([messageData])
     }
 
@@ -97,18 +96,17 @@ ${sourceContext}`,
       async onFinish({ text }) {
         // Save assistant message
         if (activeConversationId) {
-          type MessageInsert = { conversation_id: string; role: 'user' | 'assistant'; content: string; sources_used?: unknown[] }
+          type MessageInsert = Database['public']['Tables']['messages']['Insert']
           const assistantMessage: MessageInsert = {
             conversation_id: activeConversationId,
             role: 'assistant',
             content: text,
-            sources_used: relevantSources.map(s => ({ id: s.id, title: s.title })),
+            sources_used: relevantSources.map(s => ({ id: s.id, title: s.title })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
           }
-          // @ts-expect-error - Supabase type inference issue, types work at runtime
           await supabaseServer.from('messages').insert([assistantMessage])
 
           // Track analytics event
-          type AnalyticsInsert = { chatbot_id: string; conversation_id: string; event_type: string; metadata?: Record<string, unknown> }
+          type AnalyticsInsert = Database['public']['Tables']['analytics_events']['Insert']
           const analyticsData: AnalyticsInsert = {
             chatbot_id: activeChatbotId,
             conversation_id: activeConversationId,
@@ -116,9 +114,8 @@ ${sourceContext}`,
             metadata: {
               message_count: messages.length + 1,
               sources_count: relevantSources.length,
-            },
+            } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
           }
-          // @ts-expect-error - Supabase type inference issue, types work at runtime
           await supabaseServer.from('analytics_events').insert([analyticsData])
         }
       },
