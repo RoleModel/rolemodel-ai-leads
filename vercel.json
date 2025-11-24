@@ -1,0 +1,3 @@
+{
+  "buildCommand": "bash setup-npmrc.sh && npm install && npm run build"
+}
