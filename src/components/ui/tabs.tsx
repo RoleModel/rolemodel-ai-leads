@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-import '@rolemodel/optics/dist/css/components/tab.css';
 
 import { cn } from "@/lib/utils"
 

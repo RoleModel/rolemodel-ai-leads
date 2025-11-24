@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono } from "next/font/google";
-import '@rolemodel/optics/dist/css/optics.css'
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -25,6 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css"
+        />
+      </head>
       <body
         className={`${dmSans.variable} ${geistMono.variable} antialiased`}
       >
