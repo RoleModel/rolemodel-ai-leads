@@ -1,3 +1,4 @@
 {
-  "buildCommand": "bash setup-npmrc.sh && npm install && npm run build"
+  "installCommand": "bash setup-npmrc.sh && npm install",
+  "buildCommand": "npm run build"
 }
