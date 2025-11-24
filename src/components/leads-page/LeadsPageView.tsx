@@ -16,6 +16,7 @@ import {
 import { useChat } from "@ai-sdk/react"
 import { TextStreamChatTransport, isTextUIPart, type UIMessage } from "ai"
 import { AnimatedConversationDemo } from "@/components/leads-page/AnimatedConversationDemo"
+import { useLeadsPageSettings } from "@/contexts/LeadsPageSettingsContext"
 import {
   PromptInput,
   PromptInputProvider,
@@ -38,7 +39,7 @@ import {
 interface Suggestion {
   id: string
   text: string
-  isEditing?: boolean
+  isSelected?: boolean
 }
 
 interface CustomButton {
@@ -118,10 +119,8 @@ const styles = {
 }
 
 export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false }: LeadsPageViewProps) {
+  const { settings } = useLeadsPageSettings()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [favicon, setFavicon] = useState<string>('')
-  const [logo, setLogo] = useState<string>('')
-  const [pageTitle, setPageTitle] = useState('Leads page')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [customButtons, setCustomButtons] = useState<CustomButton[]>([])
   const [showDemo, setShowDemo] = useState(true)
@@ -149,45 +148,20 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
   const [editingButtonText, setEditingButtonText] = useState('')
   const [editingButtonUrl, setEditingButtonUrl] = useState('')
 
-  // Load settings on mount
+  // Set default suggestions on mount
   useEffect(() => {
-    async function loadSettings() {
-      try {
-        const response = await fetch(`/api/leads-page-settings?chatbotId=${chatbotId}`)
-        const data = await response.json()
+    setDefaultSuggestions()
+  }, [])
 
-        if (data.settings) {
-          setPageTitle(data.settings.page_title || 'Leads page')
-          setFavicon(data.settings.favicon || '')
-          setLogo(data.settings.logo || '')
-
-          // Load custom buttons if available
-          if (data.settings.custom_buttons) {
-            try {
-              const buttons = JSON.parse(data.settings.custom_buttons)
-              setCustomButtons(buttons)
-            } catch (e) {
-              console.error('Failed to parse custom buttons:', e)
-            }
-          }
-
-          // Load suggestions if available
-          if (data.settings.suggestions) {
-            try {
-              const suggestions = JSON.parse(data.settings.suggestions)
-              setSuggestions(suggestions)
-            } catch (e) {
-              console.error('Failed to parse suggestions:', e)
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load settings:', error)
-      }
-    }
-
-    loadSettings()
-  }, [chatbotId])
+  // Set default prospect-focused suggestions
+  const setDefaultSuggestions = () => {
+    setSuggestions([
+      { id: '1', text: "What types of software do you build?" },
+      { id: '2', text: "How much does custom software cost?" },
+      { id: '3', text: "How long does a project typically take?" },
+      { id: '4', text: "Do you work with startups?" },
+    ])
+  }
 
   const chatTransport = useMemo(
     () => new TextStreamChatTransport<UIMessage>({
@@ -268,18 +242,18 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
     const newSuggestion: Suggestion = {
       id: `suggestion-${Date.now()}`,
       text: 'Suggestion',
-      isEditing: true,
+      isSelected: true,
     }
-    setSuggestions([...suggestions, newSuggestion])
+    setSuggestions([...suggestions.map(s => ({ ...s, isSelected: false })), newSuggestion])
   }
 
   const handleDeleteSuggestion = (id: string) => {
     setSuggestions(suggestions.filter(s => s.id !== id))
   }
 
-  const handleEditSuggestion = (id: string, text: string) => {
+  const handleSelectSuggestion = (id: string) => {
     setSuggestions(suggestions.map(s =>
-      s.id === id ? { ...s, text, isEditing: false } : s
+      s.id === id ? { ...s, isSelected: true } : { ...s, isSelected: false }
     ))
   }
 
@@ -340,8 +314,8 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
           <div style={styles.brandHeader}>
             {!sidebarCollapsed && (
               <div style={styles.brandLogo}>
-                {logo ? (
-                  <Image src={logo} alt="Logo" width={120} height={40} style={{ maxWidth: '120px', maxHeight: '40px', objectFit: 'contain' }} />
+                {settings.logo ? (
+                  <Image src={settings.logo} alt="Logo" width={120} height={40} style={{ maxWidth: '120px', maxHeight: '40px', objectFit: 'contain' }} />
                 ) : (
                   <>
                     <span style={{ fontWeight: 'bold', color: 'var(--op-color-primary)', fontSize: 15 }}>RoleModel</span>
@@ -408,126 +382,135 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
 
                 {/* Custom Buttons */}
                 {customButtons.map((button) => (
-                  <div key={button.id}>
+                  <div key={button.id} style={{ position: 'relative' }}>
                     {editMode ? (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--op-space-x-small)',
-                        padding: 'var(--op-space-small)',
-                        border: '1px dashed var(--op-color-border)',
-                        borderRadius: 'var(--op-radius-medium)',
-                      }}>
-                        <span style={{
-                          flex: 1,
-                          fontSize: 'var(--op-font-small)',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>
-                          {button.text}
-                        </span>
-                        <Popover
-                          open={editingButtonId === button.id}
-                          onOpenChange={(open) => {
-                            if (open) {
-                              handleOpenEditPopover(button)
-                            } else {
-                              setEditingButtonId(null)
-                            }
-                          }}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button variant="ghosticon">
-                              <HugeiconsIcon icon={Settings02Icon} size={16} />
+                      <>
+                        {/* Action buttons absolutely positioned */}
+                        {editingButtonId === button.id && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '-44px',
+                            right: '0',
+                            display: 'flex',
+                            gap: 'var(--op-space-x-small)',
+                            zIndex: 10,
+                          }}>
+                            <Button
+                              variant="icon"
+                              onClick={() => handleDeleteCustomButton(button.id)}
+                            >
+                              <HugeiconsIcon icon={Delete02Icon} size={16} />
                             </Button>
-                          </PopoverTrigger>
-                          <PopoverContent align="end" style={{ width: '400px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
-                              <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                              }}>
-                                <h3 style={{
-                                  fontSize: 'var(--op-font-medium)',
-                                  fontWeight: 600,
-                                  margin: 0
-                                }}>
-                                  {button.text}
-                                </h3>
-                                <Button
-                                  variant="ghosticon"
-                                  onClick={() => setEditingButtonId(null)}
-                                >
-                                  <span style={{ fontSize: '20px' }}>×</span>
+                            <Popover
+                              open={editingButtonId === button.id}
+                              onOpenChange={(open) => {
+                                if (open) {
+                                  handleOpenEditPopover(button)
+                                } else {
+                                  setEditingButtonId(null)
+                                }
+                              }}
+                            >
+                              <PopoverTrigger asChild>
+                                <Button variant="icon">
+                                  <HugeiconsIcon icon={Settings02Icon} size={16} />
                                 </Button>
-                              </div>
-
-                              <div>
-                                <Label style={{
-                                  display: 'block',
-                                  marginBottom: 'var(--op-space-x-small)',
-                                  fontSize: 'var(--op-font-small)',
-                                }}>
-                                  Button label
-                                </Label>
-                                <Input
-                                  value={editingButtonText}
-                                  onChange={(e) => setEditingButtonText(e.target.value)}
-                                  placeholder="Contact us"
-                                />
-                              </div>
-
-                              <div>
-                                <Label style={{
-                                  display: 'block',
-                                  marginBottom: 'var(--op-space-x-small)',
-                                  fontSize: 'var(--op-font-small)',
-                                }}>
-                                  Link
-                                </Label>
-                                <div style={{ display: 'flex', gap: 0 }}>
+                              </PopoverTrigger>
+                              <PopoverContent align="end" style={{ width: '400px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
                                   <div style={{
-                                    padding: 'var(--op-space-small) var(--op-space-medium)',
-                                    backgroundColor: 'var(--op-color-neutral-plus-eight)',
-                                    border: '1px solid var(--op-color-border)',
-                                    borderRight: 'none',
-                                    borderTopLeftRadius: 'var(--op-radius-medium)',
-                                    borderBottomLeftRadius: 'var(--op-radius-medium)',
-                                    fontSize: 'var(--op-font-small)',
-                                    color: 'var(--op-color-on-background)',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
                                   }}>
-                                    https://
+                                    <h3 style={{
+                                      fontSize: 'var(--op-font-medium)',
+                                      fontWeight: 600,
+                                      margin: 0,
+                                    }}>
+                                      {button.text}
+                                    </h3>
+                                    <Button
+                                      variant="ghosticon"
+                                      onClick={() => setEditingButtonId(null)}
+                                    >
+                                      <span style={{ fontSize: '20px' }}>×</span>
+                                    </Button>
                                   </div>
-                                  <Input
-                                    value={editingButtonUrl.replace(/^https?:\/\//, '')}
-                                    onChange={(e) => setEditingButtonUrl(e.target.value.replace(/^https?:\/\//, ''))}
-                                    placeholder="example.com"
-                                    style={{
-                                      borderTopLeftRadius: 0,
-                                      borderBottomLeftRadius: 0,
-                                    }}
-                                  />
-                                </div>
-                              </div>
 
-                              <Button
-                                variant="primary"
-                                onClick={handleSaveCustomButton}
-                              >
-                                Save
-                              </Button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                                  <div>
+                                    <Label style={{
+                                      display: 'block',
+                                      marginBottom: 'var(--op-space-x-small)',
+                                      fontSize: 'var(--op-font-small)',
+                                    }}>
+                                      Button label
+                                    </Label>
+                                    <Input
+                                      value={editingButtonText}
+                                      onChange={(e) => setEditingButtonText(e.target.value)}
+                                      placeholder="Contact us"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label style={{
+                                      display: 'block',
+                                      marginBottom: 'var(--op-space-x-small)',
+                                      fontSize: 'var(--op-font-small)',
+                                    }}>
+                                      Link
+                                    </Label>
+                                    <div style={{ display: 'flex', gap: 0 }}>
+                                      <div style={{
+                                        padding: 'var(--op-space-small) var(--op-space-medium)',
+                                        backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                                        border: '1px solid var(--op-color-border)',
+                                        borderRight: 'none',
+                                        borderTopLeftRadius: 'var(--op-radius-medium)',
+                                        borderBottomLeftRadius: 'var(--op-radius-medium)',
+                                        fontSize: 'var(--op-font-small)',
+                                        color: 'var(--op-color-on-background)',
+                                      }}>
+                                        https://
+                                      </div>
+                                      <Input
+                                        value={editingButtonUrl.replace(/^https?:\/\//, '')}
+                                        onChange={(e) => setEditingButtonUrl(e.target.value.replace(/^https?:\/\//, ''))}
+                                        placeholder="example.com"
+                                        style={{
+                                          borderTopLeftRadius: 0,
+                                          borderBottomLeftRadius: 0,
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <Button
+                                    variant="primary"
+                                    onClick={handleSaveCustomButton}
+                                  >
+                                    Save
+                                  </Button>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        )}
+
+                        {/* Button with outline when selected */}
                         <Button
-                          variant="ghosticon"
-                          onClick={() => handleDeleteCustomButton(button.id)}
+                          variant="secondary"
+                          style={{
+                            width: '100%',
+                            outline: editingButtonId === button.id ? '2px solid var(--op-color-primary-base)' : 'none',
+                            outlineOffset: '2px',
+                          }}
+                          onClick={() => handleOpenEditPopover(button)}
                         >
-                          <HugeiconsIcon icon={Delete02Icon} size={16} />
+                          {button.text}
                         </Button>
-                      </div>
+                      </>
                     ) : (
                       <Button
                         variant="secondary"
@@ -560,14 +543,17 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
       <div style={styles.content}>
         {showDemo ? (
           <div style={styles.hero}>
-            <div style={{ width: 56, height: 56, fontSize: 28, borderRadius: 12, backgroundColor: favicon ? 'transparent' : 'var(--op-color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              {favicon ? (
-                <Image src={favicon} alt="Favicon" width={56} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ width: 56, height: 56, fontSize: 28, borderRadius: 12, backgroundColor: settings.favicon ? 'transparent' : 'var(--op-color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              {settings.favicon ? (
+                <Image src={settings.favicon} alt="Favicon" width={56} height={56} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 'R'
               )}
             </div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 0 }}>{pageTitle}</h2>
+            <div>
+              <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 'var(--op-space-x-small)' }}>{settings.pageTitle}</h2>
+              <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>{settings.pageDescription}</p>
+            </div>
 
             {/* Animated Conversation Demo */}
             <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} />
@@ -575,42 +561,79 @@ export function LeadsPageView({ chatbotId, showSidebar = true, editMode = false 
             {/* Suggestions */}
             <div style={{ display: 'flex', gap: 'var(--op-space-small)', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
               {suggestions.map((suggestion) => (
-                <div key={suggestion.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-x-small)' }}>
-                  {suggestion.isEditing ? (
-                    <Input
-                      autoFocus
-                      value={suggestion.text}
-                      onChange={(e) => handleSuggestionTextChange(suggestion.id, e.target.value)}
-                      onBlur={() => handleEditSuggestion(suggestion.id, suggestion.text)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleEditSuggestion(suggestion.id, suggestion.text)
-                        }
-                      }}
-                    />
-                  ) : (
-                    <Button variant="pill" onClick={() => handlePromptSubmit({ text: suggestion.text, files: [] })}>
-                      {suggestion.text}
-                    </Button>
-                  )}
-                  {editMode && !suggestion.isEditing && (
-                    <>
+                <div key={suggestion.id} style={{ position: 'relative' }}>
+                  {/* Action buttons absolutely positioned above selected suggestion */}
+                  {editMode && suggestion.isSelected && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '-44px',
+                      right: '0',
+                      display: 'flex',
+                      gap: 'var(--op-space-x-small)',
+                      zIndex: 10,
+                    }}>
                       <Button
-                        variant="ghosticon"
+                        variant="icon"
                         onClick={() => handleDeleteSuggestion(suggestion.id)}
                       >
                         <HugeiconsIcon icon={Delete02Icon} size={16} />
                       </Button>
-                      <Button
-                        variant="ghosticon"
-                        onClick={() => setSuggestions(suggestions.map(s =>
-                          s.id === suggestion.id ? { ...s, isEditing: true } : s
-                        ))}
-                      >
-                        <HugeiconsIcon icon={Settings02Icon} size={16} />
-                      </Button>
-                    </>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="icon">
+                            <HugeiconsIcon icon={Settings02Icon} size={16} />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" style={{ width: '300px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+                            <div>
+                              <Label style={{
+                                display: 'block',
+                                marginBottom: 'var(--op-space-x-small)',
+                                fontSize: 'var(--op-font-small)',
+                              }}>
+                                Suggestion text
+                              </Label>
+                              <Input
+                                autoFocus
+                                value={suggestion.text}
+                                onChange={(e) => handleSuggestionTextChange(suggestion.id, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault()
+                                    const popover = (e.target as HTMLElement).closest('[data-radix-popper-content-wrapper]')
+                                    if (popover) {
+                                      const trigger = document.querySelector(`[data-state="open"]`) as HTMLElement
+                                      trigger?.click()
+                                    }
+                                  }
+                                }}
+                                placeholder="What types of software do you build?"
+                              />
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   )}
+
+                  {/* Suggestion pill */}
+                  <Button
+                    variant="pill"
+                    onClick={() => {
+                      if (editMode) {
+                        handleSelectSuggestion(suggestion.id)
+                      } else {
+                        handlePromptSubmit({ text: suggestion.text, files: [] })
+                      }
+                    }}
+                    style={{
+                      outline: editMode && suggestion.isSelected ? '2px solid var(--op-color-primary-base)' : 'none',
+                      outlineOffset: '2px',
+                    }}
+                  >
+                    {suggestion.text}
+                  </Button>
                 </div>
               ))}
               {editMode && (

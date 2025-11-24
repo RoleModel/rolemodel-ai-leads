@@ -17,9 +17,13 @@ interface Source {
   id: string
   title: string | null
   content: string
-  type: 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion'
   created_at: string
-  size?: number
+  metadata?: {
+    type?: 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion'
+    url?: string
+    filename?: string
+    size?: number
+  } | null
 }
 
 type SourceType = 'files' | 'text' | 'website' | 'qna' | 'notion' | 'suggestions'
@@ -45,6 +49,9 @@ export default function SourcesPage() {
     try {
       const res = await fetch('/api/sources')
       const data = await res.json()
+      console.log('[Sources Page] Loaded sources:', data.sources)
+      console.log('[Sources Page] Total sources:', data.sources?.length)
+      console.log('[Sources Page] First source:', data.sources?.[0])
       setSources(data.sources || [])
     } catch (error) {
       console.error('Error loading sources:', error)
@@ -58,14 +65,26 @@ export default function SourcesPage() {
 
     setIsAdding(true)
     try {
+      const payload: {
+        title: string | null
+        content: string
+        url?: string
+        type?: string
+      } = {
+        title: newTitle.trim() || null,
+        content: newContent.trim(),
+        type: getSectionType(activeSection),
+      }
+
+      // If this is a website source, add URL to payload
+      if (activeSection === 'website') {
+        payload.url = newContent.trim()
+      }
+
       const res = await fetch('/api/sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: newTitle.trim() || null,
-          content: newContent.trim(),
-          type: getSectionType(activeSection),
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (res.ok) {
@@ -73,9 +92,14 @@ export default function SourcesPage() {
         setNewContent("")
         setNeedsRetraining(true)
         await loadSources()
+      } else {
+        const error = await res.json()
+        console.error('Error adding source:', error)
+        alert(`Failed to add source: ${error.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error adding source:', error)
+      alert('Failed to add source. Check console for details.')
     } finally {
       setIsAdding(false)
     }
@@ -129,8 +153,8 @@ export default function SourcesPage() {
     }
   }
 
-  function getSectionType(section: SourceType): Source['type'] {
-    const typeMap: Record<SourceType, Source['type']> = {
+  function getSectionType(section: SourceType): 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion' {
+    const typeMap: Record<SourceType, 'file' | 'text' | 'website' | 'qna' | 'notion' | 'suggestion'> = {
       'files': 'file',
       'text': 'text',
       'website': 'website',
@@ -141,9 +165,18 @@ export default function SourcesPage() {
     return typeMap[section]
   }
 
-  const filteredSources = sources.filter(s => s.type === getSectionType(activeSection))
-  const totalSize = sources.reduce((acc, s) => acc + (s.size || 0), 0)
-  const totalLinks = sources.filter(s => s.type === 'website').length
+  // Filter sources by type metadata
+  const filteredSources = sources.filter(s => {
+    // Only show sources that have the matching type
+    return s.metadata?.type === getSectionType(activeSection)
+  })
+  console.log('[Sources Page] Active section:', activeSection)
+  console.log('[Sources Page] Looking for type:', getSectionType(activeSection))
+  console.log('[Sources Page] Filtered sources:', filteredSources.length)
+  console.log('[Sources Page] All source types:', sources.map(s => s.metadata?.type))
+
+  const totalSize = sources.reduce((acc, s) => acc + (s.metadata?.size || 0), 0)
+  const totalLinks = sources.filter(s => s.metadata?.type === 'website').length
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault()
@@ -425,13 +458,13 @@ export default function SourcesPage() {
                           }}>
                             Added {new Date(source.created_at).toLocaleDateString()}
                           </p>
-                          {source.size && (
+                          {source.metadata?.size && (
                             <p style={{
                               fontSize: 'var(--op-font-x-small)',
                               color: 'var(--op-color-neutral-on-plus-max)',
                               margin: 0,
                             }}>
-                              {(source.size / 1024).toFixed(2)} KB
+                              {(source.metadata.size / 1024).toFixed(2)} KB
                             </p>
                           )}
                         </div>

@@ -52,21 +52,31 @@ interface LeadSummaryProps {
 
 const styles = {
   container: {
+    width: '100%',
     border: '1px solid var(--op-color-border)',
     borderRadius: 'var(--op-radius-large)',
-    padding: 'var(--op-space-large)',
+    padding: 'var(--op-space-x-large)',
     backgroundColor: 'var(--op-color-background)',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 'var(--op-space-large)',
+    marginBottom: 'var(--op-space-medium)',
   },
   title: {
-    fontSize: 'var(--op-font-large)',
+    fontSize: 'var(--op-font-x-large)',
     fontWeight: 600,
     margin: 0,
+    textAlign: 'left' as const,
+  },
+  subtitle: {
+    fontSize: 'var(--op-font-small)',
+    color: 'var(--op-color-neutral-on-plus-max)',
+    marginBottom: 'var(--op-space-x-large)',
+    textAlign: 'left' as const,
+    lineHeight: 1.6,
+    margin: '0 0 var(--op-space-x-large) 0',
   },
   actions: {
     display: 'flex',
@@ -79,7 +89,7 @@ const styles = {
     fontSize: 'var(--op-font-medium)',
     fontWeight: 600,
     marginBottom: 'var(--op-space-small)',
-    color: 'var(--op-color-primary-base)',
+    textAlign: 'left' as const,
   },
   field: {
     marginBottom: 'var(--op-space-small)',
@@ -89,21 +99,25 @@ const styles = {
     fontWeight: 500,
     color: 'var(--op-color-on-background)',
     opacity: 0.7,
+    textAlign: 'left' as const,
   },
   value: {
     fontSize: 'var(--op-font-small)',
     color: 'var(--op-color-on-background)',
+    margin: 0,
+    textAlign: 'left' as const,
+    lineHeight: 1.6,
   },
   list: {
-    listStyle: 'none',
-    padding: 0,
+    fontSize: 'var(--op-font-small)',
     margin: 0,
+    paddingLeft: 'var(--op-space-x-large)',
+    textAlign: 'left' as const,
+    lineHeight: 2,
   },
   listItem: {
     fontSize: 'var(--op-font-small)',
-    padding: 'var(--op-space-2x-small) 0',
-    paddingLeft: 'var(--op-space-medium)',
-    position: 'relative' as const,
+    textAlign: 'left' as const,
   },
   scoreContainer: {
     display: 'flex',
@@ -137,12 +151,12 @@ export function LeadSummary({
       y: 0,
       transition: { duration: 0.4, staggerChildren: 0.1 }
     }
-  } : {}
+  } : undefined
 
   const itemVariants = animated ? {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0 }
-  } : {}
+  } : undefined
 
   const getQualificationColor = (score?: number) => {
     if (!score) return 'var(--op-color-neutral-base)'
@@ -169,207 +183,63 @@ export function LeadSummary({
       animate={animated ? "visible" : undefined}
     >
       {/* Header */}
-      <div style={styles.header}>
-        <h3 style={styles.title}>Lead Summary</h3>
-        <div style={styles.actions}>
-          {onEmailShare && (
-            <Button variant="ghosticon" onClick={onEmailShare}>
-              <HugeiconsIcon icon={Mail01Icon} size={20} />
-            </Button>
-          )}
-          {onSlackShare && (
-            <Button variant="ghosticon" onClick={onSlackShare}>
-              <HugeiconsIcon icon={SlackIcon} size={20} />
-            </Button>
-          )}
-        </div>
+      <h3 style={styles.title}>Conversation Summary</h3>
+      <p style={styles.subtitle}>
+        Based on our discussion, here's what we covered and the recommended next steps.
+      </p>
+
+      {/* Content */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-large)' }}>
+        {/* Challenge/Need */}
+        {data.need?.problem && (
+          <Item variants={itemVariants}>
+            <h4 style={styles.sectionTitle}>Your Challenge</h4>
+            <p style={styles.value}>{data.need.problem}</p>
+          </Item>
+        )}
+
+        {/* Timeline */}
+        {(data.timeline?.urgency || data.timeline?.implementationDate) && (
+          <Item variants={itemVariants}>
+            <h4 style={styles.sectionTitle}>Timeline</h4>
+            <p style={styles.value}>
+              {data.timeline.implementationDate
+                ? `Looking to have a solution in place ${data.timeline.implementationDate}.`
+                : data.timeline.urgency}
+            </p>
+          </Item>
+        )}
+
+        {/* Next Steps */}
+        {data.nextSteps && data.nextSteps.length > 0 && (
+          <Item variants={itemVariants}>
+            <h4 style={styles.sectionTitle}>Next Steps</h4>
+            <ul style={styles.list}>
+              {data.nextSteps.map((step, i) => (
+                <li key={i}>{step}</li>
+              ))}
+            </ul>
+          </Item>
+        )}
       </div>
 
-      {/* Qualification Score */}
-      {data.qualificationScore !== undefined && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Qualification Score</div>
-          <div style={styles.scoreContainer}>
-            <div style={styles.scoreBar}>
-              <div style={{
-                height: '100%',
-                width: `${data.qualificationScore}%`,
-                backgroundColor: getQualificationColor(data.qualificationScore),
-                transition: 'width 0.5s ease'
-              }} />
-            </div>
-            <div style={{ ...styles.scoreLabel, color: getQualificationColor(data.qualificationScore) }}>
-              {data.qualificationScore}%
-            </div>
+      {/* Share Actions */}
+      {(onEmailShare || onSlackShare) && (
+        <div style={{ marginTop: 'var(--op-space-x-large)', paddingTop: 'var(--op-space-x-large)', borderTop: '1px solid var(--op-color-border)' }}>
+          <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
+            {onEmailShare && (
+              <Button variant="primary" onClick={onEmailShare} style={{ flex: 1 }}>
+                <HugeiconsIcon icon={Mail01Icon} size={18} />
+                <span>Email me this summary</span>
+              </Button>
+            )}
+            {onSlackShare && (
+              <Button variant="ghosticon" onClick={onSlackShare}>
+                <HugeiconsIcon icon={SlackIcon} size={20} />
+              </Button>
+            )}
           </div>
-          <div style={{ ...styles.value, marginTop: 'var(--op-space-x-small)', fontSize: 'var(--op-font-x-small)' }}>
-            {getQualificationLabel(data.qualificationScore)}
-          </div>
-        </Item>
-      )}
-
-      {/* Company Info */}
-      {data.companyInfo && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Company</div>
-          {data.companyInfo.name && (
-            <div style={styles.field}>
-              <div style={styles.label}>Name</div>
-              <div style={styles.value}>{data.companyInfo.name}</div>
-            </div>
-          )}
-          {data.companyInfo.industry && (
-            <div style={styles.field}>
-              <div style={styles.label}>Industry</div>
-              <div style={styles.value}>{data.companyInfo.industry}</div>
-            </div>
-          )}
-          {data.companyInfo.size && (
-            <div style={styles.field}>
-              <div style={styles.label}>Size</div>
-              <div style={styles.value}>{data.companyInfo.size}</div>
-            </div>
-          )}
-        </Item>
-      )}
-
-      {/* Budget */}
-      {data.budget && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Budget</div>
-          {data.budget.range && (
-            <div style={styles.field}>
-              <div style={styles.label}>Range</div>
-              <div style={styles.value}>{data.budget.range}</div>
-            </div>
-          )}
-          {data.budget.timeline && (
-            <div style={styles.field}>
-              <div style={styles.label}>Timeline</div>
-              <div style={styles.value}>{data.budget.timeline}</div>
-            </div>
-          )}
-          {data.budget.approved !== undefined && (
-            <div style={styles.field}>
-              <div style={styles.label}>Status</div>
-              <div style={styles.value}>{data.budget.approved ? '✓ Approved' : 'Pending approval'}</div>
-            </div>
-          )}
-        </Item>
-      )}
-
-      {/* Authority */}
-      {data.authority && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Authority</div>
-          {data.authority.role && (
-            <div style={styles.field}>
-              <div style={styles.label}>Role</div>
-              <div style={styles.value}>{data.authority.role}</div>
-            </div>
-          )}
-          {data.authority.decisionMaker !== undefined && (
-            <div style={styles.field}>
-              <div style={styles.label}>Decision Maker</div>
-              <div style={styles.value}>{data.authority.decisionMaker ? 'Yes' : 'No'}</div>
-            </div>
-          )}
-          {data.authority.stakeholders && data.authority.stakeholders.length > 0 && (
-            <div style={styles.field}>
-              <div style={styles.label}>Other Stakeholders</div>
-              <ul style={styles.list}>
-                {data.authority.stakeholders.map((stakeholder, i) => (
-                  <li key={i} style={styles.listItem}>• {stakeholder}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Item>
-      )}
-
-      {/* Need */}
-      {data.need && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Need</div>
-          {data.need.problem && (
-            <div style={styles.field}>
-              <div style={styles.label}>Problem</div>
-              <div style={styles.value}>{data.need.problem}</div>
-            </div>
-          )}
-          {data.need.currentSolution && (
-            <div style={styles.field}>
-              <div style={styles.label}>Current Solution</div>
-              <div style={styles.value}>{data.need.currentSolution}</div>
-            </div>
-          )}
-          {data.need.painPoints && data.need.painPoints.length > 0 && (
-            <div style={styles.field}>
-              <div style={styles.label}>Pain Points</div>
-              <ul style={styles.list}>
-                {data.need.painPoints.map((point, i) => (
-                  <li key={i} style={styles.listItem}>• {point}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </Item>
-      )}
-
-      {/* Timeline */}
-      {data.timeline && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Timeline</div>
-          {data.timeline.urgency && (
-            <div style={styles.field}>
-              <div style={styles.label}>Urgency</div>
-              <div style={styles.value}>{data.timeline.urgency}</div>
-            </div>
-          )}
-          {data.timeline.implementationDate && (
-            <div style={styles.field}>
-              <div style={styles.label}>Target Implementation</div>
-              <div style={styles.value}>{data.timeline.implementationDate}</div>
-            </div>
-          )}
-        </Item>
-      )}
-
-      {/* Next Steps */}
-      {data.nextSteps && data.nextSteps.length > 0 && (
-        <Item style={styles.section} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Recommended Next Steps</div>
-          <ul style={styles.list}>
-            {data.nextSteps.map((step, i) => (
-              <li key={i} style={styles.listItem}>• {step}</li>
-            ))}
-          </ul>
-        </Item>
-      )}
-
-      {/* Contact Info */}
-      {data.contactInfo && variant === 'full' && (
-        <Item style={{ ...styles.section, marginBottom: 0 }} variants={itemVariants}>
-          <div style={styles.sectionTitle}>Contact Information</div>
-          {data.contactInfo.name && (
-            <div style={styles.field}>
-              <div style={styles.label}>Name</div>
-              <div style={styles.value}>{data.contactInfo.name}</div>
-            </div>
-          )}
-          {data.contactInfo.email && (
-            <div style={styles.field}>
-              <div style={styles.label}>Email</div>
-              <div style={styles.value}>{data.contactInfo.email}</div>
-            </div>
-          )}
-          {data.contactInfo.phone && (
-            <div style={styles.field}>
-              <div style={styles.label}>Phone</div>
-              <div style={styles.value}>{data.contactInfo.phone}</div>
-            </div>
-          )}
-        </Item>
+        </div>
       )}
     </Container>
   )

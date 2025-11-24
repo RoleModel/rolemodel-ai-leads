@@ -16,6 +16,8 @@ import {
   QuestionIcon,
   Idea01Icon,
   ArrowDown01Icon,
+  Message01Icon,
+  UserIcon,
 } from '@hugeicons-pro/core-stroke-standard';
 
 import { Button } from "@/components/ui/button"
@@ -57,13 +59,19 @@ export function NavigationSidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(pathname.startsWith('/sources'))
+  const [isActivityExpanded, setIsActivityExpanded] = useState(pathname.startsWith('/activity'))
 
   const navItems = [
     { href: "/playground", icon: PlayCircle02Icon, label: "Playground" },
-    { href: "/activity", icon: Time01Icon, label: "Activity" },
+    { href: "/activity", icon: Time01Icon, label: "Activity", expandable: true },
     { href: "/analytics", icon: Analytics01Icon, label: "Analytics" },
     { href: "/sources", icon: Database01Icon, label: "Sources", expandable: true },
     { href: "/deploy", icon: Rocket01Icon, label: "Deploy" },
+  ]
+
+  const activitySubItems = [
+    { href: '/activity/chat-logs', icon: Message01Icon, label: 'Chat logs' },
+    { href: '/activity/leads', icon: UserIcon, label: 'Leads' },
   ]
 
   const sourcesSubItems = [
@@ -80,17 +88,21 @@ export function NavigationSidebar() {
     <aside style={styles.navSidebar}>
       {navItems.map((item) => {
         const ItemIcon = item.icon
-        const isActive = pathname === item.href
+        const isActive = pathname.startsWith(item.href)
         const isSourcesItem = item.href === '/sources'
+        const isActivityItem = item.href === '/activity'
 
         return (
           <div key={item.href}>
-            {isSourcesItem ? (
+            {item.expandable ? (
               <Button
                 variant="ghost"
                 width="full"
                 justify="start"
-                onClick={() => setIsSourcesExpanded(!isSourcesExpanded)}
+                onClick={() => {
+                  if (isSourcesItem) setIsSourcesExpanded(!isSourcesExpanded)
+                  if (isActivityItem) setIsActivityExpanded(!isActivityExpanded)
+                }}
                 style={{
                   ...styles.navItem,
                   ...(isActive ? styles.navItemActive : {}),
@@ -108,7 +120,7 @@ export function NavigationSidebar() {
                   icon={ArrowDown01Icon}
                   size={20}
                   style={{
-                    transform: isSourcesExpanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+                    transform: (isSourcesItem && isSourcesExpanded) || (isActivityItem && isActivityExpanded) ? 'rotate(0deg)' : 'rotate(-90deg)',
                     transition: 'transform 0.2s',
                   }}
                 />
@@ -124,6 +136,38 @@ export function NavigationSidebar() {
                 <HugeiconsIcon icon={ItemIcon} size={20} />
                 <span>{item.label}</span>
               </Link>
+            )}
+
+            {/* Activity Sub-items */}
+            {isActivityItem && isActivityExpanded && (
+              <div style={{ paddingLeft: 'var(--op-space-medium)' }}>
+                {activitySubItems.map((subItem) => {
+                  const SubIcon = subItem.icon
+                  const isSubActive = pathname === subItem.href
+
+                  return (
+                    <Link
+                      key={subItem.href}
+                      href={subItem.href}
+                      style={{
+                        ...styles.navItem,
+                        padding: '6px var(--op-space-medium)',
+                        borderLeft: '1px solid',
+                        borderColor: 'var(--op-color-border)',
+                        fontSize: '13px',
+                        ...(isSubActive ? {
+                          color: 'var(--op-color-primary-base)',
+                          borderColor: 'var(--op-color-primary-base)',
+                          fontWeight: 500,
+                        } : {}),
+                      }}
+                    >
+                      <HugeiconsIcon icon={SubIcon} size={20} />
+                      <span>{subItem.label}</span>
+                    </Link>
+                  )
+                })}
+              </div>
             )}
 
             {/* Sources Sub-items */}

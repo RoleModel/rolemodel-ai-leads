@@ -1,0 +1,35 @@
+.full-width {
+  width: 100%;
+}
+
+.justify-between {
+  justify-content: space-between !important;
+}
+
+.justify-start {
+  justify-content: flex-start !important;
+}
+
+.justify-center {
+  justify-content: center !important;
+}
+
+.justify-end {
+  justify-content: flex-end !important;
+}
+
+/* Hide elements */
+.hidden {
+  display: none !important;
+}
+
+/* Hide file inputs */
+input[type='file'].hidden,
+input[type='file'][aria-label='Upload files'] {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}

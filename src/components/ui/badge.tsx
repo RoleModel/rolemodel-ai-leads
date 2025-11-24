@@ -1,25 +1,30 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
+import '@rolemodel/optics/dist/css/components/badge.css'
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: "default" | "secondary" | "destructive" | "outline"
+  variant?: "default" | "secondary" | "danger" | "outline" | 'warning' | "notice" | 'primary' | 'outline'
   asChild?: boolean
 }
 
+
 function Badge({
   className,
-  variant = "default",
+  variant = "outline",
   asChild = false,
   ...props
 }: BadgeProps) {
   const Comp = asChild ? Slot : "span"
 
   const variantClass = {
-    default: "badge--primary",
+    primary: "badge--primary",
+    default: "badge",
     secondary: "badge--info",
-    destructive: "badge--danger",
-    outline: "badge--notice",
+    danger: "badge--danger",
+    warning: "badge--warning",
+    outline: "badge--outline",
+    notice: "badge--notice",
   }[variant] || "badge--primary"
 
   return (

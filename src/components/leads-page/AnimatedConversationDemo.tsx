@@ -23,12 +23,31 @@ import {
 } from '@/components/ai-elements/prompt-input'
 import { Button } from '@/components/ui/button'
 import { Mail01Icon } from '@hugeicons-pro/core-stroke-standard'
+import {
+  InlineCitation,
+  InlineCitationCard,
+  InlineCitationCardTrigger,
+  InlineCitationCardBody,
+  InlineCitationCarousel,
+  InlineCitationCarouselContent,
+  InlineCitationCarouselItem,
+  InlineCitationCarouselHeader,
+  InlineCitationCarouselIndex,
+  InlineCitationCarouselPrev,
+  InlineCitationCarouselNext,
+  InlineCitationSource,
+} from "@/components/ai-elements/inline-citation"
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   delay?: number
+  citations?: Array<{
+    url: string
+    title: string
+    description?: string
+  }>
 }
 
 const demoConversation: Message[] = [
@@ -59,8 +78,20 @@ const demoConversation: Message[] = [
   {
     id: '5',
     role: 'assistant',
-    content: "That's a common challenge. Custom software can be tailored to your exact workflow. What's your timeline for implementing a solution?",
+    content: "That's a common challenge. Custom software can be tailored to your exact workflow [1]. We've helped many companies transition from spreadsheets to custom solutions [2]. What's your timeline for implementing a solution?",
     delay: 2500,
+    citations: [
+      {
+        url: 'https://rolemodelsoftware.com/blog/custom-software-vs-off-shelf',
+        title: 'Custom Software vs Off-the-Shelf Solutions',
+        description: 'Learn when custom software makes sense for your business and how it compares to off-the-shelf alternatives.'
+      },
+      {
+        url: 'https://rolemodelsoftware.com/case-studies/crm-migration',
+        title: 'Case Study: From Spreadsheets to Custom CRM',
+        description: 'How we helped a scaling company migrate from manual spreadsheets to a tailored CRM system.'
+      }
+    ]
   },
   {
     id: '6',
@@ -197,6 +228,52 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     onInterrupt?.()
   }
 
+  const renderMessageWithCitations = (message: Message) => {
+    if (!message.citations || message.citations.length === 0) {
+      return message.content
+    }
+
+    // Split text by citation markers like [1], [2], etc.
+    const parts = message.content.split(/(\[\d+\])/g)
+
+    return parts.map((segment, i) => {
+      const citationMatch = segment.match(/\[(\d+)\]/)
+      if (citationMatch) {
+        const citationIndex = parseInt(citationMatch[1]) - 1
+        const citation = message.citations?.[citationIndex]
+
+        if (citation) {
+          return (
+            <InlineCitation key={i}>
+              <InlineCitationCard>
+                <InlineCitationCardTrigger sources={[citation.url]} />
+                <InlineCitationCardBody>
+                  <InlineCitationCarousel>
+                    <InlineCitationCarouselHeader>
+                      <InlineCitationCarouselPrev />
+                      <InlineCitationCarouselIndex />
+                      <InlineCitationCarouselNext />
+                    </InlineCitationCarouselHeader>
+                    <InlineCitationCarouselContent>
+                      <InlineCitationCarouselItem>
+                        <InlineCitationSource
+                          title={citation.title}
+                          url={citation.url}
+                          description={citation.description}
+                        />
+                      </InlineCitationCarouselItem>
+                    </InlineCitationCarouselContent>
+                  </InlineCitationCarousel>
+                </InlineCitationCardBody>
+              </InlineCitationCard>
+            </InlineCitation>
+          )
+        }
+      }
+      return <span key={i}>{segment}</span>
+    })
+  }
+
   const showButton = !isRunning || currentIndex >= demoConversation.length
 
   return (
@@ -268,7 +345,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                   whiteSpace: 'pre-line',
                 }}
               >
-                {message.content}
+                {renderMessageWithCitations(message)}
               </motion.div>
             </motion.div>
           ))}
@@ -389,7 +466,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             </div>
 
             <div style={{ marginTop: 'var(--op-space-x-large)', paddingTop: 'var(--op-space-x-large)', borderTop: '1px solid var(--op-color-border)' }}>
-              <Button variant="primary" style={{ width: '100%' }}>
+              <Button variant="primary" style={{ width: '100%', cursor: 'default' }}>
                 <HugeiconsIcon icon={Mail01Icon} size={18} />
                 <span>Email me this summary</span>
               </Button>

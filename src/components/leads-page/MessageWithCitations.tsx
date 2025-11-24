@@ -1,0 +1,102 @@
+'use client'
+
+import { type UIMessage } from "ai"
+import {
+  InlineCitation,
+  InlineCitationText,
+  InlineCitationCard,
+  InlineCitationCardTrigger,
+  InlineCitationCardBody,
+  InlineCitationCarousel,
+  InlineCitationCarouselContent,
+  InlineCitationCarouselItem,
+  InlineCitationCarouselHeader,
+  InlineCitationCarouselIndex,
+  InlineCitationCarouselPrev,
+  InlineCitationCarouselNext,
+  InlineCitationSource,
+} from "@/components/ai-elements/inline-citation"
+
+interface Citation {
+  url: string
+  title: string
+  description?: string
+}
+
+interface MessageWithCitationsProps {
+  message: UIMessage
+  citations?: Citation[]
+  className?: string
+  style?: React.CSSProperties
+}
+
+export function MessageWithCitations({ message, citations, className, style }: MessageWithCitationsProps) {
+  const renderTextWithCitations = (text: string) => {
+    if (!citations || citations.length === 0) {
+      return text
+    }
+
+    // Split text by citation markers like [1], [2], etc.
+    const parts = text.split(/(\[\d+\])/g)
+    const citationRefs: string[] = []
+    const citationMap: { [key: number]: Citation } = {}
+
+    return parts.map((segment, i) => {
+      const citationMatch = segment.match(/\[(\d+)\]/)
+      if (citationMatch) {
+        const citationNumber = parseInt(citationMatch[1])
+        const citationIndex = citationNumber - 1
+        const citation = citations[citationIndex]
+
+        if (citation) {
+          citationMap[citationNumber] = citation
+          if (!citationRefs.includes(citation.url)) {
+            citationRefs.push(citation.url)
+          }
+
+          return (
+            <InlineCitation key={i}>
+              <InlineCitationCard>
+                <InlineCitationCardTrigger sources={[citation.url]} />
+                <InlineCitationCardBody>
+                  <InlineCitationCarousel>
+                    <InlineCitationCarouselHeader>
+                      <InlineCitationCarouselPrev />
+                      <InlineCitationCarouselIndex />
+                      <InlineCitationCarouselNext />
+                    </InlineCitationCarouselHeader>
+                    <InlineCitationCarouselContent>
+                      <InlineCitationCarouselItem>
+                        <InlineCitationSource
+                          title={citation.title}
+                          url={citation.url}
+                          description={citation.description}
+                        />
+                      </InlineCitationCarouselItem>
+                    </InlineCitationCarouselContent>
+                  </InlineCitationCarousel>
+                </InlineCitationCardBody>
+              </InlineCitationCard>
+            </InlineCitation>
+          )
+        }
+      }
+      return <span key={i}>{segment}</span>
+    })
+  }
+
+  return (
+    <div className={className} style={style}>
+      {message.parts.map((part, index) => {
+        if (part.type === 'text') {
+          return (
+            <InlineCitationText key={index}>
+              {renderTextWithCitations(part.text)}
+            </InlineCitationText>
+          )
+        }
+        return null
+      })}
+    </div>
+  )
+}

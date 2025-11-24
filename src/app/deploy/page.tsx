@@ -35,7 +35,7 @@ export default function DeployPage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+            gridTemplateColumns: '1fr 1fr',
             gap: 'var(--op-space-large)',
           }}>
             {/* Chat Widget */}
@@ -48,7 +48,7 @@ export default function DeployPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px',
+                minHeight: 300,
                 position: 'relative',
               }}>
                 {/* Widget Preview */}
@@ -168,7 +168,7 @@ export default function DeployPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px',
+                minHeight: 300,
                 position: 'relative',
               }}>
                 {/* Leads page Preview */}

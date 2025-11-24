@@ -16,6 +16,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import Image from 'next/image'
+import { useLeadsPageSettings } from "@/contexts/LeadsPageSettingsContext"
 
 // Default chatbot ID for RoleModel
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
@@ -23,6 +24,7 @@ const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 const styles = {
   editorSidebar: {
     width: "25%",
+    height: '100%',
     display: 'flex',
     flexDirection: 'column' as const,
     padding: 'var(--op-space-medium) 0',
@@ -61,7 +63,7 @@ const styles = {
   settingsForm: {
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: 'var(--op-space-large)',
+    gap: 0,
     paddingBottom: 'var(--op-space-large)',
     padding: '0 var(--op-space-medium)',
   },
@@ -121,12 +123,9 @@ const styles = {
 
 export function EditorSidebar() {
   const router = useRouter()
-  const [pageTitle, setPageTitle] = useState('Leads page')
-  const [favicon, setFavicon] = useState<string>('')
+  const { settings, updateSettings } = useLeadsPageSettings()
   const [faviconPreview, setFaviconPreview] = useState<string>('')
-  const [logo, setLogo] = useState<string>('')
   const [logoPreview, setLogoPreview] = useState<string>('')
-  const [aiInstructions, setAiInstructions] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showDeployPopover, setShowDeployPopover] = useState(false)
@@ -142,16 +141,19 @@ export function EditorSidebar() {
         const data = await response.json()
 
         if (data.settings) {
-          setPageTitle(data.settings.page_title || 'Leads page')
-          setAiInstructions(data.settings.ai_instructions || '')
+          updateSettings({
+            pageTitle: data.settings.page_title || 'Leads page',
+            pageDescription: data.settings.page_description || 'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
+            aiInstructions: data.settings.ai_instructions || '',
+            favicon: data.settings.favicon || '',
+            logo: data.settings.logo || '',
+          })
 
           if (data.settings.favicon) {
-            setFavicon(data.settings.favicon)
             setFaviconPreview(data.settings.favicon)
           }
 
           if (data.settings.logo) {
-            setLogo(data.settings.logo)
             setLogoPreview(data.settings.logo)
           }
         }
@@ -173,10 +175,11 @@ export function EditorSidebar() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           chatbotId: DEFAULT_CHATBOT_ID,
-          pageTitle,
+          pageTitle: settings.pageTitle,
+          pageDescription: settings.pageDescription,
           favicon: faviconPreview,
           logo: logoPreview,
-          aiInstructions,
+          aiInstructions: settings.aiInstructions,
         }),
       })
 
@@ -201,11 +204,12 @@ export function EditorSidebar() {
   const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setFavicon(file.name)
       const reader = new FileReader()
       reader.onload = (event) => {
         if (event.target?.result) {
-          setFaviconPreview(event.target.result as string)
+          const dataUrl = event.target.result as string
+          setFaviconPreview(dataUrl)
+          updateSettings({ favicon: dataUrl })
         }
       }
       reader.readAsDataURL(file)
@@ -215,11 +219,12 @@ export function EditorSidebar() {
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setLogo(file.name)
       const reader = new FileReader()
       reader.onload = (event) => {
         if (event.target?.result) {
-          setLogoPreview(event.target.result as string)
+          const dataUrl = event.target.result as string
+          setLogoPreview(dataUrl)
+          updateSettings({ logo: dataUrl })
         }
       }
       reader.readAsDataURL(file)
@@ -302,7 +307,7 @@ export function EditorSidebar() {
         </div>
       </div>
 
-      <ScrollArea style={{ flex: 1 }}>
+      <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         <div style={styles.settingsForm}>
 
           <div style={styles.formSection}>
@@ -310,8 +315,19 @@ export function EditorSidebar() {
               Page title
             </Label>
             <Input
-              value={pageTitle}
-              onChange={(e) => setPageTitle(e.target.value)}
+              value={settings.pageTitle}
+              onChange={(e) => updateSettings({ pageTitle: e.target.value })}
+            />
+          </div>
+
+          <div style={styles.formSection}>
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>
+              Page description
+            </Label>
+            <Input
+              value={settings.pageDescription}
+              onChange={(e) => updateSettings({ pageDescription: e.target.value })}
+              placeholder="Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders."
             />
           </div>
 
@@ -344,7 +360,7 @@ export function EditorSidebar() {
                 variant="secondary"
               >
                 <HugeiconsIcon icon={Image01Icon} size={16} />
-                {favicon ? 'Change image' : 'Upload image'}
+                {settings.favicon ? 'Change image' : 'Upload image'}
               </Button>
             </div>
           </div>
@@ -377,7 +393,7 @@ export function EditorSidebar() {
                 variant="secondary"
               >
                 <HugeiconsIcon icon={Image01Icon} size={16} />
-                {logo ? 'Change image' : 'Upload image'}
+                {settings.logo ? 'Change image' : 'Upload image'}
               </Button>
             </div>
           </div>
@@ -386,17 +402,18 @@ export function EditorSidebar() {
             <Label style={{ fontSize: 'var(--op-font-small)' }}>
               AI Instructions
             </Label>
-            <p style={{ fontSize: 'var(--op-font-small)', margin: '0 0 var(--op-space-small) 0', color: 'var(--op-color-on-background)' }}>
+            <p style={{ fontSize: 'var(--op-font-small)', margin: '0 0 var(--op-space-x-small) 0' }}>
               Use the CRIT™ framework to structure your AI prompt for better lead qualification
             </p>
             <div style={{
-              backgroundColor: 'var(--op-color-neutral-plus-eight)',
+              backgroundColor: 'var(--op-color-neutral-plus-seven)',
+              border: '1px solid var(--op-color-border)',
               padding: 'var(--op-space-medium)',
               borderRadius: 'var(--op-radius-medium)',
               marginBottom: 'var(--op-space-medium)',
               fontSize: 'var(--op-font-x-small)',
             }}>
-              <p style={{ margin: '0 0 var(--op-space-small) 0', fontWeight: 600 }}>CRIT™ Framework:</p>
+              <p style={{ margin: '0 0 var(--op-space-x-small) 0', fontWeight: 600 }}>CRIT™ Framework:</p>
               <ul style={{ margin: 0, paddingLeft: 'var(--op-space-large)', lineHeight: 1.6 }}>
                 <li><strong>Context:</strong> Describe your business, product, and ideal customer profile</li>
                 <li><strong>Role:</strong> Define the AI&apos;s expertise (e.g., &quot;Expert B2B sales qualification specialist&quot;)</li>
@@ -405,8 +422,8 @@ export function EditorSidebar() {
               </ul>
             </div>
             <textarea
-              value={aiInstructions}
-              onChange={(e) => setAiInstructions(e.target.value)}
+              value={settings.aiInstructions}
+              onChange={(e) => updateSettings({ aiInstructions: e.target.value })}
               placeholder={`Example using CRIT™ framework:
 
 CONTEXT: We're a B2B SaaS platform helping mid-market companies (10-50 employees, $5M-$50M revenue) automate sales workflows.

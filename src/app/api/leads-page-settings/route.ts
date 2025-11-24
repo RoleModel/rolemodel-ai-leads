@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
   const {
     chatbotId,
     pageTitle,
+    pageDescription,
     favicon,
     logo,
     enableThemeSwitch,
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     .upsert({
       chatbot_id: chatbotId,
       page_title: pageTitle,
+      page_description: pageDescription,
       favicon,
       logo,
       enable_theme_switch: enableThemeSwitch,

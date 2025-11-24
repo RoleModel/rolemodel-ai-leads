@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 export function WidgetPreviewArea() {
   const { config } = useWidgetConfig()
   const [isOpen, setIsOpen] = useState(true)
+  const [showNotice, setShowNotice] = useState(true)
 
   const widgetBackgroundColor = config.theme === 'light' ? 'white' : '#1a1a1a'
   const widgetTextColor = config.theme === 'light' ? '#000' : '#fff'
@@ -123,6 +124,42 @@ export function WidgetPreviewArea() {
                   <HugeiconsIcon icon={RefreshIcon} size={20} />
                 </Button>
               </div>
+
+              {/* Dismissible Notice */}
+              {showNotice && config.dismissibleNotice && (
+                <div style={{
+                  padding: 'var(--op-space-small) var(--op-space-medium)',
+                  backgroundColor: config.theme === 'light' ? '#f0f9ff' : '#1e3a5f',
+                  borderBottom: '1px solid var(--op-color-border)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: 'var(--op-space-small)',
+                }}>
+                  <div
+                    style={{
+                      fontSize: 'var(--op-font-x-small)',
+                      color: widgetTextColor,
+                      flex: 1,
+                    }}
+                    dangerouslySetInnerHTML={{ __html: config.dismissibleNotice }}
+                  />
+                  <button
+                    onClick={() => setShowNotice(false)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      color: widgetTextColor,
+                      opacity: 0.6,
+                      fontSize: '16px',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
 
               {/* Chat Interface */}
               <div style={{

@@ -31,7 +31,7 @@ const styles = {
     pointerEvents: 'none' as const,
   },
   previewCard: {
-    margin: '70px auto',
+    margin: 'var(--op-space-x-large) auto',
     width: 'calc(100% - 60px)',
     maxWidth: '1400px',
     height: 'calc(100vh - 140px)',
@@ -60,13 +60,27 @@ const styles = {
     display: 'flex',
     overflow: 'hidden',
   },
+  bottomToolbarWrapper: {
+    position: 'absolute' as const, bottom: 'var(--op-space-large)', left: 0, right: 0, display: 'flex', justifyContent: 'center', padding: '0 var(--op-space-small)'
+  },
+  bottomToolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--op-space-medium)',
+    backgroundColor: 'var(--op-color-background)',
+    padding: 'var(--op-space-small) var(--op-space-medium)',
+    borderRadius: 'var(--op-radius-pill)',
+    border: '1px solid var(--op-color-border)',
+    boxShadow: ' var(--op-shadow-medium)',
+  },
   topBarTools: {
     display: 'flex',
+    backgroundColor: 'var(--op-color-neutral-plus-seven)',
     gap: 'var(--op-space-3x-small)',
     alignItems: 'center',
     border: '1px solid var(--op-color-border)',
     borderRadius: 'var(--op-radius-pill)',
-    padding: '0 var(--op-space-2x-small)',
+    padding: '0 var(--op-space-x-small)',
   },
   topBarDivider: {
     height: '24px',
@@ -120,8 +134,8 @@ export function PreviewArea() {
       </Card>
 
       {/* Bottom Toolbar */}
-      <div style={{ position: 'absolute', bottom: 'var(--op-space-large)', left: 0, right: 0, display: 'flex', justifyContent: 'center', padding: '0 var(--op-space-medium)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)', backgroundColor: 'var(--op-color-background)', padding: 'var(--op-space-small) var(--op-space-medium)', borderRadius: 'var(--op-radius-pill)', border: '1px solid var(--op-color-border)' }}>
+      <div style={styles.bottomToolbarWrapper}>
+        <div style={styles.bottomToolbar}>
           <Button variant="ghost" onClick={() => setEditMode(!editMode)} style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-x-small)' }}>
             <SparklesIcon className="icon-sm" /> Edit mode
             <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: editMode ? 'var(--op-color-alerts-notice-base)' : 'transparent', marginLeft: 'var(--op-space-x-small)' }}></span>

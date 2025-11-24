@@ -5,20 +5,30 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 
 import { cn } from "@/lib/utils"
 
+const styles = {
+  scrollArea: {
+    height: '100%',
+    width: '100%',
+    borderRadius: 'inherit',
+  },
+}
+
 function ScrollArea({
   className,
   children,
+  style,
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.Root>) {
   return (
     <ScrollAreaPrimitive.Root
       data-slot="scroll-area"
       className={cn("relative overflow-hidden", className)}
+      style={style}
       {...props}
     >
       <ScrollAreaPrimitive.Viewport
+        style={styles.scrollArea}
         data-slot="scroll-area-viewport"
-        className="size-full rounded-[inherit] outline-none"
       >
         {children}
       </ScrollAreaPrimitive.Viewport>
@@ -29,7 +39,6 @@ function ScrollArea({
 }
 
 function ScrollBar({
-  className,
   orientation = "vertical",
   ...props
 }: React.ComponentProps<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>) {
@@ -37,19 +46,32 @@ function ScrollBar({
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       data-slot="scroll-area-scrollbar"
       orientation={orientation}
-      className={cn(
-        "flex touch-none p-px transition-colors select-none",
-        orientation === "vertical" &&
-        "h-full w-2.5 border-l border-l-transparent",
-        orientation === "horizontal" &&
-        "h-2.5 flex-col border-t border-t-transparent",
-        className
-      )}
+      style={{
+        display: 'flex',
+        touchAction: 'none',
+        padding: '1px',
+        transition: 'colors 200ms',
+        userSelect: 'none',
+        ...(orientation === "vertical" ? {
+          height: '100%',
+          width: '10px',
+          borderLeft: '1px solid transparent'
+        } : {
+          height: '10px',
+          flexDirection: 'column',
+          borderTop: '1px solid transparent'
+        })
+      }}
       {...props}
     >
       <ScrollAreaPrimitive.ScrollAreaThumb
         data-slot="scroll-area-thumb"
-        className="bg-muted relative flex-1 rounded-full"
+        style={{
+          backgroundColor: 'var(--op-color-neutral-plus-six)',
+          position: 'relative',
+          flex: 1,
+          borderRadius: '9999px'
+        }}
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )
