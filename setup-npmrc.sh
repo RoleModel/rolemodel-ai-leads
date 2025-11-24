@@ -30,7 +30,8 @@ fi
 # Add Optics/GitHub token if available
 if [ -n "$OPTICS_TOKEN" ]; then
   echo "//npm.pkg.github.com/:_authToken=${OPTICS_TOKEN}" >> .npmrc
-  echo "✓ Added OPTICS_TOKEN"
+  echo "✓ Added OPTICS_TOKEN to .npmrc"
+  echo "Token preview: ${OPTICS_TOKEN:0:10}..."
 else
   echo "✗ Warning: OPTICS_TOKEN not found in environment"
 fi
