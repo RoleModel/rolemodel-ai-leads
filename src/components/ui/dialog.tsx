@@ -59,6 +59,7 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+
         className={cn('confirm-dialog', className)}
         {...props}
       >
@@ -77,7 +78,7 @@ function DialogContent({
               padding: 0,
             }}
           >
-            <Cancel01Icon className="icon-sm" />
+            <Cancel01Icon size={20} strokeWidth={2} />
             <span
               style={{
                 position: 'absolute',

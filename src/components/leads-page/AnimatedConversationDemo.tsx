@@ -442,14 +442,16 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             lineHeight: 1,
           }}
         >
-          <Image
-            className="aligned-header__centered-suffix"
-            src={settings.favicon}
-            alt="AI"
-            width={32}
-            height={32}
-            style={{ objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
-          />
+          {settings.favicon && (
+            <Image
+              className="aligned-header__centered-suffix"
+              src={settings.favicon}
+              alt="AI"
+              width={32}
+              height={32}
+              style={{ objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
+            />
+          )}
           {settings.pageTitle}
         </span>
         <p
@@ -482,7 +484,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
       >
 
         <Conversation style={{ display: 'contents' }}>
-          <ConversationContent style={{ display: 'contents' }}>
+          <ConversationContent style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
             <AnimatePresence initial={false}>
               {messages.map((message, index) => (
                 <motion.div
@@ -839,7 +841,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                   </div>
                 ) : (
                   <PromptInputTextarea
-                    placeholder="Ask me anything..."
+                    placeholder="Tell me about your project..."
                     disabled={true}
                     style={{ pointerEvents: 'none' }}
                   />

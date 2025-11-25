@@ -37,7 +37,7 @@ export default function DeployPage() {
                 margin: 0,
               }}
             >
-              All channels
+              Deploy
             </h1>
           </div>
 
@@ -274,7 +274,7 @@ export default function DeployPage() {
                       color: 'var(--op-color-neutral-on-plus-max)',
                     }}
                   >
-                    Ask me anything...
+                    Tell me about your project...
                   </div>
                 </div>
               </div>

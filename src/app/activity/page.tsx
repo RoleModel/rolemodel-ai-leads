@@ -1,16 +1,31 @@
 'use client'
 
-import { Message01Icon, UserIcon } from 'hugeicons-react'
+import { Location01Icon, Message01Icon, UserIcon } from 'hugeicons-react'
 import { Suspense, useEffect, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
 import { TopBar } from '@/components/layout/TopBar'
+
+interface VisitorMetadata {
+  ip?: string
+  geo?: {
+    country?: string
+    countryCode?: string
+    region?: string
+    city?: string
+    timezone?: string
+  }
+  userAgent?: string
+  referer?: string
+  timestamp?: string
+}
 
 interface Conversation {
   id: string
   visitor_id: string
   visitor_name: string | null
   visitor_email: string | null
+  visitor_metadata: VisitorMetadata | null
   started_at: string
   last_message_at: string
   message_count: number
@@ -182,6 +197,7 @@ export default function ActivityPage() {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 'var(--op-space-x-small)',
+                        flexWrap: 'wrap',
                       }}
                     >
                       <Message01Icon
@@ -205,6 +221,35 @@ export default function ActivityPage() {
                         · {new Date(conv.last_message_at).toLocaleString()}
                       </span>
                     </div>
+                    {conv.visitor_metadata?.geo && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--op-space-x-small)',
+                          marginTop: 'var(--op-space-2x-small)',
+                        }}
+                      >
+                        <Location01Icon
+                          className="icon-sm"
+                          style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                        />
+                        <span
+                          style={{
+                            fontSize: 'var(--op-font-x-small)',
+                            color: 'var(--op-color-neutral-on-plus-max)',
+                          }}
+                        >
+                          {[
+                            conv.visitor_metadata.geo.city,
+                            conv.visitor_metadata.geo.region,
+                            conv.visitor_metadata.geo.country,
+                          ]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))
               )}
@@ -239,6 +284,117 @@ export default function ActivityPage() {
                     gap: 'var(--op-space-medium)',
                   }}
                 >
+                  {/* Visitor Info Card */}
+                  {selectedConversation.visitor_metadata && (
+                    <div
+                      style={{
+                        padding: 'var(--op-space-medium)',
+                        borderRadius: 'var(--op-radius-medium)',
+                        backgroundColor: 'var(--op-color-background)',
+                        border: '1px solid var(--op-color-border)',
+                        marginBottom: 'var(--op-space-medium)',
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: 'var(--op-font-small)',
+                          fontWeight: 'var(--op-font-weight-bold)',
+                          marginBottom: 'var(--op-space-small)',
+                          color: 'var(--op-color-neutral-on-plus-max)',
+                        }}
+                      >
+                        Visitor Details
+                      </h3>
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                          gap: 'var(--op-space-small)',
+                          fontSize: 'var(--op-font-x-small)',
+                        }}
+                      >
+                        {selectedConversation.visitor_metadata.geo && (
+                          <div>
+                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                              Location
+                            </span>
+                            <p style={{ margin: 'var(--op-space-2x-small) 0 0 0' }}>
+                              {[
+                                selectedConversation.visitor_metadata.geo.city,
+                                selectedConversation.visitor_metadata.geo.region,
+                                selectedConversation.visitor_metadata.geo.country,
+                              ]
+                                .filter(Boolean)
+                                .join(', ') || 'Unknown'}
+                            </p>
+                          </div>
+                        )}
+                        {selectedConversation.visitor_metadata.ip && (
+                          <div>
+                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                              IP Address
+                            </span>
+                            <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontFamily: 'monospace' }}>
+                              {selectedConversation.visitor_metadata.ip}
+                            </p>
+                          </div>
+                        )}
+                        {selectedConversation.visitor_metadata.geo?.timezone && (
+                          <div>
+                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                              Timezone
+                            </span>
+                            <p style={{ margin: 'var(--op-space-2x-small) 0 0 0' }}>
+                              {selectedConversation.visitor_metadata.geo.timezone}
+                            </p>
+                          </div>
+                        )}
+                        {selectedConversation.visitor_metadata.referer && (
+                          <div>
+                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                              Referrer
+                            </span>
+                            <p
+                              style={{
+                                margin: 'var(--op-space-2x-small) 0 0 0',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                              title={selectedConversation.visitor_metadata.referer}
+                            >
+                              {selectedConversation.visitor_metadata.referer}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      {selectedConversation.visitor_metadata.userAgent && (
+                        <div style={{ marginTop: 'var(--op-space-small)' }}>
+                          <span
+                            style={{
+                              fontSize: 'var(--op-font-x-small)',
+                              color: 'var(--op-color-neutral-on-plus-max)',
+                            }}
+                          >
+                            Browser
+                          </span>
+                          <p
+                            style={{
+                              margin: 'var(--op-space-2x-small) 0 0 0',
+                              fontSize: 'var(--op-font-x-small)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                            title={selectedConversation.visitor_metadata.userAgent}
+                          >
+                            {selectedConversation.visitor_metadata.userAgent}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {messages.map((message) => (
                     <div
                       key={message.id}

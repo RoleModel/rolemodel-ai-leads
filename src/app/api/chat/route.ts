@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { buildSourceContext, getChatbot, retrieveRelevantSources } from '@/lib/ai/rag'
+import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
 import { supabaseServer } from '@/lib/supabase/server'
 
@@ -39,10 +40,27 @@ export async function POST(req: NextRequest) {
     const effectiveInstructions = instructions || chatbot?.instructions || ''
 
     // Get the last user message for RAG
+    // Handle both UIMessage format (with parts) and standard format (with content)
     const lastUserMessage = messages
       .filter((m: { role: string }) => m.role === 'user')
       .pop()
-    const userQuery = lastUserMessage?.content || ''
+
+    // Extract content - handle both formats
+    let userQuery = ''
+    if (lastUserMessage) {
+      if (lastUserMessage.content) {
+        // Standard format
+        userQuery = typeof lastUserMessage.content === 'string'
+          ? lastUserMessage.content
+          : ''
+      } else if (lastUserMessage.parts) {
+        // UIMessage format with parts
+        userQuery = lastUserMessage.parts
+          .filter((p: { type: string }) => p.type === 'text')
+          .map((p: { text: string }) => p.text)
+          .join('\n')
+      }
+    }
 
     // Retrieve relevant sources using vector search
     const relevantSources = await retrieveRelevantSources(
@@ -86,17 +104,38 @@ When using the thinking tool, provide steps with clear labels and descriptions. 
 ${sourceContext}`,
     }
 
+    // Convert UIMessage format to standard CoreMessage format for streamText
+    const convertedMessages = messages.map((m: any) => {
+      // If message has parts (UIMessage format), convert to content
+      if (m.parts && Array.isArray(m.parts)) {
+        const textParts = m.parts.filter((p: any) => p.type === 'text')
+        const content = textParts.map((p: any) => p.text).join('\n')
+        return {
+          role: m.role,
+          content,
+        }
+      }
+      // Already in standard format
+      return {
+        role: m.role,
+        content: m.content || '',
+      }
+    })
+
     // Combine system message with user messages
-    const fullMessages = [systemMessage, ...messages]
+    const fullMessages = [systemMessage, ...convertedMessages]
 
     // Create or get conversation ID
     let activeConversationId = conversationId
     if (!activeConversationId) {
+      // Build visitor metadata from request headers (IP, geolocation, user agent)
+      const visitorMetadata = await buildVisitorMetadata(req.headers)
+
       type NewConversationType = { id: string }
-      type ConversationInsert = { chatbot_id: string; visitor_id: string }
-      const conversationData: ConversationInsert = {
+      const conversationData = {
         chatbot_id: activeChatbotId,
         visitor_id: nanoid(),
+        visitor_metadata: visitorMetadata as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
       }
       const { data: newConversation } = await supabaseServer
         .from('conversations')

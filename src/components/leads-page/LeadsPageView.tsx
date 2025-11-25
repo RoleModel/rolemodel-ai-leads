@@ -10,6 +10,8 @@ import {
   SidebarLeftIcon,
   Copy01Icon,
   Sun01Icon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
@@ -54,6 +56,14 @@ const AnimatedConversationDemo = dynamic(
   }
 )
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -334,7 +344,6 @@ const getStyles = (isEmbed: boolean) => ({
   },
   bantProgressContainer: {
     width: '100%',
-    maxWidth: '600px',
     display: 'flex',
     alignItems: 'center' as const,
     gap: 'var(--op-space-small)',
@@ -576,6 +585,26 @@ export function LeadsPageView({
 }: LeadsPageViewProps) {
   const { settings } = useLeadsPageSettings()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [disliked, setDisliked] = useState<Record<string, boolean>>({});
+
+
+  // Detect mobile viewport and auto-collapse sidebar
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)')
+
+    const checkMobile = (e: MediaQueryListEvent | MediaQueryList) => {
+      const mobile = e.matches
+      setIsMobile(mobile)
+      setSidebarCollapsed(mobile)
+    }
+
+    checkMobile(mediaQuery)
+    mediaQuery.addEventListener('change', checkMobile)
+
+    return () => mediaQuery.removeEventListener('change', checkMobile)
+  }, [])
   const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null)
@@ -817,7 +846,7 @@ export function LeadsPageView({
       {/* Sidebar */}
       {showSidebar && (
         <div
-          className={sidebarCollapsed ? 'sidebar sidebar--rail' : 'sidebar'}
+          className={`sidebar${sidebarCollapsed ? ' sidebar--rail' : ''}${isMobile ? ' sidebar--compact' : ''}`}
           style={{
             ...styles.sidebar,
             ...(sidebarCollapsed ? styles.sidebarCollapsed : styles.sidebarDynamic),
@@ -944,7 +973,7 @@ export function LeadsPageView({
               gap: 'var(--op-space-small)',
               flex: '1',
               minHeight: 0,
-              maxHeight: 600,
+              // maxHeight: 600,
               overflowY: 'auto',
               width: '98%',
             }}>
@@ -980,25 +1009,59 @@ export function LeadsPageView({
                                   ) : (
                                     <div>{part.text}</div>
                                   )}
+
+                                  {message.role === 'assistant' && isLastMessage && (
+                                    <MessageActions>
+                                      <MessageAction
+                                        label="Like"
+                                        onClick={() =>
+                                          setLiked((prev) => ({
+                                            ...prev,
+                                            [message.id]: !prev[message.id],
+                                          }))
+                                        }
+                                        tooltip="Like this response"
+                                      >
+                                        <HugeiconsIcon
+                                          icon={ThumbsUpIcon}
+                                          size={16}
+                                          color={liked[message.id] ? "currentColor" : "none"}
+                                        />
+                                      </MessageAction>
+                                      <MessageAction
+                                        label="Dislike"
+                                        onClick={() =>
+                                          setDisliked((prev) => ({
+                                            ...prev,
+                                            [message.id]: !prev[message.id],
+                                          }))
+                                        }
+                                        tooltip="Dislike this response"
+                                      >
+                                        <HugeiconsIcon
+                                          icon={ThumbsDownIcon}
+                                          size={16}
+                                          color={disliked[message.id] ? "currentColor" : "none"}
+                                        />
+                                      </MessageAction>
+                                      <MessageAction
+                                        onClick={() => regenerate()}
+                                        label="Retry"
+                                      >
+                                        <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                                      </MessageAction>
+                                      <MessageAction
+                                        onClick={() =>
+                                          navigator.clipboard.writeText(part.text)
+                                        }
+                                        label="Copy"
+                                      >
+                                        <HugeiconsIcon icon={Copy01Icon} size={16} />
+                                      </MessageAction>
+                                    </MessageActions>
+
+                                  )}
                                 </MessageContent>
-                                {message.role === 'assistant' && isLastMessage && (
-                                  <MessageActions>
-                                    <MessageAction
-                                      onClick={() => regenerate()}
-                                      label="Retry"
-                                    >
-                                      <HugeiconsIcon icon={Refresh01Icon} className="size-3" />
-                                    </MessageAction>
-                                    <MessageAction
-                                      onClick={() =>
-                                        navigator.clipboard.writeText(part.text)
-                                      }
-                                      label="Copy"
-                                    >
-                                      <HugeiconsIcon icon={Copy01Icon} className="size-3" />
-                                    </MessageAction>
-                                  </MessageActions>
-                                )}
                               </Message>
                             </Fragment>
                           );
@@ -1037,7 +1100,7 @@ export function LeadsPageView({
                   </PromptInputAttachments>
                   <PromptInputBody style={{ height: "80px" }}>
                     <PromptInputTextarea
-                      placeholder="Ask me anything..."
+                      placeholder="Tell me about your project..."
                       ref={textareaRef}
                     />
                   </PromptInputBody>
@@ -1151,6 +1214,98 @@ export function LeadsPageView({
             )}
           </div>
         )}
+      </div>
+
+      {/* Fixed Privacy/Terms Links */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 'var(--op-space-medium)',
+          right: 'var(--op-space-medium)',
+          display: 'flex',
+          gap: 'var(--op-space-small)',
+          zIndex: 50,
+        }}
+      >
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+            >
+              Privacy
+            </Button>
+          </DialogTrigger>
+          <DialogContent style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}>
+            <DialogHeader>
+              <DialogTitle>Privacy Policy</DialogTitle>
+              <DialogDescription>
+                How we handle your information
+              </DialogDescription>
+            </DialogHeader>
+            <div className="confirm-dialog__body" style={{ fontSize: 'var(--op-font-small)', lineHeight: 1.6 }}>
+              <p style={{ marginBottom: 'var(--op-space-medium)' }}>
+                <strong>Information We Collect</strong><br />
+                When you use our chat service, we collect:
+              </p>
+              <ul style={{ marginBottom: 'var(--op-space-medium)', paddingLeft: 'var(--op-space-large)' }}>
+                <li>Messages you send during conversations</li>
+                <li>Contact information you voluntarily provide (name, email)</li>
+                <li>Technical data (IP address, approximate location, browser type)</li>
+              </ul>
+              <p style={{ marginBottom: 'var(--op-space-medium)' }}>
+                <strong>How We Use Your Information</strong><br />
+                We use this information to:
+              </p>
+              <ul style={{ marginBottom: 'var(--op-space-medium)', paddingLeft: 'var(--op-space-large)' }}>
+                <li>Provide and improve our chat service</li>
+                <li>Respond to your inquiries</li>
+                <li>Analyze usage patterns to enhance user experience</li>
+              </ul>
+              <p>
+                <strong>Data Retention</strong><br />
+                We retain conversation data to provide you with better service and may delete it upon request.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+            >
+              Terms
+            </Button>
+          </DialogTrigger>
+          <DialogContent style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}>
+            <DialogHeader>
+              <DialogTitle>Terms of Service</DialogTitle>
+              <DialogDescription>
+                Guidelines for using our service
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="confirm-dialog__body" style={{ fontSize: 'var(--op-font-small)', lineHeight: 1.6 }}>
+              <p style={{ marginBottom: 'var(--op-space-medium)' }}>
+                <strong>Acceptable Use</strong><br />
+                By using this chat service, you agree to:
+              </p>
+              <ul style={{ marginBottom: 'var(--op-space-medium)', paddingLeft: 'var(--op-space-large)' }}>
+                <li>Provide accurate information when requested</li>
+                <li>Use the service for legitimate business inquiries</li>
+                <li>Not attempt to misuse or abuse the service</li>
+              </ul>
+              <p style={{ marginBottom: 'var(--op-space-medium)' }}>
+                <strong>AI-Powered Responses</strong><br />
+                This chat service uses artificial intelligence. While we strive for accuracy, responses may not always be complete or error-free. For critical decisions, please verify information with our team.
+              </p>
+              <p>
+                <strong>Limitation of Liability</strong><br />
+                We provide this service &quot;as is&quot; without warranties. We are not liable for any damages arising from use of this service.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

@@ -85,7 +85,7 @@ export const MessageActions = ({
   children,
   ...props
 }: MessageActionsProps) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-2x-small)', padding: 'var(--op-space-x-small)' }} {...props}>
+  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 'var(--op-space-2x-small)', paddingTop: 'var(--op-space-2x-small)' }} {...props}>
     {children}
   </div>
 )
