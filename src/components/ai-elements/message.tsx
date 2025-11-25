@@ -4,7 +4,13 @@ import type { FileUIPart, UIMessage } from 'ai'
 import { ChevronLeftIcon, ChevronRightIcon, PaperclipIcon, XIcon } from 'lucide-react'
 import type { ComponentProps, HTMLAttributes, ReactElement } from 'react'
 import { createContext, memo, useContext, useEffect, useMemo, useState } from 'react'
-import { Streamdown } from 'streamdown'
+import dynamic from 'next/dynamic'
+
+// Dynamically import Streamdown to avoid SSR issues with DOMParser
+const Streamdown = dynamic(
+  () => import('streamdown').then((mod) => mod.Streamdown),
+  { ssr: false }
+)
 
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
@@ -316,15 +322,16 @@ export const MessageBranchPage = ({ className, ...props }: MessageBranchPageProp
   )
 }
 
-export type MessageResponseProps = ComponentProps<typeof Streamdown>
+export type MessageResponseProps = HTMLAttributes<HTMLDivElement> & {
+  children?: string
+}
 
 export const MessageResponse = memo(
-  ({ className, ...props }: MessageResponseProps) => (
-    <div style={{ width: '100%', fontSize: 'inherit' }}>
-      <Streamdown
-        className={cn('message-response', className)}
-        {...props}
-      />
+  ({ className, children, ...props }: MessageResponseProps) => (
+    <div style={{ width: '100%', fontSize: 'inherit' }} {...props}>
+      <Streamdown className={cn('message-response', className)}>
+        {children}
+      </Streamdown>
     </div>
   ),
   (prevProps, nextProps) => prevProps.children === nextProps.children

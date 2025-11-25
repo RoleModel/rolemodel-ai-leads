@@ -86,7 +86,7 @@ const getStyles = (isEmbed: boolean) => ({
   container: {
     display: 'flex',
     backgroundColor: 'var(--op-color-neutral-plus-seven)',
-    height: isEmbed ? '100vh' : '100%',
+    height: isEmbed ? '100%' : '100%',
     width: '100%',
     // overflowY: 'auto' as const,
   },
@@ -747,7 +747,7 @@ export function LeadsPageView({
     // Create new chat
     setCurrentChatId(`chat-${Date.now()}`)
     setMessages([])
-    setShowDemo(true)
+    setShowDemo(false)
   }
 
   const handleSwitchChat = (chatId: string) => {
