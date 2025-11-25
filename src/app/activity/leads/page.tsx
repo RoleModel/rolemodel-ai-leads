@@ -271,30 +271,21 @@ export default function LeadsPage() {
               ) : (
                 <div
                   style={{
-                    display: 'grid',
+                    display: 'flex',
+                    flexDirection: 'column',
                     gap: 'var(--op-space-large)',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(500px, 1fr))',
                   }}
                 >
                   {leads.map((lead) => (
-                    <div key={lead.id}>
-                      <div
-                        style={{
-                          marginBottom: 'var(--op-space-small)',
-                          fontSize: 'var(--op-font-small)',
-                          color: 'var(--op-color-neutral-on-plus-max)',
-                        }}
-                      >
-                        {lead.visitor_name || lead.visitor_email || 'Anonymous'} ·{' '}
-                        {new Date(lead.created_at).toLocaleDateString()}
-                      </div>
-                      <LeadSummary
-                        data={lead.summary}
-                        onEmailShare={() => handleEmailShare(lead)}
-                        onSlackShare={() => handleSlackShare(lead)}
-                        variant="full"
-                      />
-                    </div>
+                    <LeadSummary
+                      key={lead.id}
+                      data={lead.summary}
+                      visitorName={lead.visitor_name || lead.visitor_email || 'Anonymous'}
+                      visitorDate={new Date(lead.created_at).toLocaleDateString()}
+                      onEmailShare={() => handleEmailShare(lead)}
+                      onSlackShare={() => handleSlackShare(lead)}
+                      variant="full"
+                    />
                   ))}
                 </div>
               )}

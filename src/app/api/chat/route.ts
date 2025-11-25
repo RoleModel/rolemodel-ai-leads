@@ -105,11 +105,20 @@ ${sourceContext}`,
     }
 
     // Convert UIMessage format to standard CoreMessage format for streamText
-    const convertedMessages = messages.map((m: any) => {
+    interface UIMessagePart {
+      type: string
+      text?: string
+    }
+    interface IncomingMessage {
+      role: string
+      content?: string
+      parts?: UIMessagePart[]
+    }
+    const convertedMessages = messages.map((m: IncomingMessage) => {
       // If message has parts (UIMessage format), convert to content
       if (m.parts && Array.isArray(m.parts)) {
-        const textParts = m.parts.filter((p: any) => p.type === 'text')
-        const content = textParts.map((p: any) => p.text).join('\n')
+        const textParts = m.parts.filter((p: UIMessagePart) => p.type === 'text')
+        const content = textParts.map((p: UIMessagePart) => p.text || '').join('\n')
         return {
           role: m.role,
           content,
@@ -135,7 +144,7 @@ ${sourceContext}`,
       const conversationData = {
         chatbot_id: activeChatbotId,
         visitor_id: nanoid(),
-        visitor_metadata: visitorMetadata as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
+        visitor_metadata: visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
       }
       const { data: newConversation } = await supabaseServer
         .from('conversations')

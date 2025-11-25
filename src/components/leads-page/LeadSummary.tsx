@@ -6,7 +6,7 @@ import { motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
 
-import { Plan, PlanHeader, PlanTitle, PlanDescription, PlanContent, PlanFooter } from '@/components/ai-elements/plan'
+import { Plan, PlanHeader, PlanContent, PlanFooter } from '@/components/ai-elements/plan'
 
 export interface LeadSummaryData {
   // BANT Framework
@@ -47,6 +47,8 @@ export interface LeadSummaryData {
 
 interface LeadSummaryProps {
   data: LeadSummaryData
+  visitorName?: string
+  visitorDate?: string
   onEmailShare?: () => void
   onSlackShare?: () => void
   onScheduleConversation?: () => void
@@ -57,11 +59,7 @@ interface LeadSummaryProps {
 const styles = {
   container: {
     width: '100%',
-    border: '1px solid var(--op-color-border)',
-    borderRadius: 'var(--op-radius-medium)',
-    padding: 'var(--op-space-large)',
     backgroundColor: 'var(--op-color-background)',
-    boxShadow: 'var(--op-shadow-small)',
   },
   header: {
     display: 'flex',
@@ -70,7 +68,7 @@ const styles = {
     marginBottom: 'var(--op-space-medium)',
   },
   title: {
-    fontSize: 'var(--op-font-medium)',
+    fontSize: 'var(--op-font-small)',
     fontWeight: 600,
     margin: 0,
     textAlign: 'left' as const,
@@ -91,7 +89,7 @@ const styles = {
     marginBottom: 'var(--op-space-medium)',
   },
   sectionTitle: {
-    fontSize: 'var(--op-font-medium)',
+    fontSize: 'var(--op-font-small)',
     fontWeight: 600,
     marginBottom: 'var(--op-space-small)',
     textAlign: 'left' as const,
@@ -127,7 +125,7 @@ const styles = {
   scoreContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--op-space-medium)',
+    gap: 'var(--op-space-small)',
   },
   scoreBar: {
     flex: 1,
@@ -161,6 +159,8 @@ const styles = {
 
 export function LeadSummary({
   data,
+  visitorName,
+  visitorDate,
   onEmailShare,
   onSlackShare,
   onScheduleConversation,
@@ -196,11 +196,19 @@ export function LeadSummary({
     >
       <Plan>
         <PlanHeader>
-          <PlanTitle>Conversation Summary</PlanTitle>
-          <PlanDescription>
-            Based on our discussion, here&apos;s what we covered and the recommended
-            next steps.
-          </PlanDescription>
+          <div>
+            <h3 style={{ fontSize: 'var(--op-font-large)', fontWeight: 600, margin: 0 }}>
+              {visitorName && visitorName !== 'null' ? visitorName : 'Conversation Summary'}
+              {visitorName && visitorName !== 'null' && visitorDate && (
+                <span style={{ fontWeight: 400, fontSize: 'var(--op-font-medium)', color: 'var(--op-color-neutral-on-plus-max)', marginLeft: 'var(--op-space-small)' }}>
+                  · {visitorDate}
+                </span>
+              )}
+            </h3>
+            <p style={{ fontSize: 'var(--op-font-medium)', color: 'var(--op-color-neutral-on-plus-max)', margin: 'var(--op-space-x-small) 0 0 0', lineHeight: 1.6 }}>
+              Based on our discussion, here&apos;s what we covered and the recommended next steps.
+            </p>
+          </div>
         </PlanHeader>
 
         <PlanContent>
@@ -262,7 +270,7 @@ export function LeadSummary({
           {(onEmailShare || onSlackShare || onScheduleConversation) && (
             <div style={styles.shareButtonsGroup}>
               {onEmailShare && (
-                <Button variant="primary" onClick={onEmailShare} style={styles.emailButton}>
+                <Button variant="secondary" onClick={onEmailShare} style={styles.emailButton}>
                   <HugeiconsIcon icon={Mail01Icon} size={18} />
                   <span>Email me this summary</span>
                 </Button>
@@ -278,8 +286,9 @@ export function LeadSummary({
                 </Button>
               )}
               {onSlackShare && (
-                <Button variant="ghosticon" onClick={onSlackShare}>
+                <Button variant="secondary" onClick={onSlackShare}>
                   <HugeiconsIcon icon={SlackIcon} size={20} />
+                  <span>Share to Slack</span>
                 </Button>
               )}
             </div>

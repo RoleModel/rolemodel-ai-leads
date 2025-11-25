@@ -1,17 +1,26 @@
 'use client'
 
-import { Database01Icon, Message01Icon, UserGroupIcon } from 'hugeicons-react'
+import { Database01Icon, Link01Icon, Location01Icon, Message01Icon, UserGroupIcon } from 'hugeicons-react'
 import { useEffect, useState } from 'react'
 import { Suspense } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
 import { TopBar } from '@/components/layout/TopBar'
 
+interface VisitorAnalytics {
+  visitorsWithMetadata: number
+  visitorsWithLocation: number
+  topStates: { state: string; count: number }[]
+  topCities: { city: string; count: number }[]
+  topReferrers: { referrer: string; count: number }[]
+}
+
 interface Analytics {
   totalConversations: number
   totalMessages: number
   totalSources: number
   activityByDay: Record<string, { conversations: number; messages: number }>
+  visitorAnalytics?: VisitorAnalytics
 }
 
 export default function AnalyticsPage() {
@@ -230,6 +239,148 @@ export default function AnalyticsPage() {
                     Knowledge Sources
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Visitor Locations */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: 'var(--op-space-large)',
+              marginBottom: 'var(--op-space-large)',
+            }}
+          >
+            {/* Top States */}
+            <div className="card">
+              <div className="card-header">
+                <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+                  <Location01Icon className="icon-sm" />
+                  Top States
+                </h2>
+              </div>
+              <div className="card-body">
+                {!analytics?.visitorAnalytics?.topStates?.length ? (
+                  <p style={{ color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+                    No location data yet
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                    {analytics.visitorAnalytics.topStates.map(({ state, count }) => (
+                      <div
+                        key={state}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: 'var(--op-space-small)',
+                          borderRadius: 'var(--op-radius-small)',
+                          backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                        }}
+                      >
+                        <span style={{ fontSize: 'var(--op-font-small)' }}>{state}</span>
+                        <span
+                          style={{
+                            fontSize: 'var(--op-font-small)',
+                            fontWeight: 'var(--op-font-weight-bold)',
+                            color: 'var(--op-color-primary-base)',
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Top Cities */}
+            <div className="card">
+              <div className="card-header">
+                <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+                  <Location01Icon className="icon-sm" />
+                  Top Cities
+                </h2>
+              </div>
+              <div className="card-body">
+                {!analytics?.visitorAnalytics?.topCities?.length ? (
+                  <p style={{ color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+                    No location data yet
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                    {analytics.visitorAnalytics.topCities.map(({ city, count }) => (
+                      <div
+                        key={city}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: 'var(--op-space-small)',
+                          borderRadius: 'var(--op-radius-small)',
+                          backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                        }}
+                      >
+                        <span style={{ fontSize: 'var(--op-font-small)' }}>{city}</span>
+                        <span
+                          style={{
+                            fontSize: 'var(--op-font-small)',
+                            fontWeight: 'var(--op-font-weight-bold)',
+                            color: 'var(--op-color-primary-base)',
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Top Referrers */}
+            <div className="card">
+              <div className="card-header">
+                <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0, display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+                  <Link01Icon className="icon-sm" />
+                  Top Referrers
+                </h2>
+              </div>
+              <div className="card-body">
+                {!analytics?.visitorAnalytics?.topReferrers?.length ? (
+                  <p style={{ color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+                    No referrer data yet
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                    {analytics.visitorAnalytics.topReferrers.map(({ referrer, count }) => (
+                      <div
+                        key={referrer}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: 'var(--op-space-small)',
+                          borderRadius: 'var(--op-radius-small)',
+                          backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                        }}
+                      >
+                        <span style={{ fontSize: 'var(--op-font-small)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }} title={referrer}>{referrer}</span>
+                        <span
+                          style={{
+                            fontSize: 'var(--op-font-small)',
+                            fontWeight: 'var(--op-font-weight-bold)',
+                            color: 'var(--op-color-primary-base)',
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

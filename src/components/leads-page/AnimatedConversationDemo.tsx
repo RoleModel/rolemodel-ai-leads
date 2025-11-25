@@ -614,16 +614,17 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           >
             <h3
               style={{
-                fontSize: 'var(--op-font-small)',
+                fontSize: 'var(--op-font-large)',
                 fontWeight: 600,
                 textAlign: 'left',
+                marginBottom: 'var(--op-space-x-small)',
               }}
             >
               Conversation Summary
             </h3>
             <p
               style={{
-                fontSize: 'var(--op-font-small)',
+                fontSize: 'var(--op-font-medium)',
                 color: 'var(--op-color-neutral-on-plus-max)',
                 textAlign: 'left',
                 lineHeight: 1.6,
@@ -643,16 +644,17 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     fontWeight: 600,
                     textAlign: 'left',
+                    marginBottom: 'var(--op-space-2x-small)',
                   }}
                 >
                   Your Challenge
                 </h4>
                 <p
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     color: 'var(--op-color-on-background)',
                     margin: 0,
                     textAlign: 'left',
@@ -668,16 +670,17 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     fontWeight: 600,
                     textAlign: 'left',
+                    marginBottom: 'var(--op-space-2x-small)',
                   }}
                 >
                   Timeline
                 </h4>
                 <p
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     margin: 0,
                     textAlign: 'left',
                     lineHeight: 1.6,
@@ -690,16 +693,17 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               <div>
                 <h4
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     fontWeight: 600,
                     textAlign: 'left',
+                    marginBottom: 'var(--op-space-2x-small)',
                   }}
                 >
                   Next Steps
                 </h4>
                 <ul
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     margin: 0,
                     paddingLeft: 'var(--op-space-x-large)',
                     textAlign: 'left',
