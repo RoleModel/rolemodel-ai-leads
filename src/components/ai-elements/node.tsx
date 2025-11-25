@@ -22,8 +22,18 @@ export type NodeProps = ComponentProps<typeof Card> & {
 
 export const Node = ({ handles, className, ...props }: NodeProps) => (
   <Card
+    style={{
+      width: '100%',
+      height: 'auto',
+      gap: 0,
+      padding: 0,
+      borderRadius: 'var(--op-radius-medium)',
+      border: '0.5px solid var(--op-color-border)',
+      position: 'relative',
+      overflow: 'visible',
+    }}
     className={cn(
-      'node-container relative size-full h-auto w-sm gap-0 rounded-md p-0',
+      'node-container',
       className
     )}
     {...props}
@@ -38,7 +48,17 @@ export type NodeHeaderProps = ComponentProps<typeof CardHeader>
 
 export const NodeHeader = ({ className, ...props }: NodeHeaderProps) => (
   <CardHeader
-    className={cn('gap-0.5 rounded-t-md border-b bg-secondary p-3!', className)}
+    style={{
+      fontSize: 'var(--op-font-small)',
+      fontWeight: 400,
+      color: 'var(--op-color-neutral-on-plus-max)',
+      marginBottom: 'var(--op-space-2x-small)',
+      borderRadius: 'var(--op-radius-medium) var(--op-radius-medium) 0 0',
+      backgroundColor: 'var(--op-color-neutral-plus-seven)',
+      borderBottom: '1px solid var(--op-color-border)',
+      padding: 'var(--op-space-x-small)',
+    }}
+    className={cn('gap-0.5', className)}
     {...props}
   />
 )
@@ -60,7 +80,13 @@ export const NodeAction = (props: NodeActionProps) => <CardAction {...props} />
 export type NodeContentProps = ComponentProps<typeof CardContent>
 
 export const NodeContent = ({ className, ...props }: NodeContentProps) => (
-  <CardContent className={cn('p-3', className)} {...props} />
+  <CardContent
+    style={{
+      padding: 'var(--op-space-x-small)',
+    }}
+    className={cn('p-3', className)}
+    {...props}
+  />
 )
 
 export type NodeFooterProps = ComponentProps<typeof CardFooter>

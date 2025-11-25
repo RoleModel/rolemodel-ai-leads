@@ -28,7 +28,12 @@ export const ConversationContent = ({
   ...props
 }: ConversationContentProps) => (
   <StickToBottom.Content
-    className={cn('flex flex-col gap-8 p-4', className)}
+    style={{
+      gap: 'var(--op-space-small)',
+      padding: 'var(--op-space-medium)',
+      // maxHeight: '500px',
+    }}
+    className={cn('flex flex-col', className)}
     {...props}
   />
 )
@@ -48,18 +53,39 @@ export const ConversationEmptyState = ({
   ...props
 }: ConversationEmptyStateProps) => (
   <div
+    style={{
+      justifyContent: 'center',
+      gap: 'var(--op-space-large)',
+      padding: 'var(--op-space-medium)',
+      textAlign: 'center',
+    }}
     className={cn(
-      'flex size-full flex-col items-center justify-center gap-3 p-8 text-center',
+      'flex size-full flex-col items-center justify-center',
       className
     )}
     {...props}
   >
     {children ?? (
       <>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
-        <div className="space-y-1">
-          <h3 className="font-medium text-sm">{title}</h3>
-          {description && <p className="text-muted-foreground text-sm">{description}</p>}
+        {icon && <div
+          style={{
+            color: 'var(--op-color-muted-foreground)',
+          }}
+        >{icon}</div>}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--op-space-small)',
+          }}>
+          <h3 style={{
+            fontWeight: 500,
+            fontSize: 'var(--op-font-small)',
+          }}>{title}</h3>
+          {description && <p style={{
+            color: 'var(--op-color-muted-foreground)',
+            fontSize: 'var(--op-font-small)',
+          }}>{description}</p>}
         </div>
       </>
     )}
@@ -81,6 +107,13 @@ export const ConversationScrollButton = ({
   return (
     !isAtBottom && (
       <Button
+        style={{
+          position: 'absolute',
+          bottom: 'var(--op-space-medium)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          borderRadius: 'var(--op-radius-full)',
+        }}
         className={cn(
           'absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full',
           className

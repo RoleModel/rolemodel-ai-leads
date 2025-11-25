@@ -2,6 +2,10 @@ import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
+interface CardHeaderProps extends React.ComponentProps<'div'> {
+  border?: boolean;
+}
+
 function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
@@ -12,9 +16,14 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
+function CardHeader({ className, border = false, ...props }: CardHeaderProps) {
   return (
-    <div data-slot="card-header" className={cn('card__header', className)} {...props} />
+    <div data-slot="card-header"
+      style={{
+        fontSize: 'var(--op-font-medium)',
+        borderBottom: border ? '1px solid var(--op-color-border)' : 'none',
+      }}
+      className={cn('card__header', className)} {...props} />
   )
 }
 

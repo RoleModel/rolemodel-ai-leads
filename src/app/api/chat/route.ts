@@ -1,6 +1,7 @@
-import { streamText } from 'ai'
+import { streamText, tool } from 'ai'
 import { nanoid } from 'nanoid'
 import { NextRequest } from 'next/server'
+import { z } from 'zod'
 
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
@@ -16,7 +17,7 @@ const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { messages, chatbotId, conversationId } = body
+    const { messages, chatbotId, conversationId, model, temperature, instructions } = body
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
 
@@ -31,6 +32,11 @@ export async function POST(req: NextRequest) {
         }
       )
     }
+
+    // Override chatbot settings with playground settings if provided
+    const effectiveModel = model || chatbot?.model || 'gpt-4o-mini'
+    const effectiveTemperature = temperature !== undefined ? temperature : (chatbot?.temperature || 0.7)
+    const effectiveInstructions = instructions || chatbot?.instructions || ''
 
     // Get the last user message for RAG
     const lastUserMessage = messages
@@ -58,15 +64,17 @@ export async function POST(req: NextRequest) {
       console.log('[RAG Debug] Top source similarity:', relevantSources[0].similarity)
     }
 
-    // Build context from sources
-    const sourceContext = buildSourceContext(relevantSources)
+    // Build context from sources with workflow
+    const sourceContext = buildSourceContext(relevantSources, chatbot)
 
     // Build system message
     const systemMessage = {
       role: 'system' as const,
       content: `${chatbot?.business_context || ''}
 
-${chatbot?.instructions || ''}
+${effectiveInstructions}
+
+When answering complex questions or when your reasoning would benefit from showing step-by-step thinking, use the 'thinking' tool to display your chain of thought process to the user.
 
 ${sourceContext}`,
     }
@@ -105,13 +113,25 @@ ${sourceContext}`,
 
     // Stream response
     // Vercel AI Gateway uses provider/model format (e.g., openai/gpt-4o-mini)
-    const modelName = chatbot?.model || 'gpt-4o-mini'
-    const modelId = modelName.includes('/') ? modelName : `openai/${modelName}`
+    const modelId = effectiveModel.includes('/') ? effectiveModel : `openai/${effectiveModel}`
 
     const result = streamText({
       model: openai(modelId),
       messages: fullMessages,
-      temperature: chatbot?.temperature || 0.7,
+      temperature: effectiveTemperature,
+      toolChoice: 'auto',
+      tools: {
+        thinking: tool({
+          description: 'Show chain of thought reasoning process for complex questions',
+          inputSchema: z.object({
+            steps: z.array(z.object({
+              label: z.string(),
+              description: z.string().optional(),
+              status: z.enum(['complete', 'active', 'pending']),
+            })),
+          }),
+        }),
+      },
       async onFinish({ text }) {
         // Save assistant message
         if (activeConversationId) {

@@ -10,6 +10,7 @@ import {
   PlayCircle02Icon,
   QuestionIcon,
   Rocket01Icon,
+  Settings02Icon,
   TextIcon,
   Time01Icon,
   UserIcon,
@@ -81,6 +82,7 @@ export function NavigationSidebar() {
     { id: 'text', icon: TextIcon, label: 'Text' },
     { id: 'website', icon: Globe02Icon, label: 'Website' },
     { id: 'qna', icon: QuestionIcon, label: 'Q&A' },
+    { id: 'workflow', icon: Settings02Icon, label: 'Workflow' },
   ]
 
   const activeSection = searchParams.get('section') || 'files'

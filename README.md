@@ -1,204 +1,305 @@
-# RoleModel AI Leads Chatbot
+# RoleModel AI Leads
 
-An intelligent lead generation chatbot built with Next.js, AI SDK, and Supabase. Features both standalone chat pages and embeddable widgets for Framer sites.
+A lead qualification and chatbot system that uses AI to engage website visitors, collect contact information, and score leads based on configurable qualification workflows.
 
-## Features
+## Architecture Overview
 
-- ✅ **Playground**: Test your chatbot with a full chat interface
-- ✅ **Sources**: Add training data (text, files, websites, Q&A)
-- ✅ **Deploy**: Standalone chat pages and embeddable widgets
-- ✅ **Activity**: View all conversations and message history
-- ✅ **Analytics**: Track performance metrics
-- ✅ **RAG (Retrieval-Augmented Generation)**: Context-aware responses using vector search
-- ✅ **Optics Design System**: Professional, class-based CSS styling (no Tailwind)
+The system consists of three main components:
 
-## Tech Stack
+1. **Embeddable Chat Widget** - A React-based chat interface that can be embedded on external websites
+2. **Workflow Designer** - Visual tool for configuring lead qualification questions and scoring
+3. **RAG-Enhanced AI Backend** - GPT-4o-mini powered responses with vector search for context
 
-- **Framework**: Next.js 16 (App Router)
-- **AI**: AI SDK with AI Gateway support
-- **Database**: Supabase (PostgreSQL + pgvector)
-- **Styling**: Optics Design System
-- **Deployment**: Vercel
+---
 
-## Quick Start
+## How the AI Conversation Works
 
-### 1. Clone and Install
+### Chat Flow
 
-```bash
-git clone <repo-url>
-cd rolemodel-ai-leads
-npm install
-```
+1. User sends a message through the chat widget
+2. The backend retrieves relevant context using semantic search (RAG)
+3. GPT-4o-mini generates a response using:
+   - System instructions from the chatbot configuration
+   - Business context including workflow rules
+   - Retrieved knowledge base chunks
+   - Conversation history
+4. Lead information is extracted from the conversation
+5. Qualification score is calculated based on workflow rules
 
-### 2. Set Up Supabase
+### AI Model Configuration
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Project Settings → API to get your keys
-3. Go to SQL Editor and run the schema from `/supabase/schema.sql`
-4. (Optional) Run `/scripts/seed-knowledge.sql` to add sample RoleModel knowledge base
+Located in `/src/app/api/chat/route.ts`:
 
-### 3. Configure Environment Variables
+- **Model**: `gpt-4o-mini`
+- **Temperature**: `0.7` (default, configurable per chatbot)
+- **Max Tokens**: `500` per response
+- **Streaming**: Enabled for real-time responses
 
-Copy `.env.local` and fill in your credentials:
+---
 
-```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+## Lead Qualification System
 
-# AI Gateway (recommended)
-AI_GATEWAY_API_KEY=your_ai_gateway_key
-AI_GATEWAY_ACCOUNT_ID=your_cloudflare_account_id
+### How Scoring Works
 
-# OpenAI (fallback)
-OPENAI_API_KEY=your_openai_key
-```
+The workflow designer creates qualification rules that are embedded into the chatbot's system prompt. When a workflow is saved, the system:
 
-### 4. Run Development Server
+1. Extracts all question nodes and their configurations
+2. Generates dynamic system instructions that tell the AI:
+   - The specific questions to ask
+   - Keywords to look for in responses
+   - Scoring weights for each question
+   - Qualification threshold
+3. Updates the chatbot's `instructions` field in the database
+4. Stores the full workflow JSON in `business_context`
 
-```bash
-npm run dev
-```
+The AI receives these instructions in its system prompt and naturally incorporates the questions into conversation.
 
-Open [http://localhost:3000/playground](http://localhost:3000/playground)
+### BANT Framework (Default)
 
-## Project Structure
+The default workflow uses BANT criteria:
 
-```
-src/
-├── app/
-│   ├── api/
-│   │   ├── chat/          # Chat completions with RAG
-│   │   ├── sources/       # Source management
-│   │   ├── conversations/ # Activity data
-│   │   ├── analytics/     # Metrics
-│   │   └── chatbot/       # Chatbot config
-│   ├── playground/        # Main chat interface
-│   ├── sources/           # Knowledge base management
-│   ├── activity/          # Conversation viewer
-│   ├── analytics/         # Dashboard
-│   ├── deploy/            # Embed codes
-│   ├── chat/[id]/         # Standalone chat page
-│   └── widget/[id]/       # Widget iframe page
-├── components/
-│   ├── chat/              # Chat UI components
-│   └── layout/            # App shell components
-└── lib/
-    ├── ai/                # AI Gateway, embeddings, RAG
-    └── supabase/          # Database clients
-```
+| Question | Weight | Keywords |
+|----------|--------|----------|
+| "What's your budget for this project?" | 30% | 10k, 20k, 50k+, enterprise |
+| "Are you the decision maker?" | 25% | yes, no, team, committee |
+| "What problems are you trying to solve?" | 20% | efficiency, cost, scale, automation |
+| "When do you need this completed?" | 25% | asap, this quarter, next quarter, 6 months |
 
-## Usage Guide
+### Lead Data Extraction
 
-### Adding Knowledge Base Content
+After each AI response, the system calls GPT-4o-mini again to extract structured data from the conversation. This happens in `/src/app/api/chat/route.ts`:
 
-1. Go to **Sources** page
-2. Add text content (PDFs, websites coming soon)
-3. Content is automatically embedded for semantic search
-
-### Testing the Chatbot
-
-1. Go to **Playground**
-2. Chat with the bot to test responses
-3. Relevant sources are automatically retrieved based on context
-
-### Deploying
-
-1. Go to **Deploy** page
-2. Copy the standalone URL to share directly
-3. Copy the widget embed code for Framer:
-   - In Framer, add an **Embed** component
-   - Paste the widget code
-   - Publish your site
-
-### Viewing Activity
-
-1. Go to **Activity** page
-2. Click on any conversation to view full message history
-3. Track user engagement and common questions
-
-### Monitoring Analytics
-
-1. Go to **Analytics** page
-2. View total conversations, messages, and sources
-3. Track activity over the last 7 days
-
-## Deployment to Vercel
-
-1. Push your code to GitHub
-2. Connect your repo to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-```bash
-# Or use Vercel CLI
-npm i -g vercel
-vercel
-```
-
-## Customization
-
-### Chatbot Configuration
-
-Edit the default chatbot in `/supabase/schema.sql`:
-
-```sql
-UPDATE chatbots SET
-  display_name = 'Your Company Name',
-  initial_message = 'Your welcome message',
-  instructions = 'Your custom instructions',
-  business_context = 'Your company info'
-WHERE id = 'a0000000-0000-0000-0000-000000000001';
-```
-
-### Styling
-
-All styling uses Optics Design System classes. Customize in `/src/app/globals.css`:
-
-```css
-:root {
-  --op-color-primary-base: #your-color;
-  --op-font-family: 'Your Font';
+```typescript
+{
+  name: string | null,
+  email: string | null,
+  phone: string | null,
+  company: string | null,
+  budget: string | null,
+  timeline: string | null,
+  needs: string | null,
+  qualification_score: number,
+  is_qualified: boolean
 }
 ```
 
-## AI Gateway Setup
+This extraction analyzes the full conversation to pull out any contact or qualification data the user has mentioned.
 
-Using Cloudflare AI Gateway provides:
+---
 
-- Request caching
-- Analytics
-- Rate limiting
-- Cost optimization
+## Workflow Designer
 
-1. Create an account at [cloudflare.com](https://cloudflare.com)
-2. Set up AI Gateway
-3. Get your Account ID and Gateway API key
-4. Add to `.env.local`
+Located at `/sources` page, implemented in `/src/components/admin/WorkflowDesigner.tsx`.
 
-## Troubleshooting
+### Node Types
 
-### Vector search not working
+- **Entry Node** - Starting point of conversation flow (green)
+- **Question Node** - Qualification question with keywords and weight (blue)
+- **Outcome Node** - End state like "Qualified Lead" or "Nurture Lead" (purple/yellow)
 
-Make sure pgvector extension is enabled in Supabase:
+### Edge Configuration
 
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
+Edges between nodes can have:
+
+- **Labels** - Text displayed on the connection (e.g., "Score > 70%")
+- **Colors** - Custom stroke colors
+- **Line Styles**:
+  - `solid` - Default continuous line
+  - `dashed` - Dashed line (`strokeDasharray: "5 5"`)
+  - `dotted` - Dotted line (`strokeDasharray: "2 2"`)
+  - `animated` - Pulsing animation effect
+
+### How Workflow Affects AI Behavior
+
+When you save a workflow via POST `/api/workflow`:
+
+1. **Questions are extracted** from all question nodes
+2. **Dynamic instructions are generated**:
+   ```
+   QUALIFICATION QUESTIONS:
+   1. What's your budget for this project? (Weight: 30%)
+   2. Are you the decision maker? (Weight: 25%)
+   ...
+
+   SCORING CRITERIA:
+   - Look for these keywords: 10k, 20k, yes, no, efficiency...
+   - Qualification threshold: 70%
+   ```
+3. **Instructions are appended** to the chatbot's existing instructions
+4. **Workflow JSON is stored** in `business_context` field
+
+The AI uses these instructions to guide the conversation naturally while collecting qualification data.
+
+---
+
+## RAG (Retrieval Augmented Generation)
+
+Implemented in `/src/lib/ai/rag.ts`.
+
+### How Context Retrieval Works
+
+1. User's message is converted to a vector embedding using OpenAI's `text-embedding-3-small` (1536 dimensions)
+2. pgvector performs cosine similarity search against stored document chunks
+3. Top 5 most relevant chunks are retrieved (similarity threshold: 0.3)
+4. Retrieved context is prepended to the AI's system prompt
+
+### What Gets Retrieved
+
+The RAG system searches the `documents` table for chunks matching the user's query semantically. This allows the AI to answer questions about:
+
+- Your products/services
+- Pricing information
+- Company policies
+- FAQ content
+- Any other indexed content
+
+---
+
+## Database Schema
+
+### Key Tables
+
+**chatbots**
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| name | VARCHAR | Display name |
+| instructions | TEXT | System prompt sent to AI |
+| business_context | JSONB | Workflow and additional context |
+| model | VARCHAR | AI model to use |
+| temperature | FLOAT | Response creativity (0-1) |
+
+**conversations**
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| chatbot_id | UUID | Foreign key to chatbots |
+| lead_data | JSONB | Extracted lead information |
+
+**messages**
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| conversation_id | UUID | Foreign key to conversations |
+| role | VARCHAR | "user" or "assistant" |
+| content | TEXT | Message text |
+
+**documents**
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| chatbot_id | UUID | Foreign key to chatbots |
+| content | TEXT | Text chunk |
+| embedding | vector(1536) | Vector embedding |
+| metadata | JSONB | Source information |
+
+---
+
+## API Endpoints
+
+### POST /api/chat
+
+Main chat endpoint for conversation.
+
+**Request:**
+```json
+{
+  "message": "User's message",
+  "conversationId": "uuid (optional)",
+  "chatbotId": "uuid (optional)"
+}
 ```
 
-### Embeddings failing
+**Response:** Server-sent events stream with AI response chunks
 
-Check your AI Gateway / OpenAI API key is correct and has sufficient credits.
+### GET /api/workflow
 
-### Widget not displaying
+Retrieve workflow configuration for a chatbot.
 
-Make sure the embed code domain matches your deployment URL. Update in `/src/app/deploy/page.tsx`.
+**Query params:**
+- `chatbotId` - UUID of chatbot (optional, uses default)
+
+### POST /api/workflow
+
+Save workflow configuration.
+
+**Request:**
+```json
+{
+  "chatbotId": "uuid (optional)",
+  "workflow": {
+    "nodes": [...],
+    "qualificationThreshold": 70
+  }
+}
+```
+
+**What it does:**
+- Extracts questions from workflow nodes
+- Generates dynamic AI instructions
+- Updates chatbot in database
+- Stores full workflow in business_context
+
+### POST /api/chatbot
+
+Create or update chatbot configuration.
+
+---
+
+## Embedding the Widget
+
+### Iframe Method
+
+```html
+<iframe
+  src="https://your-domain.com/embed/leads-page"
+  width="400"
+  height="600"
+  style="border: none;"
+></iframe>
+```
+
+### Script Tag Method
+
+```html
+<script
+  src="https://your-domain.com/embed-script.js"
+  data-chatbot-id="your-chatbot-id"
+></script>
+```
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 15, React 19, TypeScript
+- **UI Components**: Custom components with Optics Design System tokens
+- **Flow Visualization**: @xyflow/react (ReactFlow)
+- **AI**: OpenAI GPT-4o-mini, text-embedding-3-small
+- **Database**: Supabase (PostgreSQL with pgvector)
+- **Styling**: Tailwind CSS with CSS custom properties
+
+---
+
+## Environment Variables
+
+```bash
+OPENAI_API_KEY=sk-...
+SUPABASE_URL=https://...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+---
+
+## Limitations
+
+- Lead extraction accuracy depends on how clearly users state information
+- Qualification scoring is keyword-based, not semantic understanding
+- RAG retrieval limited to top 5 chunks per query
+- Workflow changes require saving to take effect
+
+---
 
 ## License
 
 Proprietary - RoleModel Software
-
-## Support
-
-For questions or issues, contact: hello@rolemodelsoftware.com

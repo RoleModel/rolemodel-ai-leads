@@ -1,17 +1,27 @@
 'use client'
 
+import { Suspense, useEffect, useState } from 'react'
 import {
   Add01Icon,
   Delete02Icon,
   Globe02Icon,
   RefreshIcon,
   Upload01Icon,
+  SidebarRight01Icon,
 } from 'hugeicons-react'
+import { CheckIcon, AlertCircleIcon } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
 import { TopBar } from '@/components/layout/TopBar'
+import type { WorkflowControls } from '@/components/admin/WorkflowDesigner'
+
+// Dynamically import WorkflowDesigner to avoid SSR issues with ReactFlow
+const WorkflowDesigner = dynamic(
+  () => import('@/components/admin/WorkflowDesigner').then((mod) => mod.WorkflowDesigner),
+  { ssr: false, loading: () => <div>Loading workflow designer...</div> }
+)
 
 export const runtime = 'edge'
 
@@ -28,7 +38,7 @@ interface Source {
   } | null
 }
 
-type SourceType = 'files' | 'text' | 'website' | 'qna'
+type SourceType = 'files' | 'text' | 'website' | 'qna' | 'workflow'
 
 export default function SourcesPage() {
   const searchParams = useSearchParams()
@@ -42,6 +52,8 @@ export default function SourcesPage() {
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
   const [isDragging, setIsDragging] = useState(false)
+  const [workflowControls, setWorkflowControls] = useState<WorkflowControls | null>(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
     loadSources()
@@ -67,6 +79,7 @@ export default function SourcesPage() {
 
     setIsAdding(true)
     try {
+      const sectionType = getSectionType(activeSection)
       const payload: {
         title: string | null
         content: string
@@ -75,7 +88,7 @@ export default function SourcesPage() {
       } = {
         title: newTitle.trim() || null,
         content: newContent.trim(),
-        type: getSectionType(activeSection),
+        ...(sectionType && { type: sectionType }),
       }
 
       // If this is a website source, add URL to payload
@@ -155,24 +168,27 @@ export default function SourcesPage() {
 
   function getSectionType(
     section: SourceType
-  ): 'file' | 'text' | 'website' | 'qna' {
+  ): 'file' | 'text' | 'website' | 'qna' | null {
     const typeMap: Record<
       SourceType,
-      'file' | 'text' | 'website' | 'qna'
+      'file' | 'text' | 'website' | 'qna' | null
     > = {
       files: 'file',
       text: 'text',
       website: 'website',
       qna: 'qna',
+      workflow: null, // workflow doesn't have a source type
     }
     return typeMap[section]
   }
 
   // Filter sources by type metadata
-  const filteredSources = sources.filter((s) => {
-    // Only show sources that have the matching type
-    return s.metadata?.type === getSectionType(activeSection)
-  })
+  const filteredSources = activeSection === 'workflow'
+    ? [] // No sources to show for workflow section
+    : sources.filter((s) => {
+      // Only show sources that have the matching type
+      return s.metadata?.type === getSectionType(activeSection)
+    })
   console.log('[Sources Page] Active section:', activeSection)
   console.log('[Sources Page] Looking for type:', getSectionType(activeSection))
   console.log('[Sources Page] Filtered sources:', filteredSources.length)
@@ -231,405 +247,695 @@ export default function SourcesPage() {
             style={{
               flex: 1,
               overflow: 'auto',
-              padding: 'var(--op-space-large)',
             }}
           >
-            <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <h1
-                style={{
-                  fontSize: 'var(--op-font-x-large)',
-                  fontWeight: 'var(--op-font-weight-bold)',
-                  margin: 0,
-                  textTransform: 'capitalize',
-                }}
-              >
-                {activeSection === 'qna' ? 'Q & A' : activeSection}
-              </h1>
-              <p
-                style={{
-                  fontSize: 'var(--op-font-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  margin: 'var(--op-space-2x-small) 0 0 0',
-                }}
-              >
-                {activeSection === 'files' &&
-                  'Upload documents to train your AI. Extract text from PDFs, DOCX, and TXT files.'}
-                {activeSection === 'text' &&
-                  'Add plain text content for your chatbot to learn from.'}
-                {activeSection === 'website' &&
-                  'Add website URLs to scrape content from.'}
-                {activeSection === 'qna' &&
-                  'Add question and answer pairs for precise responses.'}
-              </p>
-            </div>
-
-            {/* File Upload Section */}
-            {activeSection === 'files' && (
-              <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
-                <div className="card-header">
-                  <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
-                    Add files
-                  </h2>
-                </div>
-                <div className="card-body">
-
-
-                  {/* Drag & Drop Area */}
-                  <div
-                    onDragEnter={handleDragEnter}
-                    onDragLeave={handleDragLeave}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
-                    style={{
-                      border: `2px dashed ${isDragging ? 'var(--op-color-primary)' : 'var(--op-color-border)'}`,
-                      borderRadius: 'var(--op-radius-medium)',
-                      padding: 'var(--op-space-3x-large)',
-                      textAlign: 'center',
-                      backgroundColor: isDragging
-                        ? 'var(--op-color-primary-background)'
-                        : 'transparent',
-                      transition: 'all 0.2s',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => document.getElementById('file-input')?.click()}
-                  >
-                    <Upload01Icon
-                      className="icon-lg"
+            {/* Show WorkflowDesigner for workflow section */}
+            {activeSection === 'workflow' ? (
+              <>
+                <div style={{
+                  marginBottom: 'var(--op-space-large)',
+                  borderBottom: '1px solid',
+                  borderColor: 'var(--op-color-border)',
+                  padding: 'var(--op-space-large)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}>
+                  <div>
+                    <h1
                       style={{
-                        marginBottom: 'var(--op-space-medium)',
-                        color: 'var(--op-color-neutral-on-plus-max)',
-                      }}
-                    />
-                    <p
-                      style={{
-                        fontSize: 'var(--op-font-medium)',
+                        fontSize: 'var(--op-font-x-large)',
+                        fontWeight: 'var(--op-font-weight-bold)',
                         margin: 0,
-                        marginBottom: 'var(--op-space-2x-small)',
                       }}
                     >
-                      Drag & drop files here, or click to select files
-                    </p>
+                      Lead Qualification Rules
+                    </h1>
                     <p
                       style={{
                         fontSize: 'var(--op-font-small)',
                         color: 'var(--op-color-neutral-on-plus-max)',
-                        margin: 0,
+                        margin: 'var(--op-space-2x-small) 0 0 0',
                       }}
                     >
-                      Supported file types: pdf, doc, docx, txt
+                      Configure questions and scoring criteria to automatically qualify leads.
                     </p>
                   </div>
-
-                  <input
-                    id="file-input"
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,.txt"
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                    style={{ display: 'none' }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Text/Other Content Section */}
-            {activeSection !== 'files' && (
-              <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
-                <div className="card-header">
-                  <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
-                    Add New{' '}
-                    {activeSection === 'text'
-                      ? 'Text'
-                      : activeSection === 'website'
-                        ? 'Website'
-                        : 'Content'}
-                  </h2>
-                </div>
-                <div
-                  className="card-body"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--op-space-medium)',
-                  }}
-                >
-                  <div className="form-group">
-                    <label htmlFor="source-title" className="form-label">
-                      Title {activeSection === 'text' && '(optional)'}
-                    </label>
-                    <input
-                      id="source-title"
-                      className="form-control form-control--large"
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder={
-                        activeSection === 'text'
-                          ? 'e.g., Services Overview'
-                          : activeSection === 'website'
-                            ? 'e.g., Homepage'
-                            : 'Enter a title'
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="source-content" className="form-label">
-                      {activeSection === 'website' ? 'URL' : 'Content'}
-                    </label>
-                    {activeSection === 'website' ? (
-                      <input
-                        id="source-content"
-                        className="form-control form-control--large"
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
-                        placeholder="https://example.com"
-                        type="url"
-                        required
-                        aria-required="true"
-                      />
-                    ) : (
-                      <textarea
-                        id="source-content"
-                        className="form-control"
-                        value={newContent}
-                        onChange={(e) => setNewContent(e.target.value)}
-                        placeholder={`Enter the ${activeSection} content that the chatbot should learn from...`}
-                        rows={8}
-                        style={{ resize: 'vertical' }}
-                        required
-                        aria-required="true"
-                      />
-                    )}
-                  </div>
-
                   <button
-                    className="btn btn--primary btn--large"
-                    onClick={handleAddSource}
-                    disabled={isAdding || !newContent.trim()}
-                    style={{ alignSelf: 'flex-start' }}
+                    className="btn btn--ghost btn--small"
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+                    style={{ flexShrink: 0 }}
                   >
-                    <Add01Icon className="icon-sm" />
-                    {isAdding
-                      ? 'Adding...'
-                      : `Add ${activeSection === 'website' ? 'Website' : 'Source'}`}
+                    <SidebarRight01Icon
+                      className="icon-sm"
+                      style={{
+                        transform: sidebarCollapsed ? 'scaleX(-1)' : 'none',
+                        transition: 'transform 0.2s ease',
+                      }}
+                    />
                   </button>
                 </div>
-              </div>
-            )}
+                <WorkflowDesigner onControlsChange={setWorkflowControls} />
+              </>
+            ) : (
+              <>
+                <div style={{
+                  marginBottom: 'var(--op-space-large)',
+                  borderBottom: '1px solid',
+                  borderColor: 'var(--op-color-border)',
+                  padding: 'var(--op-space-large)'
+                }}>
+                  <h1
+                    style={{
+                      fontSize: 'var(--op-font-x-large)',
+                      fontWeight: 'var(--op-font-weight-bold)',
+                      margin: 0,
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {activeSection === 'qna' ? 'Q & A' : activeSection}
+                  </h1>
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      margin: 'var(--op-space-2x-small) 0 0 0',
+                    }}
+                  >
+                    {activeSection === 'files' &&
+                      'Upload documents to train your AI. Extract text from PDFs, DOCX, and TXT files.'}
+                    {activeSection === 'text' &&
+                      'Add plain text content for your chatbot to learn from.'}
+                    {activeSection === 'website' &&
+                      'Add website URLs to scrape content from.'}
+                    {activeSection === 'qna' &&
+                      'Add question and answer pairs for precise responses.'}
+                  </p>
+                </div>
 
-            {/* Sources List */}
-            <div>
-              <h2
-                style={{
-                  fontSize: 'var(--op-font-large)',
-                  fontWeight: 'var(--op-font-weight-bold)',
-                  marginBottom: 'var(--op-space-medium)',
-                }}
-              >
-                Existing Sources ({filteredSources.length})
-              </h2>
-
-              {isLoading ? (
-                <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>Loading...</p>
-              ) : filteredSources.length === 0 ? (
-                <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
-                  No sources yet. Add your first source above to get started.
-                </p>
-              ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--op-space-medium)',
-                  }}
-                >
-                  {filteredSources.map((source) => (
-                    <div key={source.id} className="card">
-                      <div
-                        className="card-header"
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
-                          {source.title || 'Untitled Source'}
-                        </h3>
-                        <button
-                          className="btn btn--destructive btn--small btn--icon"
-                          onClick={() => handleDeleteSource(source.id)}
-                          title="Delete source"
-                          aria-label={`Delete ${source.title || 'source'}`}
-                        >
-                          <Delete02Icon className="icon-sm" />
-                        </button>
+                {/* File Upload Section */}
+                {activeSection === 'files' && (
+                  <div style={{ padding: 'var(--op-space-medium)' }}>
+                    <div className="card" style={{
+                      marginBottom: 'var(--op-space-large)',
+                      borderBottom: '1px solid',
+                      borderColor: 'var(--op-color-border)',
+                    }}>
+                      <div className="card-header">
+                        <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
+                          Add files
+                        </h2>
                       </div>
                       <div className="card-body">
-                        <p
-                          style={{
-                            fontSize: 'var(--op-font-small)',
-                            whiteSpace: 'pre-wrap',
-                            margin: 0,
-                            maxHeight: '200px',
-                            overflow: 'auto',
-                          }}
-                        >
-                          {source.content}
-                        </p>
+
+
+                        {/* Drag & Drop Area */}
                         <div
+                          onDragEnter={handleDragEnter}
+                          onDragLeave={handleDragLeave}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
                           style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginTop: 'var(--op-space-small)',
+                            border: `2px dashed ${isDragging ? 'var(--op-color-primary)' : 'var(--op-color-border)'}`,
+                            borderRadius: 'var(--op-radius-medium)',
+                            padding: 'var(--op-space-3x-large)',
+                            textAlign: 'center',
+                            backgroundColor: isDragging
+                              ? 'var(--op-color-primary-background)'
+                              : 'transparent',
+                            transition: 'all 0.2s',
+                            cursor: 'pointer',
                           }}
+                          onClick={() => document.getElementById('file-input')?.click()}
                         >
+                          <Upload01Icon
+                            className="icon-lg"
+                            style={{
+                              marginBottom: 'var(--op-space-medium)',
+                              color: 'var(--op-color-neutral-on-plus-max)',
+                            }}
+                          />
                           <p
                             style={{
-                              fontSize: 'var(--op-font-x-small)',
+                              fontSize: 'var(--op-font-medium)',
+                              margin: 0,
+                              marginBottom: 'var(--op-space-2x-small)',
+                            }}
+                          >
+                            Drag & drop files here, or click to select files
+                          </p>
+                          <p
+                            style={{
+                              fontSize: 'var(--op-font-small)',
                               color: 'var(--op-color-neutral-on-plus-max)',
                               margin: 0,
                             }}
                           >
-                            Added {new Date(source.created_at).toLocaleDateString()}
+                            Supported file types: pdf, doc, docx, txt
                           </p>
-                          {source.metadata?.size && (
-                            <p
-                              style={{
-                                fontSize: 'var(--op-font-x-small)',
-                                color: 'var(--op-color-neutral-on-plus-max)',
-                                margin: 0,
-                              }}
-                            >
-                              {(source.metadata.size / 1024).toFixed(2)} KB
-                            </p>
-                          )}
                         </div>
+
+                        <input
+                          id="file-input"
+                          type="file"
+                          multiple
+                          accept=".pdf,.doc,.docx,.txt"
+                          onChange={(e) => handleFileUpload(e.target.files)}
+                          style={{ display: 'none' }}
+                        />
                       </div>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Text/Other Content Section */}
+                {activeSection !== 'files' && (
+                  <div style={{ padding: 'var(--op-space-medium)' }}>
+                    <div className="card" style={{
+                      marginBottom: 'var(--op-space-large)'
+                    }}>
+                      <div className="card-header">
+                        <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
+                          Add New{' '}
+                          {activeSection === 'text'
+                            ? 'Text'
+                            : activeSection === 'website'
+                              ? 'Website'
+                              : 'Content'}
+                        </h2>
+                      </div>
+                      <div
+                        className="card-body"
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 'var(--op-space-medium)',
+                        }}
+                      >
+                        <div className="form-group">
+                          <label htmlFor="source-title" className="form-label">
+                            Title {activeSection === 'text' && '(optional)'}
+                          </label>
+                          <input
+                            id="source-title"
+                            className="form-control form-control--large"
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
+                            placeholder={
+                              activeSection === 'text'
+                                ? 'e.g., Services Overview'
+                                : activeSection === 'website'
+                                  ? 'e.g., Homepage'
+                                  : 'Enter a title'
+                            }
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label htmlFor="source-content" className="form-label">
+                            {activeSection === 'website' ? 'URL' : 'Content'}
+                          </label>
+                          {activeSection === 'website' ? (
+                            <input
+                              id="source-content"
+                              className="form-control form-control--large"
+                              value={newContent}
+                              onChange={(e) => setNewContent(e.target.value)}
+                              placeholder="https://example.com"
+                              type="url"
+                              required
+                              aria-required="true"
+                            />
+                          ) : (
+                            <textarea
+                              id="source-content"
+                              className="form-control"
+                              value={newContent}
+                              onChange={(e) => setNewContent(e.target.value)}
+                              placeholder={`Enter the ${activeSection} content that the chatbot should learn from...`}
+                              rows={8}
+                              style={{ resize: 'vertical' }}
+                              required
+                              aria-required="true"
+                            />
+                          )}
+                        </div>
+
+                        <button
+                          className="btn btn--primary btn--large"
+                          onClick={handleAddSource}
+                          disabled={isAdding || !newContent.trim()}
+                          style={{ alignSelf: 'flex-start' }}
+                        >
+                          <Add01Icon className="icon-sm" />
+                          {isAdding
+                            ? 'Adding...'
+                            : `Add ${activeSection === 'website' ? 'Website' : 'Source'}`}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sources List */}
+                <div style={{ padding: 'var(--op-space-medium)' }}>
+                  <h2
+                    style={{
+                      fontSize: 'var(--op-font-large)',
+                      fontWeight: 'var(--op-font-weight-bold)',
+                      marginBottom: 'var(--op-space-medium)',
+                    }}
+                  >
+                    Existing Sources ({filteredSources.length})
+                  </h2>
+
+                  {isLoading ? (
+                    <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>Loading...</p>
+                  ) : filteredSources.length === 0 ? (
+                    <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                      No sources yet. Add your first source above to get started.
+                    </p>
+                  ) : (
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--op-space-medium)',
+                      }}
+                    >
+                      {filteredSources.map((source) => (
+                        <div key={source.id} className="card">
+                          <div
+                            className="card-header"
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
+                              {source.title || 'Untitled Source'}
+                            </h3>
+                            <button
+                              className="btn btn--destructive btn--small btn--icon"
+                              onClick={() => handleDeleteSource(source.id)}
+                              title="Delete source"
+                              aria-label={`Delete ${source.title || 'source'}`}
+                            >
+                              <Delete02Icon className="icon-sm" />
+                            </button>
+                          </div>
+                          <div className="card-body">
+                            <p
+                              style={{
+                                fontSize: 'var(--op-font-small)',
+                                whiteSpace: 'pre-wrap',
+                                margin: 0,
+                                maxHeight: '200px',
+                                overflow: 'auto',
+                              }}
+                            >
+                              {source.content}
+                            </p>
+                            <div
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: 'var(--op-space-small)',
+                              }}
+                            >
+                              <p
+                                style={{
+                                  fontSize: 'var(--op-font-x-small)',
+                                  color: 'var(--op-color-neutral-on-plus-max)',
+                                  margin: 0,
+                                }}
+                              >
+                                Added {new Date(source.created_at).toLocaleDateString()}
+                              </p>
+                              {source.metadata?.size && (
+                                <p
+                                  style={{
+                                    fontSize: 'var(--op-font-x-small)',
+                                    color: 'var(--op-color-neutral-on-plus-max)',
+                                    margin: 0,
+                                  }}
+                                >
+                                  {(source.metadata.size / 1024).toFixed(2)} KB
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
 
           {/* Right Sidebar - Stats & Actions */}
           <aside
             style={{
-              width: '320px',
-              borderLeft: '1px solid var(--op-color-border)',
-              padding: 'var(--op-space-large)',
+              width: sidebarCollapsed ? '0px' : '320px',
+              minWidth: sidebarCollapsed ? '0px' : '320px',
+              borderLeft: sidebarCollapsed ? 'none' : '1px solid var(--op-color-border)',
+              padding: sidebarCollapsed ? '0' : 'var(--op-space-large)',
               display: 'flex',
               flexDirection: 'column',
               gap: 'var(--op-space-large)',
               backgroundColor: 'var(--op-color-background)',
+              overflow: 'hidden',
+              transition: 'width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, border 0.3s ease',
             }}
           >
-            <div>
-              <h3
-                style={{
-                  fontSize: 'var(--op-font-medium)',
-                  fontWeight: 'var(--op-font-weight-bold)',
-                  marginBottom: 'var(--op-space-medium)',
-                }}
-              >
-                Sources
-              </h3>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--op-space-small)',
-                  padding: 'var(--op-space-medium)',
-                  backgroundColor: 'var(--op-color-neutral-plus-eight)',
-                  borderRadius: 'var(--op-radius-medium)',
-                  marginBottom: 'var(--op-space-medium)',
-                }}
-              >
-                <Globe02Icon className="icon-sm" />
-                <span style={{ fontSize: 'var(--op-font-small)' }}>
-                  {totalLinks} Links
-                </span>
-                <span
+            {activeSection === 'workflow' && workflowControls ? (
+              <div>
+                <h3
                   style={{
-                    marginLeft: 'auto',
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     fontWeight: 'var(--op-font-weight-bold)',
+                    marginBottom: 'var(--op-space-medium)',
                   }}
                 >
-                  {(totalSize / 1024).toFixed(0)} KB
-                </span>
-              </div>
+                  Workflow Controls
+                </h3>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: 'var(--op-space-medium) 0',
-                  borderTop: '1px solid var(--op-color-border)',
-                }}
-              >
-                <span
+                {workflowControls.saveStatus.type && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--op-space-small)',
+                      padding: 'var(--op-space-medium)',
+                      backgroundColor: workflowControls.saveStatus.type === 'success'
+                        ? 'var(--op-color-success-background)'
+                        : 'var(--op-color-error-background)',
+                      border: `1px solid ${workflowControls.saveStatus.type === 'success'
+                        ? 'var(--op-color-success-border)'
+                        : 'var(--op-color-error-border)'}`,
+                      borderRadius: 'var(--op-radius-small)',
+                      marginBottom: 'var(--op-space-medium)',
+                    }}
+                  >
+                    {workflowControls.saveStatus.type === 'success' ? (
+                      <CheckIcon className="icon-sm" style={{ color: 'var(--op-color-success)', flexShrink: 0 }} />
+                    ) : (
+                      <AlertCircleIcon className="icon-sm" style={{ color: 'var(--op-color-error)', flexShrink: 0 }} />
+                    )}
+                    <span
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        color: workflowControls.saveStatus.type === 'success'
+                          ? 'var(--op-color-success)'
+                          : 'var(--op-color-error)',
+                      }}
+                    >
+                      {workflowControls.saveStatus.message}
+                    </span>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)', marginBottom: 'var(--op-space-large)' }}>
+                  <button
+                    className="btn btn--secondary"
+                    style={{ width: '100%' }}
+                    onClick={workflowControls.addNode}
+                  >
+                    <Add01Icon className="icon-sm" />
+                    Add Step
+                  </button>
+
+                  {workflowControls.selectedNode && (
+                    <button
+                      className="btn btn--destructive"
+                      style={{ width: '100%' }}
+                      onClick={workflowControls.deleteNode}
+                    >
+                      <Delete02Icon className="icon-sm" />
+                      Delete Node
+                    </button>
+                  )}
+
+                  {workflowControls.selectedEdge && (
+                    <button
+                      className="btn btn--destructive"
+                      style={{ width: '100%' }}
+                      onClick={workflowControls.deleteEdge}
+                    >
+                      <Delete02Icon className="icon-sm" />
+                      Delete Connection
+                    </button>
+                  )}
+
+                  <button
+                    className="btn btn--primary"
+                    style={{ width: '100%' }}
+                    onClick={workflowControls.saveWorkflow}
+                  >
+                    <RefreshIcon className="icon-sm" />
+                    Save & Apply to Chatbot
+                  </button>
+                </div>
+
+                {workflowControls.editMode && workflowControls.selectedNode && (
+                  <div style={{ borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)' }}>
+                    <h4
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        fontWeight: 'var(--op-font-weight-bold)',
+                        marginBottom: 'var(--op-space-small)',
+                      }}
+                    >
+                      Edit Node
+                    </h4>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Step Name</label>
+                      <input
+                        className="form-control"
+                        placeholder="Step name"
+                        value={workflowControls.nodeData.label}
+                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, label: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Question/Description</label>
+                      <input
+                        className="form-control"
+                        placeholder="Description"
+                        value={workflowControls.nodeData.description}
+                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, description: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Keywords (comma-separated)</label>
+                      <input
+                        className="form-control"
+                        placeholder="keyword1, keyword2"
+                        value={workflowControls.nodeData.keywords}
+                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, keywords: e.target.value })}
+                      />
+                    </div>
+
+                    <button
+                      className="btn btn--primary btn--small"
+                      style={{ width: '100%' }}
+                      onClick={workflowControls.updateNode}
+                    >
+                      Update Node
+                    </button>
+                  </div>
+                )}
+
+                {workflowControls.selectedEdge && (
+                  <div style={{ borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)' }}>
+                    <h4
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        fontWeight: 'var(--op-font-weight-bold)',
+                        marginBottom: 'var(--op-space-small)',
+                      }}
+                    >
+                      Edit Connection
+                    </h4>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Label</label>
+                      <input
+                        className="form-control"
+                        placeholder="Connection label"
+                        value={workflowControls.edgeData.label}
+                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, label: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Color</label>
+                      <select
+                        className="form-control"
+                        value={workflowControls.edgeData.stroke}
+                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, stroke: e.target.value })}
+                      >
+                        <option value="var(--op-color-primary-base)">Primary</option>
+                        <option value="var(--op-color-alerts-notice-plus-one)">Notice (Green)</option>
+                        <option value="var(--op-color-alerts-warning-plus-one)">Warning (Yellow)</option>
+                        <option value="var(--op-color-alerts-danger-plus-one)">Danger (Red)</option>
+                        <option value="var(--purple)">Purple</option>
+                        <option value="var(--orange)">Orange</option>
+                        <option value="var(--light-green)">Light Green</option>
+                        <option value="var(--bright-yellow)">Bright Yellow</option>
+                        <option value="var(--op-color-neutral-base)">Neutral</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Stroke Width</label>
+                      <input
+                        className="form-control"
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={workflowControls.edgeData.strokeWidth}
+                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, strokeWidth: Number(e.target.value) })}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Line Style</label>
+                      <select
+                        className="form-control"
+                        value={workflowControls.edgeData.lineStyle}
+                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, lineStyle: e.target.value as 'solid' | 'dashed' | 'dotted' | 'animated' })}
+                      >
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                        <option value="animated">Animated</option>
+                      </select>
+                    </div>
+
+                    <button
+                      className="btn btn--primary btn--small"
+                      style={{ width: '100%' }}
+                      onClick={workflowControls.updateEdge}
+                    >
+                      Update Connection
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <h3
                   style={{
-                    fontSize: 'var(--op-font-small)',
+                    fontSize: 'var(--op-font-medium)',
                     fontWeight: 'var(--op-font-weight-bold)',
+                    marginBottom: 'var(--op-space-medium)',
                   }}
                 >
-                  Total size
-                </span>
-                <span
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                  }}
-                >
-                  {(totalSize / 1024).toFixed(0)} KB / 400 KB
-                </span>
-              </div>
+                  Sources
+                </h3>
 
-              <button
-                className="btn btn--primary"
-                style={{ width: '100%' }}
-                onClick={handleRetrainAgent}
-                disabled={isRetraining || !needsRetraining}
-              >
-                <RefreshIcon className="icon-sm" />
-                {isRetraining ? 'Retraining...' : 'Retrain agent'}
-              </button>
-
-              {needsRetraining && (
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 'var(--op-space-small)',
                     padding: 'var(--op-space-medium)',
-                    backgroundColor: 'var(--op-color-warning-background)',
-                    border: '1px solid var(--op-color-warning-border)',
-                    borderRadius: 'var(--op-radius-small)',
-                    marginTop: 'var(--op-space-medium)',
+                    backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                    borderRadius: 'var(--op-radius-medium)',
+                    marginBottom: 'var(--op-space-medium)',
                   }}
                 >
-                  <RefreshIcon
-                    className="icon-sm"
+                  <Globe02Icon className="icon-sm" />
+                  <span style={{ fontSize: 'var(--op-font-small)' }}>
+                    {totalLinks} Links
+                  </span>
+                  <span
                     style={{
-                      color: 'var(--op-color-warning)',
-                      flexShrink: 0,
+                      marginLeft: 'auto',
+                      fontSize: 'var(--op-font-small)',
+                      fontWeight: 'var(--op-font-weight-bold)',
                     }}
-                  />
+                  >
+                    {(totalSize / 1024).toFixed(0)} KB
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: 'var(--op-space-medium) 0',
+                    borderTop: '1px solid var(--op-color-border)',
+                  }}
+                >
                   <span
                     style={{
                       fontSize: 'var(--op-font-small)',
-                      color: 'var(--op-color-warning)',
+                      fontWeight: 'var(--op-font-weight-bold)',
                     }}
                   >
-                    Retraining is required for changes to apply
+                    Total size
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                    }}
+                  >
+                    {(totalSize / 1024).toFixed(0)} KB / 400 KB
                   </span>
                 </div>
-              )}
-            </div>
+
+                <button
+                  className="btn btn--primary"
+                  style={{ width: '100%' }}
+                  onClick={handleRetrainAgent}
+                  disabled={isRetraining || !needsRetraining}
+                >
+                  <RefreshIcon className="icon-sm" />
+                  {isRetraining ? 'Retraining...' : 'Retrain agent'}
+                </button>
+
+                {needsRetraining && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--op-space-small)',
+                      padding: 'var(--op-space-medium)',
+                      backgroundColor: 'var(--op-color-warning-background)',
+                      border: '1px solid var(--op-color-warning-border)',
+                      borderRadius: 'var(--op-radius-small)',
+                      marginTop: 'var(--op-space-medium)',
+                    }}
+                  >
+                    <RefreshIcon
+                      className="icon-sm"
+                      style={{
+                        color: 'var(--op-color-warning)',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        color: 'var(--op-color-warning)',
+                      }}
+                    >
+                      Retraining is required for changes to apply
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </aside>
         </main>
       </div>

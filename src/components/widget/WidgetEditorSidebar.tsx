@@ -826,61 +826,136 @@ export function WidgetEditorSidebar() {
           {/* EMBED TAB */}
           <TabsContent value="embed" style={{ padding: 'var(--op-space-large)' }}>
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
-              <Label
-                htmlFor="widget-embed-code"
+              <h3
                 style={{
-                  display: 'block',
-                  fontSize: 'var(--op-font-small)',
-                  marginBottom: 'var(--op-space-small)',
+                  fontSize: 'var(--op-font-medium)',
+                  fontWeight: 600,
+                  margin: '0 0 var(--op-space-medium) 0',
                 }}
               >
-                Embed code
-              </Label>
-              <p
-                id="widget-embed-code-help"
-                style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  marginBottom: 'var(--op-space-medium)',
-                }}
-              >
-                Copy and paste this code into your website before the closing
-                &lt;/body&gt; tag.
-              </p>
-              <div
-                style={{
-                  position: 'relative',
-                }}
-              >
-                <Textarea
-                  id="widget-embed-code"
-                  readOnly
-                  rows={8}
-                  value={`<script src="${origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`}
-                  aria-describedby="widget-embed-code-help"
+                Chat Widget Embed Options
+              </h3>
+
+              {/* Option 1: Floating Chat Bubble */}
+              <div style={{ marginBottom: 'var(--op-space-x-large)' }}>
+                <Label
+                  htmlFor="widget-embed-bubble"
                   style={{
-                    resize: 'none',
-                    fontFamily: 'monospace',
-                    fontSize: 'var(--op-font-x-small)',
-                  }}
-                  onClick={(e) => e.currentTarget.select()}
-                />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  style={{
-                    position: 'absolute',
-                    top: 'var(--op-space-small)',
-                    right: 'var(--op-space-small)',
-                  }}
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `<script src="${window.location.origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`
-                    )
+                    display: 'block',
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 600,
+                    marginBottom: 'var(--op-space-small)',
                   }}
                 >
-                  Copy
-                </Button>
+                  Option 1: Floating Chat Bubble (Recommended)
+                </Label>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    marginBottom: 'var(--op-space-medium)',
+                  }}
+                >
+                  Adds a floating chat bubble in the corner of your website. Copy and paste this code before the closing &lt;/body&gt; tag.
+                </p>
+                <div
+                  style={{
+                    position: 'relative',
+                  }}
+                >
+                  <Textarea
+                    id="widget-embed-bubble"
+                    readOnly
+                    rows={4}
+                    value={`<script src="${origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`}
+                    style={{
+                      resize: 'none',
+                      fontFamily: 'monospace',
+                      fontSize: 'var(--op-font-x-small)',
+                    }}
+                    onClick={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    style={{
+                      position: 'absolute',
+                      top: 'var(--op-space-small)',
+                      right: 'var(--op-space-small)',
+                    }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `<script src="${origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`
+                      )
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+
+              {/* Option 2: Inline Iframe */}
+              <div style={{ marginBottom: 'var(--op-space-large)' }}>
+                <Label
+                  htmlFor="widget-embed-iframe"
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 600,
+                    marginBottom: 'var(--op-space-small)',
+                  }}
+                >
+                  Option 2: Embedded Chat Window
+                </Label>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    marginBottom: 'var(--op-space-medium)',
+                  }}
+                >
+                  Embeds the chat directly in your page. Great for help pages or dedicated chat sections.
+                </p>
+                <div
+                  style={{
+                    position: 'relative',
+                  }}
+                >
+                  <Textarea
+                    id="widget-embed-iframe"
+                    readOnly
+                    rows={6}
+                    value={`<iframe
+  src="${origin}/widget/a0000000-0000-0000-0000-000000000001"
+  width="400"
+  height="600"
+  frameborder="0"
+  style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+</iframe>`}
+                    style={{
+                      resize: 'none',
+                      fontFamily: 'monospace',
+                      fontSize: 'var(--op-font-x-small)',
+                    }}
+                    onClick={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    style={{
+                      position: 'absolute',
+                      top: 'var(--op-space-small)',
+                      right: 'var(--op-space-small)',
+                    }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `<iframe\n  src="${origin}/widget/a0000000-0000-0000-0000-000000000001"\n  width="400"\n  height="600"\n  frameborder="0"\n  style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">\n</iframe>`
+                      )
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
               </div>
             </div>
 

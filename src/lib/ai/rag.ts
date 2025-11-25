@@ -56,9 +56,9 @@ export async function retrieveRelevantSources(
 }
 
 /**
- * Build context string from sources
+ * Build context string from sources with workflow
  */
-export function buildSourceContext(sources: Source[]): string {
+export function buildSourceContext(sources: Source[], chatbot?: Chatbot | null): string {
   if (sources.length === 0) {
     return ''
   }
@@ -69,6 +69,56 @@ export function buildSourceContext(sources: Source[]): string {
       return `${title}\n${source.content}`
     })
     .join('\n\n---\n\n')
+
+  // Parse workflow from chatbot business context if available
+  let workflowInstructions = ''
+  if (chatbot?.business_context) {
+    try {
+      const context = JSON.parse(chatbot.business_context)
+      if (context.workflow) {
+        const { questions, threshold } = context.workflow
+        workflowInstructions = `
+
+LEAD QUALIFICATION WORKFLOW:
+You must follow this specific qualification process:
+
+${questions.map((q: any, i: number) => `
+${i + 1}. ${q.question}
+   - Look for keywords: ${q.keywords.join(', ')}
+   - Weight: ${q.weight}% of total score
+   - ${q.required ? 'REQUIRED - Must ask this question' : 'Optional based on conversation flow'}
+`).join('')}
+
+SCORING INSTRUCTIONS:
+- Calculate lead score based on keyword matches and response quality
+- Each question contributes its weight percentage to the total score
+- Qualification threshold: ${threshold}%
+- If score >= ${threshold}%, mark as QUALIFIED LEAD
+- If score < ${threshold}%, mark as NURTURE LEAD
+
+CONVERSATION FLOW:
+1. Start naturally, understand their initial need
+2. Weave qualification questions into the conversation
+3. Don't ask all questions at once - make it conversational
+4. Collect name early: "Who am I speaking with today?"
+5. Collect email before detailed info: "What's the best email to send you details?"
+6. Track responses mentally and calculate score
+7. Based on score, either escalate to sales or nurture
+`
+      }
+    } catch {
+      // If not JSON or no workflow, use default
+    }
+  }
+
+  // Use workflow instructions if available, otherwise default
+  const qualificationInstructions = workflowInstructions || `
+LEAD QUALIFICATION FLOW:
+- Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"
+- After establishing rapport and discussing their needs, ask for their email: "I'd love to send you a summary of our discussion. What's the best email to reach you at?"
+- ALWAYS collect name and email before offering to provide a summary or next steps
+- Frame email collection as providing value: "Let me send you a detailed summary" or "I'll email you the information we discussed"
+`
 
   return `
 ## Available Knowledge Base
@@ -84,14 +134,9 @@ CRITICAL INSTRUCTIONS:
 - If the knowledge base contains relevant information, use it to provide a complete, detailed answer
 - NEVER use phrases like "connect you with a specialist" or "I'd be happy to help you explore"
 - Conservative fallback: If you cannot answer from the knowledge base, suggest the prospect rephrase their question or offer to schedule a call to discuss their specific needs
-- Ask clarifying questions to better understand their needs and qualify the lead (budget, timeline, decision authority, specific requirements)
 - Stay focused on the business context and knowledge provided above
 
-LEAD QUALIFICATION FLOW:
-- Early in the conversation (after 1-2 messages), naturally ask for their name: "By the way, what's your name?"
-- After establishing rapport and discussing their needs, ask for their email: "I'd love to send you a summary of our discussion. What's the best email to reach you at?"
-- ALWAYS collect name and email before offering to provide a summary or next steps
-- Frame email collection as providing value: "Let me send you a detailed summary" or "I'll email you the information we discussed"
+${qualificationInstructions}
 `
 }
 

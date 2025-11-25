@@ -17,7 +17,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
@@ -318,19 +318,23 @@ function ChatInstanceComponent({
   index,
   totalInstances,
   syncEnabled,
+  syncMessage,
   onDelete,
   onModelChange,
   onTemperatureChange,
   onSyncToggle,
+  onSendMessage,
 }: {
   instance: ChatInstance
   index: number
   totalInstances: number
   syncEnabled: boolean
+  syncMessage: string | null
   onDelete: (id: string) => void
   onModelChange: (id: string, model: string) => void
   onTemperatureChange: (id: string, temperature: number) => void
   onSyncToggle?: (enabled: boolean) => void
+  onSendMessage?: (message: string) => void
 }) {
   const [modelSearch, setModelSearch] = useState('')
 
@@ -370,13 +374,29 @@ function ChatInstanceComponent({
     transport: chatTransport,
   })
 
+  // Handle synced messages from other instances
+  const lastSyncMessageRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (syncMessage && syncMessage !== lastSyncMessageRef.current) {
+      lastSyncMessageRef.current = syncMessage
+      sendMessage({ text: syncMessage }).catch((error) => {
+        console.error('Error sending synced message:', error)
+      })
+    }
+  }, [syncMessage, sendMessage])
+
   const handlePromptSubmit = async (message: { text: string; files: unknown[] }) => {
     if (!message.text.trim()) return
 
     try {
-      await sendMessage({
-        text: message.text,
-      })
+      // If sync is enabled and we have a callback, broadcast to other instances
+      if (syncEnabled && onSendMessage) {
+        onSendMessage(message.text)
+      } else {
+        await sendMessage({
+          text: message.text,
+        })
+      }
     } catch (error) {
       console.error('Error sending message:', error)
     }
@@ -838,7 +858,19 @@ export default function ComparePage() {
       temperature: 0,
     },
   ])
-  const [syncEnabled, setSyncEnabled] = useState(false)
+  const [syncEnabled, setSyncEnabled] = useState(true)
+  const [syncMessage, setSyncMessage] = useState<string | null>(null)
+  const syncMessageIdRef = useRef(0)
+
+  // Broadcast message to all instances
+  const handleSyncMessage = (message: string) => {
+    syncMessageIdRef.current += 1
+    // Append a unique ID to force re-trigger even for same message
+    setSyncMessage(`${message}::${syncMessageIdRef.current}`)
+  }
+
+  // Extract just the message text from sync message (remove the ID suffix)
+  const cleanSyncMessage = syncMessage ? syncMessage.split('::')[0] : null
 
   const handleClearAll = () => {
     window.location.reload()
@@ -965,10 +997,12 @@ export default function ComparePage() {
             index={index}
             totalInstances={instances.length}
             syncEnabled={syncEnabled}
+            syncMessage={syncEnabled ? cleanSyncMessage : null}
             onDelete={handleDeleteInstance}
             onModelChange={handleModelChange}
             onTemperatureChange={handleTemperatureChange}
             onSyncToggle={setSyncEnabled}
+            onSendMessage={syncEnabled ? handleSyncMessage : undefined}
           />
         ))}
       </div>

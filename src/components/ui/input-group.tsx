@@ -65,7 +65,8 @@ const addonAlignStyles: Record<
   'block-end': {
     order: 3,
     width: '100%',
-    borderTop: '1px solid var(--op-color-border)',
+    borderTop: '1px solid ',
+    borderColor: 'inherit',
     padding: 'var(--op-space-small)',
   },
 }
@@ -79,26 +80,26 @@ const addonDirectionStyles: Record<'column' | 'row', React.CSSProperties> = {
 }
 
 const buttonSizeStyles: Record<'xs' | 'sm' | 'icon-xs' | 'icon-sm', React.CSSProperties> =
-  {
-    xs: {
-      minHeight: 24,
-      paddingInline: 'var(--op-space-x-small)',
-    },
-    sm: {
-      minHeight: 32,
-      paddingInline: 'var(--op-space-small)',
-    },
-    'icon-xs': {
-      minHeight: 24,
-      minWidth: 32,
-      padding: 0,
-    },
-    'icon-sm': {
-      minHeight: 32,
-      minWidth: 36,
-      padding: 0,
-    },
-  }
+{
+  xs: {
+    minHeight: 24,
+    paddingInline: 'var(--op-space-x-small)',
+  },
+  sm: {
+    minHeight: 32,
+    paddingInline: 'var(--op-space-small)',
+  },
+  'icon-xs': {
+    minHeight: 24,
+    minWidth: 32,
+    padding: 0,
+  },
+  'icon-sm': {
+    minHeight: 32,
+    minWidth: 36,
+    padding: 0,
+  },
+}
 
 const controlBaseStyle: React.CSSProperties = {
   flex: 1,
@@ -125,6 +126,7 @@ function InputGroup({
     ...(hasFocus && {
       backgroundColor: 'var(--op-color-primary-plus-seven)',
       boxShadow: 'var(--op-input-focus-primary)',
+      borderColor: 'var(--op-color-primary-plus-three)',
     }),
     ...style,
   }

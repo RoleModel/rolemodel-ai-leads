@@ -5,8 +5,14 @@ import { HugeiconsIcon } from '@hugeicons/react'
 
 import { ChatInterface } from '@/components/chat/ChatInterface'
 import { Button } from '@/components/ui/button'
+import type { PlaygroundSettings } from '@/app/playground/page'
 
-export function PlaygroundPreview() {
+interface PlaygroundPreviewProps {
+  settings: PlaygroundSettings
+  onReset: () => void
+}
+
+export function PlaygroundPreview({ settings, onReset }: PlaygroundPreviewProps) {
   return (
     <div
       style={{
@@ -60,7 +66,7 @@ export function PlaygroundPreview() {
             RoleModel Software
           </span>
         </div>
-        <Button variant="ghosticon" onClick={() => {}}>
+        <Button variant="ghosticon" onClick={onReset}>
           <HugeiconsIcon
             icon={RefreshIcon}
             size={20}
@@ -73,7 +79,10 @@ export function PlaygroundPreview() {
       <div
         style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
       >
-        <ChatInterface initialMessage="Hi! Let's talk about your project!" />
+        <ChatInterface
+          initialMessage="Hi! Let's talk about your project!"
+          playgroundSettings={settings}
+        />
       </div>
     </div>
   )

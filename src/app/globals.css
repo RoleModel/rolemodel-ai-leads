@@ -1,10 +1,27 @@
-/* -------------------------------------------------
-   Import Optics Design System
-   ------------------------------------------------- */
+@source "../node_modules/streamdown/dist/index.js";
 
-@import '../styles/shadows.css';
-@import '../styles/utilities.css';
-@import '../styles/overrides.css';
+/* -------------------------------------------------
+   CSS Layers Definition
+   Define layers BEFORE any imports
+   ------------------------------------------------- */
+@layer optics, utilities, overrides, app;
+
+/* -------------------------------------------------
+   Import App Styles with Layers
+   Note: Optics is loaded without a layer, so our layers have higher priority
+   ------------------------------------------------- */
+@import '../styles/shadows.css' layer(utilities);
+@import '../styles/utilities.css' layer(utilities);
+@import '../styles/overrides.css' layer(overrides);
+@import '../styles/ai-elements.css' layer(app);
+@import '../styles/animations.css' layer(app);
+
+:root {
+  --purple: #a998c9;
+  --orange: #ffcd74;
+  --light-green: #b3d99a;
+  --bright-yellow: #fcf496;
+}
 
 /* -------------------------------------------------
    Optics overrides + app globals
@@ -14,92 +31,94 @@
    Global Helpers
    ------------------------------------------------- */
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  letter-spacing: -0.04em;
-}
-
-.icon-sm {
-  width: 16px;
-  height: 16px;
-}
-
-.btn svg {
-  stroke-width: 2;
-}
-
-.inner-shadow {
-  box-shadow: inset 0 2px 4px 0 var(--op-shadow-color);
-}
-
-/* Loading animation */
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 0.2;
+@layer app {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    letter-spacing: -0.04em;
   }
-  50% {
-    opacity: 1;
+
+  .icon-sm {
+    width: 16px;
+    height: 16px;
   }
-}
 
-.loading-dots span {
-  animation: blink 1.4s infinite;
-}
+  .btn svg {
+    stroke-width: 2;
+  }
 
-.loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
+  .inner-shadow {
+    box-shadow: inset 0 2px 4px 0 var(--op-shadow-color);
+  }
 
-.loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
+  /* Loading animation */
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 
-/* Alert component */
-.alert {
-  padding: var(--op-space-medium);
-  border-radius: var(--op-radius-medium);
-  border: 1px solid var(--op-color-border);
-}
+  .loading-dots span {
+    animation: blink 1.4s infinite;
+  }
 
-.badge--outline {
-  border-color: var(--op-color-border);
-  border-width: 1px;
-  border-style: solid;
-  border-radius: var(--op-radius-small);
-  padding: var(--op-space-2x-small) var(--op-space-small);
-  font-size: var(--op-font-small);
-  font-weight: 500;
-  color: var(--op-color-neutral-on-plus-max) !important;
-  background-color: var(--op-color-background) !important;
-}
+  .loading-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+  }
 
-.contents {
-  width: 100%;
-}
-.gradient {
-  filter: blur(8px);
-  pointer-events: none;
-  z-index: 0;
-  background-image: linear-gradient(
-    90deg,
-    #fcf496 10%,
-    #7f51b1,
-    #76ba6f,
-    #59a6d6 10%,
-    #7f51b1,
-    #fcf496
-  );
-  height: 0.75rem;
-  position: absolute;
-  left: var(--op-space-medium);
-  right: var(--op-space-medium);
-  top: 94%;
-}
+  .loading-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+  }
 
-[data-radix-popper-content-wrapper] {
-  top: -6px !important;
+  /* Alert component */
+  .alert {
+    padding: var(--op-space-medium);
+    border-radius: var(--op-radius-medium);
+    border: 1px solid var(--op-color-border);
+  }
+
+  .badge--outline {
+    border-color: var(--op-color-border);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--op-radius-small);
+    padding: var(--op-space-2x-small) var(--op-space-small);
+    font-size: var(--op-font-small);
+    font-weight: 500;
+    color: var(--op-color-neutral-on-plus-max) !important;
+    background-color: var(--op-color-background) !important;
+  }
+
+  .contents {
+    width: 100%;
+  }
+  .gradient {
+    filter: blur(8px);
+    pointer-events: none;
+    z-index: 0;
+    background-image: linear-gradient(
+      90deg,
+      #fcf496 10%,
+      #7f51b1,
+      #76ba6f,
+      #59a6d6 10%,
+      #7f51b1,
+      #fcf496
+    );
+    height: 0.75rem;
+    position: absolute;
+    left: var(--op-space-medium);
+    right: var(--op-space-medium);
+    top: 94%;
+  }
+
+  [data-radix-popper-content-wrapper] {
+    top: -6px !important;
+  }
 }

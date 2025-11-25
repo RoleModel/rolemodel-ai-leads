@@ -3,16 +3,17 @@
 import { RefreshIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import type { PlaygroundSettings } from '@/app/playground/page'
 
-export function PlaygroundConfig() {
+interface PlaygroundConfigProps {
+  settings: PlaygroundSettings
+  onSettingsChange: (settings: Partial<PlaygroundSettings>) => void
+}
+
+export function PlaygroundConfig({ settings, onSettingsChange }: PlaygroundConfigProps) {
   const router = useRouter()
-  const [model, setModel] = useState('claude-3-haiku')
-  const [temperature, setTemperature] = useState(0)
-  const [instructions, setInstructions] = useState(`### Business Context
-RoleModel Software is a custom software development company that specializes in creating tailored solutions to enhance business workflows and integrate with third-party applications. With nearly 30 years of experience, they focus on understanding client needs, iterative development, and building sustainable software that scales with the business. Their key services include web and mobile app development, UI/UX design, and expertise amplification, aiming to optimize performance and reduce inefficiencies through custom software solutions.`)
 
   return (
     <div
@@ -126,13 +127,11 @@ RoleModel Software is a custom software development company that specializes in 
           <select
             id="playground-model"
             className="form-control"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
+            value={settings.model}
+            onChange={(e) => onSettingsChange({ model: e.target.value })}
           >
-            <option value="claude-3-haiku">Claude 3 Haiku</option>
-            <option value="claude-3-sonnet">Claude 3 Sonnet</option>
-            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-            <option value="gpt-4">GPT-4</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="gpt-4o">GPT-4o</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>
             <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
           </select>
@@ -163,20 +162,21 @@ RoleModel Software is a custom software development company that specializes in 
                 fontWeight: 'var(--op-font-weight-bold)',
               }}
             >
-              {temperature}
+              {settings.temperature.toFixed(1)}
             </span>
           </div>
           <input
             id="playground-temperature"
             type="range"
             min="0"
-            max="100"
-            value={temperature}
-            onChange={(e) => setTemperature(Number(e.target.value))}
+            max="1"
+            step="0.1"
+            value={settings.temperature}
+            onChange={(e) => onSettingsChange({ temperature: Number(e.target.value) })}
             style={{ width: '100%' }}
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={temperature}
+            aria-valuemax={1}
+            aria-valuenow={settings.temperature}
           />
           <div
             style={{
@@ -254,8 +254,8 @@ RoleModel Software is a custom software development company that specializes in 
             id="playground-instructions-textarea"
             className="form-control"
             aria-labelledby="playground-instructions"
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
+            value={settings.instructions}
+            onChange={(e) => onSettingsChange({ instructions: e.target.value })}
             rows={12}
             style={{
               fontFamily: 'monospace',

@@ -1,9 +1,9 @@
 :root {
   --op-font-family:
-    'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --op-color-primary-h: 208;
-  --op-color-primary-s: 56%;
-  --op-color-primary-l: 53%;
+    'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  --op-color-primary-h: 214 !important;
+  --op-color-primary-s: 94% !important;
+  --op-color-primary-l: 57% !important;
   --op-shadow-color: #0000000d;
 }
 
@@ -12,6 +12,14 @@
   background-color: var(--op-color-background);
   overflow: hidden;
   color-scheme: light dark;
+}
+
+.card-title {
+  font-size: 1rem;
+}
+.card-description {
+  font-size: var(--op-font-2x-small);
+  opacity: 0.5;
 }
 
 .card[data-theme-mode='light'] {

@@ -186,6 +186,12 @@ export function EditorSidebar() {
   allow="clipboard-write"
 ></iframe>`
 
+  const scriptEmbedCode = `<script
+  src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed-script.js"
+  data-chatbot-id="${DEFAULT_CHATBOT_ID}"
+  data-container-id="rolemodel-widget">
+</script>`
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -225,12 +231,12 @@ export function EditorSidebar() {
             <PopoverTrigger asChild>
               <Button size="sm">Deploy</Button>
             </PopoverTrigger>
-            <PopoverContent align="end" style={{ width: '400px' }}>
+            <PopoverContent align="end" style={{ width: '500px', maxHeight: '80vh', overflow: 'auto' }}>
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 'var(--op-space-medium)',
+                  gap: 'var(--op-space-large)',
                 }}
               >
                 <div>
@@ -246,48 +252,137 @@ export function EditorSidebar() {
                   <p
                     style={{
                       fontSize: 'var(--op-font-small)',
-                      margin: '0 0 var(--op-space-medium) 0',
+                      margin: 0,
                       color: 'var(--op-color-on-background)',
                     }}
                   >
-                    Copy this code and paste it into your website to embed your leads
-                    page.
+                    Choose how to embed your leads page on your website.
                   </p>
                 </div>
-                <div style={{ position: 'relative' }}>
-                  <pre
+
+                {/* Option 1: Full Page Iframe */}
+                <div>
+                  <h4
                     style={{
-                      padding: 'var(--op-space-medium)',
-                      backgroundColor: 'var(--op-color-neutral-minus-eight)',
-                      color: 'var(--op-color-neutral-on-minus-eight)',
-                      borderRadius: 'var(--op-radius-medium)',
+                      fontSize: 'var(--op-font-small)',
+                      fontWeight: 600,
+                      margin: '0 0 var(--op-space-small) 0',
+                    }}
+                  >
+                    Option 1: Full Page Embed (Recommended)
+                  </h4>
+                  <p
+                    style={{
                       fontSize: 'var(--op-font-x-small)',
-                      fontFamily: 'monospace',
-                      overflow: 'auto',
-                      maxHeight: '200px',
-                      margin: 0,
-                      border: '1px solid',
-                      borderColor: 'var(--op-color-border)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      margin: '0 0 var(--op-space-small) 0',
                     }}
                   >
-                    {iframeEmbedCode}
-                  </pre>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    style={{
-                      position: 'absolute',
-                      top: 'var(--op-space-small)',
-                      right: 'var(--op-space-small)',
-                    }}
-                    onClick={() => {
-                      navigator.clipboard.writeText(iframeEmbedCode)
-                    }}
-                  >
-                    Copy
-                  </Button>
+                    Embeds the leads page as a full-page experience. Best for dedicated landing pages.
+                  </p>
+                  <div style={{ position: 'relative' }}>
+                    <pre
+                      style={{
+                        padding: 'var(--op-space-medium)',
+                        backgroundColor: 'var(--op-color-neutral-minus-eight)',
+                        color: 'var(--op-color-neutral-on-minus-eight)',
+                        borderRadius: 'var(--op-radius-medium)',
+                        fontSize: 'var(--op-font-x-small)',
+                        fontFamily: 'monospace',
+                        overflow: 'auto',
+                        maxHeight: '150px',
+                        margin: 0,
+                        border: '1px solid',
+                        borderColor: 'var(--op-color-border)',
+                      }}
+                    >
+                      {iframeEmbedCode}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      style={{
+                        position: 'absolute',
+                        top: 'var(--op-space-small)',
+                        right: 'var(--op-space-small)',
+                      }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(iframeEmbedCode)
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Option 2: Floating Widget */}
+                <div>
+                  <h4
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      fontWeight: 600,
+                      margin: '0 0 var(--op-space-small) 0',
+                    }}
+                  >
+                    Option 2: Floating Widget
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-x-small)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      margin: '0 0 var(--op-space-small) 0',
+                    }}
+                  >
+                    Adds a floating widget in the bottom-right corner. Works great in Framer and other platforms.
+                  </p>
+                  <div style={{ position: 'relative' }}>
+                    <pre
+                      style={{
+                        padding: 'var(--op-space-medium)',
+                        backgroundColor: 'var(--op-color-neutral-minus-eight)',
+                        color: 'var(--op-color-neutral-on-minus-eight)',
+                        borderRadius: 'var(--op-radius-medium)',
+                        fontSize: 'var(--op-font-x-small)',
+                        fontFamily: 'monospace',
+                        overflow: 'auto',
+                        maxHeight: '150px',
+                        margin: 0,
+                        border: '1px solid',
+                        borderColor: 'var(--op-color-border)',
+                      }}
+                    >
+                      {scriptEmbedCode}
+                    </pre>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      style={{
+                        position: 'absolute',
+                        top: 'var(--op-space-small)',
+                        right: 'var(--op-space-small)',
+                      }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(scriptEmbedCode)
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
+                  <Button
+                    variant="secondary"
+                    style={{ flex: 1 }}
+                    onClick={() =>
+                      window.open(
+                        `/test-embed.html`,
+                        '_blank'
+                      )
+                    }
+                  >
+                    Test Both Options
+                  </Button>
                   <Button
                     variant="secondary"
                     style={{ flex: 1 }}
@@ -298,7 +393,7 @@ export function EditorSidebar() {
                       )
                     }
                   >
-                    Preview
+                    Preview Full Page
                   </Button>
                 </div>
               </div>

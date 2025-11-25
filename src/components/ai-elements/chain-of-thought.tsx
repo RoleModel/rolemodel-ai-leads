@@ -1,9 +1,12 @@
 'use client'
 
 import { useControllableState } from '@radix-ui/react-use-controllable-state'
-import { BrainIcon, ChevronDownIcon, DotIcon, type LucideIcon } from 'lucide-react'
+import { DotIcon, type LucideIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, memo, useContext, useMemo } from 'react'
+
+import { HugeiconsIcon } from '@hugeicons/react';
+import { BrainIcon, ArrowDown01Icon } from '@hugeicons-pro/core-stroke-standard';
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -68,25 +71,30 @@ export const ChainOfThought = memo(
 export type ChainOfThoughtHeaderProps = ComponentProps<typeof CollapsibleTrigger>
 
 export const ChainOfThoughtHeader = memo(
-  ({ className, children, ...props }: ChainOfThoughtHeaderProps) => {
+  ({ children, ...props }: ChainOfThoughtHeaderProps) => {
     const { isOpen, setIsOpen } = useChainOfThought()
 
     return (
       <Collapsible onOpenChange={setIsOpen} open={isOpen}>
         <CollapsibleTrigger
-          className={cn(
-            'flex w-full items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-foreground',
-            className
-          )}
+          style={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'center',
+            gap: 'var(--op-space-small)',
+            fontSize: 'var(--op-font-x-small)',
+            color: 'var(--op-color-neutral-on-plus-max)',
+            transition: 'color 0.2s',
+          }}
           {...props}
         >
-          <BrainIcon className="size-4" />
+          <HugeiconsIcon icon={BrainIcon} size={20} />
           <span className="flex-1 text-left">{children ?? 'Chain of Thought'}</span>
-          <ChevronDownIcon
-            className={cn(
-              'size-4 transition-transform',
-              isOpen ? 'rotate-180' : 'rotate-0'
-            )}
+          <HugeiconsIcon icon={ArrowDown01Icon} size={20}
+            style={{
+              transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+              transition: 'transform 0.2s',
+            }}
           />
         </CollapsibleTrigger>
       </Collapsible>
@@ -112,29 +120,52 @@ export const ChainOfThoughtStep = memo(
     ...props
   }: ChainOfThoughtStepProps) => {
     const statusStyles = {
-      complete: 'text-muted-foreground',
-      active: 'text-foreground',
-      pending: 'text-muted-foreground/50',
+      complete: 'var(--op-color-neutral-on-plus-severn)',
+      active: 'var(--op-color-alerts-notice-minus-two)',
+      pending: 'var(--op-color-neutral-on-plus-max)',
     }
 
     return (
       <div
+        style={{
+          color: statusStyles[status],
+          display: 'flex',
+          fontSize: 'var(--op-font-small)',
+          gap: 'var(--op-space-x-small)',
+          marginTop: 'var(--op-space-x-small)',
+        }}
         className={cn(
-          'flex gap-2 text-sm',
+          'flex gap-2',
           statusStyles[status],
           'fade-in-0 slide-in-from-top-2 animate-in',
           className
         )}
         {...props}
       >
-        <div className="relative mt-0.5">
-          <Icon className="size-4" />
-          <div className="-mx-px absolute top-7 bottom-0 left-1/2 w-px bg-border" />
+        <div>
+          <Icon className="size-4" style={{ height: '20px', width: '20px' }} />
         </div>
-        <div className="flex-1 space-y-2">
-          <div>{label}</div>
+        <div
+
+          style={{
+            fontSize: 'var(--op-font-small)',
+            display: 'flex',
+            flex: 1,
+            gap: 'var(--op-space-small)',
+          }}
+          className="flex-1 space-y-2">
+          <div
+            style={{
+              fontSize: 'var(--op-font-small)',
+            }}
+          >{label}</div>
           {description && (
-            <div className="text-muted-foreground text-xs">{description}</div>
+            <div
+              style={{
+                fontSize: 'var(--op-font-small)',
+                color: 'var(--op-color-neutral-on-plus-max)',
+              }}
+            >{description}</div>
           )}
           {children}
         </div>

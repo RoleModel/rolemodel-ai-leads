@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar03Icon, Mail01Icon } from '@hugeicons-pro/core-stroke-standard'
+import { Calendar03Icon, Mail01Icon, } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
@@ -20,6 +20,13 @@ import {
   InlineCitationSource,
 } from '@/components/ai-elements/inline-citation'
 import {
+  ChainOfThought,
+  ChainOfThoughtContent,
+  ChainOfThoughtHeader,
+  ChainOfThoughtStep,
+} from '@/components/ai-elements/chain-of-thought'
+import { SearchIcon, CheckIcon, AlertCircleIcon } from 'lucide-react'
+import {
   PromptInput,
   PromptInputActionAddAttachments,
   PromptInputActionMenu,
@@ -37,6 +44,23 @@ import {
 } from '@/components/ai-elements/prompt-input'
 import { Button } from '@/components/ui/button'
 
+import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
+
+interface Suggestion {
+  id: string
+  text: string
+  isSelected?: boolean
+}
+
+interface ChainOfThoughtData {
+  steps: {
+    label: string
+    description?: string
+    status: 'complete' | 'active' | 'pending'
+    icon?: 'search' | 'check' | 'alert'
+  }[]
+}
+
 interface Message {
   id: string
   role: 'user' | 'assistant'
@@ -47,14 +71,20 @@ interface Message {
     title: string
     description?: string
   }>
+  chainOfThought?: ChainOfThoughtData
 }
+
+const DEFAULT_SUGGESTIONS: Suggestion[] = [
+  { id: '1', text: 'Are we outgrowing our current tools?' },
+  { id: '2', text: 'How do we reduce manual work?' },
+]
 
 const demoConversation: Message[] = [
   {
     id: '1',
     role: 'assistant',
     content:
-      "Hi! I'm here to help you explore whether custom software could be a good fit for your business. By the way, what's your name?",
+      "Hi! I'm here to help you explore whether custom software could be a good fit for your business. Who and I speaking with?",
     delay: 1000,
   },
   {
@@ -83,6 +113,28 @@ const demoConversation: Message[] = [
     content:
       "I understand - manual data management can definitely slow things down. What's your timeline for implementing a solution?",
     delay: 2500,
+    chainOfThought: {
+      steps: [
+        {
+          label: 'Analyzing pain point',
+          description: 'Manual data management causing scalability issues',
+          status: 'complete',
+          icon: 'search',
+        },
+        {
+          label: 'Assessing urgency',
+          description: 'Need to understand implementation timeline',
+          status: 'complete',
+          icon: 'check',
+        },
+        {
+          label: 'Qualifying timeline',
+          description: 'Determining project scheduling requirements',
+          status: 'active',
+          icon: 'alert',
+        },
+      ],
+    },
   },
   {
     id: '6',
@@ -180,9 +232,11 @@ const TypingIndicator = () => (
 
 interface AnimatedConversationDemoProps {
   onInterrupt?: () => void
+  editMode?: boolean
 }
 
 export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDemoProps) {
+  const { settings } = useLeadsPageSettings()
   const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -190,6 +244,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
   const [typingText, setTypingText] = useState('')
   const [isTypingInInput, setIsTypingInInput] = useState(false)
   const [showPlan, setShowPlan] = useState(false)
+  const [suggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -256,6 +311,34 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     onInterrupt?.()
   }
 
+  const renderChainOfThought = (chainOfThought: ChainOfThoughtData) => {
+    const getIcon = (icon?: string) => {
+      switch (icon) {
+        case 'search': return SearchIcon
+        case 'check': return CheckIcon
+        case 'alert': return AlertCircleIcon
+        default: return CheckIcon
+      }
+    }
+
+    return (
+      <ChainOfThought defaultOpen={false}>
+        <ChainOfThoughtHeader>Thinking...</ChainOfThoughtHeader>
+        <ChainOfThoughtContent>
+          {chainOfThought.steps.map((step, index) => (
+            <ChainOfThoughtStep
+              key={index}
+              label={step.label}
+              description={step.description}
+              status={step.status}
+              icon={getIcon(step.icon)}
+            />
+          ))}
+        </ChainOfThoughtContent>
+      </ChainOfThought>
+    )
+  }
+
   const renderMessageWithCitations = (message: Message) => {
     if (!message.citations || message.citations.length === 0) {
       return message.content
@@ -310,16 +393,99 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     Math.round((currentIndex / demoConversation.length) * 100)
   )
 
+  // Handle suggestion click to start conversation
+  const handleSuggestionClick = () => {
+    handleInterrupt()
+  }
+
   return (
     <div
       style={{
         width: '100%',
         maxWidth: 700,
         margin: '0 auto',
+        flex: 1,
+        minHeight: 0,
+        overflowY: 'auto',
+        padding: 'var(--op-space-x-large) var(--op-space-small)',
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 'var(--op-space-large)',
+        height: '100%',
       }}
     >
+      {/* Title and Description */}
+      <motion.div
+        initial={{ opacity: 0, filter: "blur(4px)", }}
+        animate={{ opacity: 1, filter: "blur(0px)", }}
+        transition={{ duration: 0.4 }}
+        style={{ textAlign: 'center', flex: '0 0 auto' }}>
+        <h2
+          style={{
+            fontSize: 'var(--op-font-5x-large)',
+            fontWeight: 700,
+            marginBottom: 'var(--op-space-x-small)',
+          }}
+        >
+          {settings.pageTitle}
+        </h2>
+        <p
+          style={{
+            fontSize: 'var(--op-font-medium)',
+            color: 'var(--op-color-on-background-alt)',
+            margin: 0,
+          }}
+        >
+          {settings.pageDescription}
+        </p>
+        {/* Start Your Own Conversation Button */}
+        {showButton && (
+          <motion.button
+            initial={{
+              opacity: 0,
+              y: 20,
+              scale: 0.9,
+              filter: 'blur(4px)',
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              filter: 'blur(0px)',
+            }}
+            transition={{
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1],
+              delay: showPlan ? 0.5 : 0.2,
+            }}
+            onClick={handleInterrupt}
+            style={{
+              padding: 'var(--op-space-small) var(--op-space-large)',
+              backgroundColor: 'var(--op-color-primary-base)',
+              color: 'var(--op-color-primary-on-base)',
+              border: 'none',
+              borderRadius: 'var(--op-radius-medium)',
+              fontSize: 'var(--op-font-small)',
+              fontWeight: 600,
+              cursor: 'pointer',
+              alignSelf: 'center',
+              justifySelf: 'flex-end',
+              marginTop: 'var(--op-space-large)',
+              boxShadow:
+                '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            }}
+            whileTap={{
+              scale: 0.98,
+              boxShadow: '0 2px 6px -1px rgba(0, 0, 0, 0.08)',
+              transition: { duration: 0.1 },
+            }}
+          >
+            Start your own conversation
+          </motion.button>
+        )}
+      </motion.div>
+
       {/* Progress Indicator */}
       {isRunning && currentIndex < demoConversation.length && (
         <motion.div
@@ -331,12 +497,13 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             alignItems: 'center',
             gap: 'var(--op-space-small)',
             padding: 'var(--op-space-small) var(--op-space-medium)',
+            flex: '0 0 auto',
           }}
         >
           <div
             style={{
               flex: 1,
-              height: '4px',
+              height: 'var(--op-space-x-small)',
               backgroundColor: 'var(--op-color-neutral-plus-six)',
               borderRadius: 'var(--op-radius-pill)',
               overflow: 'hidden',
@@ -360,6 +527,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             transition={{ duration: 0.3 }}
             style={{
               fontSize: 'var(--op-font-x-small)',
+              fontFamily: 'var(--font-geist-mono)',
               fontWeight: 600,
               color: 'var(--op-color-neutral-on-plus-max)',
               minWidth: '38px',
@@ -373,17 +541,20 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
 
       {/* Messages Container */}
       <div
+        // Scrollable messages column – fills remaining space between progress bar and input
         ref={containerRef}
         style={{
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--op-space-small)',
-          height: '400px',
-          flexGrow: '1',
+          flex: '1',
+          minHeight: 0,
+          maxHeight: 500,
           overflowY: 'auto',
-          paddingInline: 'var(--op-space-small)',
+          width: '98%',
         }}
       >
+
         <AnimatePresence initial={false}>
           {messages.map((message, index) => (
             <motion.div
@@ -431,7 +602,14 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                   whiteSpace: 'pre-line',
                 }}
               >
-                {renderMessageWithCitations(message)}
+                {message.chainOfThought && message.role === 'assistant' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                    {renderChainOfThought(message.chainOfThought)}
+                    <div>{renderMessageWithCitations(message)}</div>
+                  </div>
+                ) : (
+                  renderMessageWithCitations(message)
+                )}
               </motion.div>
             </motion.div>
           ))}
@@ -704,51 +882,32 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         </PromptInputProvider>
       </div>
 
-      {/* Start Your Own Conversation Button */}
-      {showButton && (
-        <motion.button
-          initial={{
-            opacity: 0,
-            y: 20,
-            scale: 0.9,
-            filter: 'blur(4px)',
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            filter: 'blur(0px)',
-          }}
-          transition={{
-            duration: 0.6,
-            ease: [0.16, 1, 0.3, 1],
-            delay: showPlan ? 0.5 : 0.2,
-          }}
-          onClick={handleInterrupt}
-          style={{
-            padding: 'var(--op-space-small) var(--op-space-large)',
-            backgroundColor: 'var(--op-color-primary-base)',
-            color: 'var(--op-color-primary-on-base)',
-            border: 'none',
-            borderRadius: 'var(--op-radius-medium)',
-            fontSize: 'var(--op-font-small)',
-            fontWeight: 600,
-            cursor: 'pointer',
-            alignSelf: 'left',
-            justifySelf: 'flex-end',
-            marginTop: 'var(--op-space-small)',
-            boxShadow:
-              '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          }}
-          whileTap={{
-            scale: 0.98,
-            boxShadow: '0 2px 6px -1px rgba(0, 0, 0, 0.08)',
-            transition: { duration: 0.1 },
-          }}
-        >
-          Start your own conversation
-        </motion.button>
-      )}
+
+
+      {/* Suggestions - Show when demo hasn't started or has finished */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 'var(--op-space-small)',
+          flexWrap: 'nowrap',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {suggestions.map((suggestion) => (
+          <Button
+            key={suggestion.id}
+            variant="pill"
+            onClick={() => handleSuggestionClick()}
+            style={{
+              cursor: 'pointer',
+            }}
+          >
+            {suggestion.text}
+          </Button>
+        ))}
+      </div>
+
     </div>
   )
 }

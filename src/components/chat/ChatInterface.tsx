@@ -6,6 +6,7 @@ import { ThumbsDownIcon, ThumbsUpIcon } from '@hugeicons-pro/core-stroke-standar
 import { HugeiconsIcon } from '@hugeicons/react'
 import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { CheckIcon, AlertCircleIcon, SearchIcon } from 'lucide-react'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
@@ -20,11 +21,24 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from '@/components/ai-elements/prompt-input'
+import {
+  ChainOfThought,
+  ChainOfThoughtContent,
+  ChainOfThoughtHeader,
+  ChainOfThoughtStep,
+} from '@/components/ai-elements/chain-of-thought'
+
+interface PlaygroundSettings {
+  model: string
+  temperature: number
+  instructions: string
+}
 
 interface ChatInterfaceProps {
   chatbotId?: string
   initialMessage?: string
   collectFeedback?: boolean
+  playgroundSettings?: PlaygroundSettings
 }
 
 interface MessageFeedback {
@@ -37,6 +51,7 @@ export function ChatInterface({
   chatbotId,
   initialMessage,
   collectFeedback = true,
+  playgroundSettings,
 }: ChatInterfaceProps) {
   const [messageFeedback, setMessageFeedback] = useState<Map<string, 'positive' | 'negative'>>(
     new Map()
@@ -46,7 +61,14 @@ export function ChatInterface({
     () =>
       new TextStreamChatTransport<UIMessage>({
         api: '/api/chat',
-        body: chatbotId ? { chatbotId } : undefined,
+        body: {
+          ...(chatbotId ? { chatbotId } : {}),
+          ...(playgroundSettings ? {
+            model: playgroundSettings.model,
+            temperature: playgroundSettings.temperature,
+            instructions: playgroundSettings.instructions,
+          } : {}),
+        },
         prepareSendMessagesRequest: ({ messages, body }) => ({
           body: {
             ...body,
@@ -60,7 +82,7 @@ export function ChatInterface({
           },
         }),
       }),
-    [chatbotId]
+    [chatbotId, playgroundSettings]
   )
 
   const { messages, sendMessage, status, setMessages } = useChat<UIMessage>({
@@ -130,6 +152,40 @@ export function ChatInterface({
     return textParts.map((part) => part.text).join('\n')
   }
 
+  const getToolCalls = (message: UIMessage) => {
+    return message.parts.filter((part) => part.type === 'tool-call')
+  }
+
+  const renderChainOfThought = (toolCall: any) => {
+    if (toolCall.name !== 'thinking' || !toolCall.args?.steps) return null
+
+    const getIcon = (status: string) => {
+      switch (status) {
+        case 'complete': return CheckIcon
+        case 'active': return SearchIcon
+        case 'pending': return AlertCircleIcon
+        default: return CheckIcon
+      }
+    }
+
+    return (
+      <ChainOfThought defaultOpen={false}>
+        <ChainOfThoughtHeader>Thinking...</ChainOfThoughtHeader>
+        <ChainOfThoughtContent>
+          {toolCall.args.steps.map((step: any, index: number) => (
+            <ChainOfThoughtStep
+              key={index}
+              label={step.label}
+              description={step.description}
+              status={step.status}
+              icon={getIcon(step.status)}
+            />
+          ))}
+        </ChainOfThoughtContent>
+      </ChainOfThought>
+    )
+  }
+
   const isStreaming = status === 'streaming'
 
   return (
@@ -151,46 +207,52 @@ export function ChatInterface({
       >
         <Conversation>
           <ConversationContent>
-            {messages.map((message) => (
-              <Message
-                key={message.id}
-                from={message.role === 'user' ? 'user' : 'assistant'}
-              >
-                <MessageContent>
-                  <MessageResponse>{getMessageContent(message)}</MessageResponse>
-                  {collectFeedback && message.role === 'assistant' && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: 'var(--op-space-x-small)',
-                        marginTop: 'var(--op-space-small)',
-                      }}
-                    >
-                      <Button
-                        variant="icon"
-                        onClick={() => handleFeedback(message.id, 'positive')}
-                        aria-label="Thumbs up"
+            {messages.map((message) => {
+              const toolCalls = getToolCalls(message)
+              const chainOfThought = toolCalls.find((tc: any) => tc.name === 'thinking')
+
+              return (
+                <Message
+                  key={message.id}
+                  from={message.role === 'user' ? 'user' : 'assistant'}
+                >
+                  <MessageContent>
+                    {chainOfThought && renderChainOfThought(chainOfThought)}
+                    <MessageResponse>{getMessageContent(message)}</MessageResponse>
+                    {collectFeedback && message.role === 'assistant' && (
+                      <div
                         style={{
-                          backgroundColor: 'var(--op-color-background)',
+                          display: 'flex',
+                          gap: 'var(--op-space-x-small)',
+                          marginTop: 'var(--op-space-small)',
                         }}
                       >
-                        <HugeiconsIcon icon={ThumbsUpIcon} size={16} />
-                      </Button>
-                      <Button
-                        variant="icon"
-                        onClick={() => handleFeedback(message.id, 'negative')}
-                        style={{
-                          backgroundColor: 'var(--op-color-background)',
-                        }}
-                        aria-label="Thumbs down"
-                      >
-                        <HugeiconsIcon icon={ThumbsDownIcon} size={16} />
-                      </Button>
-                    </div>
-                  )}
-                </MessageContent>
-              </Message>
-            ))}
+                        <Button
+                          variant="icon"
+                          onClick={() => handleFeedback(message.id, 'positive')}
+                          aria-label="Thumbs up"
+                          style={{
+                            backgroundColor: 'var(--op-color-background)',
+                          }}
+                        >
+                          <HugeiconsIcon icon={ThumbsUpIcon} size={16} />
+                        </Button>
+                        <Button
+                          variant="icon"
+                          onClick={() => handleFeedback(message.id, 'negative')}
+                          style={{
+                            backgroundColor: 'var(--op-color-background)',
+                          }}
+                          aria-label="Thumbs down"
+                        >
+                          <HugeiconsIcon icon={ThumbsDownIcon} size={16} />
+                        </Button>
+                      </div>
+                    )}
+                  </MessageContent>
+                </Message>
+              )
+            })}
           </ConversationContent>
         </Conversation>
       </div>

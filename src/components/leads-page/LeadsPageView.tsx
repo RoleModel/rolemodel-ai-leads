@@ -5,14 +5,21 @@ import {
   Delete02Icon,
   Moon02Icon,
   PlusSignIcon,
+  Refresh01Icon,
   Settings02Icon,
   SidebarLeftIcon,
+  Copy01Icon,
   Sun01Icon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import Image from 'next/image'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Message, MessageAction, MessageActions, MessageContent, MessageResponse } from '@/components/ai-elements/message';
+import {
+  Conversation,
+  ConversationContent,
+} from '@/components/ai-elements/conversation';
 
 import {
   PromptInput,
@@ -31,7 +38,21 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input'
-import { AnimatedConversationDemo } from '@/components/leads-page/AnimatedConversationDemo'
+import dynamic from 'next/dynamic'
+
+const AnimatedConversationDemo = dynamic(
+  () => import('@/components/leads-page/AnimatedConversationDemo').then(mod => ({ default: mod.AnimatedConversationDemo })),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <div style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
+          Loading...
+        </div>
+      </div>
+    )
+  }
+)
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -61,18 +82,19 @@ interface LeadsPageViewProps {
   isEmbed?: boolean
 }
 
-const styles = {
+const getStyles = (isEmbed: boolean) => ({
   container: {
     display: 'flex',
     backgroundColor: 'var(--op-color-neutral-plus-seven)',
-    height: '100vh',
+    height: isEmbed ? '100vh' : '100%',
     width: '100%',
-    overflow: 'auto',
+    // overflowY: 'auto' as const,
   },
   sidebar: {
     '--_op-sidebar-background-color': 'var(--op-color-neutral-plus-seven)',
     '--_op-sidebar-rail-width': 'calc(var(--op-space-scale-unit) * 6)',
     '--_op-sidebar-drawer-width': 'calc(var(--op-space-scale-unit) * 30)',
+    '--_op-sidebar-border-color': 'var(--op-color-border)',
 
     display: 'flex',
     flexDirection: 'column' as const,
@@ -220,33 +242,18 @@ const styles = {
     justifyContent: 'flex-end' as const,
     gap: 'var(--op-space-small)',
   },
-  content: {
-    flex: 1,
-    display: 'flex',
-    width: '100%',
-    flexDirection: 'column' as const,
-    overflow: 'auto',
-  },
   hero: {
+    width: '100%',
+    maxWidth: 700 as const,
+    margin: '0 auto',
+    flex: 1,
+    minHeight: 0 as const,
+    overflowY: 'auto' as const,
+    padding: 'var(--op-space-medium) var(--op-space-small)',
     display: 'flex',
     flexDirection: 'column' as const,
-    alignItems: 'center',
     justifyContent: 'center',
     gap: 'var(--op-space-large)',
-    padding: 'var(--op-space-3x-large)',
-    textAlign: 'center' as const,
-    flex: 1,
-    height: '100%',
-  },
-  heroSection: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--op-space-large)',
-    padding: 'var(--op-space-3x-large)',
-    textAlign: 'center' as const,
-    flex: 1,
     height: '100%',
   },
   favicon: {
@@ -267,13 +274,13 @@ const styles = {
     objectFit: 'cover' as const,
   },
   pageTitle: {
-    fontSize: 'var(--op-font-3x-large)',
+    fontSize: 'var(--op-font-5x-large)',
     fontWeight: 700,
     marginBottom: 'var(--op-space-x-small)',
   },
   pageDescription: {
-    fontSize: 'var(--op-font-small)',
-    color: 'var(--op-color-neutral-on-plus-max)',
+    fontSize: 'var(--op-font-medium)',
+    color: 'var(--op-color-on-background-alt)',
     margin: 0,
   },
   suggestionsContainer: {
@@ -307,7 +314,7 @@ const styles = {
     outlineOffset: '2px',
   },
   chatContainer: {
-    // flex: 1,
+    flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center' as const,
@@ -321,7 +328,6 @@ const styles = {
     flexDirection: 'column' as const,
     alignItems: 'center' as const,
     gap: 'var(--op-space-large)',
-    marginBottom: 'var(--op-space-large)',
   },
   chatHeaderCenter: {
     textAlign: 'center' as const,
@@ -332,7 +338,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center' as const,
     gap: 'var(--op-space-small)',
-    marginBottom: 'var(--op-space-medium)',
     padding: '0 var(--op-space-small)',
   },
   bantProgressBar: {
@@ -350,27 +355,26 @@ const styles = {
   },
   bantProgressText: {
     fontSize: 'var(--op-font-small)',
-    fontWeight: 600,
+    fontWeight: 500,
+    fontFamily: 'var(--font-geist-mono)',
     color: 'var(--op-color-neutral-on-plus-max)',
     minWidth: '38px',
     textAlign: 'right' as const,
   },
   messagesOuterContainer: {
     width: '100%',
-    maxWidth: '700px',
-    height: '100%',
+    maxWidth: 700,
     display: 'flex',
-    justifyContent: 'start',
-    flexGrow: '1',
     flexDirection: 'column' as const,
+    flexGrow: 1,
+    minHeight: 0,
   },
   messagesInnerContainer: {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 'var(--op-space-small)',
-    height: '400px',
-    flexGrow: '1',
-    flexShrink: '0',
+    flexGrow: 1,
+    minHeight: 0,
     overflowY: 'auto' as const,
     paddingInline: 'var(--op-space-small)',
   },
@@ -396,7 +400,7 @@ const styles = {
     paddingBottom: 'var(--op-space-medium)',
   },
   inputContainer: {
-    paddingTop: 'var(--op-space-medium)',
+    width: '100%',
     position: 'relative' as const,
   },
   messages: {
@@ -534,12 +538,13 @@ const styles = {
   messageWrapperAssistant: {
     justifyContent: 'flex-start' as const,
   },
-}
+})
 
 const DEFAULT_SUGGESTIONS: Suggestion[] = [
-  { id: '1', text: 'What types of software do you build?' },
-  { id: '2', text: 'How long does a project typically take?' },
+  { id: '1', text: 'Are we outgrowing our current tools?' },
+  { id: '2', text: 'How do we reduce manual work?' },
 ]
+
 
 export function LeadsPageView({
   chatbotId,
@@ -553,7 +558,14 @@ export function LeadsPageView({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const [showSuggestions, setShowSuggestions] = useState(true)
+  const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Get styles with isEmbed prop
+  const styles = getStyles(isEmbed)
+
+  // Check if we're on the client to avoid SSR issues
+  const isClient = typeof window !== 'undefined'
 
   // Chat history - use state to avoid hydration mismatch
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([])
@@ -682,6 +694,8 @@ export function LeadsPageView({
 
   const bantProgress = messages.length > 0 ? calculateBANTProgress() : 0
 
+  const { regenerate } = useChat();
+
 
   // Suggestion handlers
   const handleAddSuggestion = () => {
@@ -700,16 +714,10 @@ export function LeadsPageView({
     setSuggestions(suggestions.filter((s) => s.id !== id))
   }
 
-  const handleSelectSuggestion = (id: string) => {
-    setSuggestions(
-      suggestions.map((s) =>
-        s.id === id ? { ...s, isSelected: true } : { ...s, isSelected: false }
-      )
-    )
-  }
-
-  const handleSuggestionTextChange = (id: string, text: string) => {
-    setSuggestions(suggestions.map((s) => (s.id === id ? { ...s, text } : s)))
+  const handleUpdateSuggestion = (id: string, newText: string) => {
+    setSuggestions(suggestions.map((s) =>
+      s.id === id ? { ...s, text: newText } : s
+    ))
   }
 
   // Chat history handlers
@@ -797,7 +805,7 @@ export function LeadsPageView({
   }, [messages, currentChatId, showDemo, getMessageContent])
 
   return (
-    <div className="app-with-sidebar" style={{ height: "100%" }}>
+    <div className="app-with-sidebar" style={styles.container}>
       {/* Sidebar */}
       {showSidebar && (
         <div
@@ -859,7 +867,6 @@ export function LeadsPageView({
                   variant="secondary"
                   style={{
                     justifyContent: 'flex-start',
-                    padding: 'var(--op-space-small)',
                     textAlign: 'left',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -905,102 +912,9 @@ export function LeadsPageView({
       {/* Main Content */}
       <div className="app__content">
         {showDemo ? (
-          <div style={styles.hero}>
-
-            <div>
-              <h2 style={styles.pageTitle}>
-                {settings.pageTitle}
-              </h2>
-              <p style={styles.pageDescription}>
-                {settings.pageDescription}
-              </p>
-            </div>
-
-            {/* Animated Conversation Demo */}
-            <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} />
-
-            {/* Suggestions */}
-            <div style={styles.suggestionsContainer}>
-              {suggestions.map((suggestion) => (
-                <div key={suggestion.id} style={styles.suggestionWrapper}>
-                  {/* Action buttons absolutely positioned above selected suggestion */}
-                  {editMode && suggestion.isSelected && (
-                    <div style={styles.suggestionActions}>
-                      <Button
-                        variant="icon"
-                        onClick={() => handleDeleteSuggestion(suggestion.id)}
-                      >
-                        <HugeiconsIcon icon={Delete02Icon} size={16} />
-                      </Button>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="icon">
-                            <HugeiconsIcon icon={Settings02Icon} size={16} />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent align="end" style={styles.suggestionPopover}>
-                          <div style={styles.suggestionPopoverContent}>
-                            <div>
-                              <Label style={styles.labelBlock}>
-                                Suggestion text
-                              </Label>
-                              <Input
-                                autoFocus
-                                value={suggestion.text}
-                                onChange={(e) =>
-                                  handleSuggestionTextChange(
-                                    suggestion.id,
-                                    e.target.value
-                                  )
-                                }
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault()
-                                    const popover = (e.target as HTMLElement).closest(
-                                      '[data-radix-popper-content-wrapper]'
-                                    )
-                                    if (popover) {
-                                      const trigger = document.querySelector(
-                                        `[data-state="open"]`
-                                      ) as HTMLElement
-                                      trigger?.click()
-                                    }
-                                  }
-                                }}
-                                placeholder="What types of software do you build?"
-                              />
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  )}
-
-                  {/* Suggestion pill */}
-                  <Button
-                    variant="pill"
-                    onClick={() => {
-                      if (editMode) {
-                        handleSelectSuggestion(suggestion.id)
-                      } else {
-                        handlePromptSubmit({ text: suggestion.text, files: [] })
-                      }
-                    }}
-                    style={editMode && suggestion.isSelected ? styles.buttonOutlined : styles.buttonNoOutline}
-                  >
-                    {suggestion.text}
-                  </Button>
-                </div>
-              ))}
-              {editMode && (
-                <Button variant="dashedpill" onClick={handleAddSuggestion}>
-                  <HugeiconsIcon icon={PlusSignIcon} size={16} /> Add suggestion
-                </Button>
-              )}
-            </div>
-          </div>
+          <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} editMode={editMode} />
         ) : (
-          <div style={styles.heroSection}>
+          <div style={styles.hero}>
             {/* Header with Favicon, Title, and Description */}
             <div style={styles.headerSection}>
               <div style={styles.textCenter}>
@@ -1031,77 +945,186 @@ export function LeadsPageView({
             )}
 
             {/* Conversation Messages Container */}
-            <div style={styles.messagesOuterContainer}>
-              <div style={styles.messagesInnerContainer}>
-                {messages.map((message, index) => (
-                  <div
-                    key={`${message.id}-${index}`}
-                    style={{
-                      ...styles.messageWrapper,
-                      ...(message.role === 'user' ? styles.messageWrapperUser : styles.messageWrapperAssistant),
-                    }}
-                  >
-                    <div
-                      style={{
-                        ...styles.messageBubble,
-                        ...(message.role === 'user' ? styles.messageBubbleUser : styles.messageBubbleAssistant),
-                      }}
-                    >
-                      {getMessageContent(message)}
-                    </div>
-                  </div>
+
+            <Conversation style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--op-space-small)',
+              flex: '1',
+              minHeight: 0,
+              maxHeight: 600,
+              overflowY: 'auto',
+              width: '98%',
+            }}>
+              <ConversationContent>
+                {messages.map((message, messageIndex) => (
+                  <Fragment key={message.id}>
+                    {message.parts.map((part, i) => {
+                      switch (part.type) {
+                        case 'text':
+                          const isLastMessage =
+                            messageIndex === messages.length - 1;
+                          return (
+                            <Fragment key={`${message.id}-${i}`}>
+                              <Message from={message.role}>
+                                <MessageContent>
+                                  {isClient ? (
+                                    <MessageResponse>{part.text}</MessageResponse>
+                                  ) : (
+                                    <div>{part.text}</div>
+                                  )}
+                                </MessageContent>
+                                {message.role === 'assistant' && isLastMessage && (
+                                  <MessageActions>
+                                    <MessageAction
+                                      onClick={() => regenerate()}
+                                      label="Retry"
+                                    >
+                                      <HugeiconsIcon icon={Refresh01Icon} className="size-3" />
+                                    </MessageAction>
+                                    <MessageAction
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(part.text)
+                                      }
+                                      label="Copy"
+                                    >
+                                      <HugeiconsIcon icon={Copy01Icon} className="size-3" />
+                                    </MessageAction>
+                                  </MessageActions>
+                                )}
+                              </Message>
+                            </Fragment>
+                          );
+                        default:
+                          return null;
+                      }
+                    })}
+                  </Fragment>
                 ))}
-              </div>
+              </ConversationContent>
+            </Conversation>
 
-
-
-              <div style={styles.inputContainer}>
-                <div className="gradient" />
-                <PromptInputProvider>
-                  <PromptInput onSubmit={handlePromptSubmit}>
-                    <PromptInputAttachments>
-                      {(attachment) => (
-                        <PromptInputAttachment key={attachment.id} data={attachment} />
-                      )}
-                    </PromptInputAttachments>
-                    <PromptInputBody style={{ height: "80px" }}>
-                      <PromptInputTextarea
-                        placeholder="Ask me anything..."
-                        ref={textareaRef}
-                      />
-                    </PromptInputBody>
-                    <PromptInputFooter>
-                      <PromptInputTools>
-                        <PromptInputActionMenu>
-                          <PromptInputActionMenuTrigger>
-                            <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                          </PromptInputActionMenuTrigger>
-                          <PromptInputActionMenuContent>
-                            <PromptInputActionAddAttachments />
-                          </PromptInputActionMenuContent>
-                        </PromptInputActionMenu>
-                        <PromptInputSpeechButton textareaRef={textareaRef} />
-                      </PromptInputTools>
-                      <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-                    </PromptInputFooter>
-                  </PromptInput>
-                </PromptInputProvider>
-              </div>
+            <div style={styles.inputContainer}>
+              <div className="gradient" />
+              <PromptInputProvider>
+                <PromptInput onSubmit={handlePromptSubmit}>
+                  <PromptInputAttachments>
+                    {(attachment) => (
+                      <PromptInputAttachment key={attachment.id} data={attachment} />
+                    )}
+                  </PromptInputAttachments>
+                  <PromptInputBody style={{ height: "80px" }}>
+                    <PromptInputTextarea
+                      placeholder="Ask me anything..."
+                      ref={textareaRef}
+                    />
+                  </PromptInputBody>
+                  <PromptInputFooter>
+                    <PromptInputTools>
+                      <PromptInputActionMenu>
+                        <PromptInputActionMenuTrigger>
+                          <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                        </PromptInputActionMenuTrigger>
+                        <PromptInputActionMenuContent>
+                          <PromptInputActionAddAttachments />
+                        </PromptInputActionMenuContent>
+                      </PromptInputActionMenu>
+                      <PromptInputSpeechButton textareaRef={textareaRef} />
+                    </PromptInputTools>
+                    <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+                  </PromptInputFooter>
+                </PromptInput>
+              </PromptInputProvider>
             </div>
             {/* Suggestions - always at bottom, hide when clicked */}
             {showSuggestions && (
               <div style={styles.suggestionsAtBottom}>
                 {suggestions.map((suggestion) => (
-                  <Button
-                    key={suggestion.id}
-                    variant="pill"
-                    onClick={() =>
-                      handlePromptSubmit({ text: suggestion.text, files: [] })
-                    }
-                  >
-                    {suggestion.text}
-                  </Button>
+                  <div key={suggestion.id} style={{ position: 'relative' }}>
+                    <Button
+                      variant="pill"
+                      onClick={() => {
+                        if (editMode) {
+                          setActiveSuggestionId(suggestion.id === activeSuggestionId ? null : suggestion.id)
+                        } else {
+                          handlePromptSubmit({ text: suggestion.text, files: [] })
+                        }
+                      }}
+                    >
+                      {suggestion.text}
+                    </Button>
+                    {editMode && activeSuggestionId === suggestion.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-8px',
+                        display: 'flex',
+                        gap: '4px',
+                        background: 'var(--op-color-background)',
+                        borderRadius: 'var(--op-radius-medium)',
+                        padding: '2px',
+                        boxShadow: 'var(--op-shadow-low)',
+                      }}>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="icon" size="sm">
+                              <HugeiconsIcon icon={Settings02Icon} size={12} />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="grid gap-4">
+                              <div className="space-y-2">
+                                <h4 className="font-medium leading-none">Edit Suggestion</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Update the suggestion text
+                                </p>
+                              </div>
+                              <div className="grid gap-2">
+                                <div className="grid gap-2">
+                                  <Label htmlFor={`suggestion-text-${suggestion.id}`}>Text</Label>
+                                  <Input
+                                    id={`suggestion-text-${suggestion.id}`}
+                                    defaultValue={suggestion.text}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleUpdateSuggestion(suggestion.id, e.currentTarget.value)
+                                        setActiveSuggestionId(null)
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      handleUpdateSuggestion(suggestion.id, e.target.value)
+                                      setActiveSuggestionId(null)
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <Button
+                          variant="icon"
+                          size="sm"
+                          onClick={() => {
+                            handleDeleteSuggestion(suggestion.id)
+                            setActiveSuggestionId(null)
+                          }}
+                        >
+                          <HugeiconsIcon icon={Delete02Icon} size={12} />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 ))}
+                {editMode && (
+                  <Button
+                    variant="pill"
+                    onClick={handleAddSuggestion}
+                    style={{ borderStyle: 'dashed' }}
+                  >
+                    <HugeiconsIcon icon={PlusSignIcon} size={16} />
+                    Add Suggestion
+                  </Button>
+                )}
               </div>
             )}
           </div>
