@@ -14,7 +14,7 @@ import {
   Tick01Icon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -349,23 +349,11 @@ function ChatInstanceComponent({
 
   const chatTransport = useMemo(
     () =>
-      new TextStreamChatTransport<UIMessage>({
+      new DefaultChatTransport({
         api: '/api/chat',
         body: {
           chatbotId: 'a0000000-0000-0000-0000-000000000001',
         },
-        prepareSendMessagesRequest: ({ messages, body }) => ({
-          body: {
-            ...body,
-            messages: messages.map((msg) => ({
-              role: msg.role,
-              content: msg.parts
-                .filter((part) => part.type === 'text')
-                .map((part) => (part as { type: 'text'; text: string }).text)
-                .join('\n'),
-            })),
-          },
-        }),
       }),
     []
   )

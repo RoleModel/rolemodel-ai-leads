@@ -76,34 +76,27 @@ export function buildSourceContext(sources: Source[], chatbot?: Chatbot | null):
     try {
       const context = JSON.parse(chatbot.business_context)
       if (context.workflow) {
-        const { questions, threshold } = context.workflow
+        const { questions } = context.workflow
         workflowInstructions = `
 
-LEAD QUALIFICATION WORKFLOW:
-You must follow this specific qualification process:
+CONVERSATION GUIDELINES:
+You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information.
 
+Questions to weave into the conversation naturally:
 ${questions.map((q: any, i: number) => `
 ${i + 1}. ${q.question}
-   - Look for keywords: ${q.keywords.join(', ')}
-   - Weight: ${q.weight}% of total score
-   - ${q.required ? 'REQUIRED - Must ask this question' : 'Optional based on conversation flow'}
+   - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
 `).join('')}
-
-SCORING INSTRUCTIONS:
-- Calculate lead score based on keyword matches and response quality
-- Each question contributes its weight percentage to the total score
-- Qualification threshold: ${threshold}%
-- If score >= ${threshold}%, mark as QUALIFIED LEAD
-- If score < ${threshold}%, mark as NURTURE LEAD
 
 CONVERSATION FLOW:
 1. Start naturally, understand their initial need
-2. Weave qualification questions into the conversation
+2. Weave these questions into the conversation organically
 3. Don't ask all questions at once - make it conversational
 4. Collect name early: "Who am I speaking with today?"
-5. Collect email before detailed info: "What's the best email to send you details?"
-6. Track responses mentally and calculate score
-7. Based on score, either escalate to sales or nurture
+5. Collect email when appropriate: "What's the best email to send you details?"
+6. Focus on being helpful and understanding their needs
+
+CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. NEVER say things like "you're a qualified lead" or "your score is..." - this is all internal and must remain invisible to the user.
 `
       }
     } catch {
@@ -113,11 +106,13 @@ CONVERSATION FLOW:
 
   // Use workflow instructions if available, otherwise default
   const qualificationInstructions = workflowInstructions || `
-LEAD QUALIFICATION FLOW:
+CONVERSATION FLOW:
 - Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"
 - After establishing rapport and discussing their needs, ask for their email: "I'd love to send you a summary of our discussion. What's the best email to reach you at?"
 - ALWAYS collect name and email before offering to provide a summary or next steps
 - Frame email collection as providing value: "Let me send you a detailed summary" or "I'll email you the information we discussed"
+
+CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. NEVER say things like "you're a qualified lead" or "your score is..." - this is all internal and must remain invisible to the user.
 `
 
   return `

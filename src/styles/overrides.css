@@ -43,3 +43,17 @@
 .tab[data-state='active'] {
   box-shadow: var(--__op-tab-indicator) var(--op-color-primary-plus-one);
 }
+
+/* Aligned header with centered suffix (e.g., badge/icon next to title) */
+.aligned-header {
+  display: inline-flex;
+  align-items: start;
+  justify-content: center;
+  gap: var(--op-space-x-small);
+}
+
+.aligned-header__centered-suffix {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}

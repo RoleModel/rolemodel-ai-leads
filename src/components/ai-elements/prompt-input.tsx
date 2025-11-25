@@ -681,9 +681,10 @@ export const PromptInput = ({
           return (formData.get('message') as string) || ''
         })()
 
-    // Reset form immediately after capturing text to avoid race condition
-    // where user input during async blob conversion would be lost
-    if (!usingProvider) {
+    // Reset form/input immediately after capturing text to provide instant feedback
+    if (usingProvider && controller) {
+      controller.textInput.clear()
+    } else {
       form.reset()
     }
 
@@ -702,14 +703,11 @@ export const PromptInput = ({
       try {
         const result = onSubmit({ text, files: convertedFiles }, event)
 
-        // Handle both sync and async onSubmit
+        // Handle both sync and async onSubmit - clear files after completion
         if (result instanceof Promise) {
           result
             .then(() => {
               clearFiles()
-              if (usingProvider && controller) {
-                controller.textInput.clear()
-              }
             })
             .catch(() => {
               // Don't clear on error - user may want to retry
@@ -717,9 +715,6 @@ export const PromptInput = ({
         } else {
           // Sync function completed without throwing, clear attachments
           clearFiles()
-          if (usingProvider && controller) {
-            controller.textInput.clear()
-          }
         }
       } catch {
         // Don't clear on error - user may want to retry

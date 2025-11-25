@@ -32,12 +32,15 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
   <div
     style={{
       display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 'var(--op-space-x-small)',
       width: '100%',
       fontSize: 'var(--op-font-x-small)',
       justifyContent: from === 'user' ? 'flex-end' : 'flex-start',
     }}
     className={cn(
-      'group flex gap-2',
+      'group',
       from === 'user' ? 'is-user' : 'is-assistant',
       className
     )}
@@ -68,6 +71,7 @@ export const MessageContent = ({
       textAlign: 'left',
       padding: 'var(--op-space-small) var(--op-space-medium)',
       borderRadius: 'var(--op-radius-medium)',
+      width: 'fit-content'
     }}
     {...props}
   >

@@ -74,7 +74,14 @@ export async function POST(req: NextRequest) {
 
 ${effectiveInstructions}
 
-When answering complex questions or when your reasoning would benefit from showing step-by-step thinking, use the 'thinking' tool to display your chain of thought process to the user.
+THINKING TOOL USAGE:
+You have access to a 'thinking' tool that displays your reasoning process to users. Use it when:
+- Analyzing complex questions that require multiple considerations
+- Comparing options or evaluating trade-offs
+- Breaking down multi-part questions
+- Researching or looking up information from the knowledge base
+
+When using the thinking tool, provide steps with clear labels and descriptions. Mark steps as 'complete' when finished, 'active' for current step, and 'pending' for upcoming steps.
 
 ${sourceContext}`,
     }
@@ -216,7 +223,7 @@ ${sourceContext}`,
       },
     })
 
-    return result.toTextStreamResponse({
+    return result.toUIMessageStreamResponse({
       headers: {
         'X-Conversation-ID': activeConversationId || '',
         'X-Sources-Used': JSON.stringify(

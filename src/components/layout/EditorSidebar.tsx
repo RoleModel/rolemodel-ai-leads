@@ -113,6 +113,7 @@ export function EditorSidebar() {
   const [showDeployPopover, setShowDeployPopover] = useState(false)
 
   const logoInputRef = useRef<HTMLInputElement>(null)
+  const faviconInputRef = useRef<HTMLInputElement>(null)
 
   // Load settings on mount
   useEffect(() => {
@@ -201,6 +202,21 @@ export function EditorSidebar() {
           const dataUrl = event.target.result as string
           setLogoPreview(dataUrl)
           updateSettings({ logo: dataUrl })
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          const dataUrl = event.target.result as string
+          setFaviconPreview(dataUrl)
+          updateSettings({ favicon: dataUrl })
         }
       }
       reader.readAsDataURL(file)
@@ -450,6 +466,53 @@ export function EditorSidebar() {
               <Button onClick={() => logoInputRef.current?.click()} variant="secondary">
                 <HugeiconsIcon icon={Image01Icon} size={16} />
                 {settings.logo ? 'Change image' : 'Upload image'}
+              </Button>
+            </div>
+          </div>
+
+          <div style={styles.formSection}>
+            <Label style={{ fontSize: 'var(--op-font-small)' }}>Avatar Icon</Label>
+            <p
+              style={{
+                fontSize: 'var(--op-font-x-small)',
+                color: 'var(--op-color-neutral-on-plus-max)',
+                margin: '0 0 var(--op-space-x-small) 0',
+              }}
+            >
+              Shown next to AI messages in the chat
+            </p>
+            <div style={styles.inputGroup}>
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 'var(--op-radius-medium)',
+                  backgroundColor: faviconPreview
+                    ? 'transparent'
+                    : 'var(--op-color-neutral-plus-seven)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  border: '1px solid var(--op-color-border)',
+                }}
+              >
+                {faviconPreview ? (
+                  <Image src={faviconPreview} alt="Avatar preview" width={48} height={48} style={{ objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>AI</span>
+                )}
+              </div>
+              <input
+                ref={faviconInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFaviconUpload}
+                style={{ display: 'none' }}
+              />
+              <Button onClick={() => faviconInputRef.current?.click()} variant="secondary">
+                <HugeiconsIcon icon={Image01Icon} size={16} />
+                {settings.favicon ? 'Change icon' : 'Upload icon'}
               </Button>
             </div>
           </div>

@@ -89,7 +89,12 @@ export const ChainOfThoughtHeader = memo(
           {...props}
         >
           <HugeiconsIcon icon={BrainIcon} size={20} />
-          <span className="flex-1 text-left">{children ?? 'Chain of Thought'}</span>
+          <span
+            style={{
+              textAlign: 'left',
+              flex: 1
+            }}
+            className="flex-1 text-left">{children ?? 'Chain of Thought'}</span>
           <HugeiconsIcon icon={ArrowDown01Icon} size={20}
             style={{
               transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',

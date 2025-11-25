@@ -25,6 +25,16 @@ import {
   ChainOfThoughtHeader,
   ChainOfThoughtStep,
 } from '@/components/ai-elements/chain-of-thought'
+import {
+  Message,
+  MessageContent,
+  MessageResponse,
+} from '@/components/ai-elements/message'
+import {
+  Conversation,
+  ConversationContent,
+} from '@/components/ai-elements/conversation'
+import Image from 'next/image'
 import { SearchIcon, CheckIcon, AlertCircleIcon } from 'lucide-react'
 import {
   PromptInput,
@@ -385,8 +395,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     })
   }
 
-  const showButton = !isRunning || currentIndex >= demoConversation.length
-
   // Calculate progress percentage
   const progressPercentage = Math.min(
     100,
@@ -411,7 +419,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        gap: 'var(--op-space-large)',
+        gap: 'var(--op-space-small)',
         height: '100%',
       }}
     >
@@ -421,15 +429,29 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         animate={{ opacity: 1, filter: "blur(0px)", }}
         transition={{ duration: 0.4 }}
         style={{ textAlign: 'center', flex: '0 0 auto' }}>
-        <h2
+        <span
+          className="aligned-header"
           style={{
             fontSize: 'var(--op-font-5x-large)',
             fontWeight: 700,
             marginBottom: 'var(--op-space-x-small)',
+            // display: 'flex',
+            // alignItems: 'start',
+            // justifyContent: 'center',
+            // gap: 'var(--op-space-x-small)',
+            lineHeight: 1,
           }}
         >
+          <Image
+            className="aligned-header__centered-suffix"
+            src={settings.favicon}
+            alt="AI"
+            width={32}
+            height={32}
+            style={{ objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
+          />
           {settings.pageTitle}
-        </h2>
+        </span>
         <p
           style={{
             fontSize: 'var(--op-font-medium)',
@@ -439,105 +461,9 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         >
           {settings.pageDescription}
         </p>
-        {/* Start Your Own Conversation Button */}
-        {showButton && (
-          <motion.button
-            initial={{
-              opacity: 0,
-              y: 20,
-              scale: 0.9,
-              filter: 'blur(4px)',
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              filter: 'blur(0px)',
-            }}
-            transition={{
-              duration: 0.6,
-              ease: [0.16, 1, 0.3, 1],
-              delay: showPlan ? 0.5 : 0.2,
-            }}
-            onClick={handleInterrupt}
-            style={{
-              padding: 'var(--op-space-small) var(--op-space-large)',
-              backgroundColor: 'var(--op-color-primary-base)',
-              color: 'var(--op-color-primary-on-base)',
-              border: 'none',
-              borderRadius: 'var(--op-radius-medium)',
-              fontSize: 'var(--op-font-small)',
-              fontWeight: 600,
-              cursor: 'pointer',
-              alignSelf: 'center',
-              justifySelf: 'flex-end',
-              marginTop: 'var(--op-space-large)',
-              boxShadow:
-                '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            }}
-            whileTap={{
-              scale: 0.98,
-              boxShadow: '0 2px 6px -1px rgba(0, 0, 0, 0.08)',
-              transition: { duration: 0.1 },
-            }}
-          >
-            Start your own conversation
-          </motion.button>
-        )}
       </motion.div>
 
-      {/* Progress Indicator */}
-      {isRunning && currentIndex < demoConversation.length && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--op-space-small)',
-            padding: 'var(--op-space-small) var(--op-space-medium)',
-            flex: '0 0 auto',
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              height: 'var(--op-space-x-small)',
-              backgroundColor: 'var(--op-color-neutral-plus-six)',
-              borderRadius: 'var(--op-radius-pill)',
-              overflow: 'hidden',
-            }}
-          >
-            <motion.div
-              initial={{ width: '0%' }}
-              animate={{ width: `${progressPercentage}%` }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              style={{
-                height: '100%',
-                backgroundColor: 'var(--op-color-primary-base)',
-                borderRadius: 'var(--op-radius-pill)',
-              }}
-            />
-          </div>
-          <motion.span
-            key={progressPercentage}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              fontSize: 'var(--op-font-x-small)',
-              fontFamily: 'var(--font-geist-mono)',
-              fontWeight: 600,
-              color: 'var(--op-color-neutral-on-plus-max)',
-              minWidth: '38px',
-              textAlign: 'right',
-            }}
-          >
-            {progressPercentage}%
-          </motion.span>
-        </motion.div>
-      )}
+
 
       {/* Messages Container */}
       <div
@@ -555,65 +481,69 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         }}
       >
 
-        <AnimatePresence initial={false}>
-          {messages.map((message, index) => (
-            <motion.div
-              key={message.id + '-' + index}
-              layout
-              initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                display: 'flex',
-                justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <motion.div
-                layout
-                initial={{
-                  boxShadow: '0 0 0 0 rgba(0, 0, 0, 0)',
-                }}
-                animate={{
-                  boxShadow:
-                    message.role === 'user'
-                      ? '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                      : '0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04)',
-                }}
-                transition={{
-                  delay: 0.2,
-                  duration: 0.3,
-                }}
-                style={{
-                  maxWidth: '75%',
-                  padding: 'var(--op-space-x-small)',
-                  borderRadius: 'var(--op-radius-medium)',
-                  backgroundColor:
-                    message.role === 'user'
-                      ? 'var(--op-color-primary-base)'
-                      : 'var(--op-color-neutral-plus-five)',
-                  color:
-                    message.role === 'user'
-                      ? 'var(--op-color-primary-on-base)'
-                      : 'var(--op-color-neutral-on-plus-five)',
-                  fontSize: 'var(--op-font-small)',
-                  lineHeight: 1.5,
-                  textAlign: 'left',
-                  whiteSpace: 'pre-line',
-                }}
-              >
-                {message.chainOfThought && message.role === 'assistant' ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
-                    {renderChainOfThought(message.chainOfThought)}
-                    <div>{renderMessageWithCitations(message)}</div>
-                  </div>
-                ) : (
-                  renderMessageWithCitations(message)
-                )}
-              </motion.div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        <Conversation style={{ display: 'contents' }}>
+          <ConversationContent style={{ display: 'contents' }}>
+            <AnimatePresence initial={false}>
+              {messages.map((message, index) => (
+                <motion.div
+                  key={message.id + '-' + index}
+                  layout
+                  initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Message from={message.role}>
+                    {message.role === 'assistant' && (
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 'var(--op-radius-circle)',
+                        backgroundColor: 'var(--op-color-primary)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        flexShrink: 0,
+                        fontSize: 'var(--op-font-small)',
+                        fontWeight: 600,
+                      }}>
+                        {settings.favicon ? (
+                          <Image
+                            src={settings.favicon}
+                            alt="AI"
+                            width={32}
+                            height={32}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
+                          />
+                        ) : (
+                          'AI'
+                        )}
+                      </div>
+                    )}
+                    <MessageContent>
+                      {message.chainOfThought && message.role === 'assistant' ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                          {renderChainOfThought(message.chainOfThought)}
+                          {message.citations && message.citations.length > 0 ? (
+                            <div style={{ width: '100%', fontSize: 'inherit' }}>{renderMessageWithCitations(message)}</div>
+                          ) : (
+                            <MessageResponse>{message.content}</MessageResponse>
+                          )}
+                        </div>
+                      ) : message.citations && message.citations.length > 0 ? (
+                        <div style={{ width: '100%', fontSize: 'inherit' }}>{renderMessageWithCitations(message)}</div>
+                      ) : (
+                        <MessageResponse>{message.content}</MessageResponse>
+                      )}
+                    </MessageContent>
+                  </Message>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </ConversationContent>
+        </Conversation>
 
         {isTyping && (
           <motion.div
@@ -809,7 +739,57 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
 
         <div ref={messagesEndRef} />
       </div>
+      {/* Progress Indicator */}
 
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--op-space-small)',
+          padding: 'var(--op-space-x-small) var(--op-space-medium)',
+          flex: '0 0 auto',
+        }}
+      >
+        <div
+          style={{
+            flex: 1,
+            height: 'var(--op-space-x-small)',
+            backgroundColor: 'var(--op-color-neutral-plus-six)',
+            borderRadius: 'var(--op-radius-pill)',
+            overflow: 'hidden',
+          }}
+        >
+          <motion.div
+            initial={{ width: '0%' }}
+            animate={{ width: `${progressPercentage}%` }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            style={{
+              height: '100%',
+              backgroundColor: 'var(--op-color-primary-base)',
+              borderRadius: 'var(--op-radius-pill)',
+            }}
+          />
+        </div>
+        <motion.span
+          key={progressPercentage}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          style={{
+            fontSize: 'var(--op-font-x-small)',
+            fontFamily: 'var(--font-geist-mono)',
+            fontWeight: 600,
+            color: 'var(--op-color-neutral-on-plus-max)',
+            minWidth: '38px',
+            textAlign: 'right',
+          }}
+        >
+          {progressPercentage}%
+        </motion.span>
+      </motion.div>
       {/* Real PromptInput Component with Typing Animation */}
       <div
         onClick={handleInterrupt}

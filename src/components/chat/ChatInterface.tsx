@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useChat } from '@ai-sdk/react'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CheckIcon, AlertCircleIcon, SearchIcon } from 'lucide-react'
 
@@ -59,7 +59,7 @@ export function ChatInterface({
 
   const chatTransport = useMemo(
     () =>
-      new TextStreamChatTransport<UIMessage>({
+      new DefaultChatTransport({
         api: '/api/chat',
         body: {
           ...(chatbotId ? { chatbotId } : {}),
@@ -69,18 +69,6 @@ export function ChatInterface({
             instructions: playgroundSettings.instructions,
           } : {}),
         },
-        prepareSendMessagesRequest: ({ messages, body }) => ({
-          body: {
-            ...body,
-            messages: messages.map((msg) => ({
-              role: msg.role,
-              content: msg.parts
-                .filter((part) => part.type === 'text')
-                .map((part) => (part as { type: 'text'; text: string }).text)
-                .join('\n'),
-            })),
-          },
-        }),
       }),
     [chatbotId, playgroundSettings]
   )

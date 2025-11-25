@@ -12,7 +12,7 @@ import {
   Sun01Icon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { TextStreamChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import Image from 'next/image'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Message, MessageAction, MessageActions, MessageContent, MessageResponse } from '@/components/ai-elements/message';
@@ -527,6 +527,26 @@ const getStyles = (isEmbed: boolean) => ({
     color: 'var(--op-color-primary-on-base)',
     boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   },
+  messageAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 'var(--op-radius-circle)',
+    backgroundColor: 'var(--op-color-primary)',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    overflow: 'hidden' as const,
+    flexShrink: 0,
+    fontSize: 'var(--op-font-small)',
+    fontWeight: 600,
+  },
+  messageAvatarImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover' as const,
+    borderRadius: 'var(--op-radius-circle)',
+  },
   messageBubbleAssistant: {
     backgroundColor: 'var(--op-color-neutral-plus-six)',
     color: 'var(--op-color-on-background)',
@@ -599,23 +619,11 @@ export function LeadsPageView({
 
   const chatTransport = useMemo(
     () =>
-      new TextStreamChatTransport<UIMessage>({
+      new DefaultChatTransport({
         api: '/api/chat',
         body: {
           chatbotId,
         },
-        prepareSendMessagesRequest: ({ messages, body }) => ({
-          body: {
-            ...body,
-            messages: messages.map((msg) => ({
-              role: msg.role,
-              content: msg.parts
-                .filter((part) => part.type === 'text')
-                .map((part) => (part as { type: 'text'; text: string }).text)
-                .join('\n'),
-            })),
-          },
-        }),
       }),
     [chatbotId]
   )
@@ -846,17 +854,28 @@ export function LeadsPageView({
 
 
 
-          {/* New Chat Button */}
-          <Button
-            variant={!sidebarCollapsed ? 'secondary' : 'icon'}
-            style={{
-              ...styles.newChatButton,
-            }}
-            onClick={handleNewChat}
-          >
-            <HugeiconsIcon icon={PlusSignIcon} size={20} />{' '}
-            {!sidebarCollapsed && 'New chat'}
-          </Button>
+          {/* New Chat / Start Chatting Button */}
+          {showDemo ? (
+            <Button
+              variant="primary"
+              size="lg"
+              style={{ width: '100%' }}
+              onClick={() => setShowDemo(false)}
+            >
+              {!sidebarCollapsed && 'Start chatting'}
+            </Button>
+          ) : (
+            <Button
+              variant={!sidebarCollapsed ? 'secondary' : 'icon'}
+              style={{
+                ...styles.newChatButton,
+              }}
+              onClick={handleNewChat}
+            >
+              <HugeiconsIcon icon={PlusSignIcon} size={20} />{' '}
+              {!sidebarCollapsed && 'New chat'}
+            </Button>
+          )}
 
           {/* Chat History List */}
           {!sidebarCollapsed && chatHistory.length > 0 && (
@@ -915,34 +934,7 @@ export function LeadsPageView({
           <AnimatedConversationDemo onInterrupt={() => setShowDemo(false)} editMode={editMode} />
         ) : (
           <div style={styles.hero}>
-            {/* Header with Favicon, Title, and Description */}
-            <div style={styles.headerSection}>
-              <div style={styles.textCenter}>
-                <h2 style={styles.pageTitle}>
-                  {settings.pageTitle}
-                </h2>
-                <p style={styles.pageDescription}>
-                  {settings.pageDescription}
-                </p>
-              </div>
-            </div>
 
-            {/* BANT Progress Indicator */}
-            {bantProgress < 100 && (
-              <div style={styles.bantProgressContainer}>
-                <div style={styles.bantProgressBar}>
-                  <div
-                    style={{
-                      ...styles.bantProgressFill,
-                      width: `${bantProgress}%`,
-                    }}
-                  />
-                </div>
-                <span style={styles.bantProgressText}>
-                  {bantProgress}%
-                </span>
-              </div>
-            )}
 
             {/* Conversation Messages Container */}
 
@@ -967,6 +959,21 @@ export function LeadsPageView({
                           return (
                             <Fragment key={`${message.id}-${i}`}>
                               <Message from={message.role}>
+                                {message.role === 'assistant' && (
+                                  <div style={styles.messageAvatar}>
+                                    {settings.favicon ? (
+                                      <Image
+                                        src={settings.favicon}
+                                        alt="AI"
+                                        width={32}
+                                        height={32}
+                                        style={styles.messageAvatarImage}
+                                      />
+                                    ) : (
+                                      'AI'
+                                    )}
+                                  </div>
+                                )}
                                 <MessageContent>
                                   {isClient ? (
                                     <MessageResponse>{part.text}</MessageResponse>
@@ -1003,7 +1010,22 @@ export function LeadsPageView({
                 ))}
               </ConversationContent>
             </Conversation>
-
+            {/* BANT Progress Indicator */}
+            {bantProgress < 100 && (
+              <div style={styles.bantProgressContainer}>
+                <div style={styles.bantProgressBar}>
+                  <div
+                    style={{
+                      ...styles.bantProgressFill,
+                      width: `${bantProgress}%`,
+                    }}
+                  />
+                </div>
+                <span style={styles.bantProgressText}>
+                  {bantProgress}%
+                </span>
+              </div>
+            )}
             <div style={styles.inputContainer}>
               <div className="gradient" />
               <PromptInputProvider>
