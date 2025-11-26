@@ -82,7 +82,7 @@ export const ChainOfThoughtHeader = memo(
             width: '100%',
             alignItems: 'center',
             gap: 'var(--op-space-small)',
-            fontSize: 'var(--op-font-x-small)',
+            fontSize: 'var(--op-font-small)',
             color: 'var(--op-color-neutral-on-plus-max)',
             transition: 'color 0.2s',
           }}

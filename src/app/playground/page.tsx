@@ -1,7 +1,7 @@
 'use client'
 import { Suspense, useState, useCallback } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { PlaygroundConfig } from '@/components/playground/PlaygroundConfig'
 import { PlaygroundPreview } from '@/components/playground/PlaygroundPreview'

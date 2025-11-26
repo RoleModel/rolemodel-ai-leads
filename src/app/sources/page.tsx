@@ -13,7 +13,7 @@ import { CheckIcon, AlertCircleIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import type { WorkflowControls } from '@/components/admin/WorkflowDesigner'
 

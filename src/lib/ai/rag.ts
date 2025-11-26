@@ -83,7 +83,7 @@ CONVERSATION GUIDELINES:
 You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information.
 
 Questions to weave into the conversation naturally:
-${questions.map((q: any, i: number) => `
+${questions.map((q: { question: string; required?: boolean }, i: number) => `
 ${i + 1}. ${q.question}
    - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
 `).join('')}

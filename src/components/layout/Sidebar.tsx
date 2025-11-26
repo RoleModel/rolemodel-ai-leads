@@ -7,7 +7,7 @@ import {
   File01Icon,
   Globe02Icon,
   Message01Icon,
-  PlayCircle02Icon,
+  GitCompareIcon,
   QuestionIcon,
   Rocket01Icon,
   Settings02Icon,
@@ -65,7 +65,7 @@ export function NavigationSidebar() {
   )
 
   const navItems = [
-    { href: '/playground', icon: PlayCircle02Icon, label: 'Playground' },
+    { href: '/playground', icon: GitCompareIcon, label: 'Explore' },
     { href: '/activity', icon: Time01Icon, label: 'Activity', expandable: true },
     { href: '/analytics', icon: Analytics01Icon, label: 'Analytics' },
     { href: '/sources', icon: Database01Icon, label: 'Sources', expandable: true },

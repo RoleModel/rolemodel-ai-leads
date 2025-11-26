@@ -12,7 +12,9 @@ import {
   Sun01Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
+  Message02Icon
 } from '@hugeicons-pro/core-stroke-standard'
+
 import { HugeiconsIcon } from '@hugeicons/react'
 import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
 import Image from 'next/image'
@@ -886,11 +888,12 @@ export function LeadsPageView({
           {/* New Chat / Start Chatting Button */}
           {showDemo ? (
             <Button
-              variant="primary"
+              variant={sidebarCollapsed ? 'primaryicon' : 'primary'}
               size="lg"
               style={{ width: '100%' }}
               onClick={() => setShowDemo(false)}
             >
+              <HugeiconsIcon icon={Message02Icon} size={20} />
               {!sidebarCollapsed && 'Start chatting'}
             </Button>
           ) : (
@@ -971,9 +974,9 @@ export function LeadsPageView({
               display: 'flex',
               flexDirection: 'column',
               gap: 'var(--op-space-small)',
-              flex: '1',
+              // flex: '1',
               minHeight: 0,
-              // maxHeight: 600,
+              maxHeight: 600,
               overflowY: 'auto',
               width: '98%',
             }}>

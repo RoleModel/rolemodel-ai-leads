@@ -18,6 +18,7 @@ interface WidgetConfig {
   usePrimaryForHeader: boolean
   syncInstructions: boolean
   instructions: string
+  model: string
 }
 
 interface WidgetConfigContextType {
@@ -43,6 +44,7 @@ export function WidgetConfigProvider({ children }: { children: ReactNode }) {
     suggestedMessagesPersist: false,
     usePrimaryForHeader: true,
     syncInstructions: true,
+    model: 'gpt-4o-mini',
     instructions: `### Business Context
 RoleModel Software is a custom software development company that specializes in creating tailored solutions to enhance business workflows and integrate with third-party applications. With nearly 30 years of experience, they focus on understanding client needs, iterative development, and building sustainable software that scales with the business. Their key services include web and mobile app development, UI/UX design, and expertise amplification, aiming to streamline processes, eliminate errors, and increase productivity through custom software.
 

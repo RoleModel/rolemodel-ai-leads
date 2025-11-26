@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ModelSelector } from '@/components/ui/model-selector'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -515,6 +516,23 @@ export function EditorSidebar() {
                 {settings.favicon ? 'Change icon' : 'Upload icon'}
               </Button>
             </div>
+          </div>
+
+          <div style={styles.formSection}>
+            <ModelSelector
+              label="AI Model"
+              value={settings.model || 'gpt-4o-mini'}
+              onChange={(model) => updateSettings({ model })}
+            />
+            <p
+              style={{
+                fontSize: 'var(--op-font-x-small)',
+                color: 'var(--op-color-neutral-on-plus-max)',
+                margin: 'var(--op-space-x-small) 0 0 0',
+              }}
+            >
+              Select the AI model to power your conversations
+            </p>
           </div>
 
           <div style={styles.formSection}>

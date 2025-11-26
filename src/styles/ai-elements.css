@@ -23,13 +23,13 @@
 .group.is-user .flex.w-fit,
 .group[class*='is-user'] > div {
   margin-left: auto;
-  background-color: var(--op-color-primary-base);
-  color: var(--op-color-primary-on-base);
+  background-color: var(--op-color-neutral-plus-five);
+  color: var(--op-color-neutral-on-plus-five);
 }
 
 .group.is-assistant .flex.w-fit,
 .group[class*='is-assistant'] > div {
-  background-color: var(--op-color-neutral-plus-six);
+  background-color: 'transparent';
   color: var(--op-color-on-background);
 }
 

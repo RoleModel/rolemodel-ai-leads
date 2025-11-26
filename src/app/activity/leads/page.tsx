@@ -10,7 +10,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useCallback, useEffect, useState } from 'react'
 import { Suspense } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { LeadSummary, LeadSummaryData } from '@/components/leads-page/LeadSummary'
 import { Button } from '@/components/ui/button'

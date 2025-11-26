@@ -12,6 +12,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ModelSelector } from '@/components/ui/model-selector'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -766,6 +767,24 @@ export function WidgetEditorSidebar() {
 
           {/* AI TAB */}
           <TabsContent value="ai" style={{ padding: 'var(--op-space-large)' }}>
+            <div style={{ marginBottom: 'var(--op-space-large)' }}>
+              <ModelSelector
+                label="AI Model"
+                id="widget-model"
+                value={config.model || 'gpt-4o-mini'}
+                onChange={(model) => updateConfig({ model })}
+              />
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  margin: 'var(--op-space-x-small) 0 0 0',
+                }}
+              >
+                Select the AI model to power your widget conversations
+              </p>
+            </div>
+
             <div style={{ marginBottom: 'var(--op-space-large)' }}>
               <div
                 style={{

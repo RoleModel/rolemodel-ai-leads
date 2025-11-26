@@ -8,6 +8,7 @@ interface LeadsPageSettings {
   favicon: string
   logo: string
   aiInstructions: string
+  model: string
 }
 
 interface LeadsPageSettingsContextType {
@@ -30,6 +31,7 @@ export function LeadsPageSettingsProvider({ children }: { children: ReactNode })
     favicon: '',
     logo: '',
     aiInstructions: '',
+    model: 'gpt-4o-mini',
   })
 
   // Load settings on mount

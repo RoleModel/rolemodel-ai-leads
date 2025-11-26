@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { WidgetEditorSidebar } from '@/components/widget/WidgetEditorSidebar'
 import { WidgetPreviewArea } from '@/components/widget/WidgetPreviewArea'

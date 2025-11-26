@@ -1,9 +1,9 @@
 :root {
   --op-font-family:
     'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  --op-color-primary-h: 214 !important;
-  --op-color-primary-s: 94% !important;
-  --op-color-primary-l: 57% !important;
+  --op-color-primary-h: 213 !important;
+  --op-color-primary-s: 51% !important;
+  --op-color-primary-l: 46% !important;
   --op-shadow-color: #0000000d;
 }
 

@@ -3,7 +3,7 @@
 import { Message01Icon, UserIcon } from 'hugeicons-react'
 import { Suspense, useEffect, useState } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 

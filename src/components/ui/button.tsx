@@ -5,15 +5,16 @@ import { cn } from '@/lib/utils'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?:
-    | 'primary'
-    | 'secondary'
-    | 'ghost'
-    | 'destructive'
-    | 'icon'
-    | 'ghosticon'
-    | 'pill'
-    | 'dashed'
-    | 'dashedpill'
+  | 'primary'
+  | 'primaryicon'
+  | 'secondary'
+  | 'ghost'
+  | 'destructive'
+  | 'icon'
+  | 'ghosticon'
+  | 'pill'
+  | 'dashed'
+  | 'dashedpill'
   size?: 'sm' | 'md' | 'lg'
   width?: 'full'
   justify?: 'start' | 'center' | 'end'
@@ -39,6 +40,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const variantClass =
       {
         primary: 'btn btn--primary',
+        primaryicon: 'btn btn--primary btn--icon',
         secondary: 'btn',
         dashed: 'btn',
         dashedpill: 'btn btn--pill',

@@ -4,7 +4,7 @@ import { Database01Icon, Link01Icon, Location01Icon, Message01Icon, UserGroupIco
 import { useEffect, useState } from 'react'
 import { Suspense } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 
 interface VisitorAnalytics {

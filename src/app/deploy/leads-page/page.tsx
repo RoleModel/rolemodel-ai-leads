@@ -3,7 +3,7 @@
 import { Suspense } from 'react'
 
 import { EditorSidebar } from '@/components/layout/EditorSidebar'
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { PreviewArea } from '@/components/layout/PreviewArea'
 import { TopBar } from '@/components/layout/TopBar'
 

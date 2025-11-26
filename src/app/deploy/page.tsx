@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Suspense } from 'react'
 
-import { NavigationSidebar } from '@/components/layout/NavigationSidebar'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 

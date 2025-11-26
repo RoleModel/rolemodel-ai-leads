@@ -56,11 +56,6 @@ import { Button } from '@/components/ui/button'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
-interface Suggestion {
-  id: string
-  text: string
-  isSelected?: boolean
-}
 
 interface ChainOfThoughtData {
   steps: {
@@ -83,11 +78,6 @@ interface Message {
   }>
   chainOfThought?: ChainOfThoughtData
 }
-
-const DEFAULT_SUGGESTIONS: Suggestion[] = [
-  { id: '1', text: 'Are we outgrowing our current tools?' },
-  { id: '2', text: 'How do we reduce manual work?' },
-]
 
 const demoConversation: Message[] = [
   {
@@ -254,7 +244,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
   const [typingText, setTypingText] = useState('')
   const [isTypingInInput, setIsTypingInInput] = useState(false)
   const [showPlan, setShowPlan] = useState(false)
-  const [suggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -401,11 +390,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     Math.round((currentIndex / demoConversation.length) * 100)
   )
 
-  // Handle suggestion click to start conversation
-  const handleSuggestionClick = () => {
-    handleInterrupt()
-  }
-
   return (
     <div
       style={{
@@ -428,30 +412,18 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         initial={{ opacity: 0, filter: "blur(4px)", }}
         animate={{ opacity: 1, filter: "blur(0px)", }}
         transition={{ duration: 0.4 }}
-        style={{ textAlign: 'center', flex: '0 0 auto' }}>
+        style={{ textAlign: 'center', flex: '0 0 auto', marginBottom: 'var(--op-space-medium)' }}>
         <span
           className="aligned-header"
           style={{
             fontSize: 'var(--op-font-5x-large)',
             fontWeight: 700,
             marginBottom: 'var(--op-space-x-small)',
-            // display: 'flex',
-            // alignItems: 'start',
-            // justifyContent: 'center',
-            // gap: 'var(--op-space-x-small)',
             lineHeight: 1,
+            letterSpacing: '-0.05em',
           }}
         >
-          {settings.favicon && (
-            <Image
-              className="aligned-header__centered-suffix"
-              src={settings.favicon}
-              alt="AI"
-              width={32}
-              height={32}
-              style={{ objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
-            />
-          )}
+
           {settings.pageTitle}
         </span>
         <p
@@ -483,16 +455,14 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         }}
       >
 
-        <Conversation style={{ display: 'contents' }}>
+        <Conversation>
           <ConversationContent style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
-            <AnimatePresence initial={false}>
-              {messages.map((message, index) => (
+            <AnimatePresence initial={false} mode="sync">
+              {messages.map((message) => (
                 <motion.div
-                  key={message.id + '-' + index}
-                  layout
+                  key={message.id}
                   initial={{ opacity: 0, y: 20, filter: 'blur(12px)' }}
                   animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <Message from={message.role}>
@@ -549,7 +519,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
 
         {isTyping && (
           <motion.div
-            layout
             initial={{
               opacity: 0,
               y: 10,
@@ -574,7 +543,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             }}
           >
             <motion.div
-              layout
               animate={{
                 boxShadow: [
                   '0 2px 8px -2px rgba(0, 0, 0, 0.08)',
@@ -601,7 +569,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         {/* Summary Plan in conversation */}
         {showPlan && (
           <motion.div
-            layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -614,7 +581,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           >
             <h3
               style={{
-                fontSize: 'var(--op-font-large)',
+                fontSize: 'var(--op-font-medium)',
                 fontWeight: 600,
                 textAlign: 'left',
                 marginBottom: 'var(--op-space-x-small)',
@@ -624,7 +591,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             </h3>
             <p
               style={{
-                fontSize: 'var(--op-font-medium)',
+                fontSize: 'var(--op-font-small)',
                 color: 'var(--op-color-neutral-on-plus-max)',
                 textAlign: 'left',
                 lineHeight: 1.6,
@@ -654,7 +621,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 </h4>
                 <p
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     color: 'var(--op-color-on-background)',
                     margin: 0,
                     textAlign: 'left',
@@ -680,7 +647,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 </h4>
                 <p
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     margin: 0,
                     textAlign: 'left',
                     lineHeight: 1.6,
@@ -703,7 +670,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 </h4>
                 <ul
                   style={{
-                    fontSize: 'var(--op-font-medium)',
+                    fontSize: 'var(--op-font-small)',
                     margin: 0,
                     paddingLeft: 'var(--op-space-x-large)',
                     textAlign: 'left',
@@ -868,31 +835,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         </PromptInputProvider>
       </div>
 
-
-
-      {/* Suggestions - Show when demo hasn't started or has finished */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--op-space-small)',
-          flexWrap: 'nowrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        {suggestions.map((suggestion) => (
-          <Button
-            key={suggestion.id}
-            variant="pill"
-            onClick={() => handleSuggestionClick()}
-            style={{
-              cursor: 'pointer',
-            }}
-          >
-            {suggestion.text}
-          </Button>
-        ))}
-      </div>
 
     </div>
   )

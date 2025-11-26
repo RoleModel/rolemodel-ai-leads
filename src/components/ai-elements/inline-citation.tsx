@@ -26,7 +26,7 @@ export const InlineCitation = ({ style, ...props }: InlineCitationProps) => (
     style={{
       display: 'inline',
       alignItems: 'center',
-      gap: 'var(--op-space-x-small)',
+      gap: 'var(--op-space-small)',
       ...style,
     }}
     {...props}
@@ -248,7 +248,7 @@ export const InlineCitationCarouselIndex = ({
         justifyContent: 'flex-end',
         padding: 'var(--op-space-x-small) var(--op-space-medium)',
         color: 'var(--op-color-neutral-on-plus-max)',
-        fontSize: 'var(--op-font-x-small)',
+        fontSize: 'var(--op-font-small)',
         ...style,
       }}
       {...props}
