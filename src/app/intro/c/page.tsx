@@ -561,7 +561,7 @@ export default function IntroPageC() {
       </section>
 
       {/* Privacy Footer */}
-      <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" style={{ position: 'absolute', bottom: 'var(--op-space-medium)', right: 'var(--op-space-medium)' }} s />
+      <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" style={{ position: 'absolute', bottom: 'var(--op-space-medium)', right: 'var(--op-space-medium)' }} />
     </div>
   )
 }
