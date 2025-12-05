@@ -441,13 +441,13 @@ export default function IntroPageC() {
   return (
     <div className="intro-c-page">
 
-      {/* Logo */}
-      <div className="intro-c-logo">
-        <Logo variant="dark" style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }} />
-      </div>
 
       {/* Hero Section */}
       <section className="intro-c-hero">
+        {/* Logo */}
+        <div className="intro-c-logo">
+          <Logo variant="dark" style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }} />
+        </div>
         <div className="intro-c-hero__gradient" />
 
         <motion.div
@@ -476,9 +476,6 @@ export default function IntroPageC() {
               onClick={handleScrollToTool}>
               Start Assessment
               <HugeiconsIcon icon={ArrowRight02Icon} size={16} />
-            </Button>
-            <Button variant="secondary" size="lg" href="#">
-              View Methodology
             </Button>
           </div>
         </motion.div>
@@ -564,7 +561,7 @@ export default function IntroPageC() {
       </section>
 
       {/* Privacy Footer */}
-      <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" />
+      <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" style={{ position: 'absolute', bottom: 'var(--op-space-medium)', right: 'var(--op-space-medium)' }} s />
     </div>
   )
 }

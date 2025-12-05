@@ -15,6 +15,7 @@ html:has(.intro-c-page) body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* ===== LOGO ===== */
@@ -32,10 +33,11 @@ html:has(.intro-c-page) body {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  min-height: 70vh;
+  min-height: 80vh;
   padding: var(--op-space-3x-large);
   color: var(--op-color-neutral-on-minus-max);
   background-color: var(--blue-green-900);
+  text-align: center;
 }
 
 .intro-c-hero__gradient {
@@ -57,7 +59,7 @@ html:has(.intro-c-page) body {
 .intro-c-hero__container {
   max-width: var(--op-breakpoint-large);
   margin: 0 auto;
-  text-align: center;
+  text-align: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -154,7 +156,7 @@ html:has(.intro-c-page) body {
 }
 
 .intro-c-tool__content {
-  grid-column: span 5;
+  grid-column: 1;
 }
 
 .intro-c-tool__title {
@@ -204,7 +206,7 @@ html:has(.intro-c-page) body {
 }
 
 .intro-c-tool__app {
-  grid-column: span 7;
+  grid-column: 2;
 }
 
 /* ===== ASSESSMENT TOOL CARD ===== */
@@ -694,11 +696,40 @@ body:has(.intro-c-intro--fixed),
   margin-bottom: 0;
 }
 
+.intro-c-footer-links {
+  position: absolute !important;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .intro-c-tool__grid {
     grid-template-columns: 1fr;
     gap: var(--op-space-large);
+  }
+
+  .intro-c-hero__container {
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .intro-c-hero {
+    min-height: unset;
+    text-align: left;
+  }
+
+  .intro-c-hero__actions {
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .intro-c-page {
+    min-height: unset;
+  }
+
+  .intro-c-hero__title {
+    font-size: calc(var(--op-font-scale-unit) * 4);
   }
 
   .intro-c-tool__content,
@@ -722,8 +753,7 @@ body:has(.intro-c-intro--fixed),
   }
 
   .intro-c-hero {
-    padding-top: 8rem;
-    padding-bottom: 5rem;
+    padding: 100px var(--op-space-large) var(--op-space-3x-large);
   }
   .intro-c-features__grid {
     grid-template-columns: 1fr;
