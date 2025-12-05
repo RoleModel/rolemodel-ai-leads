@@ -1,6 +1,6 @@
 'use client'
 
-import type { UIMessage } from '@ai-sdk/react'
+import type { UIMessage } from 'ai'
 import { useEffect, useRef } from 'react'
 
 import { MessageBubble } from './MessageBubble'
@@ -8,6 +8,12 @@ import { MessageBubble } from './MessageBubble'
 interface MessageListProps {
   messages: UIMessage[]
   isLoading: boolean
+}
+
+const loadingMessage: UIMessage = {
+  id: 'loading',
+  role: 'assistant',
+  parts: [{ type: 'text', text: '...' }],
 }
 
 export function MessageList({ messages, isLoading }: MessageListProps) {
@@ -33,16 +39,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
       ))}
 
       {isLoading && (
-        <MessageBubble
-          message={
-            {
-              id: 'loading',
-              role: 'assistant',
-              content: '...',
-            } as any
-          }
-          isLoading
-        />
+        <MessageBubble message={loadingMessage} isLoading />
       )}
 
       <div ref={bottomRef} />

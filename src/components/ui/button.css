@@ -1,0 +1,10 @@
+.btn.btn--bright-blue {
+  background-color: var(--blue-100);
+  color: var(--blue-green-900);
+  box-shadow: none;
+}
+.btn.btn--bright-blue:hover {
+  filter: brightness(1.05);
+  scale: 1.02;
+  box-shadow: none;
+}

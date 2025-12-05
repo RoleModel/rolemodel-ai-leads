@@ -9,17 +9,33 @@ interface Message {
   content: string
 }
 
+interface SourceContext {
+  id: string
+  title: string | null
+  content?: string
+}
+
 /**
  * Extract BANT (Budget, Authority, Need, Timeline) information from a conversation
+ * and generate relevant recommendations based on available sources
  */
 export async function extractLeadData(
-  messages: Message[]
+  messages: Message[],
+  availableSources?: SourceContext[]
 ): Promise<LeadSummaryData | null> {
   try {
     // Build conversation history
     const conversationText = messages
       .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
       .join('\n\n')
+
+    // Build available resources context for recommendations
+    const resourcesContext = availableSources && availableSources.length > 0
+      ? `\nAVAILABLE RESOURCES FOR RECOMMENDATIONS:
+${availableSources.map((s, i) => `${i + 1}. "${s.title}" (ID: ${s.id})`).join('\n')}
+
+When generating recommendations, select 2-4 resources from this list that are most relevant to the prospect's needs and situation.`
+      : ''
 
     const { text } = await generateText({
       model: openai('openai/gpt-4o-mini'),
@@ -36,6 +52,7 @@ CRITICAL - Contact Information:
 - Names often appear as "I'm [Name]" or "My name is [Name]" or in email signatures
 
 Extract information ONLY if it was explicitly mentioned or strongly implied in the conversation. Do NOT make assumptions or infer information that isn't there.
+${resourcesContext}
 
 Return a JSON object with this structure:
 {
@@ -68,14 +85,24 @@ Return a JSON object with this structure:
     "email": "string or null",
     "phone": "string or null"
   },
-  "qualificationScore": "number 0-100 or null",
-  "nextSteps": ["array of strings or empty"]
+  "alignmentScore": "number 0-100 or null (how well the prospect aligns with your ideal customer profile)",
+  "nextSteps": ["array of strings or empty"],
+  "recommendations": [
+    {
+      "title": "string (resource title)",
+      "description": "string (brief explanation of why this resource is relevant)",
+      "url": "string or null (resource URL if known)",
+      "type": "case-study | guide | article | tool | other"
+    }
+  ]
 }
 
 CRITICAL:
 - Set fields to null if not mentioned
 - Use empty arrays [] if no items found
-- qualificationScore should reflect how qualified the lead is (0-100)
+- alignmentScore should reflect how well the prospect aligns with your ideal customer (0-100)
+- recommendations should include 2-4 relevant resources based on their needs and industry
+- For recommendations, choose resources that directly address their pain points or situation
 - Only extract factual information from the conversation
 - Return ONLY valid JSON, no other text`,
         },

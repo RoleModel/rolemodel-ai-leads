@@ -27,6 +27,7 @@ export const InlineCitation = ({ style, ...props }: InlineCitationProps) => (
       display: 'inline',
       alignItems: 'center',
       gap: 'var(--op-space-small)',
+      fontSize: 'inherit',
       ...style,
     }}
     {...props}
@@ -55,31 +56,45 @@ export type InlineCitationCardTriggerProps = ComponentProps<typeof Badge> & {
   sources: string[]
 }
 
+const getSourceLabel = (value?: string) => {
+  if (!value) {
+    return 'unknown'
+  }
+
+  try {
+    const url = new URL(value)
+    return url.hostname
+  } catch {
+    return value
+  }
+}
+
 export const InlineCitationCardTrigger = ({
   sources,
   style,
   ...props
-}: InlineCitationCardTriggerProps) => (
-  <HoverCardTrigger asChild>
-    <Badge
-      style={{
-        marginLeft: 'var(--op-space-2x-small)',
-        borderRadius: '999px',
-        ...style,
-      }}
-      variant="outline"
-      {...props}
-    >
-      {sources[0] ? (
+}: InlineCitationCardTriggerProps) => {
+  const label = getSourceLabel(sources[0])
+
+  return (
+    <HoverCardTrigger asChild>
+      <Badge
+        style={{
+          marginLeft: 'var(--op-space-2x-small)',
+          borderRadius: '999px',
+          ...style,
+        }}
+        variant="outline"
+        {...props}
+      >
         <>
-          {new URL(sources[0]).hostname} {sources.length > 1 && `+${sources.length - 1}`}
+          {label}
+          {sources.length > 1 && ` +${sources.length - 1}`}
         </>
-      ) : (
-        'unknown'
-      )}
-    </Badge>
-  </HoverCardTrigger>
-)
+      </Badge>
+    </HoverCardTrigger>
+  )
+}
 
 export type InlineCitationCardBodyProps = ComponentProps<'div'>
 
@@ -248,7 +263,7 @@ export const InlineCitationCarouselIndex = ({
         justifyContent: 'flex-end',
         padding: 'var(--op-space-x-small) var(--op-space-medium)',
         color: 'var(--op-color-neutral-on-plus-max)',
-        fontSize: 'var(--op-font-small)',
+        fontSize: 'var(--op-font-large)',
         ...style,
       }}
       {...props}
@@ -384,7 +399,7 @@ export const InlineCitationSource = ({
           rel="noreferrer"
           style={{
             margin: 0,
-            fontSize: 'var(--op-font-x-small)',
+            fontSize: 'var(--op-font-small)',
             color: 'var(--op-color-primary-base)',
             textDecoration: 'underline',
             overflow: 'hidden',

@@ -184,16 +184,12 @@ function InputGroupAddon({
   )
 }
 
-function InputGroupButton({
-  className,
-  style,
-  type = 'button',
-  variant = 'ghost',
-  size = 'xs',
-  ...props
-}: Omit<React.ComponentProps<typeof Button>, 'size'> & {
-  size?: 'xs' | 'sm' | 'icon-xs' | 'icon-sm'
-}) {
+const InputGroupButton = React.forwardRef<
+  HTMLButtonElement,
+  Omit<React.ComponentProps<typeof Button>, 'size'> & {
+    size?: 'xs' | 'sm' | 'icon-xs' | 'icon-sm'
+  }
+>(({ className, style, type = 'button', variant = 'ghost', size = 'xs', ...props }, ref) => {
   const mergedStyle = {
     ...buttonSizeStyles[size],
     ...style,
@@ -201,6 +197,7 @@ function InputGroupButton({
 
   return (
     <Button
+      ref={ref}
       type={type}
       variant={variant}
       className={className}
@@ -208,7 +205,8 @@ function InputGroupButton({
       {...props}
     />
   )
-}
+})
+InputGroupButton.displayName = 'InputGroupButton'
 
 function InputGroupText({ className, style, ...props }: React.ComponentProps<'span'>) {
   return (

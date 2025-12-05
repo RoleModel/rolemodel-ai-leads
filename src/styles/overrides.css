@@ -1,12 +1,3 @@
-:root {
-  --op-font-family:
-    'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-  --op-color-primary-h: 213 !important;
-  --op-color-primary-s: 51% !important;
-  --op-color-primary-l: 46% !important;
-  --op-shadow-color: #0000000d;
-}
-
 /* Card component */
 .card {
   background-color: var(--op-color-background);
@@ -15,7 +6,7 @@
 }
 
 .card-title {
-  font-size: 1rem;
+  font-size: var(--op-font-medium);
 }
 .card-description {
   font-size: var(--op-font-2x-small);
@@ -32,7 +23,7 @@
 
 .card-header {
   padding: var(--op-space-medium) var(--op-space-large);
-  border-bottom: 1px solid var(--op-color-border);
+  border-bottom: var(--op-border-width) solid var(--op-color-border);
   background-color: var(--op-color-neutral-plus-seven);
 }
 
@@ -56,4 +47,24 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+.badge--outline {
+  border-color: var(--op-color-border);
+  border-width: var(--op-border-width);
+  border-style: solid;
+  border-radius: var(--op-radius-pill);
+  padding: var(--op-space-2x-small) var(--op-space-small);
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-medium);
+  color: var(--op-color-neutral-on-plus-max);
+  background-color: var(--op-color-background);
+}
+
+.btn {
+  font-weight: var(--op-font-weight-semi-bold) !important;
+}
+
+.container {
+  max-inline-size: var(--op-breakpoint-large) !important;
 }

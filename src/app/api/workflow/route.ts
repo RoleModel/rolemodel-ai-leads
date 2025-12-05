@@ -1,6 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 
+interface WorkflowNode {
+  id: string
+  type: string
+  data: {
+    label?: string
+    question?: string
+    keywords?: string[]
+    weight?: number
+    required?: boolean
+    description?: string
+    threshold?: number
+    action?: string
+  }
+}
+
+interface WorkflowQuestion {
+  id: string
+  question: string
+  keywords: string[]
+  weight: number
+  required: boolean
+}
+
 // Default chatbot ID - should match the one in chat route
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
@@ -129,11 +152,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract qualification questions and scoring rules from workflow
-    const questions = workflow.nodes
-      .filter((node: any) => node.type === 'question')
-      .map((node: any) => ({
+    const questions: WorkflowQuestion[] = workflow.nodes
+      .filter((node: WorkflowNode) => node.type === 'question')
+      .map((node: WorkflowNode) => ({
         id: node.id,
-        question: node.data.question || node.data.label,
+        question: node.data.question || node.data.label || '',
         keywords: node.data.keywords || [],
         weight: node.data.weight || 25,
         required: node.data.required || false
@@ -173,12 +196,12 @@ export async function POST(req: NextRequest) {
 You are a lead qualification assistant. Follow this workflow:
 
 QUALIFICATION QUESTIONS:
-${questions.map((q: any, i: number) =>
+${questions.map((q: WorkflowQuestion, i: number) =>
   `${i + 1}. ${q.question} (Weight: ${q.weight}%)`
 ).join('\n')}
 
 SCORING CRITERIA:
-- Look for these keywords in responses: ${questions.flatMap((q: any) => q.keywords).join(', ')}
+- Look for these keywords in responses: ${questions.flatMap((q: WorkflowQuestion) => q.keywords).join(', ')}
 - Qualification threshold: ${qualificationRules.threshold}%
 - Ask questions naturally in conversation, not all at once
 - Score based on keyword matches and response quality

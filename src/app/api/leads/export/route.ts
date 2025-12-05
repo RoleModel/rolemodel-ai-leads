@@ -2,6 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { supabaseServer } from '@/lib/supabase/server'
 
+interface LeadSummary {
+  companyInfo?: {
+    name?: string
+    industry?: string
+    size?: string
+  }
+  authority?: {
+    role?: string
+    decisionMaker?: boolean
+  }
+  budget?: {
+    range?: string
+    timeline?: string
+    approved?: boolean
+  }
+  need?: {
+    problem?: string
+    currentSolution?: string
+    painPoints?: string[]
+  }
+  timeline?: {
+    urgency?: string
+    implementationDate?: string
+  }
+  qualificationScore?: number
+  nextSteps?: string[]
+}
+
 // GET - Export leads as CSV
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
@@ -64,8 +92,8 @@ export async function GET(req: NextRequest) {
       typeof lead.summary === 'object' &&
       lead.summary !== null &&
       !Array.isArray(lead.summary)
-        ? (lead.summary as Record<string, any>)
-        : {}
+        ? (lead.summary as LeadSummary)
+        : ({} as LeadSummary)
     const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : ''
 
     const row = [

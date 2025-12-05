@@ -27,9 +27,9 @@ export type WebPreviewContextValue = {
   setConsoleOpen: (open: boolean) => void
 }
 
-const WebPreviewContext = createContext<WebPreviewContextValue | null>(null)
+export const WebPreviewContext = createContext<WebPreviewContextValue | null>(null)
 
-const useWebPreview = () => {
+export const useWebPreview = () => {
   const context = useContext(WebPreviewContext)
   if (!context) {
     throw new Error('WebPreview components must be used within a WebPreview')
@@ -43,7 +43,6 @@ export type WebPreviewProps = ComponentProps<'div'> & {
 }
 
 export const WebPreview = ({
-  className,
   children,
   defaultUrl = '',
   onUrlChange,
@@ -67,7 +66,7 @@ export const WebPreview = ({
   return (
     <WebPreviewContext.Provider value={contextValue}>
       <div
-        className={cn('flex size-full flex-col rounded-lg border bg-card', className)}
+        style={{ display: 'flex', width: '100%', contain: ' paint', borderRadius: 'var(--op-radius-large)', height: '100%', minHeight: '600px', flexDirection: 'column', backgroundColor: 'var(--op-color-background)', border: '1px solid var(--op-color-border)' }}
         {...props}
       >
         {children}
@@ -79,11 +78,13 @@ export const WebPreview = ({
 export type WebPreviewNavigationProps = ComponentProps<'div'>
 
 export const WebPreviewNavigation = ({
-  className,
   children,
   ...props
 }: WebPreviewNavigationProps) => (
-  <div className={cn('flex items-center gap-1 border-b p-2', className)} {...props}>
+  <div
+
+    style={{ display: 'flex', gap: 'var(--op-space-medium)', padding: 'var(--op-space-small)', borderBottom: '1px solid var(--op-color-border)' }}
+    {...props}>
     {children}
   </div>
 )
@@ -151,7 +152,8 @@ export const WebPreviewUrl = ({
 
   return (
     <Input
-      className="h-8 flex-1 text-sm"
+      style={{ width: '100%' }}
+      className="form-control"
       onChange={onChange ?? handleChange}
       onKeyDown={handleKeyDown}
       placeholder="Enter URL..."
@@ -166,7 +168,6 @@ export type WebPreviewBodyProps = ComponentProps<'iframe'> & {
 }
 
 export const WebPreviewBody = ({
-  className,
   loading,
   src,
   ...props
@@ -174,9 +175,9 @@ export const WebPreviewBody = ({
   const { url } = useWebPreview()
 
   return (
-    <div className="flex-1">
+    <div style={{ flex: 1, width: '100%', height: '100%' }}>
       <iframe
-        className={cn('size-full', className)}
+        style={{ width: '100%', height: '100%', border: 'none' }}
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
         src={(src ?? url) || undefined}
         title="Preview"

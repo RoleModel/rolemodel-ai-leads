@@ -3,25 +3,31 @@
 /* -------------------------------------------------
    CSS Layers Definition
    Define layers BEFORE any imports
+   Layer order: optics (lowest) -> utilities -> overrides -> app (highest)
    ------------------------------------------------- */
-@layer optics, utilities, overrides, app;
+@layer frameworks, theme, global, overrides, utilities;
+
+/* -------------------------------------------------
+   Import Optics into the optics layer (lowest priority)
+   This allows our layers to override Optics styles
+   ------------------------------------------------- */
+@import '@rolemodel/optics/dist/css/optics.min.css' layer(frameworks);
 
 /* -------------------------------------------------
    Import App Styles with Layers
-   Note: Optics is loaded without a layer, so our layers have higher priority
    ------------------------------------------------- */
+@import '../styles/theme.css' layer(theme);
 @import '../styles/shadows.css' layer(utilities);
 @import '../styles/utilities.css' layer(utilities);
 @import '../styles/overrides.css' layer(overrides);
-@import '../styles/ai-elements.css' layer(app);
-@import '../styles/animations.css' layer(app);
+@import '../styles/ai-elements.css' layer(frameworks);
+@import '../styles/animations.css' layer(frameworks);
+@import '../styles/admin.css' layer(global);
 
-:root {
-  --purple: #a998c9;
-  --orange: #ffcd74;
-  --light-green: #b3d99a;
-  --bright-yellow: #fcf496;
-}
+/* -------------------------------------------------
+   Optics Variable Overrides (unlayered - highest priority)
+   These MUST be unlayered to override Optics :root variables
+   ------------------------------------------------- */
 
 /* -------------------------------------------------
    Optics overrides + app globals
@@ -31,7 +37,7 @@
    Global Helpers
    ------------------------------------------------- */
 
-@layer app {
+@layer global {
   h1,
   h2,
   h3,
@@ -41,8 +47,8 @@
   }
 
   .icon-sm {
-    width: 16px;
-    height: 16px;
+    width: var(--op-space-medium);
+    height: var(--op-space-medium);
   }
 
   .btn svg {
@@ -85,40 +91,45 @@
 
   .badge--outline {
     border-color: var(--op-color-border);
-    border-width: 1px;
+    border-width: var(--op-border-width);
     border-style: solid;
     border-radius: var(--op-radius-small);
     padding: var(--op-space-2x-small) var(--op-space-small);
     font-size: var(--op-font-small);
-    font-weight: 500;
-    color: var(--op-color-neutral-on-plus-max) !important;
-    background-color: var(--op-color-background) !important;
+    font-weight: var(--op-font-weight-medium);
+    color: var(--op-color-neutral-on-plus-max);
+    background-color: var(--op-color-background);
   }
 
   .contents {
     width: 100%;
   }
-  .gradient {
-    filter: blur(8px);
-    pointer-events: none;
-    z-index: 0;
-    background-image: linear-gradient(
-      90deg,
-      #fcf496 10%,
-      #7f51b1,
-      #76ba6f,
-      #59a6d6 10%,
-      #7f51b1,
-      #fcf496
-    );
-    height: 0.75rem;
+  .grid {
     position: absolute;
-    left: var(--op-space-medium);
-    right: var(--op-space-medium);
-    top: 94%;
+    z-index: 0;
+    inset: 0;
+    background-image: radial-gradient(
+      var(--grid-color) var(--op-border-width),
+      transparent 0
+    );
+    background-size: var(--op-space-scale-unit) var(--op-space-scale-unit);
+    pointer-events: none;
   }
 
-  [data-radix-popper-content-wrapper] {
-    top: -6px !important;
+  .grid.grid--dark {
+    --grid-color: var(--blue-green-700);
+    z-index: 0;
+  }
+
+  .gradient {
+    filter: blur(var(--op-space-x-small));
+    pointer-events: none;
+    z-index: 0;
+    background-image: var(--light-gradient);
+    height: var(--op-space-large);
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    top: 86%;
   }
 }

@@ -150,11 +150,13 @@ export type ModelSelectorLogoProps = Omit<ComponentProps<'img'>, 'src' | 'alt'> 
     | (string & {})
 }
 
+// Using img for external SVG logos - Next/Image requires configuration for external domains
 export const ModelSelectorLogo = ({
   provider,
   className,
   ...props
 }: ModelSelectorLogoProps) => (
+  // eslint-disable-next-line @next/next/no-img-element
   <img
     {...props}
     alt={`${provider} logo`}

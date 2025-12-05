@@ -2,6 +2,48 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { supabaseServer } from '@/lib/supabase/server'
 
+interface LeadSummary {
+  companyInfo?: {
+    name?: string
+    industry?: string
+    size?: string
+  }
+  authority?: {
+    role?: string
+    decisionMaker?: boolean
+  }
+  budget?: {
+    range?: string
+    timeline?: string
+    approved?: boolean
+  }
+  need?: {
+    problem?: string
+    currentSolution?: string
+    painPoints?: string[]
+  }
+  timeline?: {
+    urgency?: string
+    implementationDate?: string
+  }
+  qualificationScore?: number
+  nextSteps?: string[]
+}
+
+interface Lead {
+  id: string
+  created_at: string | null
+  visitor_name?: string | null
+  visitor_email?: string | null
+  summary?: LeadSummary | null
+}
+
+interface SlackBlock {
+  type: string
+  text?: { type: string; text: string }
+  fields?: { type: string; text: string }[]
+}
+
 // POST - Share lead summary via email or Slack
 export async function POST(req: NextRequest) {
   const body = await req.json()
@@ -29,14 +71,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Lead not found' }, { status: 404 })
   }
 
-  const summary = lead.summary || {}
+  const summary = (lead.summary || {}) as LeadSummary
+  const leadData: Lead = {
+    id: lead.id,
+    created_at: lead.created_at,
+    visitor_name: lead.visitor_name,
+    visitor_email: lead.visitor_email,
+    summary,
+  }
 
   if (method === 'email') {
     // TODO: Implement email sending
     // This would typically use a service like SendGrid, Resend, or AWS SES
     // For now, we'll just format the content
 
-    const emailContent = formatLeadSummaryForEmail(lead, summary)
+    const emailContent = formatLeadSummaryForEmail(leadData, summary)
 
     // In a real implementation, you would send the email here
     // await sendEmail({
@@ -56,7 +105,7 @@ export async function POST(req: NextRequest) {
     // TODO: Implement Slack webhook
     // This would use Slack's Incoming Webhooks or Web API
 
-    const slackMessage = formatLeadSummaryForSlack(lead, summary)
+    const slackMessage = formatLeadSummaryForSlack(leadData, summary)
 
     // In a real implementation, you would send to Slack here
     // await fetch(process.env.SLACK_WEBHOOK_URL, {
@@ -75,8 +124,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ error: 'Invalid method' }, { status: 400 })
 }
 
-function formatLeadSummaryForEmail(lead: any, summary: any): string {
-  const date = new Date(lead.created_at).toLocaleDateString()
+function formatLeadSummaryForEmail(lead: Lead, summary: LeadSummary): string {
+  const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'Unknown'
 
   let html = `
     <h2>New Lead: ${lead.visitor_name || lead.visitor_email || 'Anonymous'}</h2>
@@ -161,8 +210,8 @@ function formatLeadSummaryForEmail(lead: any, summary: any): string {
   return html
 }
 
-function formatLeadSummaryForSlack(lead: any, summary: any): any {
-  const date = new Date(lead.created_at).toLocaleDateString()
+function formatLeadSummaryForSlack(lead: Lead, summary: LeadSummary): { blocks: SlackBlock[] } {
+  const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'Unknown'
   const name = lead.visitor_name || lead.visitor_email || 'Anonymous'
 
   const blocks = [

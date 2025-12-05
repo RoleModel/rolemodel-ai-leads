@@ -36,7 +36,7 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
       alignItems: 'flex-start',
       gap: 'var(--op-space-x-small)',
       width: '100%',
-      fontSize: 'var(--op-font-x-small)',
+      fontSize: 'var(--op-font-small)',
       justifyContent: from === 'user' ? 'flex-end' : 'flex-start',
     }}
     className={cn(
@@ -67,7 +67,7 @@ export const MessageContent = ({
       flexDirection: 'column',
       gap: 'var(--op-space-small)',
       overflow: 'hidden',
-      fontSize: 'var(--op-font-x-small)',
+      fontSize: 'var(--op-font-small)',
       textAlign: 'left',
       padding: 'var(--op-space-small) var(--op-space-medium)',
       borderRadius: 'var(--op-radius-medium)',

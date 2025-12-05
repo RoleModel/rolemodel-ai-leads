@@ -1,6 +1,6 @@
 'use client'
 
-import type { ComponentProps } from 'react'
+import { forwardRef, type ComponentProps } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
@@ -11,7 +11,9 @@ export type SuggestionsProps = ComponentProps<typeof ScrollArea>
 
 export const Suggestions = ({ className, children, ...props }: SuggestionsProps) => (
   <ScrollArea className="w-full overflow-x-auto whitespace-nowrap" {...props}>
-    <div className={cn('flex w-max flex-nowrap items-center gap-2', className)}>
+    <div
+      style={{ display: 'flex', width: 'max-content', flexWrap: 'nowrap', alignItems: 'center', gap: 'var(--op-space-medium)' }}
+      className={cn(className)}>
       {children}
     </div>
     <ScrollBar className="hidden" orientation="horizontal" />
@@ -23,29 +25,27 @@ export type SuggestionProps = Omit<ComponentProps<typeof Button>, 'onClick'> & {
   onClick?: (suggestion: string) => void
 }
 
-export const Suggestion = ({
-  suggestion,
-  onClick,
-  className,
-  variant = 'secondary',
-  size = 'sm',
-  children,
-  ...props
-}: SuggestionProps) => {
-  const handleClick = () => {
-    onClick?.(suggestion)
-  }
+export const Suggestion = forwardRef<HTMLButtonElement, SuggestionProps>(
+  ({ suggestion, onClick, className, variant = 'pill', size = 'sm', children, ...props }, ref) => {
+    const handleClick = () => {
+      onClick?.(suggestion)
+    }
 
-  return (
-    <Button
-      className={cn('cursor-pointer rounded-full px-4', className)}
-      onClick={handleClick}
-      size={size}
-      type="button"
-      variant={variant}
-      {...props}
-    >
-      {children || suggestion}
-    </Button>
-  )
-}
+    return (
+      <Button
+        ref={ref}
+        style={{ paddingInline: 'var(--op-space-medium)' }}
+        className={cn('cursor-pointer', className)}
+        onClick={handleClick}
+        size={size}
+        type="button"
+        variant={variant}
+        {...props}
+      >
+        {children || suggestion}
+      </Button>
+    )
+  }
+)
+
+Suggestion.displayName = 'Suggestion'

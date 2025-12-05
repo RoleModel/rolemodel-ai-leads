@@ -37,7 +37,7 @@ export type DatabaseOld = {
           title: string | null
           content: string
           embedding: number[] | null
-          metadata: Record<string, any>
+          metadata: Record<string, unknown>
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['sources']['Row'], 'id' | 'created_at'>
@@ -50,7 +50,7 @@ export type DatabaseOld = {
           visitor_id: string | null
           visitor_email: string | null
           visitor_name: string | null
-          visitor_metadata: Record<string, any>
+          visitor_metadata: Record<string, unknown>
           started_at: string
           last_message_at: string
           message_count: number
@@ -68,7 +68,7 @@ export type DatabaseOld = {
           conversation_id: string
           role: 'user' | 'assistant' | 'system'
           content: string
-          sources_used: any[]
+          sources_used: unknown[]
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['messages']['Row'], 'id' | 'created_at'>
@@ -80,7 +80,7 @@ export type DatabaseOld = {
           chatbot_id: string
           conversation_id: string | null
           event_type: string
-          metadata: Record<string, any>
+          metadata: Record<string, unknown>
           created_at: string
         }
         Insert: Omit<

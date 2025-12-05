@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
-import { buildSourceContext, getChatbot, retrieveRelevantSources } from '@/lib/ai/rag'
+import { buildSourceContext, getChatbot, retrieveRelevantSources, type Source } from '@/lib/ai/rag'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
 import { supabaseServer } from '@/lib/supabase/server'
@@ -15,6 +15,68 @@ export const maxDuration = 30
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
+type SourceHeaderPayload = {
+  index: number
+  id: string
+  title: string
+  url?: string | null
+  snippet?: string
+}
+
+// Sanitize string for HTTP headers (ASCII only, 0-255)
+const sanitizeForHeader = (str: string): string =>
+  str
+    .replace(/[\u2018\u2019]/g, "'") // Smart single quotes to straight
+    .replace(/[\u201C\u201D]/g, '"') // Smart double quotes to straight
+    .replace(/[\u2013\u2014]/g, '-') // En/em dashes to hyphen
+    .replace(/\u2026/g, '...') // Ellipsis
+    .replace(/[^\x00-\xFF]/g, '') // Remove any remaining non-ASCII
+
+const buildSourceHeaderPayload = (sources: Source[]): SourceHeaderPayload[] =>
+  sources.map((source, idx) => {
+    const snippet = sanitizeForHeader(
+      source.content
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 320)
+    )
+    const title = sanitizeForHeader(source.title ?? `Source ${idx + 1}`)
+    const url =
+      typeof source.metadata?.url === 'string' && source.metadata.url.trim().length > 0
+        ? source.metadata.url
+        : null
+
+    return {
+      index: idx + 1,
+      id: source.id,
+      title,
+      url,
+      snippet,
+    }
+  })
+
+// Guardrail instructions to prevent token abuse
+const GUARDRAIL_INSTRUCTIONS = `IMPORTANT GUARDRAILS - You must follow these rules:
+
+1. TOPIC SCOPE: You are a lead qualification assistant. ONLY discuss topics related to:
+   - The business/product you represent and its services
+   - Business challenges that software or services could solve
+   - Project timelines, budgets, and requirements
+   - Scheduling calls or next steps with the team
+
+2. OFF-TOPIC HANDLING: If a user asks about unrelated topics (homework help, coding tutorials, general knowledge questions, jokes, creative writing, personal advice, etc.), politely redirect:
+   "I'm here to help you explore whether our solutions are right for your business needs. Is there a specific business challenge I can help you with?"
+
+3. ABUSE PREVENTION: If a user continues with off-topic requests after 2 redirects, respond with:
+   "It seems I might not be the right resource for what you're looking for today. If you'd like to discuss how we can help your business, I'm happy to continue. Otherwise, feel free to reach out when you have business-related questions."
+   Then keep responses brief and focused only on business topics.
+
+4. DO NOT provide: code examples, homework solutions, general trivia, creative stories, medical/legal/financial advice, or act as a general-purpose assistant.
+
+---
+
+`
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -22,8 +84,35 @@ export async function POST(req: NextRequest) {
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
 
-    // Get chatbot configuration
-    const chatbot = await getChatbot(activeChatbotId)
+    // Get the last user message for RAG - do this FIRST before parallel ops
+    const lastUserMessage = messages
+      .filter((m: { role: string }) => m.role === 'user')
+      .pop()
+
+    // Extract content - handle both formats
+    let userQuery = ''
+    if (lastUserMessage) {
+      if (lastUserMessage.content) {
+        userQuery = typeof lastUserMessage.content === 'string'
+          ? lastUserMessage.content
+          : ''
+      } else if (lastUserMessage.parts) {
+        userQuery = lastUserMessage.parts
+          .filter((p: { type: string }) => p.type === 'text')
+          .map((p: { text: string }) => p.text)
+          .join('\n')
+      }
+    }
+
+    // Run chatbot fetch and RAG in parallel for better performance
+    // Only run RAG if there's actual content to search for
+    const [chatbot, relevantSources] = await Promise.all([
+      getChatbot(activeChatbotId),
+      userQuery.trim().length > 0
+        ? retrieveRelevantSources(activeChatbotId, userQuery, 5, 0.3)
+        : Promise.resolve([]),
+    ])
+
     if (!chatbot) {
       return new Response(
         JSON.stringify({ error: 'Chatbot not found', chatbotId: activeChatbotId }),
@@ -39,56 +128,13 @@ export async function POST(req: NextRequest) {
     const effectiveTemperature = temperature !== undefined ? temperature : (chatbot?.temperature || 0.7)
     const effectiveInstructions = instructions || chatbot?.instructions || ''
 
-    // Get the last user message for RAG
-    // Handle both UIMessage format (with parts) and standard format (with content)
-    const lastUserMessage = messages
-      .filter((m: { role: string }) => m.role === 'user')
-      .pop()
-
-    // Extract content - handle both formats
-    let userQuery = ''
-    if (lastUserMessage) {
-      if (lastUserMessage.content) {
-        // Standard format
-        userQuery = typeof lastUserMessage.content === 'string'
-          ? lastUserMessage.content
-          : ''
-      } else if (lastUserMessage.parts) {
-        // UIMessage format with parts
-        userQuery = lastUserMessage.parts
-          .filter((p: { type: string }) => p.type === 'text')
-          .map((p: { text: string }) => p.text)
-          .join('\n')
-      }
-    }
-
-    // Retrieve relevant sources using vector search
-    const relevantSources = await retrieveRelevantSources(
-      activeChatbotId,
-      userQuery,
-      5,
-      0.3 // Lower threshold to get more results
-    )
-
-    // Debug logging
-    console.log('[RAG Debug] Query:', userQuery)
-    console.log('[RAG Debug] Chatbot ID:', activeChatbotId)
-    console.log('[RAG Debug] Sources retrieved:', relevantSources.length)
-    console.log(
-      '[RAG Debug] Source titles:',
-      relevantSources.map((s) => s.title).join(', ')
-    )
-    if (relevantSources.length > 0) {
-      console.log('[RAG Debug] Top source similarity:', relevantSources[0].similarity)
-    }
-
     // Build context from sources with workflow
     const sourceContext = buildSourceContext(relevantSources, chatbot)
 
-    // Build system message
+    // Build system message with guardrails prepended
     const systemMessage = {
       role: 'system' as const,
-      content: `${chatbot?.business_context || ''}
+      content: `${GUARDRAIL_INSTRUCTIONS}${chatbot?.business_context || ''}
 
 ${effectiveInstructions}
 
@@ -100,6 +146,31 @@ You have access to a 'thinking' tool that displays your reasoning process to use
 - Researching or looking up information from the knowledge base
 
 When using the thinking tool, provide steps with clear labels and descriptions. Mark steps as 'complete' when finished, 'active' for current step, and 'pending' for upcoming steps.
+
+INLINE CITATIONS:
+When you reference information from the RELEVANT SOURCES section below, cite them using numbered brackets that match the source number.
+- Use [1] for Source 1, [2] for Source 2, etc.
+- Place citations immediately after the relevant statement
+- Example: "Custom software can significantly reduce manual work [1] and has been shown to improve customer satisfaction [2]."
+- ALWAYS cite when mentioning specific facts, case studies, statistics, or recommendations from the knowledge base
+- This creates clickable citation badges that users can hover over to see the source details
+
+SUGGESTED QUESTIONS:
+After each response, use the 'suggest_questions' tool to provide 2 relevant follow-up questions the user might want to ask.
+- Questions should be natural continuations of the conversation
+- Focus on helping the user explore their business needs further
+- Make questions specific to what was just discussed
+
+BANT PROGRESS TRACKING:
+Use the 'report_bant_progress' tool to update what qualification information you have gathered from the user.
+Call this tool whenever you learn new information about:
+- need: What challenges, goals, or problems they want to solve
+- timeline: When they need a solution implemented
+- budget: Their investment range or budget considerations
+- authority: Who makes decisions, their role in the organization
+- contact: Their name or email address
+
+This updates the progress indicator shown to the user. Mark items as true when you have gathered that information.
 
 ${sourceContext}`,
     }
@@ -134,41 +205,56 @@ ${sourceContext}`,
     // Combine system message with user messages
     const fullMessages = [systemMessage, ...convertedMessages]
 
-    // Create or get conversation ID
+    // OPTIMIZATION: Create conversation in background - don't block streaming
+    // Use existing conversationId if provided, otherwise create one async
     let activeConversationId = conversationId
+    let conversationPromise: Promise<void> | null = null
+
     if (!activeConversationId) {
-      // Build visitor metadata from request headers (IP, geolocation, user agent)
-      const visitorMetadata = await buildVisitorMetadata(req.headers)
+      // Generate ID upfront so we can use it immediately
+      activeConversationId = nanoid()
 
-      type NewConversationType = { id: string }
-      const conversationData = {
-        chatbot_id: activeChatbotId,
-        visitor_id: nanoid(),
-        visitor_metadata: visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
-      }
-      const { data: newConversation } = await supabaseServer
-        .from('conversations')
-        .insert([conversationData])
-        .select()
-        .single()
-
-      activeConversationId = (newConversation as NewConversationType | null)?.id
+      // Create conversation in background (non-blocking)
+      conversationPromise = (async () => {
+        const visitorMetadata = await buildVisitorMetadata(req.headers)
+        const conversationData = {
+          id: activeConversationId,
+          chatbot_id: activeChatbotId,
+          visitor_id: nanoid(),
+          visitor_metadata: visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
+        }
+        await supabaseServer
+          .from('conversations')
+          .insert([conversationData])
+      })()
     }
 
-    // Save user message
+    // OPTIMIZATION: Save user message in background (non-blocking)
     if (activeConversationId && userQuery) {
-      type MessageInsert = Database['public']['Tables']['messages']['Insert']
-      const messageData: MessageInsert = {
-        conversation_id: activeConversationId,
-        role: 'user',
-        content: userQuery,
+      const insertMessage = () =>
+        supabaseServer.from('messages').insert([{
+          conversation_id: activeConversationId,
+          role: 'user',
+          content: userQuery,
+        }])
+      // Ensure ordering: insert message only after conversation creation (if needed)
+      if (conversationPromise) {
+        void conversationPromise
+          .then(() => insertMessage())
+          .catch((err) => console.error('Error creating conversation before inserting message:', err))
+      } else {
+        void insertMessage().then(
+          () => {},
+          (err) => console.error('Error inserting user message:', err)
+        )
       }
-      await supabaseServer.from('messages').insert([messageData])
     }
 
-    // Stream response
+    // Stream response - START IMMEDIATELY without waiting for DB writes
     // Vercel AI Gateway uses provider/model format (e.g., openai/gpt-4o-mini)
     const modelId = effectiveModel.includes('/') ? effectiveModel : `openai/${effectiveModel}`
+
+    const sourceHeaderPayload = buildSourceHeaderPayload(relevantSources)
 
     const result = streamText({
       model: openai(modelId),
@@ -184,6 +270,22 @@ ${sourceContext}`,
               description: z.string().optional(),
               status: z.enum(['complete', 'active', 'pending']),
             })),
+          }),
+        }),
+        suggest_questions: tool({
+          description: 'Provide suggested follow-up questions for the user to click. Call this at the end of each response.',
+          inputSchema: z.object({
+            questions: z.array(z.string()).min(1).max(3).describe('1-3 relevant follow-up questions'),
+          }),
+        }),
+        report_bant_progress: tool({
+          description: 'Report what BANT qualification information has been gathered from the user. Call this when you learn new information.',
+          inputSchema: z.object({
+            need: z.boolean().describe('True if you know their challenges, goals, or problems'),
+            timeline: z.boolean().describe('True if you know when they need a solution'),
+            budget: z.boolean().describe('True if you know their budget or investment range'),
+            authority: z.boolean().describe('True if you know their role or decision-making power'),
+            contact: z.boolean().describe('True if you have their name or email'),
           }),
         }),
       },
@@ -228,8 +330,18 @@ ${sourceContext}`,
                 .order('created_at', { ascending: true })
 
               if (allMessages && allMessages.length > 0) {
-                // Extract lead data
-                const leadData = await extractLeadData(allMessages)
+                // Get all available sources for this chatbot for recommendations
+                const { data: allSources } = await supabaseServer
+                  .from('sources')
+                  .select('id, title, content')
+                  .eq('chatbot_id', activeChatbotId)
+                  .limit(20)
+
+                // Extract lead data with available sources for recommendations
+                const leadData = await extractLeadData(
+                  allMessages,
+                  allSources || []
+                )
 
                 // Check if lead is qualified and hasn't been saved yet
                 if (leadData && isQualifiedLead(leadData)) {
@@ -275,7 +387,7 @@ ${sourceContext}`,
       headers: {
         'X-Conversation-ID': activeConversationId || '',
         'X-Sources-Used': JSON.stringify(
-          relevantSources.map((s) => ({ id: s.id, title: s.title }))
+          sourceHeaderPayload
         ),
       },
     })

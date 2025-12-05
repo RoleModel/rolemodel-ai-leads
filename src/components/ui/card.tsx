@@ -6,11 +6,30 @@ interface CardHeaderProps extends React.ComponentProps<'div'> {
   border?: boolean;
 }
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+interface CardProps extends React.ComponentProps<'div'> {
+  variant?: 'default' | 'dark';
+  borderBottom?: string;
+}
+
+function Card({ className, variant = 'default', borderBottom, style, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
-      className={cn('card card-padded flex flex-col gap-lg', className)}
+      className={cn(
+        'card card-padded flex flex-col gap-lg',
+        variant === 'dark' && 'card--dark',
+        className
+      )}
+      style={{
+        ...(variant === 'dark' && {
+          backgroundColor: 'var(--blue-green-900)',
+          color: 'var(--op-color-white)',
+        }),
+        ...(borderBottom && {
+          borderBottom: `8px solid ${borderBottom}`,
+        }),
+        ...style,
+      }}
       {...props}
     />
   )

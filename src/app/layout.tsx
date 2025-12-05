@@ -1,23 +1,31 @@
 import type { Metadata } from 'next'
+import type { Viewport } from 'next';
 import { DM_Sans, Geist_Mono } from 'next/font/google'
 
 import './globals.css'
 
 const dmSans = DM_Sans({
-  variable: '--font-dm-sans',
+  variable: '--dm-sans',
   subsets: ['latin'],
 })
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+  variable: '--geist-mono',
   subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
-  title: 'RoleModel AI Leads',
+  title: 'A.I. Custom Software Analysis',
   description:
-    'RoleModel AI Leads is a platform that helps you generate leads for your business using AI.',
+    'A tool that helps you analyze your need for custom software.',
 }
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#021b20',
+  viewportFit: 'cover',
+};
 
 export default function RootLayout({
   children,
@@ -25,12 +33,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="leads">
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css"
-        />
+        {/* Preconnect to critical third-party origins */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
       </head>
       <body className={`${dmSans.variable} ${geistMono.variable} antialiased app-body`}>
         {children}

@@ -33,13 +33,14 @@ export async function POST(request: NextRequest) {
     chatbotId,
     pageTitle,
     pageDescription,
-    favicon,
-    logo,
+    introText,
+    timeEstimate,
     enableThemeSwitch,
     defaultTheme,
     lightPrimaryColor,
     darkPrimaryColor,
     aiInstructions,
+    calendlyUrl,
   } = body
 
   if (!chatbotId) {
@@ -54,13 +55,14 @@ export async function POST(request: NextRequest) {
         chatbot_id: chatbotId,
         page_title: pageTitle,
         page_description: pageDescription,
-        favicon,
-        logo,
+        intro_text: introText,
+        time_estimate: timeEstimate,
         enable_theme_switch: enableThemeSwitch,
         default_theme: defaultTheme,
         light_primary_color: lightPrimaryColor,
         dark_primary_color: darkPrimaryColor,
         ai_instructions: aiInstructions,
+        calendly_url: calendlyUrl,
       },
       {
         onConflict: 'chatbot_id',
