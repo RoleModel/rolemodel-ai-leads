@@ -2,8 +2,6 @@
 
 import IntroBPage from '@/app/intro/b/page'
 
-export const runtime = 'edge'
-
 export default function EmbedIntroB() {
   return (
     <div

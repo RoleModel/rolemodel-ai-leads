@@ -7,8 +7,6 @@ import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProv
 // Default chatbot ID for RoleModel
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
-export const runtime = 'edge'
-
 export default function EmbedLeadsPage() {
   const searchParams = useSearchParams()
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID

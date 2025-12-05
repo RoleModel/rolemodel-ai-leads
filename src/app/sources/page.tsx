@@ -26,7 +26,6 @@ const WorkflowDesigner = dynamic(
   { ssr: false, loading: () => <div>Loading workflow designer...</div> }
 )
 
-export const runtime = 'edge'
 
 interface Source {
   id: string
