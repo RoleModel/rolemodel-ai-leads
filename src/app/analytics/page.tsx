@@ -226,7 +226,7 @@ export default function AnalyticsPage() {
 
   // Engagement breakdown for pie/bar chart
   const engagementBreakdownData = analytics?.engagementLevels ? [
-    { name: 'Bounced', value: analytics.engagementLevels.bounced, fill: 'var(--purple, #3c194a)' },
+    { name: 'Bounced', value: analytics.engagementLevels.bounced, fill: 'var(--purple-200, #3c194a)' },
     { name: 'Low', value: analytics.engagementLevels.low, fill: 'var(--orange, #ffcd74)' },
     { name: 'Medium', value: analytics.engagementLevels.medium, fill: 'var(--light-blue, #87d4e9)' },
     { name: 'High', value: analytics.engagementLevels.high, fill: 'var(--light-green, #86c774)' },
@@ -431,7 +431,7 @@ export default function AnalyticsPage() {
                     <Line
                       type="monotone"
                       dataKey="messages"
-                      stroke="var(--purple, #3c194a)"
+                      stroke="var(--green-500, #3c194a)"
                       strokeWidth={2}
                       dot={{ r: 4 }}
                       activeDot={{ r: 6 }}

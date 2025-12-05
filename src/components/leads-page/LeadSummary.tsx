@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatIcon, Mail01Icon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
+import { Archive01Icon, ChatIcon, Mail01Icon, RotateClockwiseIcon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
 
@@ -62,6 +62,8 @@ interface LeadSummaryProps {
   onEmailShare?: () => void
   onSlackShare?: () => void
   onScheduleConversation?: () => void
+  onArchive?: () => void
+  isArchived?: boolean
   variant?: 'full' | 'compact'
   animated?: boolean
 }
@@ -89,6 +91,8 @@ export function LeadSummary({
   onEmailShare,
   onSlackShare,
   onScheduleConversation,
+  onArchive,
+  isArchived = false,
   animated = false,
 }: LeadSummaryProps) {
   const containerVariants = animated
@@ -320,7 +324,7 @@ export function LeadSummary({
 
         {/* Share Actions */}
         <PlanFooter>
-          {(onEmailShare || onSlackShare || onScheduleConversation) && (
+          {(onEmailShare || onSlackShare || onScheduleConversation || onArchive) && (
             <div className="lead-summary__share-actions">
               {onEmailShare && (
                 <Button variant="secondary" onClick={onEmailShare} className="lead-summary__share-button">
@@ -338,6 +342,11 @@ export function LeadSummary({
                 <Button variant="secondary" onClick={onSlackShare}>
                   <HugeiconsIcon icon={SlackIcon} size={20} />
                   <span>Share to Slack</span>
+                </Button>
+              )}
+              {onArchive && (
+                <Button variant="secondary" onClick={onArchive} title={isArchived ? 'Restore' : 'Archive'}>
+                  <HugeiconsIcon icon={isArchived ? RotateClockwiseIcon : Archive01Icon} size={18} />
                 </Button>
               )}
             </div>

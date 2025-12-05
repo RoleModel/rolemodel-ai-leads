@@ -57,6 +57,7 @@ import Favicon from '@/components/intro/Favicon'
 import Logo from '@/components/intro/Logo'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import '@/styles/ai-elements.css'
+import '@/components/leads-page/LeadsPageView.css'
 
 interface AssessmentToolProps {
   chatbotId?: string
@@ -72,6 +73,13 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
+  const [bantStatus, setBantStatus] = useState({
+    need: false,
+    timeline: false,
+    budget: false,
+    authority: false,
+    contact: false,
+  })
 
   const activeChatbotId = chatbotId || 'a0000000-0000-0000-0000-000000000001'
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -134,6 +142,33 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const isStreaming = status === 'streaming'
   const isClient = typeof window !== 'undefined'
 
+  // Calculate BANT progress
+  const bantProgress = useMemo(() => {
+    const completed = Object.values(bantStatus).filter(Boolean).length
+    return Math.round((completed / 5) * 100)
+  }, [bantStatus])
+
+  // Process messages for BANT tool calls
+  useMemo(() => {
+    for (const message of messages) {
+      for (const part of message.parts) {
+        // Tool parts have type like 'tool-report_bant_progress'
+        if (part.type === 'tool-report_bant_progress') {
+          const toolPart = part as { type: string; input?: Record<string, boolean> }
+          if (toolPart.input) {
+            setBantStatus(prev => ({
+              need: toolPart.input?.need ?? prev.need,
+              timeline: toolPart.input?.timeline ?? prev.timeline,
+              budget: toolPart.input?.budget ?? prev.budget,
+              authority: toolPart.input?.authority ?? prev.authority,
+              contact: toolPart.input?.contact ?? prev.contact,
+            }))
+          }
+        }
+      }
+    }
+  }, [messages])
+
   const handlePromptSubmit = async (message: PromptInputMessage) => {
     if (!message.text.trim()) return
     await sendMessage({ text: message.text })
@@ -141,6 +176,8 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
 
   const handleStartChat = () => {
     if (!formData.name || !formData.email) return
+    // Mark contact as captured since we have name and email
+    setBantStatus(prev => ({ ...prev, contact: true }))
     setStep('chat')
     setIsExpanded(true)
   }
@@ -153,13 +190,15 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   return (
     <Card className={`intro-c-card ${step === 'chat' && isExpanded ? 'intro-c-intro--fixed' : ''}`}>
       {step === 'chat' && (
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           className="intro-c-card__expand-btn"
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? 'Minimize' : 'Maximize'}
         >
           <HugeiconsIcon icon={isExpanded ? MinimizeScreenIcon : MaximizeScreenIcon} size={20} />
-        </button>
+        </Button>
       )}
       <div className="intro-c-card__content">
         <AnimatePresence mode="wait">
@@ -190,7 +229,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                   We&apos;ll ask a few key questions to understand your needs. We&apos;ll email you the results.
                 </p>
               </div>
-              <div className="intro-c-intro__form">
+              <form className="intro-c-intro__form" onSubmit={(e) => { e.preventDefault(); handleStartChat(); }}>
                 <div className="form-group">
                   <label className="form-label">Full Name</label>
                   <input
@@ -198,6 +237,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                     type="text"
                     name="name"
                     autoComplete="name"
+                    required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="form-control form-control--large"
@@ -211,6 +251,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                     type="email"
                     name="email"
                     autoComplete="email"
+                    required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="form-control form-control--large"
@@ -218,9 +259,12 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                   />
                 </div>
 
-                <Button onClick={handleStartChat}
+                <Button
+                  type="submit"
                   size="lg"
-                  variant="primary">
+                  variant="primary"
+                  style={{ width: 'fit-content' }}
+                >
                   Start Conversation
                   <HugeiconsIcon icon={ArrowRight02Icon} size={20} />
                 </Button>
@@ -228,7 +272,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                 <p className="intro-c-intro__disclaimer">
                   By continuing, you agree to our privacy policy. Your data is secure.
                 </p>
-              </div>
+              </form>
             </motion.div>
           )}
 
@@ -307,8 +351,23 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                 </ConversationContent>
               </Conversation>
 
-              <div className="prompt-input-wrapper">
-                <div className="gradient" style={{ top: '80%' }}></div>
+              {/* BANT Progress Indicator */}
+              {bantProgress < 100 && (
+                <div className="leads-page__bant-progress">
+                  <div className="leads-page__bant-bar">
+                    <div
+                      className="leads-page__bant-fill"
+                      style={{ width: `${bantProgress}%` }}
+                    />
+                  </div>
+                  <span className="leads-page__bant-text">
+                    {bantProgress}%
+                  </span>
+                </div>
+              )}
+
+              <div className="intro-c-chat__input-wrapper" style={{ paddingBottom: 'var(--op-space-medium)' }}>
+                <div className="gradient" style={{ top: '80%' }} />
                 <PromptInputProvider>
                   <PromptInput onSubmit={handlePromptSubmit}>
                     <PromptInputBody>

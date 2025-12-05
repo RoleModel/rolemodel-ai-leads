@@ -1,12 +1,10 @@
 'use client'
 
 import {
-  Archive01Icon,
   Calendar03Icon,
   Download01Icon,
   FilterIcon,
   RefreshIcon,
-  RotateClockwiseIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -226,30 +224,14 @@ export default function LeadsPage() {
                         lead.is_archived ? 'admin-card-wrapper--archived' : ''
                       }`}
                     >
-                      <div className="admin-archive-overlay">
-                        {lead.is_archived && (
-                          <span className="admin-badge admin-badge--archived">
-                            Archived
-                          </span>
-                        )}
-                        <Button
-                          variant="ghosticon"
-                          size="sm"
-                          onClick={() => handleArchive(lead.id, !lead.is_archived)}
-                          title={lead.is_archived ? 'Restore' : 'Archive'}
-                        >
-                          <HugeiconsIcon
-                            icon={lead.is_archived ? RotateClockwiseIcon : Archive01Icon}
-                            size={18}
-                          />
-                        </Button>
-                      </div>
                       <LeadSummary
                         data={lead.summary}
                         visitorName={lead.visitor_name || lead.visitor_email || 'Anonymous'}
                         visitorDate={new Date(lead.created_at).toLocaleDateString()}
                         onEmailShare={() => handleEmailShare(lead)}
                         onSlackShare={() => handleSlackShare(lead)}
+                        onArchive={() => handleArchive(lead.id, !lead.is_archived)}
+                        isArchived={lead.is_archived ?? false}
                         variant="full"
                       />
                     </div>
