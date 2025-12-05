@@ -300,6 +300,8 @@ export default function SourcesPage() {
 
         {/* Main Content */}
         <main
+          role="main"
+          aria-label="Sources content"
           style={{
             flex: 1,
             display: 'flex',
@@ -783,6 +785,7 @@ export default function SourcesPage() {
 
           {/* Right Sidebar - Stats & Actions */}
           <aside
+            aria-label="Source statistics and actions"
             style={{
               width: sidebarCollapsed ? '0px' : '320px',
               minWidth: sidebarCollapsed ? '0px' : '320px',

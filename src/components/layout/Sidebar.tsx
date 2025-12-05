@@ -89,7 +89,8 @@ export function NavigationSidebar() {
   const activeSection = searchParams.get('section') || 'files'
 
   return (
-    <aside style={styles.navSidebar} className="sidebar">
+    <aside style={styles.navSidebar} className="sidebar" aria-label="Main navigation">
+      <nav role="navigation" aria-label="Primary">
       {navItems.map((item) => {
         const ItemIcon = item.icon
         const isActive = pathname.startsWith(item.href)
@@ -219,6 +220,7 @@ export function NavigationSidebar() {
           </div>
         )
       })}
+      </nav>
     </aside>
   )
 }

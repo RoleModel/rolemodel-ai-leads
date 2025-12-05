@@ -171,7 +171,7 @@ export function TopBar() {
   }
 
   return (
-    <header style={styles.topBar} className="app__header">
+    <header style={styles.topBar} className="app__header" role="banner" aria-label="Application header">
       <div style={styles.logoBlock}>R</div>
 
       <div style={styles.breadcrumbItem}>
