@@ -1,0 +1,442 @@
+/* ==========================================================================
+   Admin Page Shared Styles
+   Shared styles for admin pages like chat-logs, leads, activity, etc.
+   BEM naming convention
+   ========================================================================== */
+
+/* ==========================================================================
+   Page Layout
+   ========================================================================== */
+
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.admin-page__body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.admin-page__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* ==========================================================================
+   Page Header
+   ========================================================================== */
+
+.admin-header {
+  padding: var(--op-space-large);
+  border-bottom: var(--op-border-width) solid var(--op-color-border);
+}
+
+.admin-header__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--op-space-small);
+}
+
+.admin-header__top--no-margin {
+  margin-bottom: 0;
+}
+
+.admin-header__title {
+  font-size: var(--op-font-x-large);
+  font-weight: var(--op-font-weight-bold);
+  margin: 0;
+}
+
+.admin-header__subtitle {
+  font-size: var(--op-font-small);
+  color: var(--op-color-neutral-on-plus-max);
+  margin: var(--op-space-2x-small) 0 0 0;
+}
+
+.admin-header__actions {
+  display: flex;
+  gap: var(--op-space-small);
+}
+
+/* ==========================================================================
+   Filter Controls
+   ========================================================================== */
+
+.admin-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-medium);
+  flex-wrap: wrap;
+}
+
+.admin-filters__group {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+}
+
+.admin-filters__label {
+  font-size: var(--op-font-small);
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-filters__label--bold {
+  font-weight: var(--op-font-weight-semi-bold);
+  color: var(--op-color-on-background);
+}
+
+.admin-filters__buttons {
+  display: flex;
+  gap: var(--op-space-2x-small);
+}
+
+.admin-filters__button {
+  text-transform: capitalize;
+}
+
+.admin-filters__date-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-small);
+  padding: var(--op-space-x-small) var(--op-space-small);
+  border: var(--op-border-width) solid var(--op-color-border);
+  border-radius: var(--op-radius-medium);
+  background-color: var(--op-color-background);
+}
+
+.admin-filters__date-input {
+  font-size: var(--op-font-small);
+  border: none;
+  background: transparent;
+  color: var(--op-color-on-background);
+}
+
+.admin-filters__separator {
+  font-size: var(--op-font-small);
+}
+
+/* ==========================================================================
+   Split Panel Layout
+   ========================================================================== */
+
+.admin-split {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.admin-split__sidebar {
+  width: 350px;
+  border-right: var(--op-border-width) solid var(--op-color-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.admin-split__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ==========================================================================
+   List Items
+   ========================================================================== */
+
+.admin-list-item {
+  padding: var(--op-space-medium) var(--op-space-large);
+  border-bottom: var(--op-border-width) solid var(--op-color-border);
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.admin-list-item:hover {
+  background-color: var(--op-color-neutral-plus-eight);
+}
+
+.admin-list-item--selected {
+  background-color: var(--op-color-primary-plus-eight);
+}
+
+.admin-list-item--selected:hover {
+  background-color: var(--op-color-primary-plus-eight);
+}
+
+.admin-list-item__header {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-small);
+  margin-bottom: var(--op-space-2x-small);
+}
+
+.admin-list-item__title {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-bold);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-list-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+  margin-bottom: var(--op-space-2x-small);
+}
+
+.admin-list-item__meta:last-child {
+  margin-bottom: 0;
+}
+
+.admin-list-item__meta-text {
+  font-size: var(--op-font-x-small);
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-list-item__icon {
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+/* ==========================================================================
+   Badges
+   ========================================================================== */
+
+.admin-badge {
+  font-size: var(--op-font-2x-small);
+  padding: var(--op-space-3x-small) var(--op-space-x-small);
+  border-radius: var(--op-radius-small);
+  border: var(--op-border-width) solid transparent;
+  white-space: nowrap;
+}
+
+.admin-badge--archived {
+  background-color: var(--op-color-neutral-plus-six);
+  border-color: var(--op-color-neutral-base);
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-badge--lead {
+  background-color: var(--op-color-alerts-positive-plus-seven);
+  border-color: var(--op-color-alerts-positive-base);
+  color: var(--op-color-alerts-positive-base);
+}
+
+.admin-badge--positive {
+  background-color: var(--op-color-alerts-positive-plus-seven);
+  border-color: var(--op-color-alerts-positive-base);
+  color: var(--op-color-alerts-positive-base);
+}
+
+.admin-badge--warning {
+  background-color: var(--op-color-alerts-warning-plus-seven);
+  border-color: var(--op-color-alerts-warning-base);
+  color: var(--op-color-alerts-warning-base);
+}
+
+.admin-badge--danger {
+  background-color: var(--op-color-alerts-danger-plus-seven);
+  border-color: var(--op-color-alerts-danger-base);
+  color: var(--op-color-alerts-danger-base);
+}
+
+/* ==========================================================================
+   Empty States
+   ========================================================================== */
+
+.admin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--op-space-x-large);
+  text-align: center;
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-empty__title {
+  margin: 0;
+  font-size: var(--op-font-medium);
+  font-weight: var(--op-font-weight-semi-bold);
+}
+
+.admin-empty__description {
+  margin: var(--op-space-small) 0 0 0;
+  font-size: var(--op-font-small);
+}
+
+.admin-empty--centered {
+  height: 100%;
+}
+
+/* ==========================================================================
+   Info Card
+   ========================================================================== */
+
+.admin-info-card {
+  padding: var(--op-space-medium);
+  border-radius: var(--op-radius-medium);
+  background-color: var(--op-color-background);
+  border: var(--op-border-width) solid var(--op-color-border);
+  margin-bottom: var(--op-space-medium);
+}
+
+.admin-info-card__title {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-bold);
+  margin-bottom: var(--op-space-small);
+  color: var(--op-color-on-background);
+}
+
+.admin-info-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--op-space-small);
+  font-size: var(--op-font-x-small);
+}
+
+.admin-info-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-2x-small);
+}
+
+.admin-info-card__label {
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-info-card__value {
+  margin: 0;
+}
+
+.admin-info-card__value--mono {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.admin-info-card__value--truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-info-card__value--positive {
+  color: var(--op-color-alerts-positive-base);
+}
+
+.admin-info-card__value--muted {
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.admin-info-card__section {
+  margin-top: var(--op-space-small);
+}
+
+/* ==========================================================================
+   Message Bubbles (for chat log viewing)
+   ========================================================================== */
+
+.admin-message {
+  display: flex;
+}
+
+.admin-message--user {
+  justify-content: flex-end;
+}
+
+.admin-message--assistant {
+  justify-content: flex-start;
+}
+
+.admin-message__bubble {
+  max-width: 70%;
+  padding: var(--op-space-small) var(--op-space-medium);
+  border-radius: var(--op-radius-medium);
+}
+
+.admin-message__bubble--user {
+  background-color: var(--op-color-primary-base);
+  color: var(--op-color-primary-on-base);
+  box-shadow: var(--op-shadow-small);
+}
+
+.admin-message__bubble--assistant {
+  background-color: var(--op-color-background);
+  color: var(--op-color-on-background);
+  box-shadow: var(--op-shadow-x-small);
+}
+
+.admin-message__content {
+  font-size: var(--op-font-small);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.admin-message__time {
+  font-size: var(--op-font-x-small);
+  opacity: var(--op-opacity-disabled);
+  margin-top: var(--op-space-2x-small);
+}
+
+/* ==========================================================================
+   Content Areas
+   ========================================================================== */
+
+.admin-content {
+  padding: var(--op-space-large);
+}
+
+.admin-content--muted {
+  background-color: var(--op-color-neutral-plus-eight);
+  min-height: 100%;
+}
+
+.admin-content__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-medium);
+}
+
+.admin-content__list--large-gap {
+  gap: var(--op-space-large);
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+
+.admin-loading {
+  padding: var(--op-space-large);
+  color: var(--op-color-neutral-on-plus-max);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Archive Actions Overlay
+   ========================================================================== */
+
+.admin-archive-overlay {
+  position: absolute;
+  top: var(--op-space-small);
+  right: var(--op-space-small);
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+  z-index: 10;
+}
+
+.admin-card-wrapper {
+  position: relative;
+}
+
+.admin-card-wrapper--archived {
+  opacity: var(--op-opacity-disabled);
+}

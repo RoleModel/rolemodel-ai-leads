@@ -561,9 +561,9 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
   }, [onControlsChange, addNode, deleteNode, deleteEdge, updateNode, updateEdge, saveWorkflow, selectedNode, selectedEdge, editMode, nodeData, edgeData, saveStatus])
 
   return (
-    <div style={{ width: '100%', height: '80vh', position: 'relative' }}>
+    <div style={{ width: '100%', height: 'calc(100vh + 20px)', position: 'relative', backgroundColor: 'var(--op-color-neutral-plus-six)' }}>
       <Canvas
-        defaultViewport={{ x: 20, y: 10, zoom: 1.3 }}
+        defaultViewport={{ x: 20, y: 40, zoom: 1.3 }}
         colorMode="light"
         nodes={nodes}
         edges={edges}

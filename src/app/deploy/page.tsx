@@ -309,6 +309,268 @@ export default function DeployPage() {
                 </button>
               </div>
             </div>
+
+            {/* Webhooks Integration */}
+            <div
+              className="card"
+              style={{
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #87D4E9 0%, #3A70B3 100%)',
+                  padding: 'var(--op-space-x-large)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 300,
+                  position: 'relative',
+                }}
+              >
+                {/* Webhook Flow Diagram */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-large)',
+                  }}
+                >
+                  {/* Lead Card */}
+                  <div
+                    style={{
+                      backgroundColor: 'var(--op-color-background)',
+                      borderRadius: 'var(--op-radius-medium)',
+                      padding: 'var(--op-space-medium)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      width: '320px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-x-small)',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                        marginBottom: 'var(--op-space-2x-small)',
+                      }}
+                    >
+                      New Lead
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-small)',
+                        fontWeight: 'var(--op-font-weight-bold)',
+                      }}
+                    >
+                      Mark Burns
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-x-small)',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                      }}
+                    >
+                      john@example.com
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div
+                    style={{
+                      color: 'white',
+                      fontSize: '24px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    →
+                  </div>
+
+                  {/* CRM Icons */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--op-space-small)',
+                    }}
+                  >
+                    {['HubSpot', 'Salesforce', 'Zapier'].map((crm) => (
+                      <div
+                        key={crm}
+                        style={{
+                          backgroundColor: 'var(--op-color-background)',
+                          borderRadius: 'var(--op-radius-small)',
+                          padding: 'var(--op-space-x-small) var(--op-space-small)',
+                          fontSize: 'var(--op-font-x-small)',
+                          fontWeight: 'var(--op-font-weight-medium)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        {crm}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-body">
+                <div style={{ marginBottom: 'var(--op-space-medium)' }}>
+                  <h3
+                    style={{
+                      fontSize: 'var(--op-font-large)',
+                      fontWeight: 'var(--op-font-weight-bold)',
+                      margin: '0 0 var(--op-space-2x-small) 0',
+                    }}
+                  >
+                    Webhooks
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      margin: 0,
+                    }}
+                  >
+                    Send leads to any CRM or automation tool
+                  </p>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/deploy/webhooks')}
+                >
+                  <span>Configure</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Intro A/B Testing */}
+            <div
+              className="card"
+              style={{
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, var(--orange-100) 0%, var(--orange-900) 50%)',
+                  padding: 'var(--op-space-x-large)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 300,
+                  position: 'relative',
+                }}
+              >
+                {/* A/B Test Diagram */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-x-large)',
+                  }}
+                >
+                  {/* Variant A */}
+                  <div
+                    style={{
+                      backgroundColor: 'var(--op-color-background)',
+                      borderRadius: 'var(--op-radius-medium)',
+                      padding: 'var(--op-space-medium)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      textAlign: 'center',
+                      width: '120px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-2x-large)',
+                        fontWeight: 'var(--op-font-weight-bold)',
+                        color: 'var(--op-color-primary-base)',
+                      }}
+                    >
+                      A
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-x-small)',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                      }}
+                    >
+                      50% traffic
+                    </div>
+                  </div>
+
+                  {/* VS */}
+                  <div
+                    style={{
+                      color: 'white',
+                      fontSize: 'var(--op-font-large)',
+                      fontWeight: 'var(--op-font-weight-bold)',
+                    }}
+                  >
+                    vs
+                  </div>
+
+                  {/* Variant B */}
+                  <div
+                    style={{
+                      backgroundColor: 'var(--op-color-background)',
+                      borderRadius: 'var(--op-radius-medium)',
+                      padding: 'var(--op-space-medium)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      textAlign: 'center',
+                      width: '120px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-2x-large)',
+                        fontWeight: 'var(--op-font-weight-bold)',
+                        color: 'var(--op-color-alerts-notice-base)',
+                      }}
+                    >
+                      B
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 'var(--op-font-x-small)',
+                        color: 'var(--op-color-neutral-on-plus-max)',
+                      }}
+                    >
+                      50% traffic
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card-body">
+                <div style={{ marginBottom: 'var(--op-space-medium)' }}>
+                  <h3
+                    style={{
+                      fontSize: 'var(--op-font-large)',
+                      fontWeight: 'var(--op-font-weight-bold)',
+                      margin: '0 0 var(--op-space-2x-small) 0',
+                    }}
+                  >
+                    Intro A/B Testing
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 'var(--op-font-small)',
+                      color: 'var(--op-color-neutral-on-plus-max)',
+                      margin: 0,
+                    }}
+                  >
+                    Compare intro page variants and track conversions
+                  </p>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/deploy/intro')}
+                >
+                  <span>View Results</span>
+                </Button>
+              </div>
+            </div>
           </div>
         </main>
       </div>
