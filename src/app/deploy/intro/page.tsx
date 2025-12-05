@@ -14,6 +14,7 @@ import {
 import {
   ArrowLeft02Icon,
   ArrowRight02Icon,
+  CodeIcon,
   Link01Icon,
   Maximize01Icon,
   RefreshIcon,
@@ -31,6 +32,7 @@ import {
   useWebPreview,
 } from '@/components/ai-elements/web-preview'
 import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface VariantStats {
   views: number
@@ -193,6 +195,13 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
   const [selectedPath, setSelectedPath] = useState(defaultPath)
   const fullUrl = `${baseUrl}${selectedPath}`
 
+  const iframeEmbedCode = `<iframe
+  src="${fullUrl}"
+  width="100%"
+  height="100vh"
+  frameborder="0"
+></iframe>`
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)' }}>
@@ -211,6 +220,50 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
             </option>
           ))}
         </select>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="secondary" size="lg">
+              <HugeiconsIcon icon={CodeIcon} size={16} />
+              Embed
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" style={{ width: '400px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+              <h4 style={{ margin: 0, fontSize: 'var(--op-font-small)', fontWeight: 600 }}>
+                Embed Code
+              </h4>
+              <p style={{ margin: 0, fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
+                Copy and paste this code into your website.
+              </p>
+              <div style={{ position: 'relative' }}>
+                <pre
+                  style={{
+                    padding: 'var(--op-space-small)',
+                    backgroundColor: 'var(--op-color-neutral-minus-eight)',
+                    color: 'var(--op-color-neutral-on-minus-eight)',
+                    borderRadius: 'var(--op-radius-medium)',
+                    fontSize: 'var(--op-font-x-small)',
+                    fontFamily: 'monospace',
+                    overflow: 'auto',
+                    maxHeight: '120px',
+                    margin: 0,
+                    border: '1px solid var(--op-color-border)',
+                  }}
+                >
+                  {iframeEmbedCode}
+                </pre>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  style={{ position: 'absolute', top: 'var(--op-space-x-small)', right: 'var(--op-space-x-small)' }}
+                  onClick={() => navigator.clipboard.writeText(iframeEmbedCode)}
+                >
+                  Copy
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <WebPreview defaultUrl={fullUrl} key={selectedPath}>
