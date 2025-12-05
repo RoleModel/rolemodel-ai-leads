@@ -229,12 +229,6 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
           </PopoverTrigger>
           <PopoverContent align="start" style={{ width: '400px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
-              <h4 style={{ margin: 0, fontSize: 'var(--op-font-small)', fontWeight: 600 }}>
-                Embed Code
-              </h4>
-              <p style={{ margin: 0, fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
-                Copy and paste this code into your website.
-              </p>
               <div style={{ position: 'relative' }}>
                 <pre
                   style={{
@@ -253,7 +247,7 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
                   {iframeEmbedCode}
                 </pre>
                 <Button
-                  size="lg"
+                  size="sm"
                   variant="secondary"
                   style={{ position: 'absolute', top: 'var(--op-space-x-small)', right: 'var(--op-space-x-small)' }}
                   onClick={() => navigator.clipboard.writeText(iframeEmbedCode)}
