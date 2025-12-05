@@ -59,7 +59,7 @@ interface ABTest {
   id: string
   name: string
   description: string | null
-  status: 'notice' | 'info' | 'warning' | 'completed'
+  status: 'active' | 'paused' | 'notice' | 'info' | 'warning' | 'completed'
   start_date: string | null
   end_date: string | null
   created_at: string
@@ -300,7 +300,7 @@ export default function IntroABTestingPage() {
     }
   }
 
-  async function updateTestStatus(testId: string, status: 'notice' | 'warning' | 'completed') {
+  async function updateTestStatus(testId: string, status: 'active' | 'paused' | 'notice' | 'warning' | 'completed') {
     try {
       await fetch(`/api/ab-tests/${testId}`, {
         method: 'PUT',
@@ -378,16 +378,15 @@ export default function IntroABTestingPage() {
             {activeTest && (
               <div style={{ display: 'flex', gap: 'var(--op-space-medium)', alignItems: 'center' }}>
                 <span
-
-                  className={`badge badge--${activeTest.status}`}
+                  className={`badge badge--${activeTest.status === 'active' ? 'notice' : activeTest.status}`}
                 >
-                  {activeTest.status.toUpperCase()}
+                  {activeTest.status === 'active' ? 'ACTIVE' : activeTest.status.toUpperCase()}
                 </span>
-                {activeTest.status === 'notice' ? (
+                {activeTest.status === 'active' ? (
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => updateTestStatus(activeTest.id, 'warning')}
+                    onClick={() => updateTestStatus(activeTest.id, 'paused')}
                   >
                     Pause Test
                   </Button>
@@ -395,7 +394,7 @@ export default function IntroABTestingPage() {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => updateTestStatus(activeTest.id, 'notice')}
+                    onClick={() => updateTestStatus(activeTest.id, 'active')}
                   >
                     Activate Test
                   </Button>
