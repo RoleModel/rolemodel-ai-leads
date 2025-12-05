@@ -19,29 +19,41 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   async headers() {
+    const iframeHeaders = [
+      {
+        key: 'Content-Security-Policy',
+        value:
+          "frame-ancestors 'self' http://localhost:* https://localhost:* http://127.0.0.1:* https://127.0.0.1:* *",
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'ALLOWALL',
+      },
+      {
+        key: 'Access-Control-Allow-Origin',
+        value: '*',
+      },
+      {
+        key: 'Access-Control-Allow-Private-Network',
+        value: 'true',
+      },
+    ]
+
     return [
       {
-        // Allow embedding in iframes and localhost connections
+        // Allow embedding in iframes for leads-page
         source: '/embed/leads-page',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value:
-              "frame-ancestors 'self' http://localhost:* https://localhost:* http://127.0.0.1:* https://127.0.0.1:* *",
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'ALLOWALL',
-          },
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Private-Network',
-            value: 'true',
-          },
-        ],
+        headers: iframeHeaders,
+      },
+      {
+        // Allow embedding in iframes for intro pages
+        source: '/embed/intro/:path*',
+        headers: iframeHeaders,
+      },
+      {
+        // Allow embedding intro pages directly
+        source: '/intro/:path*',
+        headers: iframeHeaders,
       },
     ]
   },
