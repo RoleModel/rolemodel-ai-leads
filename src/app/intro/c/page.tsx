@@ -21,6 +21,8 @@ import {
   Copy01Icon,
   Refresh01Icon,
   PlusSignIcon,
+  MinimizeScreenIcon,
+  MaximizeScreenIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import './page.css'
@@ -64,6 +66,7 @@ interface AssessmentToolProps {
 const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   useLeadsPageSettings()
   const [step, setStep] = useState<'intro' | 'chat'>('intro')
+  const [isExpanded, setIsExpanded] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '' })
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
@@ -139,6 +142,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const handleStartChat = () => {
     if (!formData.name || !formData.email) return
     setStep('chat')
+    setIsExpanded(true)
   }
 
   const suggestions = [
@@ -147,7 +151,16 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   ]
 
   return (
-    <Card className="intro-c-card">
+    <Card className={`intro-c-card ${step === 'chat' && isExpanded ? 'intro-c-intro--fixed' : ''}`}>
+      {step === 'chat' && (
+        <button
+          className="intro-c-card__expand-btn"
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-label={isExpanded ? 'Minimize' : 'Maximize'}
+        >
+          <HugeiconsIcon icon={isExpanded ? MinimizeScreenIcon : MaximizeScreenIcon} size={20} />
+        </button>
+      )}
       <div className="intro-c-card__content">
         <AnimatePresence mode="wait">
 

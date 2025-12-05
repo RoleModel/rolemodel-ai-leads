@@ -218,6 +218,34 @@ html:has(.intro-c-page) body {
   min-height: 550px;
   display: flex;
   flex-direction: column;
+  transition:
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    inset 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.intro-c-card__expand-btn {
+  position: absolute;
+  top: var(--op-space-small);
+  right: var(--op-space-small);
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--op-radius-medium);
+  border: 1px solid var(--op-color-neutral-plus-five);
+  background-color: var(--op-color-neutral-plus-max);
+  color: var(--op-color-neutral-on-plus-max);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--op-shadow-small);
+}
+
+.intro-c-card__expand-btn:hover {
+  background-color: var(--op-color-neutral-plus-six);
+  transform: scale(1.05);
 }
 
 .intro-c-card__content {
@@ -237,6 +265,34 @@ html:has(.intro-c-page) body {
   justify-content: start;
   margin: 0 auto;
   width: 100%;
+}
+
+body:has(.intro-c-intro--fixed),
+.intro-c-intro:has(.intro-c-intro--fixed) {
+  overflow: hidden;
+}
+
+.intro-c-intro--fixed {
+  position: fixed;
+  inset: 24px;
+  z-index: 100;
+  box-shadow: var(--op-shadow-large);
+}
+
+.intro-c-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--blue-green-900) 80%, transparent);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.intro-c-page:has(.intro-c-intro--fixed)::before {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .intro-c-intro__emoji {
