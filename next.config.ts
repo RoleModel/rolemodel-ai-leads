@@ -19,31 +19,20 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   async headers() {
-    const iframeHeaders = [
-      {
-        key: 'Content-Security-Policy',
-        value:
-          "frame-ancestors 'self' http://localhost:* https://localhost:* http://127.0.0.1:* https://127.0.0.1:* *",
-      },
-      {
-        key: 'X-Frame-Options',
-        value: 'ALLOWALL',
-      },
-      {
-        key: 'Access-Control-Allow-Origin',
-        value: '*',
-      },
-      {
-        key: 'Access-Control-Allow-Private-Network',
-        value: 'true',
-      },
-    ]
-
     return [
       {
         // Allow embedding all pages in iframes
         source: '/:path*',
-        headers: iframeHeaders,
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors *",
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
       },
     ]
   },

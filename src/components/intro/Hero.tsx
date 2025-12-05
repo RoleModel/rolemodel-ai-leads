@@ -1,4 +1,6 @@
 'use client'
+
+import { useRef } from 'react'
 import { AlarmClockIcon, ArrowDownRight01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
@@ -6,10 +8,11 @@ import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
 import { useGSAP } from '@gsap/react'
 import Logo from '@/components/intro/Logo'
-import { useRef } from 'react'
 import AnimatedPath from '@/components/intro/AnimatedPath'
 import ButtonPill from '@/components/ui/button-animated'
 import styles from './hero.module.css'
+
+gsap.registerPlugin(useGSAP, SplitText)
 
 
 interface HeroProps {
@@ -46,7 +49,6 @@ export function Hero({ showBackground = true }: HeroProps) {
   }
 
   const container = useRef<HTMLDivElement>(null)
-  gsap.registerPlugin(SplitText)
 
   useGSAP(() => {
     gsap.set("h1", { opacity: 1 })

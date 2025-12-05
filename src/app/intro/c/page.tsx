@@ -4,8 +4,9 @@ import { useState, useRef, useCallback, useMemo, Fragment } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import gsap from 'gsap'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { useGSAP } from '@gsap/react'
 
-gsap.registerPlugin(ScrollToPlugin)
+gsap.registerPlugin(useGSAP, ScrollToPlugin)
 import {
   ArrowRight02Icon,
   ArtificialIntelligence04Icon,
@@ -422,21 +423,35 @@ const AssessmentTool = (props: AssessmentToolProps) => (
 // Feature items data
 const features = [
   { icon: Time01Icon, title: "Respects your time", text: "Complete the assessment in under 5 minutes. No lengthy calls required for initial discovery." },
-  { icon: File01Icon, title: "Instant Structured Summary", text: "Receive a summary of your business goals and potential ROI  via email." },
+  { icon: File01Icon, title: "Instant Structured Summary", text: "Receive a summary of your business goals and potential ROI." },
   { icon: SecurityCheckIcon, title: "Low Risk Exploration", text: "Get AI-driven feedback on technical feasibility before committing to a consultation." }
 ]
 
 const featureCards = [
-  { icon: Idea01Icon, title: "Contextual Insights", text: "The tool doesn't just ask questions; it analyzes your business goals against our database of successful projects to offer relevant content." },
-  { icon: DashboardSpeed01Icon, title: "Project Feasibility", text: "We analyze based on budget alignment, project scope, and timeline needs to ensure a consultation call is the right next step for you." },
-  { icon: Link01Icon, title: "CRM Integration", text: "Seamlessly connects with our systems. Your responses prepare our sales team to offer a highly personalized consultation." }
+  {
+    icon: Idea01Icon,
+    title: "A Clearer Picture of Your Work",
+    text: "Your answers give us enough context about your workflow, pain points, and constraints that we can skip the generic intake and start by talking about what actually needs to change."
+  },
+  {
+    icon: DashboardSpeed01Icon,
+    title: "Realistic Next Steps",
+    text: "We use what you share to get an honest first read on scope, risk, and timing so we can suggest a starting point that fits your situation—or let you know if custom software isn’t the right move yet."
+  },
+  {
+    icon: Link01Icon,
+    title: "A More Useful First Conversation",
+    text: "Your responses shape the agenda, who from our team joins the call, and which examples we bring, so our time together feels like a working session focused on your business, not a sales script."
+  }
 ]
 
 // --- Main App Component ---
 export default function IntroPageC() {
-  const handleScrollToTool = () => {
+  const { contextSafe } = useGSAP()
+
+  const handleScrollToTool = contextSafe(() => {
     gsap.to(window, { duration: 0.3, scrollTo: { y: '#tool', offsetY: 40 }, ease: 'ease-in-out' })
-  }
+  })
 
   return (
     <div className="intro-c-page">
@@ -558,10 +573,10 @@ export default function IntroPageC() {
             })}
           </div>
         </div>
+        {/* Privacy Footer */}
+        <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" style={{ position: 'absolute', bottom: 'var(--op-space-medium)', right: 'var(--op-space-medium)' }} />
       </section>
 
-      {/* Privacy Footer */}
-      <PrivacyTermsLinks variant="dark" className="intro-c-footer-links" style={{ position: 'absolute', bottom: 'var(--op-space-medium)', right: 'var(--op-space-medium)' }} />
     </div>
   )
 }

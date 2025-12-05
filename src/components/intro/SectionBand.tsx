@@ -1,6 +1,10 @@
+'use client'
+
 import { useRef, useMemo, useEffect } from "react"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+
+gsap.registerPlugin(useGSAP)
 
 interface Props {
   tint?: string

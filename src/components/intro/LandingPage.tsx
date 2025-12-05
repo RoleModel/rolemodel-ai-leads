@@ -51,12 +51,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ScrollSmoother } from "gsap/ScrollSmoother"
 import styles from './landing-page.module.css'
 
-gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger)
-try {
-  gsap.registerPlugin(ScrollSmoother)
-} catch {
-  // ScrollSmoother is a Club GSAP plugin - may not be available
-}
+gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
 
 const AnimatedPath = dynamic(() => import('./AnimatedPath'), { ssr: false })
 
@@ -437,23 +432,19 @@ function LandingBInner({
   }, [])
 
   const { contextSafe } = useGSAP(() => {
-    let smoother: ScrollSmoother | null = null
-    try {
-      smoother = ScrollSmoother.create({
-        wrapper: wrapperRef.current,
-        content: contentRef.current,
-        smooth: 0.5,
-        effects: true,
-        smoothTouch: 0.8,
-      })
-      smoother.scrollTo(0)
-    } catch {
-      // ScrollSmoother is a Club GSAP plugin - may not be available in production
-    }
+    const smoother = ScrollSmoother.create({
+      wrapper: wrapperRef.current,
+      content: contentRef.current,
+      smooth: 0.5,
+      effects: true,
+      smoothTouch: 0.8,
+    })
+
+    smoother.scrollTo(0)
 
     ScrollTrigger.create({
       trigger: containerRef.current,
-      scroller: smoother?.wrapper() ?? undefined,
+      scroller: smoother.wrapper(),
       start: 'top top',
       end: '30% top',
       scrub: 0.3,
@@ -546,16 +537,12 @@ function LandingBInner({
     updatePanelSize()
     window.addEventListener('resize', updatePanelSize)
 
-    let rafId: number | null = null
+    let ticker: (() => void) | null = null
 
     if (!isMobile) {
-      let lastTime = performance.now()
-
-      const tick = () => {
-        const now = performance.now()
-        const elapsed = now - lastTime
-        lastTime = now
-        const deltaRatio = Math.min(elapsed / (1000 / 60), 3) // Cap at 3x to prevent jumps
+      ticker = () => {
+        // Use gsap's deltaRatio for frame-rate independent animation (1.0 at 60fps)
+        const deltaRatio = gsap.ticker.deltaRatio(60)
 
         smoothMouseRef.current.x = lerp(smoothMouseRef.current.x, mouseRef.current.x, 0.1 * deltaRatio)
         smoothMouseRef.current.y = lerp(smoothMouseRef.current.y, mouseRef.current.y, 0.1 * deltaRatio)
@@ -616,30 +603,33 @@ function LandingBInner({
           x = Math.max(-maxX, Math.min(maxX, x))
           y = Math.max(-maxY, Math.min(maxY, y))
 
-          // Use direct style manipulation instead of gsap.set for reliability
-          cardEl.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
+          gsap.set(cardEl, { x, y, xPercent: -50, yPercent: -50 })
           cardEl.style.scale = String(cardScale)
         })
-
-        rafId = requestAnimationFrame(tick)
       }
-
-      rafId = requestAnimationFrame(tick)
+      ticker()
+      gsap.ticker.add(ticker)
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouse)
       window.removeEventListener('resize', updatePanelSize)
-      if (rafId !== null) cancelAnimationFrame(rafId)
+      if (ticker) gsap.ticker.remove(ticker)
     }
   }, { scope: containerRef, dependencies: [isMobile, isDarkMode, getGridOffset] })
 
-  const handleCardClick = contextSafe((questionText: string) => {
+  const handleCardClick = contextSafe(() => {
     gsap.to(window, { duration: .9, scrollTo: "#get-started" })
-    // Dispatch event after a short delay to let scroll start
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('hero-submit-suggestion', { detail: { text: questionText } }))
-    }, 300)
+  })
+
+  const handleScrollToSection = contextSafe((id: string) => {
+    const target = `#${id}`
+    const smoother = ScrollSmoother.get()
+    if (smoother) {
+      smoother.scrollTo(target, true)
+      return
+    }
+    gsap.to(window, { duration: 1.3, scrollTo: target })
   })
 
   // Only render glow in light mode on desktop (expensive effect)
@@ -705,7 +695,7 @@ function LandingBInner({
                         key={q.id}
                         ref={(el) => { cardRefs.current[index] = el }}
                         suggestion={q.text}
-                        onClick={() => handleCardClick(q.text)}
+                        onClick={() => handleCardClick()}
                         tabIndex={index + 1}
                         className={styles.suggestion}
                         style={{
@@ -736,19 +726,7 @@ function LandingBInner({
                 animationPreset="default"
                 minimalistFontSize={10}
                 minimalistSpeed={1}
-                onScrollToSection={(id) => {
-                  const target = `#${id}`
-                  try {
-                    const smoother = ScrollSmoother.get()
-                    if (smoother) {
-                      smoother.scrollTo(target, true)
-                      return
-                    }
-                  } catch {
-                    // ScrollSmoother may not be available
-                  }
-                  gsap.to(window, { duration: 1.3, scrollTo: target })
-                }}
+                onScrollToSection={handleScrollToSection}
               />
             </div>
           </div>

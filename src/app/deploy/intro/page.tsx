@@ -271,7 +271,7 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
 export default function IntroABTestingPage() {
   const [tests, setTests] = useState<ABTest[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [baseUrl, setBaseUrl] = useState('')
+  const [baseUrl, setBaseUrl] = useState<string | null>(null)
 
   useEffect(() => {
     // Set base URL from window location
@@ -313,7 +313,7 @@ export default function IntroABTestingPage() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || baseUrl === null) {
     return (
       <div
         style={{

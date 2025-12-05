@@ -51,6 +51,11 @@ export const WebPreview = ({
   const [url, setUrl] = useState(defaultUrl)
   const [consoleOpen, setConsoleOpen] = useState(false)
 
+  // Sync internal URL state when defaultUrl prop changes
+  useEffect(() => {
+    setUrl(defaultUrl)
+  }, [defaultUrl])
+
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl)
     onUrlChange?.(newUrl)
