@@ -483,6 +483,13 @@ function LandingBInner({
             pointerEvents: t > 0.6 ? 'auto' : 'none'
           })
         }
+
+        // Hide glow when scrolled past hero area
+        if (glowRef.current) {
+          const isInHeroArea = p < 0.5
+          glowRef.current.style.opacity = isInHeroArea ? glowRef.current.style.opacity : '0'
+          glowRef.current.style.scale = isInHeroArea ? glowRef.current.style.scale : '0.5'
+        }
       },
     })
 
