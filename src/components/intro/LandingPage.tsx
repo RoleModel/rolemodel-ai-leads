@@ -51,7 +51,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ScrollSmoother } from "gsap/ScrollSmoother"
 import styles from './landing-page.module.css'
 
-gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
+gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger)
+try {
+  gsap.registerPlugin(ScrollSmoother)
+} catch {
+  // ScrollSmoother is a Club GSAP plugin - may not be available
+}
 
 const AnimatedPath = dynamic(() => import('./AnimatedPath'), { ssr: false })
 
@@ -432,19 +437,23 @@ function LandingBInner({
   }, [])
 
   const { contextSafe } = useGSAP(() => {
-    const smoother = ScrollSmoother.create({
-      wrapper: wrapperRef.current,
-      content: contentRef.current,
-      smooth: 0.5,
-      effects: true,
-      smoothTouch: 0.8,
-    })
-
-    smoother.scrollTo(0)
+    let smoother: ScrollSmoother | null = null
+    try {
+      smoother = ScrollSmoother.create({
+        wrapper: wrapperRef.current,
+        content: contentRef.current,
+        smooth: 0.5,
+        effects: true,
+        smoothTouch: 0.8,
+      })
+      smoother.scrollTo(0)
+    } catch {
+      // ScrollSmoother is a Club GSAP plugin - may not be available in production
+    }
 
     ScrollTrigger.create({
       trigger: containerRef.current,
-      scroller: smoother.wrapper(),
+      scroller: smoother?.wrapper() ?? undefined,
       start: 'top top',
       end: '30% top',
       scrub: 0.3,
@@ -711,10 +720,14 @@ function LandingBInner({
                 minimalistSpeed={1}
                 onScrollToSection={(id) => {
                   const target = `#${id}`
-                  const smoother = ScrollSmoother.get()
-                  if (smoother) {
-                    smoother.scrollTo(target, true)
-                    return
+                  try {
+                    const smoother = ScrollSmoother.get()
+                    if (smoother) {
+                      smoother.scrollTo(target, true)
+                      return
+                    }
+                  } catch {
+                    // ScrollSmoother may not be available
                   }
                   gsap.to(window, { duration: 1.3, scrollTo: target })
                 }}
