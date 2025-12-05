@@ -41,18 +41,8 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        // Allow embedding in iframes for leads-page
-        source: '/embed/leads-page',
-        headers: iframeHeaders,
-      },
-      {
-        // Allow embedding in iframes for intro pages
-        source: '/embed/intro/:path*',
-        headers: iframeHeaders,
-      },
-      {
-        // Allow embedding intro pages directly
-        source: '/intro/:path*',
+        // Allow embedding all pages in iframes
+        source: '/:path*',
         headers: iframeHeaders,
       },
     ]
