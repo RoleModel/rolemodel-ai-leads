@@ -9,16 +9,18 @@
   width: calc(var(--op-size-unit) * 200);
   height: calc(var(--op-size-unit) * 200);
   border-radius: 50%;
-  background: light-dark(
-    radial-gradient(circle, var(--brand-Bright-Yellow) 0%, transparent 70%),
-    radial-gradient(circle, transparent 0%, transparent 70%)
-  );
+  background: radial-gradient(circle, var(--brand-Bright-Yellow) 0%, transparent 60%);
   pointer-events: none;
   z-index: 2;
   left: 0;
   top: 0;
   opacity: 0;
   will-change: transform, opacity, left, top;
+  transition:
+    left 0.15s ease-out,
+    top 0.15s ease-out,
+    opacity 0.3s ease-out,
+    scale 0.3s ease-out;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -259,6 +261,15 @@
   left: 50%;
   z-index: 100;
   will-change: opacity;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme-mode='light']) {
+    .hero-glow {
+      display: none;
+      visibility: hidden;
+    }
+  }
 }
 
 /* Mobile styles */

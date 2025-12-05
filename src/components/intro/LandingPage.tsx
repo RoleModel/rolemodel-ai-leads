@@ -539,12 +539,16 @@ function LandingBInner({
     updatePanelSize()
     window.addEventListener('resize', updatePanelSize)
 
-    let ticker: (() => void) | null = null
+    let rafId: number | null = null
 
     if (!isMobile) {
-      ticker = () => {
-        // Use gsap's deltaRatio for frame-rate independent animation (1.0 at 60fps)
-        const deltaRatio = gsap.ticker.deltaRatio(60)
+      let lastTime = performance.now()
+
+      const tick = () => {
+        const now = performance.now()
+        const elapsed = now - lastTime
+        lastTime = now
+        const deltaRatio = Math.min(elapsed / (1000 / 60), 3) // Cap at 3x to prevent jumps
 
         smoothMouseRef.current.x = lerp(smoothMouseRef.current.x, mouseRef.current.x, 0.1 * deltaRatio)
         smoothMouseRef.current.y = lerp(smoothMouseRef.current.y, mouseRef.current.y, 0.1 * deltaRatio)
@@ -605,23 +609,30 @@ function LandingBInner({
           x = Math.max(-maxX, Math.min(maxX, x))
           y = Math.max(-maxY, Math.min(maxY, y))
 
-          gsap.set(cardEl, { x, y, xPercent: -50, yPercent: -50 })
+          // Use direct style manipulation instead of gsap.set for reliability
+          cardEl.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`
           cardEl.style.scale = String(cardScale)
         })
+
+        rafId = requestAnimationFrame(tick)
       }
-      ticker()
-      gsap.ticker.add(ticker)
+
+      rafId = requestAnimationFrame(tick)
     }
 
     return () => {
       window.removeEventListener('mousemove', handleMouse)
       window.removeEventListener('resize', updatePanelSize)
-      if (ticker) gsap.ticker.remove(ticker)
+      if (rafId !== null) cancelAnimationFrame(rafId)
     }
   }, { scope: containerRef, dependencies: [isMobile, isDarkMode, getGridOffset] })
 
-  const handleCardClick = contextSafe(() => {
+  const handleCardClick = contextSafe((questionText: string) => {
     gsap.to(window, { duration: .9, scrollTo: "#get-started" })
+    // Dispatch event after a short delay to let scroll start
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('hero-submit-suggestion', { detail: { text: questionText } }))
+    }, 300)
   })
 
   // Only render glow in light mode on desktop (expensive effect)
@@ -687,7 +698,7 @@ function LandingBInner({
                         key={q.id}
                         ref={(el) => { cardRefs.current[index] = el }}
                         suggestion={q.text}
-                        onClick={() => handleCardClick()}
+                        onClick={() => handleCardClick(q.text)}
                         tabIndex={index + 1}
                         className={styles.suggestion}
                         style={{
