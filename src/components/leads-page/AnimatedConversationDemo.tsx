@@ -34,7 +34,7 @@ import {
   Conversation,
   ConversationContent,
 } from '@/components/ai-elements/conversation'
-import Image from 'next/image'
+import Favicon from '@/components/intro/Favicon'
 import { SearchIcon, CheckIcon, AlertCircleIcon } from 'lucide-react'
 import {
   PromptInput,
@@ -84,20 +84,20 @@ const demoConversation: Message[] = [
     id: '1',
     role: 'assistant',
     content:
-      "Hi! I'm here to help you explore whether custom software could be a good fit for your business. Who and I speaking with?",
+      "Hi! I'm here to help you explore whether custom software makes sense for your business. This takes about 3-5 minutes. Who am I speaking with?",
     delay: 1000,
   },
   {
     id: '2',
     role: 'user',
-    content: "I'm Sarah.",
+    content: "I'm Sarah, CEO at TechFlow Solutions.",
     delay: 2000,
   },
   {
     id: '3',
     role: 'assistant',
     content:
-      'Nice to meet you, Sarah! Tell me - what business challenge are you trying to solve?',
+      "Nice to meet you, Sarah! What's the biggest operational challenge you're facing right now?",
     delay: 2500,
   },
   {
@@ -111,7 +111,7 @@ const demoConversation: Message[] = [
     id: '5',
     role: 'assistant',
     content:
-      "I understand - manual data management can definitely slow things down. What's your timeline for implementing a solution?",
+      "That's a common pain point - manual data management can really slow growth. What's your ideal timeline for having a solution in place?",
     delay: 2500,
     chainOfThought: {
       steps: [
@@ -146,7 +146,7 @@ const demoConversation: Message[] = [
     id: '7',
     role: 'assistant',
     content:
-      "That's helpful. And what budget range are you working with for this project?",
+      "Got it. And what budget range have you allocated for solving this?",
     delay: 2000,
   },
   {
@@ -159,7 +159,7 @@ const demoConversation: Message[] = [
     id: '9',
     role: 'assistant',
     content:
-      "Great, that budget range works well for a custom solution [1]. Last question - who's involved in making the final decision at your company?",
+      "That's a great starting point for a custom solution [1]. Who else would be involved in evaluating and deciding on a solution?",
     delay: 2500,
     citations: [
       {
@@ -173,26 +173,26 @@ const demoConversation: Message[] = [
   {
     id: '10',
     role: 'user',
-    content: "I'm the CEO, and I'll be working with our CTO on the final decision.",
+    content: "I'll be working with our CTO on the final decision.",
     delay: 2500,
   },
   {
     id: '11',
     role: 'assistant',
     content:
-      "Perfect, Sarah. I'd love to send you a summary of what we discussed. What's the best email to reach you at?",
+      "Perfect. I'd love to send you a personalized summary of what we discussed. What's the best email to reach you?",
     delay: 2500,
   },
   {
     id: '12',
     role: 'user',
-    content: 'sarah@company.com',
+    content: 'sarah@techflow.com',
     delay: 2200,
   },
   {
     id: '13',
     role: 'assistant',
-    content: 'Thank you! Based on our conversation, here are the recommended next steps.',
+    content: "Thanks Sarah! Here's a summary of our conversation and recommended next steps.",
     delay: 2500,
   },
 ]
@@ -407,7 +407,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         height: '100%',
       }}
     >
-      {/* Title and Description */}
+      {/* Landing Header */}
       <motion.div
         initial={{ opacity: 0, filter: "blur(4px)", }}
         animate={{ opacity: 1, filter: "blur(0px)", }}
@@ -423,7 +423,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             letterSpacing: '-0.05em',
           }}
         >
-
           {settings.pageTitle}
         </span>
         <p
@@ -431,10 +430,29 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             fontSize: 'var(--op-font-medium)',
             color: 'var(--op-color-on-background-alt)',
             margin: 0,
+            marginBottom: 'var(--op-space-small)',
           }}
         >
-          {settings.pageDescription}
+          {settings.introText || settings.pageDescription}
         </p>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 'var(--op-space-x-small)',
+            fontSize: 'var(--op-font-small)',
+            color: 'var(--op-color-neutral-on-plus-max)',
+            backgroundColor: 'var(--op-color-neutral-plus-six)',
+            padding: 'var(--op-space-2x-small) var(--op-space-small)',
+            borderRadius: 'var(--op-radius-pill)',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12,6 12,12 16,14" />
+          </svg>
+          {settings.timeEstimate || '3-5 minutes'}
+        </span>
       </motion.div>
 
 
@@ -471,7 +489,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                         width: 32,
                         height: 32,
                         borderRadius: 'var(--op-radius-circle)',
-                        backgroundColor: 'var(--op-color-primary)',
                         color: 'white',
                         display: 'flex',
                         alignItems: 'center',
@@ -481,17 +498,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                         fontSize: 'var(--op-font-small)',
                         fontWeight: 600,
                       }}>
-                        {settings.favicon ? (
-                          <Image
-                            src={settings.favicon}
-                            alt="AI"
-                            width={32}
-                            height={32}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--op-radius-circle)' }}
-                          />
-                        ) : (
-                          'AI'
-                        )}
+                        <Favicon style={{ width: '100%', height: '100%', borderRadius: 'var(--op-radius-circle)' }} />
                       </div>
                     )}
                     <MessageContent>
@@ -566,7 +573,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           </motion.div>
         )}
 
-        {/* Summary Plan in conversation */}
+        {/* Qualification Summary */}
         {showPlan && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -577,17 +584,18 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
               border: '1px solid var(--op-color-border)',
               borderRadius: 'var(--op-radius-large)',
               padding: 'var(--op-space-x-large)',
+              backgroundColor: 'var(--op-color-background)',
             }}
           >
             <h3
               style={{
-                fontSize: 'var(--op-font-medium)',
+                fontSize: 'var(--op-font-large)',
                 fontWeight: 600,
                 textAlign: 'left',
                 marginBottom: 'var(--op-space-x-small)',
               }}
             >
-              Conversation Summary
+              Qualification Summary
             </h3>
             <p
               style={{
@@ -595,102 +603,171 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 color: 'var(--op-color-neutral-on-plus-max)',
                 textAlign: 'left',
                 lineHeight: 1.6,
+                marginBottom: 'var(--op-space-medium)',
               }}
             >
-              Based on our discussion, here&apos;s what we covered and the recommended
-              next steps.
+              Based on our conversation, here&apos;s what I&apos;ve learned about your needs.
             </p>
 
+            {/* Summary Grid */}
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--op-space-small)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 'var(--op-space-medium)',
+                marginBottom: 'var(--op-space-large)',
               }}
             >
-              <div>
-                <h4
-                  style={{
-                    fontSize: 'var(--op-font-medium)',
-                    fontWeight: 600,
-                    textAlign: 'left',
-                    marginBottom: 'var(--op-space-2x-small)',
-                  }}
-                >
-                  Your Challenge
-                </h4>
-                <p
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    color: 'var(--op-color-on-background)',
-                    margin: 0,
-                    textAlign: 'left',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  Managing customer data across multiple spreadsheets is becoming
-                  unmanageable as you scale. Off-the-shelf CRM platforms don&apos;t fit
-                  your specific workflow needs.
+              <div style={{
+                padding: 'var(--op-space-medium)',
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                borderRadius: 'var(--op-radius-medium)',
+              }}>
+                <span style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 500,
+                }}>Contact</span>
+                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+                  Sarah, CEO
+                </p>
+                <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+                  sarah@techflow.com
                 </p>
               </div>
 
-              <div>
-                <h4
-                  style={{
-                    fontSize: 'var(--op-font-medium)',
-                    fontWeight: 600,
-                    textAlign: 'left',
-                    marginBottom: 'var(--op-space-2x-small)',
-                  }}
-                >
-                  Timeline
-                </h4>
-                <p
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    margin: 0,
-                    textAlign: 'left',
-                    lineHeight: 1.6,
-                  }}
-                >
-                  Looking to have a solution in place within the next 6 months.
+              <div style={{
+                padding: 'var(--op-space-medium)',
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                borderRadius: 'var(--op-radius-medium)',
+              }}>
+                <span style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 500,
+                }}>Budget</span>
+                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+                  $50k - $75k
                 </p>
               </div>
 
-              <div>
-                <h4
-                  style={{
-                    fontSize: 'var(--op-font-medium)',
-                    fontWeight: 600,
-                    textAlign: 'left',
-                    marginBottom: 'var(--op-space-2x-small)',
-                  }}
-                >
-                  Next Steps
-                </h4>
-                <ul
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    margin: 0,
-                    paddingLeft: 'var(--op-space-x-large)',
-                    textAlign: 'left',
-                    lineHeight: 2,
-                  }}
-                >
-                  <li>Schedule a discovery call with you and your CTO</li>
-                  <li>Review your current workflow and data requirements</li>
-                  <li>Prepare a custom solution proposal tailored to your needs</li>
-                </ul>
+              <div style={{
+                padding: 'var(--op-space-medium)',
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                borderRadius: 'var(--op-radius-medium)',
+              }}>
+                <span style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 500,
+                }}>Timeline</span>
+                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+                  6 months
+                </p>
+              </div>
+
+              <div style={{
+                padding: 'var(--op-space-medium)',
+                backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                borderRadius: 'var(--op-radius-medium)',
+              }}>
+                <span style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  fontWeight: 500,
+                }}>Decision Makers</span>
+                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+                  CEO + CTO
+                </p>
               </div>
             </div>
 
+            {/* Challenge & Need */}
+            <div style={{ marginBottom: 'var(--op-space-large)' }}>
+              <h4
+                style={{
+                  fontSize: 'var(--op-font-medium)',
+                  fontWeight: 600,
+                  textAlign: 'left',
+                  marginBottom: 'var(--op-space-x-small)',
+                }}
+              >
+                Challenge
+              </h4>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-on-background)',
+                  margin: 0,
+                  textAlign: 'left',
+                  lineHeight: 1.6,
+                }}
+              >
+                Managing customer data across multiple spreadsheets is becoming
+                unmanageable as the company scales.
+              </p>
+            </div>
+
+            {/* Recommendation */}
             <div
               style={{
-                marginTop: 'var(--op-space-x-large)',
-                paddingTop: 'var(--op-space-x-large)',
+                padding: 'var(--op-space-medium)',
+                backgroundColor: 'var(--op-color-primary-plus-seven)',
+                borderRadius: 'var(--op-radius-medium)',
+                borderLeft: '3px solid var(--op-color-primary-base)',
+                marginBottom: 'var(--op-space-large)',
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: 'var(--op-font-medium)',
+                  fontWeight: 600,
+                  textAlign: 'left',
+                  marginBottom: 'var(--op-space-x-small)',
+                  color: 'var(--op-color-primary-on-plus-max)',
+                }}
+              >
+                Recommendation
+              </h4>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-small)',
+                  margin: 0,
+                  textAlign: 'left',
+                  lineHeight: 1.6,
+                }}
+              >
+                A custom data management solution would help TechFlow consolidate customer data,
+                automate manual processes, and scale efficiently. We recommend a 30-minute
+                discovery call to explore the specifics.
+              </p>
+            </div>
+
+            {/* CTA Section */}
+            <div
+              style={{
+                paddingTop: 'var(--op-space-large)',
                 borderTop: '1px solid var(--op-color-border)',
               }}
             >
+              <p
+                style={{
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  textAlign: 'center',
+                  marginBottom: 'var(--op-space-medium)',
+                }}
+              >
+                Ready to take the next step?
+              </p>
               <div
                 style={{
                   display: 'flex',
@@ -698,12 +775,12 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 }}
               >
                 <Button variant="primary" style={{ flex: 1, cursor: 'default' }}>
-                  <HugeiconsIcon icon={Mail01Icon} size={18} />
-                  <span>Email me this summary</span>
+                  <HugeiconsIcon icon={Calendar03Icon} size={18} />
+                  <span>Schedule a Call</span>
                 </Button>
                 <Button variant="secondary" style={{ flex: 1, cursor: 'default' }}>
-                  <HugeiconsIcon icon={Calendar03Icon} size={18} />
-                  <span>Schedule a conversation</span>
+                  <HugeiconsIcon icon={Mail01Icon} size={18} />
+                  <span>Email Summary</span>
                 </Button>
               </div>
             </div>

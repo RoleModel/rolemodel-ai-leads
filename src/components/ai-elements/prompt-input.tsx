@@ -19,6 +19,7 @@ import {
   type ComponentProps,
   type FormEvent,
   type FormEventHandler,
+  forwardRef,
   Fragment,
   type HTMLAttributes,
   type KeyboardEventHandler,
@@ -739,8 +740,8 @@ export const PromptInput = ({
           type="file"
         />
       )}
-      <form className={cn('w-full', className)} onSubmit={handleSubmit} {...props}>
-        <InputGroup direction="column" className="overflow-hidden">
+      <form className={className} style={{ width: '100%' }} onSubmit={handleSubmit} {...props}>
+        <InputGroup direction="column" style={{ overflow: 'visible' }}>
           {children}
         </InputGroup>
       </form>
@@ -895,30 +896,40 @@ export const PromptInputFooter = ({
 
 export type PromptInputToolsProps = HTMLAttributes<HTMLDivElement>
 
-export const PromptInputTools = ({ className, ...props }: PromptInputToolsProps) => (
-  <div className={cn('flex items-center gap-1 flex-grow-1', className)} {...props} />
+export const PromptInputTools = ({ className, style, ...props }: PromptInputToolsProps) => (
+  <div
+    className={className}
+    style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 'var(--op-space-x-small)',
+      flexGrow: 1,
+      ...style,
+    }}
+    {...props}
+  />
 )
 
 export type PromptInputButtonProps = ComponentProps<typeof InputGroupButton>
 
-export const PromptInputButton = ({
-  variant = 'ghost',
-  className,
-  size,
-  ...props
-}: PromptInputButtonProps) => {
-  const newSize = size ?? (Children.count(props.children) > 1 ? 'sm' : 'icon-sm')
+export const PromptInputButton = forwardRef<HTMLButtonElement, PromptInputButtonProps>(
+  ({ variant = 'ghost', className, size, ...props }, ref) => {
+    const newSize = size ?? (Children.count(props.children) > 1 ? 'sm' : 'icon-sm')
 
-  return (
-    <InputGroupButton
-      className={cn(className)}
-      size={newSize}
-      type="button"
-      variant={variant}
-      {...props}
-    />
-  )
-}
+    return (
+      <InputGroupButton
+        ref={ref}
+        className={cn(className)}
+        size={newSize}
+        type="button"
+        variant={variant}
+        {...props}
+      />
+    )
+  }
+)
+PromptInputButton.displayName = 'PromptInputButton'
 
 export type PromptInputActionMenuProps = ComponentProps<typeof DropdownMenu>
 export const PromptInputActionMenu = (props: PromptInputActionMenuProps) => (
@@ -944,7 +955,8 @@ export const PromptInputActionMenuContent = ({
   className,
   ...props
 }: PromptInputActionMenuContentProps) => (
-  <DropdownMenuContent align="start" className={cn(className)} {...props} />
+  // container={null} disables portal to fix positioning when inside transformed elements
+  <DropdownMenuContent align="start" container={null} className={cn(className)} {...props} />
 )
 
 export type PromptInputActionMenuItemProps = ComponentProps<typeof DropdownMenuItem>
@@ -1116,7 +1128,12 @@ export const PromptInputSpeechButton = ({
     }
 
     instance.onerror = (event) => {
-      console.error('Speech recognition error:', event.error)
+      // Silently handle expected errors (network issues, no speech detected, user aborted)
+      // Only log unexpected errors for debugging
+      const silentErrors = ['network', 'no-speech', 'aborted']
+      if (!silentErrors.includes(event.error)) {
+        console.warn('Speech recognition error:', event.error)
+      }
       setIsListening(false)
     }
 

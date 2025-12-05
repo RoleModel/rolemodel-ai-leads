@@ -18,8 +18,8 @@ import {
   InlineCitationText,
 } from '@/components/ai-elements/inline-citation'
 
-interface Citation {
-  url: string
+export interface Citation {
+  url?: string
   title: string
   description?: string
 }
@@ -56,14 +56,15 @@ export function MessageWithCitations({
 
         if (citation) {
           citationMap[citationNumber] = citation
-          if (!citationRefs.includes(citation.url)) {
-            citationRefs.push(citation.url)
+          const url = citation.url ?? ''
+          if (url && !citationRefs.includes(url)) {
+            citationRefs.push(url)
           }
 
           return (
             <InlineCitation key={i}>
               <InlineCitationCard>
-                <InlineCitationCardTrigger sources={[citation.url]} />
+                <InlineCitationCardTrigger sources={[url]} />
                 <InlineCitationCardBody>
                   <InlineCitationCarousel>
                     <InlineCitationCarouselHeader>
@@ -75,7 +76,7 @@ export function MessageWithCitations({
                       <InlineCitationCarouselItem>
                         <InlineCitationSource
                           title={citation.title}
-                          url={citation.url}
+                          url={url}
                           description={citation.description}
                         />
                       </InlineCitationCarouselItem>

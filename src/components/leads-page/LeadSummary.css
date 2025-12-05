@@ -1,0 +1,186 @@
+.lead-summary {
+  width: 100%;
+  background-color: var(--op-color-background);
+}
+
+.lead-summary__header-title {
+  font-size: var(--op-font-large);
+  font-weight: var(--op-font-weight-semi-bold);
+  margin: 0;
+}
+
+.lead-summary__header-date {
+  font-weight: var(--op-font-weight-normal);
+  font-size: var(--op-font-medium);
+  color: var(--op-color-neutral-on-plus-max);
+  margin-left: var(--op-space-small);
+}
+
+.lead-summary__header-subtitle {
+  font-size: var(--op-font-medium);
+  color: var(--op-color-neutral-on-plus-max);
+  margin: var(--op-space-x-small) 0 0 0;
+  line-height: var(--op-line-height-loose);
+}
+
+.lead-summary_section {
+  margin-bottom: var(--op-space-medium);
+}
+
+.lead-summary__section-title {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-semi-bold);
+  margin-bottom: var(--op-space-2x-small);
+  text-align: left;
+}
+
+.lead-summary__alignment {
+  margin-bottom: var(--op-space-medium);
+  border: var(--op-border-width) solid var(--op-color-border);
+  border-radius: var(--op-radius-medium);
+  padding: var(--op-space-medium);
+}
+
+.lead-summary__field {
+  margin-bottom: 0;
+  display: flex;
+  gap: var(--op-space-x-small);
+}
+
+.lead-summary__label {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-semi-bold);
+  color: var(--op-color-on-background);
+  opacity: var(--op-opacity-disabled);
+  text-align: left;
+  display: inline-flex;
+}
+
+.lead-summary__value {
+  font-size: var(--op-font-small);
+  color: var(--op-color-on-background-alt);
+  margin: 0;
+  text-align: left;
+  line-height: var(--op-line-height-loose);
+}
+
+.lead-summary__value--muted {
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+.lead-summary__list {
+  font-size: var(--op-font-small);
+  margin: 0;
+  padding-left: var(--op-space-large);
+  text-align: left;
+  line-height: var(--op-line-height-base);
+}
+
+.lead-summary__list-item {
+  font-size: var(--op-font-small);
+  text-align: left;
+}
+
+/* Score Section */
+.lead-summary__score-container {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-small);
+}
+
+.lead-summary__score-bar {
+  flex: 1;
+  height: var(--op-space-x-small);
+  background-color: var(--op-color-neutral-plus-six);
+  border-radius: var(--op-radius-pill);
+  overflow: hidden;
+}
+
+.lead-summary__score-fill {
+  height: 100%;
+  background: var(--light-gradient);
+  border-radius: var(--op-radius-pill);
+}
+
+.lead-summary__score-fill--high {
+  background-color: var(--op-color-alerts-notice-base);
+}
+
+.lead-summary__score-fill--medium {
+  background-color: var(--op-color-alerts-warning-base);
+}
+
+.lead-summary__score-fill--low {
+  background-color: var(--op-color-alerts-danger-base);
+}
+
+.lead-summary__score-label {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-semi-bold);
+}
+
+/* Recommendations */
+.lead-summary__recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-small);
+  margin-bottom: var(--op-space-medium);
+}
+
+.lead-summary__recommendation-card {
+  padding: var(--op-space-small);
+  background-color: var(--op-color-neutral-plus-eight);
+  border-radius: var(--op-radius-medium);
+  border: var(--op-border-width) solid var(--op-color-border);
+}
+
+.lead-summary__recommendation-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-2x-small);
+}
+
+.lead-summary__recommendation-type {
+  font-size: var(--op-font-x-small);
+  font-weight: var(--op-font-weight-medium);
+  color: var(--op-color-primary-base);
+  text-transform: uppercase;
+  letter-spacing: var(--op-letter-spacing-label);
+}
+
+.lead-summary__recommendation-title {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-semi-bold);
+  color: var(--op-color-on-background);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.lead-summary__recommendation-title:hover {
+  text-decoration: underline;
+}
+
+.lead-summary__recommendation-title--static {
+  cursor: default;
+}
+
+.lead-summary__recommendation-title--static:hover {
+  text-decoration: none;
+}
+
+.lead-summary__recommendation-description {
+  font-size: var(--op-font-small);
+  color: var(--op-color-neutral-on-plus-max);
+  margin: 0;
+  line-height: var(--op-line-height-base);
+}
+
+/* Share Actions */
+.lead-summary__share-actions {
+  display: flex;
+  gap: var(--op-space-small);
+}
+
+.lead-summary__share-button {
+  flex: 1;
+}

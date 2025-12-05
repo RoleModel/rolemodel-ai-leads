@@ -2,12 +2,14 @@ import type { Experimental_GeneratedImage } from 'ai'
 
 import { cn } from '@/lib/utils'
 
-export type ImageProps = Experimental_GeneratedImage & {
+export type ImageProps = Omit<Experimental_GeneratedImage, 'uint8Array'> & {
   className?: string
   alt?: string
 }
 
-export const Image = ({ base64, uint8Array, mediaType, ...props }: ImageProps) => (
+// Using img for base64 data URIs - Next/Image doesn't support data: URLs
+export const Image = ({ base64, mediaType, ...props }: ImageProps) => (
+  // eslint-disable-next-line @next/next/no-img-element
   <img
     {...props}
     alt={props.alt}

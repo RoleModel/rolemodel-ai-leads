@@ -13,7 +13,7 @@ interface WorkflowContextValue {
 
 const WorkflowContext = createContext<WorkflowContextValue | null>(null)
 
-const useWorkflow = () => {
+export const useWorkflow = () => {
   const context = useContext(WorkflowContext)
   if (!context) {
     throw new Error('Workflow components must be used within a Workflow')
@@ -69,7 +69,7 @@ export const WorkflowNode = memo(
     children,
     ...props
   }: WorkflowNodeProps) => {
-    const getStatusIcon = () => {
+    const StatusIcon = useMemo(() => {
       switch (status) {
         case 'complete':
           return CheckIcon
@@ -80,7 +80,7 @@ export const WorkflowNode = memo(
         default:
           return Icon || ClockIcon
       }
-    }
+    }, [status, Icon])
 
     const getStatusColor = () => {
       switch (status) {
@@ -94,8 +94,6 @@ export const WorkflowNode = memo(
           return 'var(--op-color-neutral-on-plus-max)'
       }
     }
-
-    const StatusIcon = getStatusIcon()
 
     return (
       <div

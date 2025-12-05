@@ -5,10 +5,11 @@ import { ReactNode, createContext, useCallback, useContext, useEffect, useState 
 interface LeadsPageSettings {
   pageTitle: string
   pageDescription: string
-  favicon: string
-  logo: string
+  introText: string
+  timeEstimate: string
   aiInstructions: string
   model: string
+  calendlyUrl: string
 }
 
 interface LeadsPageSettingsContextType {
@@ -18,31 +19,52 @@ interface LeadsPageSettingsContextType {
   isLoading: boolean
 }
 
-const LeadsPageSettingsContext = createContext<LeadsPageSettingsContextType | undefined>(
+export const LeadsPageSettingsContext = createContext<LeadsPageSettingsContextType | undefined>(
   undefined
 )
 
-export function LeadsPageSettingsProvider({ children }: { children: ReactNode }) {
+interface LeadsPageSettingsProviderProps {
+  children: ReactNode
+  chatbotId?: string
+}
+
+const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
+
+export function LeadsPageSettingsProvider({ children, chatbotId }: LeadsPageSettingsProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [settings, setSettings] = useState<LeadsPageSettings>({
     pageTitle: 'Leads page',
     pageDescription:
       'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
-    favicon: '',
-    logo: '',
+    introText: 'This tool helps you see if custom software makes sense for your business.',
+    timeEstimate: '3-5 minutes',
     aiInstructions: '',
     model: 'gpt-4o-mini',
+    calendlyUrl: '',
   })
 
   // Load settings on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await fetch('/api/leads-page-settings')
+        const id = chatbotId || DEFAULT_CHATBOT_ID
+        const response = await fetch(`/api/leads-page-settings?chatbotId=${id}`)
         if (response.ok) {
           const data = await response.json()
           if (data.settings) {
-            setSettings(data.settings)
+            setSettings({
+              pageTitle: data.settings.page_title || 'Leads page',
+              pageDescription:
+                data.settings.page_description ||
+                'Get personalized answers about your project in minutes.',
+              introText:
+                data.settings.intro_text ||
+                'This tool helps you see if custom software makes sense for your business.',
+              timeEstimate: data.settings.time_estimate || '3-5 minutes',
+              aiInstructions: data.settings.ai_instructions || '',
+              model: data.settings.model || 'gpt-4o-mini',
+              calendlyUrl: data.settings.calendly_url || '',
+            })
           }
         }
       } catch (error) {
@@ -52,7 +74,7 @@ export function LeadsPageSettingsProvider({ children }: { children: ReactNode })
       }
     }
     loadSettings()
-  }, [])
+  }, [chatbotId])
 
   const updateSettings = useCallback((updates: Partial<LeadsPageSettings>) => {
     setSettings((prev) => ({ ...prev, ...updates }))

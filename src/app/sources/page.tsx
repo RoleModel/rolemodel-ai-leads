@@ -8,6 +8,8 @@ import {
   RefreshIcon,
   Upload01Icon,
   SidebarRight01Icon,
+  ArrowUp01Icon,
+  Link01Icon,
 } from 'hugeicons-react'
 import { CheckIcon, AlertCircleIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -16,6 +18,7 @@ import { useSearchParams } from 'next/navigation'
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import type { WorkflowControls } from '@/components/admin/WorkflowDesigner'
+import { Button } from '@/components/ui/button'
 
 // Dynamically import WorkflowDesigner to avoid SSR issues with ReactFlow
 const WorkflowDesigner = dynamic(
@@ -54,6 +57,24 @@ export default function SourcesPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [workflowControls, setWorkflowControls] = useState<WorkflowControls | null>(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [expandedSources, setExpandedSources] = useState<Set<string>>(new Set())
+  const [isSyncingFramer, setIsSyncingFramer] = useState(false)
+  const [framerSyncResult, setFramerSyncResult] = useState<{
+    success: boolean
+    message: string
+  } | null>(null)
+
+  const toggleSourceExpanded = (id: string) => {
+    setExpandedSources(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   useEffect(() => {
     loadSources()
@@ -139,6 +160,48 @@ export default function SourcesPage() {
       console.error('Error retraining agent:', error)
     } finally {
       setIsRetraining(false)
+    }
+  }
+
+  async function handleFramerSync() {
+    setIsSyncingFramer(true)
+    setFramerSyncResult(null)
+    try {
+      const res = await fetch('/api/framer-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          framerUrl: 'https://relaxed-store-637823.framer.app',
+          includeBlog: true,
+          includeCaseStudies: true,
+          includePages: true,
+          skipExisting: true,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        setFramerSyncResult({
+          success: true,
+          message: `Synced ${data.result.created} pages (${data.result.skipped} skipped, ${data.result.failed} failed)`,
+        })
+        setNeedsRetraining(true)
+        await loadSources()
+      } else {
+        setFramerSyncResult({
+          success: false,
+          message: data.error || 'Sync failed',
+        })
+      }
+    } catch (error) {
+      console.error('Error syncing Framer:', error)
+      setFramerSyncResult({
+        success: false,
+        message: 'Network error during sync',
+      })
+    } finally {
+      setIsSyncingFramer(false)
     }
   }
 
@@ -253,7 +316,7 @@ export default function SourcesPage() {
             {activeSection === 'workflow' ? (
               <>
                 <div style={{
-                  marginBottom: 'var(--op-space-large)',
+                  // marginBottom: 'var(--op-space-large)',
                   borderBottom: '1px solid',
                   borderColor: 'var(--op-color-border)',
                   padding: 'var(--op-space-large)',
@@ -301,7 +364,7 @@ export default function SourcesPage() {
             ) : (
               <>
                 <div style={{
-                  marginBottom: 'var(--op-space-large)',
+                  // marginBottom: 'var(--op-space-large)',
                   borderBottom: '1px solid',
                   borderColor: 'var(--op-color-border)',
                   padding: 'var(--op-space-large)'
@@ -495,6 +558,67 @@ export default function SourcesPage() {
                         </button>
                       </div>
                     </div>
+
+                    {/* Framer Sync Card - Website section only */}
+                    {activeSection === 'website' && (
+                      <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
+                        <div className="card-header">
+                          <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
+                            Sync from Framer
+                          </h2>
+                        </div>
+                        <div className="card-body">
+                          <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)', marginBottom: 'var(--op-space-medium)' }}>
+                            Automatically import all case studies, blog posts, and pages from your Framer website.
+                          </p>
+
+                          {framerSyncResult && (
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 'var(--op-space-small)',
+                                padding: 'var(--op-space-medium)',
+                                backgroundColor: framerSyncResult.success
+                                  ? 'var(--op-color-success-background)'
+                                  : 'var(--op-color-error-background)',
+                                border: `1px solid ${framerSyncResult.success
+                                  ? 'var(--op-color-success-border)'
+                                  : 'var(--op-color-error-border)'}`,
+                                borderRadius: 'var(--op-radius-small)',
+                                marginBottom: 'var(--op-space-medium)',
+                              }}
+                            >
+                              {framerSyncResult.success ? (
+                                <CheckIcon className="icon-sm" style={{ color: 'var(--op-color-success)', flexShrink: 0 }} />
+                              ) : (
+                                <AlertCircleIcon className="icon-sm" style={{ color: 'var(--op-color-error)', flexShrink: 0 }} />
+                              )}
+                              <span
+                                style={{
+                                  fontSize: 'var(--op-font-small)',
+                                  color: framerSyncResult.success
+                                    ? 'var(--op-color-success)'
+                                    : 'var(--op-color-error)',
+                                }}
+                              >
+                                {framerSyncResult.message}
+                              </span>
+                            </div>
+                          )}
+
+                          <button
+                            className="btn btn--secondary btn--large"
+                            onClick={handleFramerSync}
+                            disabled={isSyncingFramer}
+                            style={{ alignSelf: 'flex-start' }}
+                          >
+                            <RefreshIcon className="icon-sm" style={{ animation: isSyncingFramer ? 'spin 1s linear infinite' : 'none' }} />
+                            {isSyncingFramer ? 'Syncing...' : 'Sync from Framer'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -524,72 +648,132 @@ export default function SourcesPage() {
                         gap: 'var(--op-space-medium)',
                       }}
                     >
-                      {filteredSources.map((source) => (
-                        <div key={source.id} className="card">
-                          <div
-                            className="card-header"
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
-                              {source.title || 'Untitled Source'}
-                            </h3>
-                            <button
-                              className="btn btn--destructive btn--small btn--icon"
-                              onClick={() => handleDeleteSource(source.id)}
-                              title="Delete source"
-                              aria-label={`Delete ${source.title || 'source'}`}
-                            >
-                              <Delete02Icon className="icon-sm" />
-                            </button>
-                          </div>
-                          <div className="card-body">
-                            <p
-                              style={{
-                                fontSize: 'var(--op-font-small)',
-                                whiteSpace: 'pre-wrap',
-                                margin: 0,
-                                maxHeight: '200px',
-                                overflow: 'auto',
-                              }}
-                            >
-                              {source.content}
-                            </p>
+                      {filteredSources.map((source) => {
+                        const isExpanded = expandedSources.has(source.id)
+
+                        return (
+                          <div key={source.id} className="card">
                             <div
+                              className="card-header"
                               style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                marginTop: 'var(--op-space-small)',
+                                cursor: 'pointer',
+                                borderBottom: isExpanded ? '1px solid var(--op-color-border)' : 'none',
+                              }}
+                              onClick={() => toggleSourceExpanded(source.id)}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)', flex: 1, minWidth: 0 }}>
+
+                                <ArrowUp01Icon
+                                  className="icon-sm"
+                                  style={{
+                                    flexShrink: 0,
+                                    color: 'var(--op-color-neutral-on-plus-max)',
+                                    transition: 'transform 0.2s ease-in-out',
+                                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                                  }} />
+
+                                <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {source.title || 'Untitled Source'}
+                                </h3>
+                              </div>
+
+                            </div>
+
+                            {/* URL display */}
+                            {source.metadata?.url && (
+                              <div
+                                style={{
+                                  display: isExpanded ? 'block' : 'none',
+                                  padding: 'var(--op-space-medium)',
+                                  // paddingBottom: 'var(--op-space-small)',
+                                  borderBottom: isExpanded ? '1px solid var(--op-color-border)' : 'none',
+                                }}
+                              >
+                                <a
+                                  href={source.metadata.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 'var(--op-space-2x-small)',
+                                    fontSize: 'var(--op-font-small)',
+                                    color: 'var(--op-color-primary-base)',
+                                    textDecoration: 'none',
+                                    maxWidth: '100%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  <Link01Icon style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+                                  {source.metadata.url}
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Content - collapsible */}
+                            <div
+                              className="card-body"
+                              style={{
+                                display: isExpanded ? 'block' : 'none',
                               }}
                             >
                               <p
                                 style={{
-                                  fontSize: 'var(--op-font-x-small)',
+                                  fontSize: 'var(--op-font-small)',
+                                  whiteSpace: 'pre-wrap',
+                                  margin: 0,
+                                  maxHeight: '400px',
+                                  overflow: 'auto',
+                                }}
+                              >
+                                {source.content}
+                              </p>
+                            </div>
+
+                            {/* Footer with metadata */}
+                            <div
+                              style={{
+                                display: isExpanded ? 'flex' : 'none',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: 'var(--op-space-small) var(--op-space-medium)',
+                                borderTop: '1px solid var(--op-color-border)',
+                                backgroundColor: 'var(--op-color-neutral-plus-eight)',
+                              }}
+                            >
+
+                              <p
+                                style={{
+                                  fontSize: 'var(--op-font-small)',
                                   color: 'var(--op-color-neutral-on-plus-max)',
                                   margin: 0,
                                 }}
                               >
-                                Added {new Date(source.created_at).toLocaleDateString()}
+                                Added {new Date(source.created_at).toLocaleDateString()}{"  "}  |  {" "}
+                                {source.content.length.toLocaleString()} chars
+                                {source.metadata?.size && ` · ${(source.metadata.size / 1024).toFixed(1)} KB`}
                               </p>
-                              {source.metadata?.size && (
-                                <p
-                                  style={{
-                                    fontSize: 'var(--op-font-x-small)',
-                                    color: 'var(--op-color-neutral-on-plus-max)',
-                                    margin: 0,
-                                  }}
-                                >
-                                  {(source.metadata.size / 1024).toFixed(2)} KB
-                                </p>
-                              )}
+                              <button
+                                className="btn btn--destructive btn--small btn--icon"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteSource(source.id)
+                                }}
+                                title="Delete source"
+                                aria-label={`Delete ${source.title || 'source'}`}
+                              >
+                                <Delete02Icon className="icon-sm" />
+                              </button>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -681,14 +865,15 @@ export default function SourcesPage() {
                   )}
 
                   {workflowControls.selectedEdge && (
-                    <button
+                    <Button
+                      variant="icon"
                       className="btn btn--destructive"
                       style={{ width: '100%' }}
                       onClick={workflowControls.deleteEdge}
                     >
                       <Delete02Icon className="icon-sm" />
                       Delete Connection
-                    </button>
+                    </Button>
                   )}
 
                   <button

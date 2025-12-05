@@ -28,28 +28,40 @@ function DropdownMenuContent({
   className,
   sideOffset = 4,
   style,
+  container,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
+  container?: HTMLElement | null
+}) {
+  const content = (
+    <DropdownMenuPrimitive.Content
+      data-slot="dropdown-menu-content"
+      sideOffset={sideOffset}
+      style={{
+        zIndex: 9999,
+        minWidth: '200px',
+        overflow: 'hidden',
+        borderRadius: 'var(--op-radius-medium)',
+        border: '1px solid var(--op-color-border)',
+        backgroundColor: 'var(--op-color-background)',
+        padding: 'var(--op-space-small)',
+        color: 'var(--op-color-on-background)',
+        boxShadow: 'var(--op-shadow-medium)',
+        ...style,
+      }}
+      className={className}
+      {...props}
+    />
+  )
+
+  // When container is explicitly null, render without portal (for transformed parents)
+  if (container === null) {
+    return content
+  }
+
   return (
-    <DropdownMenuPrimitive.Portal>
-      <DropdownMenuPrimitive.Content
-        data-slot="dropdown-menu-content"
-        sideOffset={sideOffset}
-        style={{
-          zIndex: 1000,
-          minWidth: '200px',
-          overflow: 'hidden',
-          borderRadius: 'var(--op-radius-medium)',
-          border: '1px solid var(--op-color-border)',
-          backgroundColor: 'var(--op-color-background)',
-          padding: 'var(--op-space-small)',
-          color: 'var(--op-color-on-background)',
-          boxShadow: 'var(--op-shadow-medium)',
-          ...style,
-        }}
-        className={className}
-        {...props}
-      />
+    <DropdownMenuPrimitive.Portal container={container}>
+      {content}
     </DropdownMenuPrimitive.Portal>
   )
 }

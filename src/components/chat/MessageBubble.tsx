@@ -1,6 +1,6 @@
 'use client'
 
-import type { UIMessage } from '@ai-sdk/react'
+import { type UIMessage, isTextUIPart } from 'ai'
 
 interface MessageBubbleProps {
   message: UIMessage
@@ -9,7 +9,8 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, isLoading }: MessageBubbleProps) {
   const isUser = message.role === 'user'
-  const content = (message as any).content || ''
+  const textParts = message.parts.filter(isTextUIPart)
+  const content = textParts.map((part) => part.text).join('\n')
 
   return (
     <div

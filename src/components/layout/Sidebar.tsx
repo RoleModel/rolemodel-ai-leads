@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 const styles = {
   navSidebar: {
     '--_op-sidebar-background-color': 'var(--op-color-neutral-plus-seven)',
+    '--_op-sidebar-border-color': 'var(--op-color-border)',
     width: '260px',
     display: 'flex',
     flexDirection: 'column' as const,

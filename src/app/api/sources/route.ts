@@ -88,38 +88,128 @@ export async function POST(req: NextRequest) {
         if (response.ok) {
           const html = await response.text()
 
-          // Basic HTML to text conversion
-          // Remove script and style tags
-          let textContent = html.replace(
+          // Smart HTML content extraction
+          let workingHtml = html
+
+          // Remove script, style, noscript tags first
+          workingHtml = workingHtml.replace(
             /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
             ''
           )
-          textContent = textContent.replace(
+          workingHtml = workingHtml.replace(
             /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi,
             ''
           )
+          workingHtml = workingHtml.replace(
+            /<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi,
+            ''
+          )
 
-          // Remove HTML tags
-          textContent = textContent.replace(/<[^>]+>/g, ' ')
+          // Remove navigation, header, footer, aside elements (common non-content areas)
+          workingHtml = workingHtml.replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/gi, '')
+          workingHtml = workingHtml.replace(/<header\b[^>]*>[\s\S]*?<\/header>/gi, '')
+          workingHtml = workingHtml.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/gi, '')
+          workingHtml = workingHtml.replace(/<aside\b[^>]*>[\s\S]*?<\/aside>/gi, '')
+
+          // Remove common navigation/menu class patterns
+          workingHtml = workingHtml.replace(/<[^>]+(class|id)="[^"]*\b(nav|menu|sidebar|footer|header|breadcrumb|cookie|banner|popup|modal|advertisement|social-share)[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
+
+          // Try to extract content from semantic elements first
+          let mainContent = ''
+
+          // Priority 1: Look for <main> content
+          const mainMatch = workingHtml.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)
+          if (mainMatch && mainMatch[1]) {
+            mainContent = mainMatch[1]
+          }
+
+          // Priority 2: Look for <article> content
+          if (!mainContent) {
+            const articleMatch = workingHtml.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i)
+            if (articleMatch && articleMatch[1]) {
+              mainContent = articleMatch[1]
+            }
+          }
+
+          // Priority 3: Look for common content container classes
+          if (!mainContent) {
+            const contentPatterns = [
+              /<div[^>]+class="[^"]*\b(content|main-content|page-content|post-content|entry-content|article-content|body-content)[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+              /<section[^>]+class="[^"]*\b(content|main|hero|intro)[^"]*"[^>]*>([\s\S]*?)<\/section>/i,
+            ]
+            for (const pattern of contentPatterns) {
+              const match = workingHtml.match(pattern)
+              if (match && match[2]) {
+                mainContent = match[2]
+                break
+              }
+            }
+          }
+
+          // Fallback: use the cleaned working HTML
+          if (!mainContent) {
+            mainContent = workingHtml
+          }
+
+          // Now extract text from the content
+          let textContent = mainContent.replace(/<[^>]+>/g, ' ')
 
           // Decode HTML entities
+          textContent = textContent.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+          textContent = textContent.replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
           textContent = textContent.replace(/&nbsp;/g, ' ')
           textContent = textContent.replace(/&amp;/g, '&')
           textContent = textContent.replace(/&lt;/g, '<')
           textContent = textContent.replace(/&gt;/g, '>')
           textContent = textContent.replace(/&quot;/g, '"')
+          textContent = textContent.replace(/&apos;/g, "'")
 
-          // Clean up whitespace
+          // Clean up whitespace - collapse multiple spaces/newlines
           textContent = textContent.replace(/\s+/g, ' ').trim()
+
+          // Remove common noise patterns
+          textContent = textContent.replace(/Skip to (main )?content/gi, '')
+          textContent = textContent.replace(/Cookie (Policy|Consent|Notice)/gi, '')
+          textContent = textContent.replace(/Accept (All )?Cookies/gi, '')
+          textContent = textContent.replace(/Privacy Policy/gi, '')
+          textContent = textContent.replace(/Terms (of|and) (Service|Use)/gi, '')
+          textContent = textContent.trim()
 
           if (textContent && textContent.length > 100) {
             finalContent = textContent
+
             // Try to extract title from HTML if not provided
             if (!finalTitle) {
-              const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-              if (titleMatch && titleMatch[1]) {
-                finalTitle = titleMatch[1].trim()
+              // First try og:title meta tag (often cleaner)
+              const ogTitleMatch = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i)
+              if (ogTitleMatch && ogTitleMatch[1]) {
+                finalTitle = ogTitleMatch[1].trim()
+              } else {
+                // Fallback to <title> tag
+                const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+                if (titleMatch && titleMatch[1]) {
+                  const extractedTitle = titleMatch[1].trim()
+                  // Clean up repetitive title patterns like "Services | Company Services | Company"
+                  // Take just the first meaningful part
+                  const titleParts = extractedTitle.split(/\s*[|–—-]\s*/)
+                  if (titleParts.length > 1) {
+                    // Use the first part that's not just the company name
+                    finalTitle = titleParts[0].trim()
+                  } else {
+                    finalTitle = extractedTitle
+                  }
+                }
               }
+            }
+
+            // Also try to get meta description for better context
+            const metaDescMatch = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i)
+            const ogDescMatch = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i)
+            const metaDescription = ogDescMatch?.[1] || metaDescMatch?.[1]
+
+            if (metaDescription && metaDescription.length > 50) {
+              // Prepend meta description as it's often a good summary
+              finalContent = metaDescription.trim() + '\n\n' + finalContent
             }
           }
         }

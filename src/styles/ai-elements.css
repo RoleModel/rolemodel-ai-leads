@@ -5,7 +5,106 @@
   --xy-connectionline-stroke-default: var(--op-color-primary-base);
 }
 
-/* Message alignment styles */
+/* ==========================================================================
+   Chat Container
+   Shared wrapper for chat interfaces
+   ========================================================================== */
+
+.chat-container {
+  background: var(--op-color-background);
+  border-radius: var(--op-radius-large);
+  border: var(--op-border-width) solid var(--op-color-border);
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: end;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--op-breakpoint-large);
+}
+
+.chat-container--full-height {
+  height: 90vh;
+}
+
+.chat-container--fixed-height {
+  max-height: 600px;
+}
+
+/* ==========================================================================
+   Conversation Wrapper
+   ========================================================================== */
+
+.conversation-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-small);
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+}
+/* 
+.conversation-wrapper--scrollable {
+  max-height: 600px;
+} */
+
+.conversation-wrapper--flex {
+  flex: 1;
+}
+
+/* ==========================================================================
+   Message Avatar
+   ========================================================================== */
+
+.message-avatar {
+  width: calc(var(--op-space-scale-unit) * 3.2);
+  height: calc(var(--op-space-scale-unit) * 3.2);
+  border-radius: var(--op-radius-circle);
+  background-color: var(--op-color-primary);
+  color: var(--op-color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-semi-bold);
+  padding: 0 !important;
+}
+
+.message-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--op-radius-circle);
+}
+
+/* ==========================================================================
+   Prompt Input Footer
+   ========================================================================== */
+
+.prompt-input-wrapper {
+  padding: var(--op-space-medium);
+  position: relative;
+}
+
+/* ==========================================================================
+   Suggestions Container
+   ========================================================================== */
+
+.suggestions-container {
+  padding: 0 var(--op-space-medium);
+  margin-bottom: var(--op-space-small);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--op-space-x-small);
+  padding-bottom: var(--op-space-x-small);
+}
+
+/* ==========================================================================
+   Message alignment styles (existing)
+   ========================================================================== */
+
 .group.is-user {
   justify-content: flex-end;
   max-width: 90%;
@@ -17,6 +116,7 @@
   flex-direction: column;
   max-width: 90%;
   margin-right: auto;
+  /* font-family: var(--font-geist-mono); */
 }
 
 /* Message content styles using Optics variables */
@@ -29,7 +129,14 @@
 
 .group.is-assistant .flex.w-fit,
 .group[class*='is-assistant'] > div {
+  padding: 0.25lh var(--op-space-small) var(--op-space-small) var(--op-space-small) !important;
   background-color: 'transparent';
+  color: var(--op-color-on-background);
+}
+
+.group[class*='is-assistant'] > .message-avatar {
+  padding: 0 !important;
+  background: 'transparent';
   color: var(--op-color-on-background);
 }
 
@@ -52,11 +159,14 @@
 .message-response ul,
 .message-response ol,
 .message-response li {
-  line-height: 1.5;
+  line-height: var(--op-line-height-base);
   font-size: inherit !important;
 }
 
-/* Override Tailwind classes with Optics variables */
+/* ==========================================================================
+   Override Tailwind classes with Optics variables
+   ========================================================================== */
+
 .bg-primary {
   background-color: var(--op-color-primary-base) !important;
 }
@@ -73,8 +183,12 @@
   color: var(--op-color-on-background) !important;
 }
 
+/* ==========================================================================
+   React Flow Handles
+   ========================================================================== */
+
 .react-flow__handle {
-  width: 2px;
+  width: var(--op-border-width-large);
   background-color: var(--op-color-neutral-plus-four) !important;
   border-color: var(--op-color-neutral-plus-four) !important;
   z-index: 1000;

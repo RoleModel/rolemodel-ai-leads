@@ -13,7 +13,15 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    className={cn('relative flex-1 overflow-y-hidden', className)}
+    style={
+      {
+        overscrollBehavior: 'contain',
+        position: 'relative',
+        flex: 1,
+        overflowY: 'hidden'
+      }
+    }
+    className={cn(className)}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -69,7 +77,7 @@ export const ConversationEmptyState = ({
       <>
         {icon && <div
           style={{
-            color: 'var(--op-color-muted-foreground)',
+            color: 'var(--op-color-on-background)',
           }}
         >{icon}</div>}
         <div

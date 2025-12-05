@@ -15,6 +15,9 @@ interface LeadsPageWithProviderProps {
   editMode?: boolean
   loadFromApi?: boolean
   isEmbed?: boolean
+  visitorName?: string
+  visitorEmail?: string
+  conversationId?: string
 }
 
 function LeadsPageLoader({
@@ -23,6 +26,9 @@ function LeadsPageLoader({
   editMode,
   loadFromApi,
   isEmbed,
+  visitorName,
+  visitorEmail,
+  conversationId,
 }: LeadsPageWithProviderProps) {
   const { updateSettings, isLoading } = useLeadsPageSettings()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -42,8 +48,6 @@ function LeadsPageLoader({
             pageDescription:
               data.settings.page_description ||
               'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
-            favicon: data.settings.favicon || '',
-            logo: data.settings.logo || '',
             aiInstructions: data.settings.ai_instructions || '',
           })
         }
@@ -75,6 +79,9 @@ function LeadsPageLoader({
       theme={theme}
       onThemeChange={setTheme}
       isEmbed={isEmbed}
+      visitorName={visitorName}
+      visitorEmail={visitorEmail}
+      initialConversationId={conversationId}
     />
   )
 }

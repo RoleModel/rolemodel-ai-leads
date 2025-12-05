@@ -23,11 +23,16 @@ interface Lead {
   visitor_email: string | null
   created_at: string
   summary: LeadSummaryData
+  is_archived: boolean | null
+  archived_at: string | null
 }
+
+type ArchiveFilter = 'active' | 'archived' | 'all'
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('active')
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0],
@@ -36,8 +41,10 @@ export default function LeadsPage() {
   const loadLeads = useCallback(async () => {
     setIsLoading(true)
     try {
+      const archiveParam =
+        archiveFilter === 'archived' ? 'true' : archiveFilter === 'all' ? 'all' : 'false'
       const res = await fetch(
-        `/api/leads?startDate=${dateRange.start}&endDate=${dateRange.end}`
+        `/api/leads?startDate=${dateRange.start}&endDate=${dateRange.end}&archived=${archiveParam}`
       )
       const data = await res.json()
       setLeads(data.leads || [])
@@ -46,7 +53,7 @@ export default function LeadsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [dateRange])
+  }, [dateRange, archiveFilter])
 
   useEffect(() => {
     loadLeads()
@@ -105,51 +112,37 @@ export default function LeadsPage() {
     }
   }
 
+  async function handleArchive(leadId: string, archive: boolean) {
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: leadId, is_archived: archive }),
+      })
+      if (res.ok) {
+        loadLeads()
+      }
+    } catch (error) {
+      console.error('Error archiving lead:', error)
+    }
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div className="admin-page">
       <TopBar />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="admin-page__body">
         <Suspense fallback={<div>Loading...</div>}>
           <NavigationSidebar />
         </Suspense>
 
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            height: '100%',
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              padding: 'var(--op-space-large)',
-              borderBottom: '1px solid var(--op-color-border)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 'var(--op-space-medium)',
-              }}
-            >
+        <main className="admin-page__main">
+          <header className="admin-header">
+            <div className="admin-header__top">
               <div>
-                <h1
-                  style={{
-                    fontSize: 'var(--op-font-x-large)',
-                    fontWeight: 'var(--op-font-weight-bold)',
-                    margin: 0,
-                  }}
-                >
-                  Leads
-                </h1>
+                <h1 className="admin-header__title">Leads</h1>
               </div>
-              <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
+              <div className="admin-header__actions">
                 <Button variant="ghosticon" onClick={loadLeads}>
                   <HugeiconsIcon icon={RefreshIcon} size={20} />
                 </Button>
@@ -160,41 +153,18 @@ export default function LeadsPage() {
               </div>
             </div>
 
-            {/* Filters */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--op-space-medium)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--op-space-x-small)',
-                }}
-              >
+            <div className="admin-filters">
+              <div className="admin-filters__group">
                 <HugeiconsIcon
                   icon={FilterIcon}
                   size={16}
-                  style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                  className="admin-list-item__icon"
                 />
-                <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 600 }}>
+                <span className="admin-filters__label admin-filters__label--bold">
                   Filters
                 </span>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--op-space-small)',
-                  padding: 'var(--op-space-x-small) var(--op-space-small)',
-                  border: '1px solid var(--op-color-border)',
-                  borderRadius: 'var(--op-radius-medium)',
-                  backgroundColor: 'var(--op-color-background)',
-                }}
-              >
+              <div className="admin-filters__date-picker">
                 <HugeiconsIcon icon={Calendar03Icon} size={16} />
                 <input
                   type="date"
@@ -202,90 +172,69 @@ export default function LeadsPage() {
                   onChange={(e) =>
                     setDateRange((prev) => ({ ...prev, start: e.target.value }))
                   }
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    border: 'none',
-                    background: 'transparent',
-                    color: 'var(--op-color-on-background)',
-                  }}
+                  className="admin-filters__date-input"
                 />
-                <span style={{ fontSize: 'var(--op-font-small)' }}>to</span>
+                <span className="admin-filters__separator">to</span>
                 <input
                   type="date"
                   value={dateRange.end}
                   onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-                  style={{
-                    fontSize: 'var(--op-font-small)',
-                    border: 'none',
-                    background: 'transparent',
-                    color: 'var(--op-color-on-background)',
-                  }}
+                  className="admin-filters__date-input"
                 />
               </div>
-            </div>
-          </div>
 
-          {/* Leads List */}
+              <div className="admin-filters__group">
+                <span className="admin-filters__label">Show:</span>
+                <div className="admin-filters__buttons">
+                  {(['active', 'archived', 'all'] as const).map((filter) => (
+                    <Button
+                      key={filter}
+                      variant={archiveFilter === filter ? 'primary' : 'secondary'}
+                      size="sm"
+                      onClick={() => setArchiveFilter(filter)}
+                      className="admin-filters__button"
+                    >
+                      {filter}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </header>
+
           <ScrollArea style={{ flex: 1, minHeight: 0 }}>
-            <div style={{ padding: 'var(--op-space-large)' }}>
+            <div className="admin-content">
               {isLoading ? (
-                <p
-                  style={{
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                    textAlign: 'center',
-                    padding: 'var(--op-space-x-large)',
-                  }}
-                >
-                  Loading leads...
-                </p>
+                <p className="admin-loading">Loading leads...</p>
               ) : leads.length === 0 ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 'var(--op-space-x-large)',
-                    textAlign: 'center',
-                    color: 'var(--op-color-neutral-on-plus-max)',
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 'var(--op-font-medium)',
-                      fontWeight: 600,
-                    }}
-                  >
+                <div className="admin-empty">
+                  <p className="admin-empty__title">
                     No leads found for the selected date range
                   </p>
-                  <p
-                    style={{
-                      margin: 'var(--op-space-small) 0 0 0',
-                      fontSize: 'var(--op-font-small)',
-                    }}
-                  >
+                  <p className="admin-empty__description">
                     Try adjusting your date range or check back later
                   </p>
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--op-space-large)',
-                  }}
-                >
+                <div className="admin-content__list admin-content__list--large-gap">
                   {leads.map((lead) => (
-                    <LeadSummary
+                    <div
                       key={lead.id}
-                      data={lead.summary}
-                      visitorName={lead.visitor_name || lead.visitor_email || 'Anonymous'}
-                      visitorDate={new Date(lead.created_at).toLocaleDateString()}
-                      onEmailShare={() => handleEmailShare(lead)}
-                      onSlackShare={() => handleSlackShare(lead)}
-                      variant="full"
-                    />
+                      className={`admin-card-wrapper ${
+                        lead.is_archived ? 'admin-card-wrapper--archived' : ''
+                      }`}
+                    >
+                      <LeadSummary
+                        data={lead.summary}
+                        visitorName={lead.visitor_name || lead.visitor_email || 'Anonymous'}
+                        visitorDate={new Date(lead.created_at).toLocaleDateString()}
+                        onEmailShare={() => handleEmailShare(lead)}
+                        onSlackShare={() => handleSlackShare(lead)}
+                        onArchive={() => handleArchive(lead.id, !lead.is_archived)}
+                        isArchived={lead.is_archived ?? false}
+                        variant="full"
+                      />
+                    </div>
                   ))}
                 </div>
               )}

@@ -1,12 +1,21 @@
 'use client'
 
-import { Calendar03Icon, Mail01Icon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
+import { Archive01Icon, ChatIcon, Mail01Icon, RotateClockwiseIcon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
 
 import { Button } from '@/components/ui/button'
+import { decodeHtmlEntities } from '@/lib/utils'
 
-import { Plan, PlanHeader, PlanContent, PlanFooter } from '@/components/ai-elements/plan'
+import { Plan, PlanHeader, PlanContent, PlanFooter, PlanTrigger } from '@/components/ai-elements/plan'
+import './LeadSummary.css'
+
+export interface Recommendation {
+  title: string
+  description?: string
+  url?: string
+  type?: 'case-study' | 'guide' | 'article' | 'tool' | 'other'
+}
 
 export interface LeadSummaryData {
   // BANT Framework
@@ -41,8 +50,9 @@ export interface LeadSummaryData {
     email?: string
     phone?: string
   }
-  qualificationScore?: number // 0-100
+  alignmentScore?: number // 0-100
   nextSteps?: string[]
+  recommendations?: Recommendation[]
 }
 
 interface LeadSummaryProps {
@@ -52,109 +62,26 @@ interface LeadSummaryProps {
   onEmailShare?: () => void
   onSlackShare?: () => void
   onScheduleConversation?: () => void
+  onArchive?: () => void
+  isArchived?: boolean
   variant?: 'full' | 'compact'
   animated?: boolean
 }
 
-const styles = {
-  container: {
-    width: '100%',
-    backgroundColor: 'var(--op-color-background)',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 'var(--op-space-medium)',
-  },
-  title: {
-    fontSize: 'var(--op-font-small)',
-    fontWeight: 600,
-    margin: 0,
-    textAlign: 'left' as const,
-  },
-  subtitle: {
-    fontSize: 'var(--op-font-small)',
-    color: 'var(--op-color-neutral-on-plus-max)',
-    marginBottom: 'var(--op-space-large)',
-    textAlign: 'left' as const,
-    lineHeight: 1.6,
-    margin: '0 0 var(--op-space-x-large) 0',
-  },
-  actions: {
-    display: 'flex',
-    gap: 'var(--op-space-small)',
-  },
-  section: {
-    marginBottom: 'var(--op-space-medium)',
-  },
-  sectionTitle: {
-    fontSize: 'var(--op-font-small)',
-    fontWeight: 600,
-    marginBottom: 'var(--op-space-small)',
-    textAlign: 'left' as const,
-  },
-  field: {
-    marginBottom: 'var(--op-space-small)',
-  },
-  label: {
-    fontSize: 'var(--op-font-small)',
-    fontWeight: 500,
-    color: 'var(--op-color-on-background)',
-    opacity: 0.7,
-    textAlign: 'left' as const,
-  },
-  value: {
-    fontSize: 'var(--op-font-small)',
-    color: 'var(--op-color-on-background)',
-    margin: 0,
-    textAlign: 'left' as const,
-    lineHeight: 1.6,
-  },
-  list: {
-    fontSize: 'var(--op-font-small)',
-    margin: 0,
-    paddingLeft: 'var(--op-space-large)',
-    textAlign: 'left' as const,
-    lineHeight: 2,
-  },
-  listItem: {
-    fontSize: 'var(--op-font-small)',
-    textAlign: 'left' as const,
-  },
-  scoreContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--op-space-small)',
-  },
-  scoreBar: {
-    flex: 1,
-    height: '8px',
-    backgroundColor: 'var(--op-color-neutral-plus-six)',
-    borderRadius: 'var(--op-radius-pill)',
-    overflow: 'hidden',
-  },
-  scoreLabel: {
-    fontSize: 'var(--op-font-small)',
-    fontWeight: 600,
-  },
-  contentContainer: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 'var(--op-space-large)',
-  },
-  shareActionsContainer: {
-    marginTop: 'var(--op-space-x-large)',
-    paddingTop: 'var(--op-space-x-large)',
-    borderTop: '1px solid var(--op-color-border)',
-  },
-  shareButtonsGroup: {
-    display: 'flex',
-    gap: 'var(--op-space-small)',
-  },
-  emailButton: {
-    flex: 1,
-  },
+function getScoreClass(score: number): string {
+  if (score >= 75) return 'lead-summary__score-fill--high'
+  if (score >= 50) return 'lead-summary__score-fill--medium'
+  return 'lead-summary__score-fill--low'
+}
+
+function getRecommendationTypeLabel(type: Recommendation['type']): string {
+  switch (type) {
+    case 'case-study': return 'Case Study'
+    case 'guide': return 'Guide'
+    case 'article': return 'Article'
+    case 'tool': return 'Tool'
+    default: return 'Resource'
+  }
 }
 
 export function LeadSummary({
@@ -164,6 +91,8 @@ export function LeadSummary({
   onEmailShare,
   onSlackShare,
   onScheduleConversation,
+  onArchive,
+  isArchived = false,
   animated = false,
 }: LeadSummaryProps) {
   const containerVariants = animated
@@ -189,7 +118,7 @@ export function LeadSummary({
 
   return (
     <Container
-      style={styles.container}
+      className="lead-summary"
       variants={containerVariants}
       initial={animated ? 'hidden' : undefined}
       animate={animated ? 'visible' : undefined}
@@ -197,66 +126,194 @@ export function LeadSummary({
       <Plan>
         <PlanHeader>
           <div>
-            <h3 style={{ fontSize: 'var(--op-font-large)', fontWeight: 600, margin: 0 }}>
+            <h3 className="lead-summary__header-title">
               {visitorName && visitorName !== 'null' ? visitorName : 'Conversation Summary'}
               {visitorName && visitorName !== 'null' && visitorDate && (
-                <span style={{ fontWeight: 400, fontSize: 'var(--op-font-medium)', color: 'var(--op-color-neutral-on-plus-max)', marginLeft: 'var(--op-space-small)' }}>
-                  · {visitorDate}
-                </span>
+                <span className="lead-summary__header-date">· {visitorDate}</span>
               )}
             </h3>
-            <p style={{ fontSize: 'var(--op-font-medium)', color: 'var(--op-color-neutral-on-plus-max)', margin: 'var(--op-space-x-small) 0 0 0', lineHeight: 1.6 }}>
-              Based on our discussion, here&apos;s what we covered and the recommended next steps.
+            <p className="lead-summary__header-subtitle">
+              Conversation summary
             </p>
           </div>
+          <PlanTrigger />
         </PlanHeader>
-
         <PlanContent>
-          {/* Qualification Score */}
-          {data.qualificationScore !== undefined && (
-            <Item variants={itemVariants}>
-              <h4 style={styles.sectionTitle}>Qualification Score</h4>
-              <div style={styles.scoreContainer}>
-                <div style={styles.scoreBar}>
+          {/* Alignment Score */}
+          {data.alignmentScore !== undefined && (
+            <Item className="lead-summary_section lead-summary__alignment" variants={itemVariants} >
+              <h4 className="lead-summary__section-title">Alignment</h4>
+              <div className="lead-summary__score-container">
+                <div className="lead-summary__score-bar">
                   <motion.div
+                    className={`lead-summary__score-fill ${getScoreClass(data.alignmentScore)}`}
                     initial={animated ? { width: 0 } : undefined}
-                    animate={animated ? { width: `${data.qualificationScore}%` } : undefined}
+                    animate={animated ? { width: `${data.alignmentScore}%` } : undefined}
                     transition={animated ? { duration: 0.8, delay: 0.2 } : undefined}
-                    style={{
-                      width: animated ? undefined : `${data.qualificationScore}%`,
-                      height: '100%',
-                      backgroundColor:
-                        data.qualificationScore >= 75
-                          ? 'var(--op-color-alerts-notice-base)'
-                          : data.qualificationScore >= 50
-                            ? 'var(--op-color-alerts-warning-base)'
-                            : 'var(--op-color-alerts-danger-base)',
-                      borderRadius: 'var(--op-radius-pill)',
-                    }}
+                    style={animated ? undefined : { width: `${data.alignmentScore}%` }}
                   />
                 </div>
-                <span style={styles.scoreLabel}>{data.qualificationScore}%</span>
+                <span className="lead-summary__score-label">{data.alignmentScore}%</span>
               </div>
+            </Item>
+          )}
+
+          {/* Company Info */}
+          {(data.companyInfo?.name || data.companyInfo?.size || data.companyInfo?.industry) && (
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Company</h4>
+              {data.companyInfo.name && (
+                <p className="lead-summary__value">{data.companyInfo.name}</p>
+              )}
+              {(data.companyInfo.industry || data.companyInfo.size) && (
+                <p className="lead-summary__value lead-summary__value--muted">
+                  {[data.companyInfo.industry, data.companyInfo.size].filter(Boolean).join(' · ')}
+                </p>
+              )}
+            </Item>
+          )}
+
+
+          {/* Budget */}
+          {(data.budget?.range || data.budget?.timeline || data.budget?.approved !== undefined) && (
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Budget</h4>
+              {data.budget.range && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Range</span>
+                  <p className="lead-summary__value">{data.budget.range}</p>
+                </div>
+              )}
+              {data.budget.timeline && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Budget Timeline</span>
+                  <p className="lead-summary__value">{data.budget.timeline}</p>
+                </div>
+              )}
+              {data.budget.approved !== undefined && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Approved</span>
+                  <p className="lead-summary__value">{data.budget.approved ? 'Yes' : 'No'}</p>
+                </div>
+              )}
+            </Item>
+          )}
+
+          {/* Need / Problem */}
+          {(data.need?.problem || data.need?.currentSolution || (data.need?.painPoints && data.need.painPoints.length > 0)) && (
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Need</h4>
+              {data.need.problem && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Problem</span>
+                  <p className="lead-summary__value">{data.need.problem}</p>
+                </div>
+              )}
+              {data.need.currentSolution && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Current Solution</span>
+                  <p className="lead-summary__value">{data.need.currentSolution}</p>
+                </div>
+              )}
+              {data.need.painPoints && data.need.painPoints.length > 0 && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Pain Points</span>
+                  <ul className="lead-summary__list">
+                    {data.need.painPoints.map((point, i) => (
+                      <li key={i} className="lead-summary__list-item">{point}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Item>
+          )}
+
+          {/* Authority */}
+          {(data.authority?.role || data.authority?.decisionMaker !== undefined || (data.authority?.stakeholders && data.authority.stakeholders.length > 0)) && (
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Authority</h4>
+              {data.authority.role && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Role</span>
+                  <p className="lead-summary__value">{data.authority.role}</p>
+                </div>
+              )}
+              {data.authority.decisionMaker !== undefined && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Decision Maker</span>
+                  <p className="lead-summary__value">{data.authority.decisionMaker ? 'Yes' : 'No'}</p>
+                </div>
+              )}
+              {data.authority.stakeholders && data.authority.stakeholders.length > 0 && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Other Stakeholders</span>
+                  <p className="lead-summary__value">{data.authority.stakeholders.join(', ')}</p>
+                </div>
+              )}
             </Item>
           )}
 
           {/* Timeline */}
           {(data.timeline?.urgency || data.timeline?.implementationDate) && (
-            <Item variants={itemVariants}>
-              <h4 style={styles.sectionTitle}>Timeline</h4>
-              <p style={styles.value}>
-                {data.timeline.implementationDate
-                  ? `Looking to have a solution in place ${data.timeline.implementationDate}.`
-                  : data.timeline.urgency}
-              </p>
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Timeline</h4>
+              {data.timeline.urgency && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Urgency</span>
+                  <p className="lead-summary__value">{data.timeline.urgency}</p>
+                </div>
+              )}
+              {data.timeline.implementationDate && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Target Date</span>
+                  <p className="lead-summary__value">{data.timeline.implementationDate}</p>
+                </div>
+              )}
+            </Item>
+          )}
+
+          {/* Recommendations */}
+          {data.recommendations && data.recommendations.length > 0 && (
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Recommended Resources</h4>
+              <div className="lead-summary__recommendations">
+                {data.recommendations.map((rec, i) => (
+                  <div key={i} className="lead-summary__recommendation-card">
+                    <div className="lead-summary__recommendation-content">
+                      {rec.type && (
+                        <span className="lead-summary__recommendation-type">
+                          {getRecommendationTypeLabel(rec.type)}
+                        </span>
+                      )}
+                      {rec.url ? (
+                        <a
+                          href={rec.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="lead-summary__recommendation-title"
+                        >
+                          {decodeHtmlEntities(rec.title)}
+                        </a>
+                      ) : (
+                        <span className="lead-summary__recommendation-title lead-summary__recommendation-title--static">
+                          {decodeHtmlEntities(rec.title)}
+                        </span>
+                      )}
+                      {rec.description && (
+                        <p className="lead-summary__recommendation-description">{decodeHtmlEntities(rec.description)}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </Item>
           )}
 
           {/* Next Steps */}
           {data.nextSteps && data.nextSteps.length > 0 && (
-            <Item variants={itemVariants}>
-              <h4 style={styles.sectionTitle}>Next Steps</h4>
-              <ul style={styles.list}>
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Next Steps</h4>
+              <ul className="lead-summary__list">
                 {data.nextSteps.map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
@@ -267,21 +324,17 @@ export function LeadSummary({
 
         {/* Share Actions */}
         <PlanFooter>
-          {(onEmailShare || onSlackShare || onScheduleConversation) && (
-            <div style={styles.shareButtonsGroup}>
+          {(onEmailShare || onSlackShare || onScheduleConversation || onArchive) && (
+            <div className="lead-summary__share-actions">
               {onEmailShare && (
-                <Button variant="secondary" onClick={onEmailShare} style={styles.emailButton}>
+                <Button variant="secondary" onClick={onEmailShare} className="lead-summary__share-button">
                   <HugeiconsIcon icon={Mail01Icon} size={18} />
-                  <span>Email me this summary</span>
+                  <span>Email this summary</span>
                 </Button>
               )}
               {onScheduleConversation && (
-                <Button
-                  variant="secondary"
-                  onClick={onScheduleConversation}
-                  style={styles.emailButton}
-                >
-                  <HugeiconsIcon icon={Calendar03Icon} size={18} />
+                <Button variant="secondary" onClick={onScheduleConversation} className="lead-summary__share-button">
+                  <HugeiconsIcon icon={ChatIcon} size={18} />
                   <span>Schedule a conversation</span>
                 </Button>
               )}
@@ -291,10 +344,15 @@ export function LeadSummary({
                   <span>Share to Slack</span>
                 </Button>
               )}
+              {onArchive && (
+                <Button variant="secondary" onClick={onArchive} title={isArchived ? 'Restore' : 'Archive'}>
+                  <HugeiconsIcon icon={isArchived ? RotateClockwiseIcon : Archive01Icon} size={18} />
+                </Button>
+              )}
             </div>
           )}
         </PlanFooter>
       </Plan>
-    </Container >
+    </Container>
   )
 }

@@ -1,9 +1,8 @@
 'use client'
-import { ArrowLeft01Icon, Image01Icon } from '@hugeicons-pro/core-stroke-standard'
+import { ArrowLeft01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,7 +32,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 'var(--op-space-medium)',
-    marginBottom: 'var(--op-space-large)',
+    marginBottom: 'var(--op-space-medium)',
     padding: '0 var(--op-space-medium)',
   },
   navBackBtn: {
@@ -75,24 +74,6 @@ const styles = {
     justifyContent: 'space-between',
     gap: 'var(--op-space-small)',
   },
-  inputGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--op-space-small)',
-  },
-  logoPreview: {
-    width: 172,
-    height: 60,
-    borderRadius: 'var(--op-radius-medium)',
-    border: '1px solid var(--op-color-border)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '12px',
-    background: 'var(--op-color-background)',
-    fontSize: 'var(--op-font-x-small)',
-    fontWeight: 600,
-  },
   sidebarFooter: {
     marginTop: 'auto',
     paddingTop: 'var(--op-space-large)',
@@ -107,52 +88,8 @@ const styles = {
 export function EditorSidebar() {
   const router = useRouter()
   const { settings, updateSettings } = useLeadsPageSettings()
-  const [faviconPreview, setFaviconPreview] = useState<string>('')
-  const [logoPreview, setLogoPreview] = useState<string>('')
   const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [showDeployPopover, setShowDeployPopover] = useState(false)
-
-  const logoInputRef = useRef<HTMLInputElement>(null)
-  const faviconInputRef = useRef<HTMLInputElement>(null)
-
-  // Load settings on mount
-  useEffect(() => {
-    async function loadSettings() {
-      try {
-        const response = await fetch(
-          `/api/leads-page-settings?chatbotId=${DEFAULT_CHATBOT_ID}`
-        )
-        const data = await response.json()
-
-        if (data.settings) {
-          updateSettings({
-            pageTitle: data.settings.page_title || 'Leads page',
-            pageDescription:
-              data.settings.page_description ||
-              'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
-            aiInstructions: data.settings.ai_instructions || '',
-            favicon: data.settings.favicon || '',
-            logo: data.settings.logo || '',
-          })
-
-          if (data.settings.favicon) {
-            setFaviconPreview(data.settings.favicon)
-          }
-
-          if (data.settings.logo) {
-            setLogoPreview(data.settings.logo)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load settings:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadSettings()
-  }, [updateSettings])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -164,9 +101,10 @@ export function EditorSidebar() {
           chatbotId: DEFAULT_CHATBOT_ID,
           pageTitle: settings.pageTitle,
           pageDescription: settings.pageDescription,
-          favicon: faviconPreview,
-          logo: logoPreview,
+          introText: settings.introText,
+          timeEstimate: settings.timeEstimate,
           aiInstructions: settings.aiInstructions,
+          calendlyUrl: settings.calendlyUrl,
         }),
       })
 
@@ -193,46 +131,6 @@ export function EditorSidebar() {
   data-chatbot-id="${DEFAULT_CHATBOT_ID}"
   data-container-id="rolemodel-widget">
 </script>`
-
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const dataUrl = event.target.result as string
-          setLogoPreview(dataUrl)
-          updateSettings({ logo: dataUrl })
-        }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const dataUrl = event.target.result as string
-          setFaviconPreview(dataUrl)
-          updateSettings({ favicon: dataUrl })
-        }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <aside style={styles.editorSidebar}>
-        <div style={{ padding: 'var(--op-space-large)', textAlign: 'center' }}>
-          Loading settings...
-        </div>
-      </aside>
-    )
-  }
 
   return (
     <aside style={styles.editorSidebar}>
@@ -421,173 +319,94 @@ export function EditorSidebar() {
 
       <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         <div style={styles.settingsForm}>
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>Page title</Label>
-            <Input
-              value={settings.pageTitle}
-              onChange={(e) => updateSettings({ pageTitle: e.target.value })}
-            />
-          </div>
-
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>Page description</Label>
-            <Input
-              value={settings.pageDescription}
-              onChange={(e) => updateSettings({ pageDescription: e.target.value })}
-              placeholder="Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders."
-            />
-          </div>
-
-
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>Logo</Label>
-            <div style={styles.inputGroup}>
-              <div
-                style={{
-                  ...styles.logoPreview,
-                  backgroundColor: logoPreview
-                    ? 'transparent'
-                    : 'var(--op-color-background)',
-                  overflow: 'hidden',
-                }}
-              >
-                {logoPreview ? (
-                  <Image src={logoPreview} alt="Logo preview" width={160} height={48} />
-                ) : (
-                  'RoleModel'
-                )}
+              <div style={styles.formSection}>
+                <ModelSelector
+                  label="AI Model"
+                  value={settings.model || 'gpt-4o-mini'}
+                  onChange={(model) => updateSettings({ model })}
+                />
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    margin: 'var(--op-space-x-small) 0 0 0',
+                  }}
+                >
+                  Select the AI model to power your conversations
+                </p>
               </div>
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                style={{ display: 'none' }}
-              />
-              <Button onClick={() => logoInputRef.current?.click()} variant="secondary">
-                <HugeiconsIcon icon={Image01Icon} size={16} />
-                {settings.logo ? 'Change image' : 'Upload image'}
-              </Button>
-            </div>
-          </div>
 
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>Avatar Icon</Label>
-            <p
-              style={{
-                fontSize: 'var(--op-font-x-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                margin: '0 0 var(--op-space-x-small) 0',
-              }}
-            >
-              Shown next to AI messages in the chat
-            </p>
-            <div style={styles.inputGroup}>
-              <div
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 'var(--op-radius-medium)',
-                  backgroundColor: faviconPreview
-                    ? 'transparent'
-                    : 'var(--op-color-neutral-plus-seven)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  border: '1px solid var(--op-color-border)',
-                }}
-              >
-                {faviconPreview ? (
-                  <Image src={faviconPreview} alt="Avatar preview" width={48} height={48} style={{ objectFit: 'cover' }} />
-                ) : (
-                  <span style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>AI</span>
-                )}
+              <div style={styles.formSection}>
+                <Label style={{ fontSize: 'var(--op-font-small)' }}>Calendly URL</Label>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    margin: '0 0 var(--op-space-x-small) 0',
+                  }}
+                >
+                  Link for scheduling calls after qualification
+                </p>
+                <Input
+                  value={settings.calendlyUrl}
+                  onChange={(e) => updateSettings({ calendlyUrl: e.target.value })}
+                  placeholder="https://calendly.com/your-link"
+                />
               </div>
-              <input
-                ref={faviconInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFaviconUpload}
-                style={{ display: 'none' }}
-              />
-              <Button onClick={() => faviconInputRef.current?.click()} variant="secondary">
-                <HugeiconsIcon icon={Image01Icon} size={16} />
-                {settings.favicon ? 'Change icon' : 'Upload icon'}
-              </Button>
-            </div>
-          </div>
 
-          <div style={styles.formSection}>
-            <ModelSelector
-              label="AI Model"
-              value={settings.model || 'gpt-4o-mini'}
-              onChange={(model) => updateSettings({ model })}
-            />
-            <p
-              style={{
-                fontSize: 'var(--op-font-x-small)',
-                color: 'var(--op-color-neutral-on-plus-max)',
-                margin: 'var(--op-space-x-small) 0 0 0',
-              }}
-            >
-              Select the AI model to power your conversations
-            </p>
-          </div>
-
-          <div style={styles.formSection}>
-            <Label style={{ fontSize: 'var(--op-font-small)' }}>AI Instructions</Label>
-            <p
-              style={{
-                fontSize: 'var(--op-font-small)',
-                margin: '0 0 var(--op-space-x-small) 0',
-              }}
-            >
-              Use the CRIT™ framework to structure your AI prompt for better lead
-              qualification
-            </p>
-            <div
-              style={{
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                border: '1px solid var(--op-color-border)',
-                padding: 'var(--op-space-medium)',
-                borderRadius: 'var(--op-radius-medium)',
-                marginBottom: 'var(--op-space-medium)',
-                fontSize: 'var(--op-font-x-small)',
-              }}
-            >
-              <p style={{ margin: '0 0 var(--op-space-x-small) 0', fontWeight: 600 }}>
-                CRIT™ Framework:
-              </p>
-              <ul
-                style={{
-                  margin: 0,
-                  paddingLeft: 'var(--op-space-large)',
-                  lineHeight: 1.6,
-                }}
-              >
-                <li>
-                  <strong>Context:</strong> Describe your business, product, and ideal
-                  customer profile
-                </li>
-                <li>
-                  <strong>Role:</strong> Define the AI&apos;s expertise (e.g.,
-                  &quot;Expert B2B sales qualification specialist&quot;)
-                </li>
-                <li>
-                  <strong>Interview:</strong> Specify how to qualify leads (e.g.,
-                  &quot;Ask 3-5 BANT questions one at a time&quot;)
-                </li>
-                <li>
-                  <strong>Task:</strong> Define the outcome (e.g., &quot;Provide
-                  qualification score and next steps&quot;)
-                </li>
-              </ul>
-            </div>
-            <textarea
-              value={settings.aiInstructions}
-              onChange={(e) => updateSettings({ aiInstructions: e.target.value })}
-              placeholder={`Example using CRIT™ framework:
+              <div style={styles.formSection}>
+                <Label style={{ fontSize: 'var(--op-font-small)' }}>AI Instructions</Label>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    margin: '0 0 var(--op-space-x-small) 0',
+                  }}
+                >
+                  Use the CRIT™ framework to structure your AI prompt for better lead
+                  qualification
+                </p>
+                <div
+                  style={{
+                    backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                    border: '1px solid var(--op-color-border)',
+                    padding: 'var(--op-space-medium)',
+                    borderRadius: 'var(--op-radius-medium)',
+                    marginBottom: 'var(--op-space-medium)',
+                    fontSize: 'var(--op-font-x-small)',
+                  }}
+                >
+                  <p style={{ margin: '0 0 var(--op-space-x-small) 0', fontWeight: 600 }}>
+                    CRIT™ Framework:
+                  </p>
+                  <ul
+                    style={{
+                      margin: 0,
+                      paddingLeft: 'var(--op-space-large)',
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <li>
+                      <strong>Context:</strong> Describe your business, product, and ideal
+                      customer profile
+                    </li>
+                    <li>
+                      <strong>Role:</strong> Define the AI&apos;s expertise (e.g.,
+                      &quot;Expert B2B sales qualification specialist&quot;)
+                    </li>
+                    <li>
+                      <strong>Interview:</strong> Specify how to qualify leads (e.g.,
+                      &quot;Ask 3-5 BANT questions one at a time&quot;)
+                    </li>
+                    <li>
+                      <strong>Task:</strong> Define the outcome (e.g., &quot;Provide
+                      qualification score and next steps&quot;)
+                    </li>
+                  </ul>
+                </div>
+                <textarea
+                  value={settings.aiInstructions}
+                  onChange={(e) => updateSettings({ aiInstructions: e.target.value })}
+                  placeholder={`Example using CRIT™ framework:
 
 CONTEXT: We're a B2B SaaS platform helping mid-market companies (10-50 employees, $5M-$50M revenue) automate sales workflows.
 
@@ -604,16 +423,16 @@ TASK: After qualification, provide:
 2. Summary of their needs
 3. Recommended next steps
 4. Offer to schedule a discovery call`}
-              className="form-control"
-              rows={15}
-              style={{
-                resize: 'vertical',
-                minHeight: '300px',
-                fontFamily: 'monospace',
-                fontSize: 'var(--op-font-x-small)',
-              }}
-            />
-          </div>
+                  className="form-control"
+                  rows={15}
+                  style={{
+                    resize: 'vertical',
+                    minHeight: '300px',
+                    fontFamily: 'monospace',
+                    fontSize: 'var(--op-font-x-small)',
+                  }}
+                />
+              </div>
         </div>
       </ScrollArea>
 

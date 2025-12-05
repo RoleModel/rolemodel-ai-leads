@@ -18,6 +18,7 @@ export interface ModelInfo {
     | 'meituan'
     | 'minimax'
     | 'moonshot'
+    | 'groq'
   logo: string
 }
 
@@ -250,6 +251,38 @@ export const AVAILABLE_MODELS: ModelInfo[] = [
     provider: 'meituan',
     logo: '/meituan.avif',
   },
+
+  // Groq (fast inference for open source models)
+  {
+    id: 'groq/llama-3.3-70b-versatile',
+    name: 'Llama 3.3 70B (Groq)',
+    provider: 'groq',
+    logo: '/groq.svg',
+  },
+  {
+    id: 'groq/llama-3.1-70b-versatile',
+    name: 'Llama 3.1 70B (Groq)',
+    provider: 'groq',
+    logo: '/groq.svg',
+  },
+  {
+    id: 'groq/llama-3.1-8b-instant',
+    name: 'Llama 3.1 8B Instant (Groq)',
+    provider: 'groq',
+    logo: '/groq.svg',
+  },
+  {
+    id: 'groq/mixtral-8x7b-32768',
+    name: 'Mixtral 8x7B (Groq)',
+    provider: 'groq',
+    logo: '/groq.svg',
+  },
+  {
+    id: 'groq/gemma2-9b-it',
+    name: 'Gemma 2 9B (Groq)',
+    provider: 'groq',
+    logo: '/groq.svg',
+  },
 ]
 
 // Helper to get model info by ID
@@ -292,4 +325,5 @@ export const PROVIDER_NAMES: Record<ModelInfo['provider'], string> = {
   meituan: 'Meituan',
   minimax: 'MiniMax',
   moonshot: 'Moonshot',
+  groq: 'Groq',
 }

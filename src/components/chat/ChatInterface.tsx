@@ -27,6 +27,7 @@ import {
   ChainOfThoughtHeader,
   ChainOfThoughtStep,
 } from '@/components/ai-elements/chain-of-thought'
+import { MessageWithCitations, type Citation } from '@/components/leads-page/MessageWithCitations'
 
 interface PlaygroundSettings {
   model: string
@@ -47,6 +48,21 @@ interface MessageFeedback {
   timestamp: number
 }
 
+interface ThinkingStep {
+  label: string
+  description: string
+  status: 'complete' | 'active' | 'pending'
+}
+
+// Tool part from AI SDK - type is `tool-${toolName}`
+interface ToolPart {
+  type: string
+  toolCallId?: string
+  input?: {
+    steps?: ThinkingStep[]
+  }
+}
+
 export function ChatInterface({
   chatbotId,
   initialMessage,
@@ -55,6 +71,70 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const [messageFeedback, setMessageFeedback] = useState<Map<string, 'positive' | 'negative'>>(
     new Map()
+  )
+  const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
+  const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
+
+  // Handle chat response to extract citations from X-Sources-Used header
+  const handleChatResponse = useCallback((response: Response) => {
+    const header = response.headers.get('x-sources-used')
+    if (!header) {
+      setPendingCitations(null)
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(header) as Array<{
+        title: string
+        url?: string | null
+        snippet?: string
+      }>
+      const formatted: Citation[] = parsed
+        .map((item) => ({
+          title: item.title,
+          url: item.url ?? undefined,
+          description: item.snippet,
+        }))
+        .filter((item) => item.title || item.description || item.url)
+
+      if (formatted.length > 0) {
+        setPendingCitations(formatted)
+      } else {
+        setPendingCitations(null)
+      }
+    } catch {
+      setPendingCitations(null)
+    }
+  }, [])
+
+  // Handle chat finish to associate citations with messages
+  const handleChatFinish = useCallback(
+    ({ message }: { message: UIMessage }) => {
+      if (message.role !== 'assistant') {
+        setPendingCitations(null)
+        return
+      }
+
+      if (pendingCitations && pendingCitations.length > 0) {
+        setMessageCitations((prev) => ({
+          ...prev,
+          [message.id]: pendingCitations,
+        }))
+      }
+
+      setPendingCitations(null)
+    },
+    [pendingCitations]
+  )
+
+  // Intercepting fetch to capture response headers
+  const interceptingFetch = useCallback(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const response = await fetch(input, init)
+      handleChatResponse(response.clone())
+      return response
+    },
+    [handleChatResponse]
   )
 
   const chatTransport = useMemo(
@@ -69,12 +149,14 @@ export function ChatInterface({
             instructions: playgroundSettings.instructions,
           } : {}),
         },
+        fetch: interceptingFetch,
       }),
-    [chatbotId, playgroundSettings]
+    [chatbotId, playgroundSettings, interceptingFetch]
   )
 
   const { messages, sendMessage, status, setMessages } = useChat<UIMessage>({
     transport: chatTransport,
+    onFinish: handleChatFinish,
   })
 
   const handleFeedback = useCallback(
@@ -84,7 +166,6 @@ export function ChatInterface({
       setMessageFeedback((prev) => {
         const next = new Map(prev)
         if (isTogglingOff) {
-          // Toggle off if clicking the same button
           next.delete(messageId)
         } else {
           next.set(messageId, feedback)
@@ -92,15 +173,12 @@ export function ChatInterface({
         return next
       })
 
-      // Store feedback in localStorage
       const existingFeedback = JSON.parse(
         localStorage.getItem('chat-message-feedback') || '[]'
       ) as MessageFeedback[]
 
-      // Remove existing feedback for this message
       const filteredFeedback = existingFeedback.filter((f) => f.messageId !== messageId)
 
-      // Add new feedback if not toggling off
       if (!isTogglingOff) {
         const now = Date.now()
         const feedbackData: MessageFeedback = {
@@ -140,12 +218,12 @@ export function ChatInterface({
     return textParts.map((part) => part.text).join('\n')
   }
 
-  const getToolCalls = (message: UIMessage) => {
-    return message.parts.filter((part) => part.type === 'tool-call')
+  const getToolParts = (message: UIMessage): ToolPart[] => {
+    return message.parts.filter((part) => part.type.startsWith('tool-')) as unknown as ToolPart[]
   }
 
-  const renderChainOfThought = (toolCall: any) => {
-    if (toolCall.name !== 'thinking' || !toolCall.args?.steps) return null
+  const renderChainOfThought = (toolPart: ToolPart) => {
+    if (toolPart.type !== 'tool-thinking' || !toolPart.input?.steps) return null
 
     const getIcon = (status: string) => {
       switch (status) {
@@ -160,7 +238,7 @@ export function ChatInterface({
       <ChainOfThought defaultOpen={false}>
         <ChainOfThoughtHeader>Thinking...</ChainOfThoughtHeader>
         <ChainOfThoughtContent>
-          {toolCall.args.steps.map((step: any, index: number) => (
+          {toolPart.input.steps.map((step: ThinkingStep, index: number) => (
             <ChainOfThoughtStep
               key={index}
               label={step.label}
@@ -196,8 +274,10 @@ export function ChatInterface({
         <Conversation>
           <ConversationContent>
             {messages.map((message) => {
-              const toolCalls = getToolCalls(message)
-              const chainOfThought = toolCalls.find((tc: any) => tc.name === 'thinking')
+              const toolParts = getToolParts(message)
+              const chainOfThought = toolParts.find((tp) => tp.type === 'tool-thinking')
+              const citations = messageCitations[message.id]
+              const hasCitations = message.role === 'assistant' && citations && citations.length > 0
 
               return (
                 <Message
@@ -206,7 +286,14 @@ export function ChatInterface({
                 >
                   <MessageContent>
                     {chainOfThought && renderChainOfThought(chainOfThought)}
-                    <MessageResponse>{getMessageContent(message)}</MessageResponse>
+                    {hasCitations ? (
+                      <MessageWithCitations
+                        message={message}
+                        citations={citations}
+                      />
+                    ) : (
+                      <MessageResponse>{getMessageContent(message)}</MessageResponse>
+                    )}
                     {collectFeedback && message.role === 'assistant' && (
                       <div
                         style={{

@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowUp01Icon } from 'hugeicons-react'
-import { ChangeEvent, FormEvent } from 'react'
+import { ChangeEvent, FormEvent, useRef } from 'react'
 
 interface ChatInputProps {
   input: string
@@ -16,6 +16,8 @@ export function ChatInput({
   handleSubmit,
   isLoading,
 }: ChatInputProps) {
+  const formRef = useRef<HTMLFormElement>(null)
+
   return (
     <div
       style={{
@@ -24,7 +26,7 @@ export function ChatInput({
         backgroundColor: 'var(--op-color-background)',
       }}
     >
-      <form onSubmit={handleSubmit}>
+      <form ref={formRef} onSubmit={handleSubmit}>
         <div
           style={{
             display: 'flex',
@@ -49,7 +51,7 @@ export function ChatInput({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
-                handleSubmit(e as any)
+                formRef.current?.requestSubmit()
               }
             }}
             aria-label="Type your message"

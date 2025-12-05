@@ -1,0 +1,4 @@
+.privacy-terms-links__button:hover,
+.privacy-terms-links__button:active {
+  background-color: transparent !important;
+}

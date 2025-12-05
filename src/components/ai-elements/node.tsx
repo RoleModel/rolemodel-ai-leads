@@ -28,7 +28,7 @@ export const Node = ({ handles, className, ...props }: NodeProps) => (
       gap: 0,
       padding: 0,
       borderRadius: 'var(--op-radius-medium)',
-      border: '0.5px solid var(--op-color-border)',
+      boxShadow: 'var(--op-border-all) var(--op-color-neutral-plus-three)',
       position: 'relative',
       overflow: 'visible',
     }}

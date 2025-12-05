@@ -97,8 +97,10 @@ export type Database = {
       }
       conversations: {
         Row: {
+          archived_at: string | null
           chatbot_id: string | null
           id: string
+          is_archived: boolean | null
           last_message_at: string | null
           lead_captured: boolean | null
           message_count: number | null
@@ -109,8 +111,10 @@ export type Database = {
           visitor_name: string | null
         }
         Insert: {
+          archived_at?: string | null
           chatbot_id?: string | null
           id?: string
+          is_archived?: boolean | null
           last_message_at?: string | null
           lead_captured?: boolean | null
           message_count?: number | null
@@ -121,8 +125,10 @@ export type Database = {
           visitor_name?: string | null
         }
         Update: {
+          archived_at?: string | null
           chatbot_id?: string | null
           id?: string
+          is_archived?: boolean | null
           last_message_at?: string | null
           lead_captured?: boolean | null
           message_count?: number | null
@@ -200,25 +206,31 @@ export type Database = {
       }
       leads: {
         Row: {
+          archived_at: string | null
           conversation_id: string | null
           created_at: string | null
           id: string
+          is_archived: boolean | null
           summary: Json
           visitor_email: string | null
           visitor_name: string | null
         }
         Insert: {
+          archived_at?: string | null
           conversation_id?: string | null
           created_at?: string | null
           id?: string
+          is_archived?: boolean | null
           summary: Json
           visitor_email?: string | null
           visitor_name?: string | null
         }
         Update: {
+          archived_at?: string | null
           conversation_id?: string | null
           created_at?: string | null
           id?: string
+          is_archived?: boolean | null
           summary?: Json
           visitor_email?: string | null
           visitor_name?: string | null
@@ -334,6 +346,212 @@ export type Database = {
             columns: ['chatbot_id']
             isOneToOne: false
             referencedRelation: 'chatbots'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      webhooks: {
+        Row: {
+          id: string
+          chatbot_id: string
+          name: string
+          url: string
+          secret: string | null
+          events: string[]
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          last_triggered_at: string | null
+          failure_count: number
+        }
+        Insert: {
+          id?: string
+          chatbot_id: string
+          name: string
+          url: string
+          secret?: string | null
+          events: string[]
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          last_triggered_at?: string | null
+          failure_count?: number
+        }
+        Update: {
+          id?: string
+          chatbot_id?: string
+          name?: string
+          url?: string
+          secret?: string | null
+          events?: string[]
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          last_triggered_at?: string | null
+          failure_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'webhooks_chatbot_id_fkey'
+            columns: ['chatbot_id']
+            isOneToOne: false
+            referencedRelation: 'chatbots'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      webhook_deliveries: {
+        Row: {
+          id: string
+          webhook_id: string
+          event: string
+          payload: Json
+          response_status: number | null
+          response_body: string | null
+          delivered_at: string | null
+          created_at: string
+          success: boolean
+          error_message: string | null
+        }
+        Insert: {
+          id?: string
+          webhook_id: string
+          event: string
+          payload: Json
+          response_status?: number | null
+          response_body?: string | null
+          delivered_at?: string | null
+          created_at?: string
+          success: boolean
+          error_message?: string | null
+        }
+        Update: {
+          id?: string
+          webhook_id?: string
+          event?: string
+          payload?: Json
+          response_status?: number | null
+          response_body?: string | null
+          delivered_at?: string | null
+          created_at?: string
+          success?: boolean
+          error_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'webhook_deliveries_webhook_id_fkey'
+            columns: ['webhook_id']
+            isOneToOne: false
+            referencedRelation: 'webhooks'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ab_tests: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          status: 'draft' | 'active' | 'paused' | 'completed'
+          start_date: string | null
+          end_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          status?: 'draft' | 'active' | 'paused' | 'completed'
+          start_date?: string | null
+          end_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          status?: 'draft' | 'active' | 'paused' | 'completed'
+          start_date?: string | null
+          end_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ab_test_variants: {
+        Row: {
+          id: string
+          test_id: string
+          name: string
+          path: string
+          weight: number
+          is_control: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          test_id: string
+          name: string
+          path: string
+          weight?: number
+          is_control?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          test_id?: string
+          name?: string
+          path?: string
+          weight?: number
+          is_control?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ab_test_variants_test_id_fkey'
+            columns: ['test_id']
+            isOneToOne: false
+            referencedRelation: 'ab_tests'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      ab_test_events: {
+        Row: {
+          id: string
+          variant_id: string
+          event_type: 'view' | 'engagement' | 'conversion' | 'bounce'
+          session_id: string | null
+          visitor_id: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          variant_id: string
+          event_type: 'view' | 'engagement' | 'conversion' | 'bounce'
+          session_id?: string | null
+          visitor_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          variant_id?: string
+          event_type?: 'view' | 'engagement' | 'conversion' | 'bounce'
+          session_id?: string | null
+          visitor_id?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ab_test_events_variant_id_fkey'
+            columns: ['variant_id']
+            isOneToOne: false
+            referencedRelation: 'ab_test_variants'
             referencedColumns: ['id']
           },
         ]

@@ -98,7 +98,6 @@ const styles = {
     gap: 'var(--op-space-small)',
     padding: 'var(--op-space-small) var(--op-space-medium)',
     cursor: 'pointer',
-    borderBottom: '1px solid var(--op-color-border)',
   },
   agentItemSelected: {
     backgroundColor: 'var(--op-color-neutral-plus-six)',
@@ -110,7 +109,6 @@ const styles = {
     width: '100%',
     justifyContent: 'flex-start',
     gap: 'var(--op-space-small)',
-    borderTop: '1px solid var(--op-color-border)',
   },
 }
 
@@ -228,11 +226,13 @@ export function TopBar() {
 
 
               <Button
-                variant="ghost"
+                variant="primary"
+                size="lg"
+                width="full"
                 style={styles.createAgentButton}
                 onClick={handleCreateAgent}
               >
-                <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                <HugeiconsIcon icon={PlusSignIcon} size={18} />
                 Create agent
               </Button>
             </div>
