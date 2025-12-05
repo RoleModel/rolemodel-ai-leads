@@ -328,7 +328,7 @@ export default function IntroABTestingPage() {
     )
   }
 
-  const activeTest = tests.length > 0 ? (tests.find(t => t.status === 'notice') || tests[0]) : null
+  const activeTest = tests.length > 0 ? (tests.find(t => t.status === 'active') || tests[0]) : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
