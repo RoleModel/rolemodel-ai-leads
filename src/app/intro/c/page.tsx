@@ -8,7 +8,6 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 gsap.registerPlugin(ScrollToPlugin)
 import {
   ArrowRight02Icon,
-  Tick01Icon,
   ArtificialIntelligence04Icon,
   Time01Icon,
   File01Icon,
@@ -33,7 +32,7 @@ import {
   LeadsPageSettingsProvider,
 } from '@/contexts/LeadsPageSettingsContext'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport, isTextUIPart, type UIMessage } from 'ai'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import { Message, MessageContent, MessageResponse, MessageActions, MessageAction } from '@/components/ai-elements/message'
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
@@ -73,13 +72,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
-  const [bantStatus, setBantStatus] = useState({
-    need: false,
-    timeline: false,
-    budget: false,
-    authority: false,
-    contact: false,
-  })
+  const [contactCaptured, setContactCaptured] = useState(false)
 
   const activeChatbotId = chatbotId || 'a0000000-0000-0000-0000-000000000001'
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -142,32 +135,37 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const isStreaming = status === 'streaming'
   const isClient = typeof window !== 'undefined'
 
+  // Derive BANT status from messages
+  const bantStatus = useMemo(() => {
+    const status = {
+      need: false,
+      timeline: false,
+      budget: false,
+      authority: false,
+      contact: contactCaptured,
+    }
+    for (const message of messages) {
+      for (const part of message.parts) {
+        if (part.type === 'tool-report_bant_progress') {
+          const toolPart = part as { type: string; input?: Record<string, boolean> }
+          if (toolPart.input) {
+            status.need = toolPart.input.need ?? status.need
+            status.timeline = toolPart.input.timeline ?? status.timeline
+            status.budget = toolPart.input.budget ?? status.budget
+            status.authority = toolPart.input.authority ?? status.authority
+            status.contact = toolPart.input.contact ?? status.contact
+          }
+        }
+      }
+    }
+    return status
+  }, [messages, contactCaptured])
+
   // Calculate BANT progress
   const bantProgress = useMemo(() => {
     const completed = Object.values(bantStatus).filter(Boolean).length
     return Math.round((completed / 5) * 100)
   }, [bantStatus])
-
-  // Process messages for BANT tool calls
-  useMemo(() => {
-    for (const message of messages) {
-      for (const part of message.parts) {
-        // Tool parts have type like 'tool-report_bant_progress'
-        if (part.type === 'tool-report_bant_progress') {
-          const toolPart = part as { type: string; input?: Record<string, boolean> }
-          if (toolPart.input) {
-            setBantStatus(prev => ({
-              need: toolPart.input?.need ?? prev.need,
-              timeline: toolPart.input?.timeline ?? prev.timeline,
-              budget: toolPart.input?.budget ?? prev.budget,
-              authority: toolPart.input?.authority ?? prev.authority,
-              contact: toolPart.input?.contact ?? prev.contact,
-            }))
-          }
-        }
-      }
-    }
-  }, [messages])
 
   const handlePromptSubmit = async (message: PromptInputMessage) => {
     if (!message.text.trim()) return
@@ -177,7 +175,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const handleStartChat = () => {
     if (!formData.name || !formData.email) return
     // Mark contact as captured since we have name and email
-    setBantStatus(prev => ({ ...prev, contact: true }))
+    setContactCaptured(true)
     setStep('chat')
     setIsExpanded(true)
   }
