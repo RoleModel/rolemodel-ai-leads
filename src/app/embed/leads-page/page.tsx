@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
@@ -7,10 +8,21 @@ import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProv
 // Default chatbot ID for RoleModel
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
-export default function EmbedLeadsPage() {
+function EmbedLeadsPageContent() {
   const searchParams = useSearchParams()
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
+  return (
+    <LeadsPageWithProvider
+      chatbotId={chatbotId}
+      showSidebar={true}
+      loadFromApi={true}
+      isEmbed={true}
+    />
+  )
+}
+
+export default function EmbedLeadsPage() {
   return (
     <div
       className="app-body"
@@ -22,12 +34,9 @@ export default function EmbedLeadsPage() {
       data-theme="leads"
       data-theme-mode="light"
     >
-      <LeadsPageWithProvider
-        chatbotId={chatbotId}
-        showSidebar={true}
-        loadFromApi={true}
-        isEmbed={true}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <EmbedLeadsPageContent />
+      </Suspense>
     </div>
   )
 }
