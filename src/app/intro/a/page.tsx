@@ -108,7 +108,7 @@ export default function IntroPage() {
   return (
     <div className="intro-page">
       <div className={`intro-page__content${showChat ? ' intro-page__content--exiting' : ''}`}>
-        <Hero />
+        <Hero showBackground={true} />
         <HowItWorks />
         <SectionBand autoAnimate={true} reverse={true} minHeight={12} maxHeight={14} color={['#364E5D', '#324B59', '#475658', '#646A60', '#8D887D', '#9D95A4', '#9C97BD', '#BDBBFF']} />
         <CTA
