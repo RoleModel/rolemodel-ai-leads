@@ -1,0 +1,10 @@
+/* Override optics html overflow:hidden to allow scrolling */
+html:has(.intro-b-page) {
+  overflow: visible !important;
+  overflow-y: auto !important;
+}
+
+.intro-b-page {
+  width: 100%;
+  min-height: 100vh;
+}

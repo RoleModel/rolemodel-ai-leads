@@ -1,0 +1,313 @@
+/* ==========================================================================
+   LeadsPageView Component Styles
+   BEM naming: .leads-page__[element]--[modifier]
+   ========================================================================== */
+
+/* Container */
+.leads-page {
+  display: flex;
+  background-color: var(--op-color-neutral-plus-seven);
+  height: 100%;
+  width: 100%;
+}
+
+.leads-page--embed {
+  height: 100%;
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.leads-page__sidebar {
+  --_op-sidebar-background-color: var(--op-color-neutral-plus-seven);
+  --_op-sidebar-rail-width: calc(var(--op-space-scale-unit) * 6);
+  --_op-sidebar-drawer-width: calc(var(--op-space-scale-unit) * 30);
+  --_op-sidebar-border-color: var(--op-color-border);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--op-space-medium);
+  transition: width 0.2s ease;
+}
+
+.leads-page__sidebar--collapsed {
+  padding: var(--op-space-small);
+}
+
+/* Brand Header */
+.leads-page__brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--op-space-large);
+}
+
+.leads-page__brand-logo {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: var(--op-space-small);
+}
+
+.leads-page__logo-image {
+  max-width: 120px;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.leads-page__brand-name--primary {
+  font-weight: var(--op-font-weight-bold);
+  color: var(--op-color-primary-base);
+  font-size: var(--op-font-small);
+}
+
+.leads-page__brand-name--secondary {
+  font-size: var(--op-font-x-small);
+  color: var(--op-color-neutral-on-plus-max);
+}
+
+/* New Chat Button */
+.leads-page__new-chat-btn {
+  justify-content: center;
+  gap: var(--op-space-small);
+  margin-top: var(--op-space-large);
+  border: var(--op-border-width) dashed var(--op-color-border);
+  min-width: 0;
+  box-shadow: none;
+}
+
+/* Chat History */
+.leads-page__chat-history {
+  margin-top: var(--op-space-medium);
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-2x-small);
+}
+
+.leads-page__chat-history-item {
+  justify-content: flex-start;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  width: 100%;
+}
+
+.leads-page__chat-history-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  width: 100%;
+}
+
+/* Dark Mode Toggle */
+.leads-page__dark-mode-container {
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.leads-page__dark-mode-btn {
+  justify-content: flex-end;
+  gap: var(--op-space-small);
+}
+
+/* ==========================================================================
+   Main Content
+   ========================================================================== */
+
+.leads-page__content {
+  width: 100%;
+  max-width: calc(var(--op-breakpoint-medium) - var(--op-space-scale-unit) * 20);
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--op-space-medium) var(--op-space-small);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--op-space-large);
+  height: 100%;
+}
+
+/* ==========================================================================
+   BANT Progress
+   ========================================================================== */
+
+.leads-page__bant-progress {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-small);
+  padding: 0 var(--op-space-x-large);
+}
+
+.leads-page__bant-bar {
+  flex: 1;
+  height: var(--op-space-x-small);
+  background-color: var(--op-color-neutral-plus-five);
+  border-radius: var(--op-radius-pill);
+  overflow: hidden;
+}
+
+.leads-page__bant-fill {
+  height: 100%;
+  background-color: var(--op-color-primary-base);
+  border-radius: var(--op-radius-pill);
+  transition: width 0.5s ease-out;
+}
+
+.leads-page__bant-text {
+  font-size: var(--op-font-small);
+  font-weight: var(--op-font-weight-medium);
+  font-family: var(--font-geist-mono);
+  color: var(--op-color-neutral-on-plus-max);
+  min-width: calc(var(--op-space-scale-unit) * 3.8);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Input Container
+   ========================================================================== */
+
+.leads-page__input-container {
+  width: 100%;
+  position: relative;
+}
+
+/* ==========================================================================
+   Suggestions
+   ========================================================================== */
+
+.leads-page__suggestions {
+  display: flex;
+  gap: var(--op-space-small);
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding-top: var(--op-space-medium);
+  padding-bottom: var(--op-space-medium);
+}
+
+.leads-page__suggestion-wrapper {
+  position: relative;
+}
+
+.leads-page__suggestion-actions {
+  position: absolute;
+  top: calc(var(--op-space-x-small) * -1);
+  right: calc(var(--op-space-x-small) * -1);
+  display: flex;
+  gap: var(--op-space-2x-small);
+  background: var(--op-color-background);
+  border-radius: var(--op-radius-medium);
+  padding: var(--op-space-3x-small);
+  box-shadow: var(--op-shadow-low);
+}
+
+/* ==========================================================================
+   Fixed Footer Links
+   ========================================================================== */
+
+.leads-page__footer-links {
+  position: fixed;
+  bottom: var(--op-space-medium);
+  right: var(--op-space-medium);
+  display: flex;
+  gap: var(--op-space-small);
+  z-index: 50;
+}
+
+/* ==========================================================================
+   Dialog Content
+   ========================================================================== */
+
+.leads-page__dialog-body {
+  font-size: var(--op-font-small);
+  line-height: 1.6;
+}
+
+.leads-page__dialog-section {
+  margin-bottom: var(--op-space-medium);
+}
+
+.leads-page__dialog-list {
+  padding-left: var(--op-space-large);
+  margin-bottom: var(--op-space-medium);
+}
+
+/* ==========================================================================
+   Popover
+   ========================================================================== */
+
+.leads-page__popover {
+  width: calc(var(--op-space-scale-unit) * 30);
+}
+
+.leads-page__popover-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-medium);
+}
+
+/* ==========================================================================
+   Custom Buttons (Edit Mode)
+   ========================================================================== */
+
+.leads-page__custom-buttons {
+  margin-top: var(--op-space-medium);
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-small);
+}
+
+.leads-page__custom-button-wrapper {
+  position: relative;
+}
+
+.leads-page__custom-button-actions {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  display: flex;
+  gap: var(--op-space-x-small);
+  z-index: 10;
+}
+
+/* ==========================================================================
+   URL Input
+   ========================================================================== */
+
+.leads-page__url-input-group {
+  display: flex;
+  gap: 0;
+}
+
+.leads-page__url-prefix {
+  padding-block: var(--op-space-2x-small);
+  padding-inline: var(--op-space-small) var(--op-space-x-small);
+  background-color: var(--op-color-neutral-plus-eight);
+  border: 1px solid var(--op-color-border);
+  border-right: none;
+  border-top-left-radius: var(--op-radius-medium);
+  border-bottom-left-radius: var(--op-radius-medium);
+  font-size: var(--op-font-small);
+  color: var(--op-color-on-background);
+  height: var(--op-input-height-large);
+  display: flex;
+  align-items: center;
+}
+
+.leads-page__url-input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
