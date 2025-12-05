@@ -180,9 +180,9 @@ function ConversionRateComparison({ variants }: { variants: Variant[] }) {
 
 // Available intro pages (using embed paths for iframe preview)
 const INTRO_PAGES = [
-  { path: '/embed/intro/a', name: 'Intro A - Landing Page' },
-  { path: '/embed/intro/b', name: 'Intro B - Alternative' },
-  { path: '/embed/intro/c', name: 'Intro C - Assessment Tool' },
+  { path: '/embed/intro/a', name: 'Intro A' },
+  { path: '/embed/intro/b', name: 'Intro B' },
+  { path: '/embed/intro/c', name: 'Intro C' },
 ]
 
 interface VariantPreviewWithSelectProps {
