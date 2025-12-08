@@ -7,7 +7,7 @@ import {
   Upload01Icon,
 } from 'hugeicons-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,11 +28,8 @@ export function WidgetEditorSidebar() {
     text: string
   } | null>(null)
 
-  const origin = useSyncExternalStore(
-    () => () => {},
-    () => (typeof window !== 'undefined' ? window.location.origin : ''),
-    () => ''
-  )
+  // Always use production URL for embed codes (preview deployments block iframes)
+  const origin = 'https://rolemodel-ai-leads.vercel.app'
 
   // Load saved config on mount
   useEffect(() => {

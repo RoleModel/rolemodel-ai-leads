@@ -191,16 +191,18 @@ export function EditorSidebar({
     }
   }
 
+  // Always use production URL for embed codes (preview deployments block iframes)
+  const origin = 'https://rolemodel-ai-leads.vercel.app'
+
   const iframeEmbedCode = `<iframe
-  src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
+  src="${origin}/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
   width="100%"
-  height="100vh"
-  frameborder="0"
+  style="height: 100vh; border: none;"
   allow="clipboard-write"
 ></iframe>`
 
   const scriptEmbedCode = `<script
-  src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed-script.js"
+  src="${origin}/embed-script.js"
   data-chatbot-id="${DEFAULT_CHATBOT_ID}"
   data-container-id="rolemodel-widget">
 </script>`

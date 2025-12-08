@@ -26,7 +26,7 @@
   }
 
   // Configuration
-  const WIDGET_URL = `${baseUrl}/embed/leads-page`
+  const WIDGET_URL = `${baseUrl}/widget`
   const OPTICS_CSS =
     'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css'
 
@@ -52,7 +52,7 @@
   style.textContent = `
         #${containerId} {
             position: fixed;
-            bottom: 20px;
+            bottom: 90px;
             right: 20px;
             width: 400px;
             height: 600px;
@@ -62,6 +62,13 @@
             overflow: hidden;
             z-index: 999999;
             background: white;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        #${containerId}.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
         }
 
         #${containerId}-iframe {
@@ -70,12 +77,40 @@
             border: none;
         }
 
+        #${containerId}-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: #7f51b1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 999999;
+            transition: transform 0.2s;
+        }
+
+        #${containerId}-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        #${containerId}-toggle svg {
+            width: 24px;
+            height: 24px;
+        }
+
         /* Mobile responsive */
         @media (max-width: 768px) {
             #${containerId} {
                 width: 100%;
-                height: 100%;
-                bottom: 0;
+                height: calc(100% - 80px);
+                bottom: 80px;
                 right: 0;
                 border-radius: 0;
             }
@@ -98,6 +133,12 @@
     `
   document.head.appendChild(style)
 
+  // SVG icons
+  const chatIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+  const closeIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+
+  let isOpen = false
+
   // Create widget container
   function createWidget() {
     // Check if container already exists
@@ -109,15 +150,39 @@
     // Create container
     const container = document.createElement('div')
     container.id = containerId
+    container.classList.add('hidden')
 
     // Create iframe
     const iframe = document.createElement('iframe')
     iframe.id = `${containerId}-iframe`
-    iframe.src = `${WIDGET_URL}?chatbotId=${chatbotId}`
+    iframe.src = `${WIDGET_URL}/${chatbotId}`
     iframe.setAttribute('allow', 'microphone')
 
     container.appendChild(iframe)
     document.body.appendChild(container)
+
+    // Listen for close message from iframe
+    window.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'WIDGET_CLOSE') {
+        window.RoleModelAIWidget.hide()
+      }
+    })
+
+    // Create toggle button
+    const toggleBtn = document.createElement('button')
+    toggleBtn.id = `${containerId}-toggle`
+    toggleBtn.innerHTML = chatIcon
+    toggleBtn.onclick = function () {
+      isOpen = !isOpen
+      if (isOpen) {
+        container.classList.remove('hidden')
+        toggleBtn.innerHTML = closeIcon
+      } else {
+        container.classList.add('hidden')
+        toggleBtn.innerHTML = chatIcon
+      }
+    }
+    document.body.appendChild(toggleBtn)
   }
 
   // Initialize when DOM is ready
@@ -131,16 +196,27 @@
   window.RoleModelAIWidget = {
     show: function () {
       const container = document.getElementById(containerId)
-      if (container) container.style.display = 'block'
+      const toggleBtn = document.getElementById(`${containerId}-toggle`)
+      if (container) {
+        container.classList.remove('hidden')
+        isOpen = true
+        if (toggleBtn) toggleBtn.innerHTML = closeIcon
+      }
     },
     hide: function () {
       const container = document.getElementById(containerId)
-      if (container) container.style.display = 'none'
+      const toggleBtn = document.getElementById(`${containerId}-toggle`)
+      if (container) {
+        container.classList.add('hidden')
+        isOpen = false
+        if (toggleBtn) toggleBtn.innerHTML = chatIcon
+      }
     },
     toggle: function () {
-      const container = document.getElementById(containerId)
-      if (container) {
-        container.style.display = container.style.display === 'none' ? 'block' : 'none'
+      if (isOpen) {
+        this.hide()
+      } else {
+        this.show()
       }
     },
   }
