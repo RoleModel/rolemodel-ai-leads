@@ -4,9 +4,26 @@
     const OPTICS_CSS = 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css';
 
     // Get script tag and extract parameters
-    const currentScript = document.currentScript || document.querySelector('script[data-chatbot-id]');
-    const chatbotId = currentScript?.getAttribute('data-chatbot-id') || 'a0000000-0000-0000-0000-000000000001';
-    const containerId = currentScript?.getAttribute('data-container-id') || 'rolemodel-ai-widget';
+    // Try multiple methods for Framer compatibility
+    let currentScript = document.currentScript;
+
+    // Fallback: find script by src URL (works in Framer)
+    if (!currentScript) {
+        const scripts = document.querySelectorAll('script[src*="embed-script"]');
+        currentScript = scripts[scripts.length - 1]; // Get the last matching script
+    }
+
+    // Fallback: find script by data attribute
+    if (!currentScript) {
+        currentScript = document.querySelector('script[data-chatbot-id]');
+    }
+
+    const chatbotId = currentScript?.getAttribute('data-chatbot-id') ||
+                      window.ROLEMODEL_CHATBOT_ID ||
+                      'a0000000-0000-0000-0000-000000000001';
+    const containerId = currentScript?.getAttribute('data-container-id') ||
+                        window.ROLEMODEL_CONTAINER_ID ||
+                        'rolemodel-ai-widget';
 
     // Load Optics CSS if not already loaded
     if (!document.querySelector(`link[href="${OPTICS_CSS}"]`)) {

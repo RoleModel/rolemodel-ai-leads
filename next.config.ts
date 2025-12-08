@@ -21,9 +21,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Allow embedding all pages in iframes
-        source: '/:path*',
+        // Allow embedding embed pages in iframes (for Framer, etc.)
+        source: '/embed/:path*',
         headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'ALLOWALL',
+          },
           {
             key: 'Content-Security-Policy',
             value: "frame-ancestors *",
@@ -31,6 +35,16 @@ const nextConfig: NextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: '*',
+          },
+        ],
+      },
+      {
+        // Protect non-embed pages from clickjacking
+        source: '/((?!embed).*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
           },
         ],
       },
