@@ -87,11 +87,12 @@ const QualificationNode = ({ data, isConnectable }: NodeProps) => {
             {nodeData.keywords.map((keyword: string, idx: number) => (
               <span
                 key={idx}
+                className="badge badge--small badge--pill"
                 style={{
-                  padding: '2px 6px',
-                  backgroundColor: 'var(--op-color-primary-background)',
-                  borderRadius: '4px',
-                  fontSize: '10px',
+                  backgroundColor: 'var(--op-color-neutral-plus-four)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  fontSize: '9px',
+                  padding: '2px 4px',
                 }}
               >
                 {keyword}
@@ -306,7 +307,7 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
   })
   const [edgeData, setEdgeData] = useState<EdgeStyleData>({
     stroke: 'var(--op-color-primary-base)',
-    strokeWidth: 2,
+    strokeWidth: 1,
     animated: true,
     label: '',
     lineStyle: 'animated',

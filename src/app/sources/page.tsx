@@ -846,30 +846,29 @@ export default function SourcesPage() {
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)', marginBottom: 'var(--op-space-large)' }}>
-                  <button
-                    className="btn btn--secondary"
+                  <Button
+                    variant="secondary"
                     style={{ width: '100%' }}
                     onClick={workflowControls.addNode}
                   >
                     <Add01Icon className="icon-sm" />
                     Add Step
-                  </button>
+                  </Button>
 
                   {workflowControls.selectedNode && (
-                    <button
-                      className="btn btn--destructive"
+                    <Button
+                      variant="destructive"
                       style={{ width: '100%' }}
                       onClick={workflowControls.deleteNode}
                     >
                       <Delete02Icon className="icon-sm" />
                       Delete Node
-                    </button>
+                    </Button>
                   )}
 
                   {workflowControls.selectedEdge && (
                     <Button
                       variant="icon"
-                      className="btn btn--destructive"
                       style={{ width: '100%' }}
                       onClick={workflowControls.deleteEdge}
                     >
@@ -878,14 +877,14 @@ export default function SourcesPage() {
                     </Button>
                   )}
 
-                  <button
-                    className="btn btn--primary"
+                  <Button
+                    variant="primary"
                     style={{ width: '100%' }}
                     onClick={workflowControls.saveWorkflow}
                   >
                     <RefreshIcon className="icon-sm" />
                     Save & Apply to Chatbot
-                  </button>
+                  </Button>
                 </div>
 
                 {workflowControls.editMode && workflowControls.selectedNode && (
@@ -900,7 +899,7 @@ export default function SourcesPage() {
                       Edit Node
                     </h4>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Step Name</label>
                       <input
                         className="form-control"
@@ -910,7 +909,7 @@ export default function SourcesPage() {
                       />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Question/Description</label>
                       <input
                         className="form-control"
@@ -920,7 +919,7 @@ export default function SourcesPage() {
                       />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Keywords (comma-separated)</label>
                       <input
                         className="form-control"
@@ -930,13 +929,13 @@ export default function SourcesPage() {
                       />
                     </div>
 
-                    <button
-                      className="btn btn--primary btn--small"
+                    <Button
+                      variant="primary"
                       style={{ width: '100%' }}
                       onClick={workflowControls.updateNode}
                     >
                       Update Node
-                    </button>
+                    </Button>
                   </div>
                 )}
 
@@ -952,7 +951,7 @@ export default function SourcesPage() {
                       Edit Connection
                     </h4>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Label</label>
                       <input
                         className="form-control"
@@ -962,7 +961,7 @@ export default function SourcesPage() {
                       />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Color</label>
                       <select
                         className="form-control"
@@ -981,7 +980,7 @@ export default function SourcesPage() {
                       </select>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Stroke Width</label>
                       <input
                         className="form-control"
@@ -993,7 +992,7 @@ export default function SourcesPage() {
                       />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--op-space-small)' }}>
+                    <div className="form-group">
                       <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Line Style</label>
                       <select
                         className="form-control"
@@ -1007,13 +1006,13 @@ export default function SourcesPage() {
                       </select>
                     </div>
 
-                    <button
-                      className="btn btn--primary btn--small"
+                    <Button
+                      variant="primary"
                       style={{ width: '100%' }}
                       onClick={workflowControls.updateEdge}
                     >
                       Update Connection
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>

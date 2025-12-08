@@ -52,10 +52,9 @@ export const NodeHeader = ({ className, ...props }: NodeHeaderProps) => (
       fontSize: 'var(--op-font-small)',
       fontWeight: 400,
       color: 'var(--op-color-neutral-on-plus-max)',
-      marginBottom: 'var(--op-space-2x-small)',
-      borderRadius: 'var(--op-radius-medium) var(--op-radius-medium) 0 0',
+      marginBottom: 0,
+      borderRadius: 'var(--op-radius-medium)',
       backgroundColor: 'var(--op-color-neutral-plus-seven)',
-      borderBottom: '1px solid var(--op-color-border)',
       padding: 'var(--op-space-x-small)',
     }}
     className={cn('gap-0.5', className)}
@@ -84,7 +83,7 @@ export const NodeContent = ({ className, ...props }: NodeContentProps) => (
     style={{
       padding: 'var(--op-space-x-small)',
     }}
-    className={cn('p-3', className)}
+    className={cn(className)}
     {...props}
   />
 )
