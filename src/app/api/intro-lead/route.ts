@@ -24,12 +24,16 @@ export async function POST(req: NextRequest) {
     const visitorMetadata = await buildVisitorMetadata(req.headers)
 
     // Create a conversation with the visitor info pre-populated
+    // lead_captured starts as false - AI will qualify and capture the lead during conversation
     const { data: conversation, error: convError } = await supabaseServer
       .from('conversations')
       .insert([
         {
           chatbot_id: activeChatbotId,
           visitor_id: `intro-${Date.now()}`,
+          visitor_name: name,
+          visitor_email: email,
+          lead_captured: false,
           visitor_metadata: {
             ...visitorMetadata,
             name,

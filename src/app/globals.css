@@ -11,7 +11,8 @@
    Import Optics into the optics layer (lowest priority)
    This allows our layers to override Optics styles
    ------------------------------------------------- */
-@import 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css' layer(frameworks);
+@import 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css'
+  layer(frameworks);
 
 /* -------------------------------------------------
    Import App Styles with Layers
@@ -128,8 +129,8 @@
     background-image: var(--light-gradient);
     height: var(--op-space-large);
     position: absolute;
-    left: 5%;
-    right: 5%;
+    left: var(--op-space-large);
+    right: var(--op-space-large);
     top: 86%;
   }
 }

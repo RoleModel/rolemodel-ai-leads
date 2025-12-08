@@ -13,6 +13,10 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react'
 import Favicon from '@/components/intro/Favicon'
 import Logo from '@/components/intro/Logo'
+import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
+import { trackView, trackEngagement, trackConversion } from '@/lib/ab-testing/tracking'
+import { Card, CardHeader, CardAction, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import '@/styles/ai-elements.css'
 import '../leads-page/LeadsPageView.css'
 import {
@@ -49,7 +53,7 @@ import { useGSAP } from "@gsap/react"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ScrollSmoother } from "gsap/ScrollSmoother"
-import styles from './landing-page.module.css'
+import styles from './landing-page-b.module.css'
 
 gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
 
@@ -71,7 +75,7 @@ const questions: FloatingQuestion[] = [
   { id: 'risk', text: 'How can we reduce risk?', angle: 300, distance: 550 },
 ]
 
-interface LandingBProps {
+export interface LandingPageBProps {
   title?: string
   line2?: string
   highlight?: string
@@ -81,7 +85,7 @@ interface LandingBProps {
   chatbotId?: string
 }
 
-export function LandingB(props: LandingBProps) {
+export function LandingPageB(props: LandingPageBProps) {
   return (
     <LeadsPageSettingsProvider>
       <LandingBInner {...props} />
@@ -110,6 +114,10 @@ export interface HeroChatProps {
 export function HeroChat(props: HeroChatProps) {
   const { chatbotId, initialQuestion, onQuestionConsumed } = props
   useLeadsPageSettings()
+  const [step, setStep] = useState<'intro' | 'chat'>('intro')
+  const [formData, setFormData] = useState({ name: '', email: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
@@ -161,10 +169,10 @@ export function HeroChat(props: HeroChatProps) {
   const chatTransport = useMemo(
     () => new DefaultChatTransport({
       api: '/api/chat',
-      body: { chatbotId: activeChatbotId },
+      body: { chatbotId: activeChatbotId, conversationId },
       fetch: interceptingFetch,
     }),
-    [activeChatbotId, interceptingFetch]
+    [activeChatbotId, conversationId, interceptingFetch]
   )
 
   const { messages, sendMessage, status, error } = useChat<UIMessage>({
@@ -189,6 +197,41 @@ export function HeroChat(props: HeroChatProps) {
     }
 
     await sendMessage({ text: message.text })
+  }
+
+  const handleStartChat = async () => {
+    if (!formData.name || !formData.email) return
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/intro-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          chatbotId: activeChatbotId,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit form')
+      }
+
+      const result = await response.json()
+      setConversationId(result.conversationId)
+
+      // Dispatch conversion event for A/B tracking
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('intro-b-conversion'))
+      }
+
+      setStep('chat')
+    } catch (error) {
+      console.error('Error submitting lead form:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   useEffect(() => {
@@ -238,110 +281,171 @@ export function HeroChat(props: HeroChatProps) {
 
   return (
     <div className={`chat-container ${styles['chat-container']}`}>
-      <h2 className={styles['chat-title']}>
-        <span>Let&apos;s talk about your </span>
-        <span className={styles['chat-title-text']}>project.
-          <span className={styles['chat-title-underline']}></span>
-        </span>
-      </h2>
-      <Conversation className="conversation-wrapper conversation-wrapper--flex">
-        <ConversationContent>
-          {messages.map((message) => (
-            <Fragment key={message.id}>
-              {message.parts.map((part, index) => {
-                switch (part.type) {
-                  case 'text':
-                    return (
-                      <Fragment key={`${message.id}-${index}`}>
-                        <Message from={message.role}>
-                          {message.role === 'assistant' && (
-                            <div className="message-avatar">
-                              <Favicon className="message-avatar__image" style={{ width: 'var(--op-space-x-large)', height: 'var(--op-space-x-large)' }} />
-                            </div>
-                          )}
-                          <MessageContent>
-                            {isClient ? (
-                              messageCitations[message.id]?.length ? (
-                                <MessageWithCitations message={message} citations={messageCitations[message.id]} />
-                              ) : (
-                                <MessageResponse>{part.text}</MessageResponse>
-                              )
-                            ) : (
-                              <div>{part.text}</div>
-                            )}
-                            {message.role === 'assistant' && (
-                              <MessageActions>
-                                <MessageAction label="Like" onClick={() => setLiked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Like this response">
-                                  <HugeiconsIcon icon={ThumbsUpIcon} size={16} color={liked[message.id] ? "currentColor" : "none"} />
-                                </MessageAction>
-                                <MessageAction label="Dislike" onClick={() => setDisliked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Dislike this response">
-                                  <HugeiconsIcon icon={ThumbsDownIcon} size={16} color={disliked[message.id] ? "currentColor" : "none"} />
-                                </MessageAction>
-                                <MessageAction onClick={() => regenerate()} label="Retry">
-                                  <HugeiconsIcon icon={Refresh01Icon} size={16} />
-                                </MessageAction>
-                                <MessageAction onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
-                                  <HugeiconsIcon icon={Copy01Icon} size={16} />
-                                </MessageAction>
-                              </MessageActions>
-                            )}
-                          </MessageContent>
-                        </Message>
-                      </Fragment>
-                    )
-                  default:
-                    return null
-                }
-              })}
-            </Fragment>
-          ))}
-        </ConversationContent>
-      </Conversation>
+      {step === 'intro' ? (
+        <Card className={styles['lead-card']}>
+          <CardHeader>
+            <h2 className={styles['card-title']}>
+              <span>Let&apos;s see if we&apos;re a </span>
+              <span className={styles['chat-title-text']}>fit.
+                <span className={styles['chat-title-underline']}></span>
+              </span>
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <p className={styles['lead-form__subtitle']}>
+              Share a few details and we&apos;ll help you explore whether custom software makes sense for your business.
+            </p>
+            <form className={styles['lead-form__form']} onSubmit={(e) => { e.preventDefault(); void handleStartChat(); }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="lead-name">Full Name</label>
+                <Input
+                  id="lead-name"
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="form-control--large"
+                  placeholder="Jane Doe"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="lead-email">Work Email</label>
+                <Input
+                  id="lead-email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="form-control--large"
+                  placeholder="jane@company.com"
+                />
+              </div>
+              <CardAction>
+                <button
+                  type="submit"
+                  className="btn btn--primary btn--large"
+                  disabled={!formData.name || !formData.email || isSubmitting}
+                >
+                  {isSubmitting ? 'Starting...' : 'Start Conversation'}
+                </button>
+              </CardAction>
+            </form>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <h2 className={styles['chat-title']}>
+            <span>Let&apos;s talk about your </span>
+            <span className={styles['chat-title-text']}>project.
+              <span className={styles['chat-title-underline']}></span>
+            </span>
+          </h2>
+          <Conversation className="conversation-wrapper conversation-wrapper--flex">
+            <ConversationContent>
+              {messages.map((message) => (
+                <Fragment key={message.id}>
+                  {message.parts.map((part, index) => {
+                    switch (part.type) {
+                      case 'text':
+                        return (
+                          <Fragment key={`${message.id}-${index}`}>
+                            <Message from={message.role}>
+                              {message.role === 'assistant' && (
+                                <div className="message-avatar">
+                                  <Favicon className="message-avatar__image" style={{ width: 'var(--op-space-x-large)', height: 'var(--op-space-x-large)' }} />
+                                </div>
+                              )}
+                              <MessageContent>
+                                {isClient ? (
+                                  messageCitations[message.id]?.length ? (
+                                    <MessageWithCitations message={message} citations={messageCitations[message.id]} />
+                                  ) : (
+                                    <MessageResponse>{part.text}</MessageResponse>
+                                  )
+                                ) : (
+                                  <div>{part.text}</div>
+                                )}
+                                {message.role === 'assistant' && (
+                                  <MessageActions>
+                                    <MessageAction label="Like" onClick={() => setLiked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Like this response">
+                                      <HugeiconsIcon icon={ThumbsUpIcon} size={16} color={liked[message.id] ? "currentColor" : "none"} />
+                                    </MessageAction>
+                                    <MessageAction label="Dislike" onClick={() => setDisliked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Dislike this response">
+                                      <HugeiconsIcon icon={ThumbsDownIcon} size={16} color={disliked[message.id] ? "currentColor" : "none"} />
+                                    </MessageAction>
+                                    <MessageAction onClick={() => regenerate()} label="Retry">
+                                      <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                                    </MessageAction>
+                                    <MessageAction onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
+                                      <HugeiconsIcon icon={Copy01Icon} size={16} />
+                                    </MessageAction>
+                                  </MessageActions>
+                                )}
+                              </MessageContent>
+                            </Message>
+                          </Fragment>
+                        )
+                      default:
+                        return null
+                    }
+                  })}
+                </Fragment>
+              ))}
+            </ConversationContent>
+          </Conversation>
 
-      {bantProgress < 100 && messages.some(m => m.role === 'user') && (
-        <div className="leads-page__bant-progress">
-          <div className="leads-page__bant-bar">
-            <div className="leads-page__bant-fill" style={{ width: `${bantProgress}%` }} />
+          {bantProgress < 100 && messages.some(m => m.role === 'user') && (
+            <div className="leads-page__bant-progress">
+              <div className="leads-page__bant-bar">
+                <div className="leads-page__bant-fill" style={{ width: `${bantProgress}%` }} />
+              </div>
+              <span className="leads-page__bant-text">{bantProgress}%</span>
+            </div>
+          )}
+          <div className="prompt-input-wrapper">
+            <div className="gradient" style={{ top: '80%' }} />
+            <PromptInputProvider>
+              <PromptInput onSubmit={handlePromptSubmit}>
+                <PromptInputBody>
+                  <PromptInputTextarea ref={textareaRef} placeholder="Ask a question..." />
+                </PromptInputBody>
+                <PromptInputFooter>
+                  <PromptInputTools>
+                    <PromptInputActionMenu>
+                      <PromptInputActionMenuTrigger>
+                        <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                      </PromptInputActionMenuTrigger>
+                      <PromptInputActionMenuContent>
+                        <PromptInputActionAddAttachments />
+                      </PromptInputActionMenuContent>
+                    </PromptInputActionMenu>
+                    <PromptInputSpeechButton textareaRef={textareaRef} />
+                  </PromptInputTools>
+                  <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+                </PromptInputFooter>
+              </PromptInput>
+            </PromptInputProvider>
           </div>
-          <span className="leads-page__bant-text">{bantProgress}%</span>
-        </div>
-      )}
-      <div className="prompt-input-wrapper">
-        <div className="gradient" style={{ top: '80%' }} />
-        <PromptInputProvider>
-          <PromptInput onSubmit={handlePromptSubmit}>
-            <PromptInputBody>
-              <PromptInputTextarea ref={textareaRef} placeholder="Ask a question..." />
-            </PromptInputBody>
-            <PromptInputFooter>
-              <PromptInputTools>
-                <PromptInputActionMenu>
-                  <PromptInputActionMenuTrigger>
-                    <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                  </PromptInputActionMenuTrigger>
-                  <PromptInputActionMenuContent>
-                    <PromptInputActionAddAttachments />
-                  </PromptInputActionMenuContent>
-                </PromptInputActionMenu>
-                <PromptInputSpeechButton textareaRef={textareaRef} />
-              </PromptInputTools>
-              <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-            </PromptInputFooter>
-          </PromptInput>
-        </PromptInputProvider>
-      </div>
-      {messages.length < 3 && (
-        <div className="suggestions-container">
-          <Suggestions>
-            {suggestions.map((suggestion) => (
-              <Suggestion key={suggestion} size="lg" onClick={() => handlePromptSubmit({ text: suggestion, files: [] })} suggestion={suggestion} />
-            ))}
-          </Suggestions>
-        </div>
+          {messages.length < 3 && (
+            <div className="suggestions-container">
+              <Suggestions>
+                {suggestions.map((suggestion) => (
+                  <Suggestion key={suggestion} size="lg" onClick={() => handlePromptSubmit({ text: suggestion, files: [] })} suggestion={suggestion} />
+                ))}
+              </Suggestions>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
 }
+
+const AB_TEST_PATH = '/intro/b'
 
 function LandingBInner({
   title = 'Is custom software',
@@ -350,10 +454,35 @@ function LandingBInner({
   punctuation = '?',
   className,
   chatbotId,
-}: LandingBProps) {
+}: LandingPageBProps) {
   useLeadsPageSettings()
   const [isMobile, setIsMobile] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Track page view and scroll engagement
+  useEffect(() => {
+    trackView(AB_TEST_PATH)
+
+    const handleScroll = () => {
+      const scrollPercentage = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100
+      if (scrollPercentage > 50) {
+        trackEngagement(AB_TEST_PATH, { scrollDepth: scrollPercentage })
+        window.removeEventListener('scroll', handleScroll)
+      }
+    }
+
+    const handleConversion = () => {
+      trackConversion(AB_TEST_PATH, { action: 'chat_started' })
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('intro-b-conversion', handleConversion)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('intro-b-conversion', handleConversion)
+    }
+  }, [])
 
   useEffect(() => {
     const mobileQuery = window.matchMedia('(max-width: 768px)')
@@ -399,7 +528,7 @@ function LandingBInner({
   const [progress, setProgress] = useState(0)
 
   const orbitRadiusScale = 1.1
-  const orbitVerticalScale = 0.5
+  const orbitVerticalScale = 0.4
 
   const getGridOffset = useCallback((index: number): { x: number; y: number } => {
     const col = index % 2
@@ -636,106 +765,110 @@ function LandingBInner({
   const showGlow = !isMobile && !isDarkMode
 
   return (
-    <div ref={containerRef} className={`${styles.root} ${className || ''}`}>
-      {showGlow && (
-        <div
-          ref={glowRef}
-          className={styles['hero-glow']}
-        />
-      )}
-      <div className={styles.logo}>
-        <Logo variant="auto" style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }} />
-      </div>
-      <div className={styles['grid-background']} />
-      <div ref={gridOpacityRef} className={styles.grid} />
-      <div ref={wrapperRef} className={styles['smooth-wrapper']}>
-        <div ref={contentRef} className={styles['smooth-content']}>
-          <div className={styles.viewport}>
-            <div ref={titleBoxRef} className={styles['title-box']}>
-              <h1 ref={titleRef} className={styles.title} style={{ fontSize: isMobile ? '5.5rem' : '6.5vw' }}>
-                <span>{title}</span>{' '}
-                <div>
-                  <span>{line2}</span>{' '}
-                  <span className={styles.highlight}>
-                    {highlight}
-                    <AnimatedPath
-                      className={styles['highlight-circle']}
-                      stroke="var(--brand-RM-Logo-Blue)"
-                      strokeWidth={6}
-                      unit="%"
-                      wunit="%"
-                      height={100}
-                      width={100}
-                      speed={2}
-                      delay={2}
-                      trigger="in-view"
-                      scrollProgress={progress}
-                      preserveAspectRatio="none"
-                      d="M1 52.6501C115.88 -2.08648 483.388 1.16489 499.75 52.6501C510.213 85.5762 454.384 99.1037 355.471 112.631C256.559 126.159 48.5456 125.915 17.3586 92.0694C-20.5347 50.9459 89.9842 -1.65508 260.277 3.32941C519.086 10.9048 527.267 80.7065 459.59 112.631"
+    <div className="intro-b-page">
+      <div ref={containerRef} className={`${styles.root} ${className || ''}`}>
+        {showGlow && (
+          <div
+            ref={glowRef}
+            className={styles['hero-glow']}
+          />
+        )}
+        <div className={styles.logo}>
+          <Logo variant="auto" style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }} />
+        </div>
+        <div className={styles['grid-background']} />
+        <div ref={gridOpacityRef} className={styles.grid} />
+        <div ref={wrapperRef} className={styles['smooth-wrapper']}>
+          <div ref={contentRef} className={styles['smooth-content']}>
+            <div className={styles.viewport}>
+              <div ref={titleBoxRef} className={styles['title-box']}>
+                <h1 ref={titleRef} className={styles.title} style={{ fontSize: isMobile ? '5.5rem' : '6.5vw' }}>
+                  <span>{title}</span>{' '}
+                  <div>
+                    <span>{line2}</span>{' '}
+                    <span className={styles.highlight}>
+                      {highlight}
+                      <AnimatedPath
+                        className={styles['highlight-circle']}
+                        stroke="var(--brand-RM-Logo-Blue)"
+                        strokeWidth={4}
+                        unit="%"
+                        wunit="%"
+                        height={120}
+                        width={130}
+                        speed={2}
+                        delay={2}
+                        trigger="in-view"
+                        scrollProgress={progress}
+                        preserveAspectRatio="none"
+                        d="M1 52.6501C115.88 -2.08648 483.388 1.16489 499.75 52.6501C510.213 85.5762 454.384 99.1037 355.471 112.631C256.559 126.159 48.5456 125.915 17.3586 92.0694C-20.5347 50.9459 89.9842 -1.65508 260.277 3.32941C519.086 10.9048 527.267 80.7065 459.59 112.631"
 
-                    />
-                  </span>
-                  {punctuation}
-                </div>
-              </h1>
-              <p ref={descriptionRef} className={styles.description}>
-                Our AI-powered tool helps you explore whether custom software makes sense for your business—and connects you with the right resources either way.
-              </p>
-            </div>
-
-            {!isMobile && (
-              <div ref={cardsContainerRef} className={styles['suggestions-container']}>
-                <div ref={cardsWrapperRef} className={styles.suggestions}>
-                  {questions.map((q, index) => {
-                    const rad = (q.angle * Math.PI) / 180
-                    const initialX = Math.round(Math.cos(rad) * q.distance * orbitRadiusScale)
-                    const initialY = Math.round(Math.sin(rad) * q.distance * orbitRadiusScale * orbitVerticalScale)
-                    return (
-                      <Suggestion
-                        key={q.id}
-                        ref={(el) => { cardRefs.current[index] = el }}
-                        suggestion={q.text}
-                        onClick={() => handleCardClick()}
-                        tabIndex={index + 1}
-                        className={styles.suggestion}
-                        style={{
-                          transform: `translate(calc(-50% + ${initialX}px), calc(-50% + ${initialY}px))`,
-                        }}
-                      >
-                        <span className={styles['suggestion-text']}>{q.text}</span>
-                      </Suggestion>
-                    )
-                  })}
-                </div>
+                      />
+                    </span>
+                    {punctuation}
+                  </div>
+                </h1>
+                <p ref={descriptionRef} className={styles.description}>
+                  Our AI-powered tool helps you explore whether custom software makes sense for your business—and connects you with the right resources either way.
+                </p>
               </div>
-            )}
 
-            <div ref={scrollIndicatorRef} className={styles.scroll}>
-              <ScrollIndicator
-                borderColor="var(--brand-RM-Logo-Blue)"
-                borderOpacity={1}
-                dotColor="var(--brand-RM-Logo-Blue)"
-                pillWidth={24}
-                pillHeight={40}
-                dotSize={8}
-                borderWidth={2}
-                borderRadius={9999}
-                animationSpeed={1.5}
-                scrollType="section"
-                sectionName="get-started"
-                animationPreset="default"
-                minimalistFontSize={10}
-                minimalistSpeed={1}
-                onScrollToSection={handleScrollToSection}
-              />
+
+              {!isMobile && (
+                <div ref={cardsContainerRef} className={styles['suggestions-container']}>
+                  <div ref={cardsWrapperRef} className={styles.suggestions}>
+                    {questions.map((q, index) => {
+                      const rad = (q.angle * Math.PI) / 180
+                      const initialX = Math.round(Math.cos(rad) * q.distance * orbitRadiusScale)
+                      const initialY = Math.round(Math.sin(rad) * q.distance * orbitRadiusScale * orbitVerticalScale)
+                      return (
+                        <Suggestion
+                          key={q.id}
+                          ref={(el) => { cardRefs.current[index] = el }}
+                          suggestion={q.text}
+                          onClick={() => handleCardClick()}
+                          tabIndex={index + 1}
+                          className={styles.suggestion}
+                          style={{
+                            transform: `translate(calc(-50% + ${initialX}px), calc(-50% + ${initialY}px))`,
+                          }}
+                        >
+                          <span className={styles['suggestion-text']}>{q.text}</span>
+                        </Suggestion>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div ref={scrollIndicatorRef} className={styles.scroll}>
+                <ScrollIndicator
+                  borderColor="var(--brand-RM-Logo-Blue)"
+                  borderOpacity={1}
+                  dotColor="var(--brand-RM-Logo-Blue)"
+                  pillWidth={24}
+                  pillHeight={40}
+                  dotSize={8}
+                  borderWidth={2}
+                  borderRadius={9999}
+                  animationSpeed={1.5}
+                  scrollType="section"
+                  sectionName="get-started"
+                  animationPreset="default"
+                  minimalistFontSize={10}
+                  minimalistSpeed={1}
+                  onScrollToSection={handleScrollToSection}
+                />
+              </div>
             </div>
-          </div>
 
-          <div ref={formBoxRef} id="get-started" className={styles['form-box']}>
-            <HeroChat chatbotId={chatbotId} />
+            <div ref={formBoxRef} id="get-started" className={styles['form-box']}>
+              <HeroChat chatbotId={chatbotId} />
+            </div>
           </div>
         </div>
       </div>
+      <PrivacyTermsLinks variant="dark" className="intro-page__footer-links" />
     </div>
   )
 }

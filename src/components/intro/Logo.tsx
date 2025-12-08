@@ -2,6 +2,7 @@
 
 import { SVGProps } from "react"
 import Link from 'next/link'
+import './logo.css'
 
 interface SVGRProps {
   title?: string;
@@ -18,44 +19,6 @@ const Logo = ({
   ...props
 }: SVGProps<SVGSVGElement> & SVGRProps) => (
   <>
-    <style>{`
-      .logo--white .logo-fill {
-      transition: all 300ms ease-in-out;
-        fill: #FFFFFF;
-      }
-      .logo--white .logo-text {
-        fill: #FFFFFF;
-      }
-      .logo-link:hover .logo-fill {
-      fill: #2A84F8;
-      }
-      .logo--auto .logo-fill {
-        fill: #2A84F8;
-      }
-      .logo--auto .logo-text {
-        fill: light-dark(var(--op-color-black), var(--op-color-white));
-      }
-      @media (prefers-color-scheme: dark) {
-        .logo--auto .logo-fill {
-          fill: #2A84F8;
-        }
-        .logo--auto .logo-text {
-          fill: #FFFFFF;
-        }
-      }
-      .logo--light .logo-fill {
-        fill: #2A84F8;
-      }
-      .logo--light .logo-text {
-        fill: #0C2227;
-      }
-      .logo--dark .logo-fill {
-        fill: #2A84F8;
-      }
-      .logo--dark .logo-text {
-        fill: #FFFFFF;
-      }
-    `}</style>
     <Link
       className="logo-link"
       aria-label="Go to RoleModel Software"

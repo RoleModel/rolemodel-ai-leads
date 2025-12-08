@@ -5,6 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { ModelSelector } from '@/components/ui/model-selector'
 import type { PlaygroundSettings } from '@/app/playground/page'
 
 interface PlaygroundConfigProps {
@@ -113,28 +114,12 @@ export function PlaygroundConfig({ settings, onSettingsChange }: PlaygroundConfi
 
         {/* Model Selection */}
         <div style={{ marginBottom: 'var(--op-space-large)' }}>
-          <label
-            htmlFor="playground-model"
-            style={{
-              display: 'block',
-              fontSize: 'var(--op-font-small)',
-              fontWeight: 'var(--op-font-weight-medium)',
-              marginBottom: 'var(--op-space-small)',
-            }}
-          >
-            Model
-          </label>
-          <select
+          <ModelSelector
             id="playground-model"
-            className="form-control"
+            label="Model"
             value={settings.model}
-            onChange={(e) => onSettingsChange({ model: e.target.value })}
-          >
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-          </select>
+            onChange={(modelId) => onSettingsChange({ model: modelId })}
+          />
         </div>
 
         {/* Temperature */}
@@ -173,7 +158,7 @@ export function PlaygroundConfig({ settings, onSettingsChange }: PlaygroundConfi
             step="0.1"
             value={settings.temperature}
             onChange={(e) => onSettingsChange({ temperature: Number(e.target.value) })}
-            style={{ width: '100%' }}
+            style={{ width: '100%', accentColor: 'var(--op-color-primary-base)' }}
             aria-valuemin={0}
             aria-valuemax={1}
             aria-valuenow={settings.temperature}

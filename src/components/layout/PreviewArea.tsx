@@ -6,7 +6,7 @@ import {
   SparklesIcon,
   Sun01Icon,
 } from 'hugeicons-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 
 import { LeadsPageView } from '@/components/leads-page/LeadsPageView'
@@ -101,8 +101,28 @@ const styles = {
 
 export function PreviewArea() {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [manualTheme, setManualTheme] = useState<'light' | 'dark' | null>(null)
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
   const [editMode, setEditMode] = useState(true)
+
+  // Detect system color scheme preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setSystemTheme(e.matches ? 'dark' : 'light')
+    }
+
+    // Set initial value
+    handleChange(mediaQuery)
+
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // Effective theme: manual override takes precedence, otherwise use system
+  const theme = manualTheme ?? systemTheme
 
   return (
     <main style={styles.main}>
@@ -150,7 +170,7 @@ export function PreviewArea() {
             showSidebar={previewMode === 'desktop'}
             editMode={editMode}
             theme={theme}
-            onThemeChange={setTheme}
+            onThemeChange={setManualTheme}
           />
         </div>
       </Card>
@@ -196,10 +216,10 @@ export function PreviewArea() {
           <div style={styles.topBarDivider} />
 
           <div style={styles.topBarTools}>
-            <Button variant="ghosticon" onClick={() => setTheme('light')}>
+            <Button variant="ghosticon" onClick={() => setManualTheme('light')}>
               <Sun01Icon className="icon-sm" />
             </Button>
-            <Button variant="ghosticon" onClick={() => setTheme('dark')}>
+            <Button variant="ghosticon" onClick={() => setManualTheme('dark')}>
               <Moon02Icon className="icon-sm" />
             </Button>
           </div>

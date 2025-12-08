@@ -322,29 +322,58 @@ ${sourceContext}`,
           const totalMessages = messages.length + 1
           if (totalMessages >= 3) {
             try {
-              // Get all conversation messages
-              const { data: allMessages } = await supabaseServer
-                .from('messages')
-                .select('role, content')
-                .eq('conversation_id', activeConversationId)
-                .order('created_at', { ascending: true })
-
-              if (allMessages && allMessages.length > 0) {
-                // Get all available sources for this chatbot for recommendations
-                const { data: allSources } = await supabaseServer
+              // Fetch conversation messages AND the conversation's visitor info in parallel
+              const [messagesResult, conversationResult, sourcesResult] = await Promise.all([
+                supabaseServer
+                  .from('messages')
+                  .select('role, content')
+                  .eq('conversation_id', activeConversationId)
+                  .order('created_at', { ascending: true }),
+                supabaseServer
+                  .from('conversations')
+                  .select('visitor_name, visitor_email, lead_captured')
+                  .eq('id', activeConversationId)
+                  .single(),
+                supabaseServer
                   .from('sources')
                   .select('id, title, content')
                   .eq('chatbot_id', activeChatbotId)
-                  .limit(20)
+                  .limit(20),
+              ])
 
+              const allMessages = messagesResult.data
+              const conversation = conversationResult.data
+              const allSources = sourcesResult.data
+
+              // Skip if already captured as a lead
+              if (conversation?.lead_captured) {
+                return
+              }
+
+              if (allMessages && allMessages.length > 0) {
                 // Extract lead data with available sources for recommendations
                 const leadData = await extractLeadData(
                   allMessages,
                   allSources || []
                 )
 
+                // Use conversation's visitor info if AI didn't extract it
+                // (from intro forms where name/email are captured before chat)
+                const visitorName = leadData?.contactInfo?.name || conversation?.visitor_name || undefined
+                const visitorEmail = leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+
+                // Merge conversation visitor info into leadData for qualification check
+                const enrichedLeadData = leadData ? {
+                  ...leadData,
+                  contactInfo: {
+                    ...leadData.contactInfo,
+                    name: visitorName,
+                    email: visitorEmail,
+                  }
+                } : null
+
                 // Check if lead is qualified and hasn't been saved yet
-                if (leadData && isQualifiedLead(leadData)) {
+                if (enrichedLeadData && isQualifiedLead(enrichedLeadData)) {
                   // Check if lead already exists for this conversation
                   const { data: existingLead } = await supabaseServer
                     .from('leads')
@@ -353,14 +382,14 @@ ${sourceContext}`,
                     .single()
 
                   if (!existingLead) {
-                    // Save the lead
+                    // Save the lead with enriched data
                     type LeadInsert = Database['public']['Tables']['leads']['Insert']
                     const leadInsert: LeadInsert = {
                       conversation_id: activeConversationId,
-                      visitor_name: leadData.contactInfo?.name || null,
-                      visitor_email: leadData.contactInfo?.email || null,
+                      visitor_name: visitorName || null,
+                      visitor_email: visitorEmail || null,
                       summary:
-                        leadData as Database['public']['Tables']['leads']['Insert']['summary'],
+                        enrichedLeadData as unknown as Database['public']['Tables']['leads']['Insert']['summary'],
                     }
                     await supabaseServer.from('leads').insert([leadInsert])
 

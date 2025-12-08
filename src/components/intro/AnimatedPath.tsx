@@ -1,8 +1,11 @@
 'use client'
 import * as React from "react"
-import { motion, useScroll } from "motion/react"
-import type { UseScrollOptions } from "motion/react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useGSAP } from "@gsap/react"
 import { cn } from "@/lib/utils"
+
+gsap.registerPlugin(useGSAP, ScrollTrigger)
 
 type TriggerMode = "load" | "in-view" | "scroll"
 
@@ -30,7 +33,6 @@ type Props = {
   clipPath?: React.ReactNode
   // Scroll-specific
   scrollTarget?: "page" | "element"
-  scrollOffset?: UseScrollOptions["offset"]
   /** External progress value (0-1) for scroll trigger. If provided, overrides internal scroll tracking. */
   scrollProgress?: number
   /** Progress value (0-1) at which d2 starts animating. Default is 1 (d2 waits until d is complete). Set to 0.8 for d2 to start when d is 80% done. */
@@ -56,7 +58,6 @@ export default function PathScrollRunner({
   clipPath,
   viewBox,
   scrollTarget = "element",
-  scrollOffset = ["start end", "end start"],
   d2StartAt = 1,
   unit = "px",
   wunit = "px",
@@ -68,97 +69,12 @@ export default function PathScrollRunner({
   const pathRef2 = React.useRef<SVGPathElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [autoViewBox, setAutoViewBox] = React.useState<string | null>(null)
-  const [totalLength1, setTotalLength1] = React.useState<number>(0)
-  const [totalLength2, setTotalLength2] = React.useState<number>(0)
-  const [dashOffset1, setDashOffset1] = React.useState<number>(0)
-  const [dashOffset2, setDashOffset2] = React.useState<number>(0)
 
-  // Element-based scroll progress (only used when scrollTarget="element")
-  const scrollOptions: UseScrollOptions | undefined =
-    trigger === "scroll" && scrollTarget === "element"
-      ? { target: containerRef, offset: scrollOffset }
-      : undefined
-  const { scrollYProgress } = useScroll(scrollOptions)
-
-  // Subscribe to scroll progress and update dash offsets directly
-  React.useEffect(() => {
-    if (trigger !== "scroll") return
-
-    const updateFromProgress = (p: number) => {
-      // d1 animates from 0 to d2StartAt
-      // d2 animates from d2StartAt to 1
-      if (totalLength1 > 0) {
-        // Map progress [0, d2StartAt] to [0, 1] for d1
-        const d1Progress = d2StartAt > 0 ? Math.min(1, p / d2StartAt) : 1
-        setDashOffset1((1 - d1Progress) * totalLength1)
-      }
-      if (totalLength2 > 0) {
-        // Map progress [d2StartAt, 1] to [0, 1] for d2
-        const d2Range = 1 - d2StartAt
-        let d2Progress = 0
-        if (d2Range > 0) {
-          d2Progress = Math.max(0, Math.min(1, (p - d2StartAt) / d2Range))
-        } else if (p >= d2StartAt) {
-          d2Progress = 1
-        }
-        setDashOffset2((1 - d2Progress) * totalLength2)
-      }
-    }
-
-    // If external scrollProgress is provided, use it directly
-    if (scrollProgress !== undefined) {
-      updateFromProgress(scrollProgress)
-      return
-    }
-
-    if (scrollTarget === "element") {
-      // Use Motion's scrollYProgress
-      const unsubscribe = scrollYProgress.on("change", updateFromProgress)
-      // Initial value
-      updateFromProgress(scrollYProgress.get())
-      return unsubscribe
-    } else {
-      // Page scroll - manual listener
-      const handleScroll = () => {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0
-        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
-        const p = scrollHeight > 0 ? Math.min(1, Math.max(0, scrollTop / scrollHeight)) : 0
-        updateFromProgress(p)
-      }
-      handleScroll()
-      window.addEventListener("scroll", handleScroll, { passive: true })
-      return () => window.removeEventListener("scroll", handleScroll)
-    }
-  }, [trigger, scrollTarget, scrollYProgress, totalLength1, totalLength2, scrollProgress, d2StartAt])
-
-  const variants = {
-    hidden: { pathLength: 0 },
-    visible: {
-      pathLength: 1,
-      transition: {
-        duration: Math.max(0.05, speed),
-        delay: Math.max(0, delay),
-      },
-    },
-  }
-
-  const baseProps =
-    trigger === "load"
-      ? { initial: "hidden", animate: "visible" as const }
-      : trigger === "in-view"
-        ? { initial: "hidden", whileInView: "visible" as const }
-        : {}
-
-  const viewportProps =
-    trigger === "in-view"
-      ? { viewport: { amount: inViewAmount, once: !replay } }
-      : {}
-
-  // --- auto-fit viewBox if none provided ---
+  // Auto-fit viewBox if none provided
   React.useLayoutEffect(() => {
     const el = pathRef1.current
     if (!el) return
-    if (viewBox && viewBox.trim().length > 0) return // user override
+    if (viewBox && viewBox.trim().length > 0) return
 
     try {
       const b = el.getBBox()
@@ -169,49 +85,149 @@ export default function PathScrollRunner({
       const h = Math.max(1, Math.ceil(b.height + pad * 2))
       setAutoViewBox(`${x} ${y} ${w} ${h}`)
     } catch {
-      // fallback
       setAutoViewBox("0 0 100 100")
     }
   }, [d, viewBox])
 
-  // --- measure path lengths for stroke-dash animation ---
-  React.useLayoutEffect(() => {
-    const el1 = pathRef1.current
-    if (el1) {
-      try {
-        const len1 = el1.getTotalLength()
-        setTotalLength1(len1)
-        // Initialize dash offset to full length (hidden)
-        if (trigger === "scroll") {
-          setDashOffset1(len1)
-        }
-      } catch {
-        setTotalLength1(0)
+  // GSAP animations
+  useGSAP(() => {
+    const path1 = pathRef1.current
+    const path2 = pathRef2.current
+    if (!path1) return
+
+    // Set initial state - different dash patterns for scroll vs other triggers
+    if (trigger === "scroll") {
+      gsap.set(path1, {
+        strokeDasharray: '1 1',
+        strokeDashoffset: 1,
+      })
+
+      if (path2 && hasd2) {
+        gsap.set(path2, {
+          strokeDasharray: '1 1',
+          strokeDashoffset: 1,
+        })
+      }
+    } else {
+      gsap.set(path1, {
+        strokeDasharray: 1,
+        strokeDashoffset: 1,
+      })
+
+      if (path2 && hasd2) {
+        gsap.set(path2, {
+          strokeDasharray: 1,
+          strokeDashoffset: 1,
+        })
       }
     }
-  }, [d, trigger])
 
-  React.useLayoutEffect(() => {
-    if (!hasd2) return
-    const el2 = pathRef2.current
-    if (el2) {
-      try {
-        const len2 = el2.getTotalLength()
-        setTotalLength2(len2)
-        if (trigger === "scroll") {
-          setDashOffset2(len2)
+    if (trigger === "load") {
+      // Simple load animation
+      gsap.to(path1, {
+        strokeDasharray: 1,
+        strokeDashoffset: 0,
+        duration: speed,
+        delay: delay,
+        ease: "none",
+      })
+
+      if (path2 && hasd2) {
+        gsap.to(path2, {
+          strokeDasharray: 1,
+          strokeDashoffset: 0,
+          duration: speed,
+          delay: delay + (d2StartAt < 1 ? speed * d2StartAt : speed),
+          ease: "none",
+        })
+      }
+    } else if (trigger === "in-view") {
+      // In-view animation
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: `top ${100 - inViewAmount * 100}%`,
+        once: !replay,
+        onEnter: () => {
+          gsap.to(path1, {
+            strokeDasharray: 1,
+            strokeDashoffset: 0,
+            duration: speed,
+            delay: delay,
+            ease: "none",
+          })
+
+          if (path2 && hasd2) {
+            gsap.to(path2, {
+              strokeDasharray: 1,
+              strokeDashoffset: 0,
+              duration: speed,
+              delay: delay + (d2StartAt < 1 ? speed * d2StartAt : speed),
+              ease: "none",
+            })
+          }
+        },
+      })
+    } else if (trigger === "scroll") {
+      // Scroll-based animation
+      if (scrollProgress !== undefined) {
+        // External progress provided - use a ticker to update on every frame
+        gsap.ticker.add(() => {
+          const p = scrollProgress
+          const d1Progress = d2StartAt > 0 ? Math.min(1, p / d2StartAt) : 1
+          gsap.set(path1, {
+            strokeDashoffset: 1 - d1Progress,
+          })
+
+          if (path2 && hasd2) {
+            const d2Range = 1 - d2StartAt
+            let d2Progress = 0
+            if (d2Range > 0) {
+              d2Progress = Math.max(0, Math.min(1, (p - d2StartAt) / d2Range))
+            } else if (p >= d2StartAt) {
+              d2Progress = 1
+            }
+            gsap.set(path2, {
+              strokeDashoffset: 1 - d2Progress,
+            })
+          }
+        })
+        return () => {
+          gsap.ticker.remove(() => {})
         }
-      } catch {
-        setTotalLength2(0)
+      } else {
+        // ScrollTrigger-based
+        ScrollTrigger.create({
+          trigger: scrollTarget === "element" ? containerRef.current : "body",
+          start: scrollTarget === "element" ? "top bottom" : "top top",
+          end: scrollTarget === "element" ? "bottom top" : "bottom bottom",
+          scrub: true,
+          onUpdate: (self) => {
+            const p = self.progress
+            const d1Progress = d2StartAt > 0 ? Math.min(1, p / d2StartAt) : 1
+            gsap.set(path1, {
+              strokeDashoffset: 1 - d1Progress,
+            })
+
+            if (path2 && hasd2) {
+              const d2Range = 1 - d2StartAt
+              let d2Progress = 0
+              if (d2Range > 0) {
+                d2Progress = Math.max(0, Math.min(1, (p - d2StartAt) / d2Range))
+              } else if (p >= d2StartAt) {
+                d2Progress = 1
+              }
+              gsap.set(path2, {
+                strokeDashoffset: 1 - d2Progress,
+              })
+            }
+          },
+        })
       }
     }
-  }, [hasd2, d2, trigger])
-
+  }, { dependencies: [trigger, scrollProgress, d2StartAt, hasd2, speed, delay, scrollTarget, inViewAmount, replay], scope: containerRef })
   const resolvedViewBox =
     (viewBox && viewBox.trim().length > 0 ? viewBox : autoViewBox) ??
     "0 0 100 100"
-
-
 
   const resolvedWidth = typeof width === "number" ? `${width}${wunit}` : width
   const resolvedHeight = typeof height === "number" ? `${height}${unit}` : height
@@ -224,18 +240,18 @@ export default function PathScrollRunner({
         ...style,
         width: resolvedWidth,
         height: resolvedHeight,
-        display: "grid",
+        display: "block",
+        overflow: "visible",
       }}
     >
-      <motion.svg
-        {...baseProps}
-        {...viewportProps}
+      <svg
         viewBox={resolvedViewBox}
         preserveAspectRatio={preserveAspectRatio}
         style={{
           width: "100%",
           height: "100%",
           display: "block",
+          overflow: "visible",
         }}
       >
         {useClipPath && (
@@ -243,37 +259,33 @@ export default function PathScrollRunner({
             {clipPath}
           </defs>
         )}
-        <motion.path
+        <path
           ref={pathRef1}
           d={d}
-          variants={trigger !== "scroll" ? variants : undefined}
           stroke={stroke}
           strokeWidth={strokeWidth}
           strokeLinecap="butt"
           strokeLinejoin="miter"
           fill="none"
-          strokeDasharray={trigger === "scroll" ? totalLength1 : undefined}
-          strokeDashoffset={trigger === "scroll" ? dashOffset1 : undefined}
-          pathLength={trigger === "scroll" ? undefined : 1}
+          pathLength="1"
+          style={{ strokeDasharray: '1 1', strokeDashoffset: '1' }}
           vectorEffect={vectorEffect ? "non-scaling-stroke" : undefined}
         />
         {hasd2 && (
-          <motion.path
+          <path
             ref={pathRef2}
             d={d2}
-            variants={trigger !== "scroll" ? variants : undefined}
             stroke={stroke}
             strokeWidth={strokeWidth}
             strokeLinecap="butt"
             strokeLinejoin="miter"
             fill="none"
-            strokeDasharray={trigger === "scroll" ? totalLength2 : undefined}
-            strokeDashoffset={trigger === "scroll" ? dashOffset2 : undefined}
-            pathLength={trigger === "scroll" ? undefined : 1}
+            pathLength="1"
+            style={{ strokeDasharray: '1 1', strokeDashoffset: '1' }}
             vectorEffect={vectorEffect ? "non-scaling-stroke" : undefined}
           />
         )}
-      </motion.svg>
+      </svg>
     </div>
   )
 }

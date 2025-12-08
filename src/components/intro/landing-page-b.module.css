@@ -1,3 +1,14 @@
+/* Override optics html overflow:hidden to allow scrolling */
+:global(html:has(.intro-b-page)) {
+  overflow: visible !important;
+  overflow-y: auto !important;
+}
+
+:global(.intro-b-page) {
+  width: 100%;
+  min-height: 100vh;
+}
+
 .root {
   position: relative;
   width: 100%;
@@ -57,7 +68,7 @@
   inset: 0;
   background-color: light-dark(
     var(--op-color-neutral-plus-six),
-    var(--op-color-neutral-plus-eight)
+    var(--op-color-background)
   );
   pointer-events: none;
   z-index: 0;
@@ -123,19 +134,15 @@
 
 .highlight {
   position: relative;
-  font-weight: 900;
-  padding: 0 var(--op-space-small);
+  padding: 0 var(--op-space-x-small);
   white-space: nowrap;
   overflow: hidden;
 }
 
 .highlight-circle {
   position: absolute;
-  inset: 8% 0 0 0;
+  inset: -10% -10% 0 -15%;
   bottom: calc(var(--op-size-unit) * -2.5);
-  width: 105%;
-  height: 110%;
-  top: -5%;
   transform: rotate(-180deg);
 }
 
@@ -199,7 +206,7 @@
   position: relative;
   background-color: light-dark(
     var(--op-color-neutral-plus-six),
-    var(--op-color-neutral-plus-eight)
+    var(--op-color-background)
   );
 }
 
@@ -208,6 +215,7 @@
   max-width: calc(var(--op-size-unit) * 200);
   background-color: transparent;
   border: none;
+  overflow: auto;
 }
 
 .chat-title {
@@ -251,8 +259,8 @@
 }
 
 .scroll {
-  position: absolute;
-  bottom: var(--op-space-2x-large);
+  position: fixed;
+  top: 80vh;
   left: 50%;
   z-index: 100;
   will-change: opacity;
@@ -265,6 +273,46 @@
       visibility: hidden;
     }
   }
+}
+
+/* Lead capture form */
+.lead-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--op-space-large);
+  gap: 0;
+  box-shadow: 0px 0px 2px 0px inset var(--op-color-neutral-plus-four);
+  contain: paint;
+  background-color: var(--op-color-neutral-plus-seven);
+}
+
+.card-title {
+  font-size: var(--op-font-5x-large);
+  font-weight: var(--op-font-weight-bold);
+  color: var(--op-color-on-background);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-medium);
+  padding: var(--op-space-large);
+}
+
+.lead-form__subtitle {
+  font-size: var(--op-font-medium);
+  color: var(--op-color-on-background-alt);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.lead-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--op-space-medium);
+  margin-top: var(--op-space-small);
 }
 
 /* Mobile styles */

@@ -1,0 +1,46 @@
+.logo-link {
+  display: block;
+}
+
+.logo--white .logo-fill {
+  transition: all 300ms ease-in-out;
+  fill: #ffffff;
+}
+.logo--white .logo-text {
+  fill: #ffffff;
+}
+.logo-link:hover .logo-fill {
+  fill: #2a84f8;
+}
+.logo--auto .logo-fill {
+  fill: #2a84f8;
+}
+.logo--auto .logo-text {
+  fill: #0c2227;
+}
+/* System dark mode when root not explicitly light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme-mode='light']) .logo--auto .logo-text {
+    fill: #ffffff;
+  }
+}
+/* Explicit dark mode via data attribute on any ancestor */
+[data-theme-mode='dark'] .logo--auto .logo-text {
+  fill: #ffffff;
+}
+/* Explicit light mode via data attribute on any ancestor */
+[data-theme-mode='light'] .logo--auto .logo-text {
+  fill: #0c2227;
+}
+.logo--light .logo-fill {
+  fill: #2a84f8;
+}
+.logo--light .logo-text {
+  fill: #0c2227;
+}
+.logo--dark .logo-fill {
+  fill: #2a84f8;
+}
+.logo--dark .logo-text {
+  fill: #ffffff;
+}

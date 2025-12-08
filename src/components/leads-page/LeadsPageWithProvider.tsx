@@ -31,8 +31,34 @@ function LeadsPageLoader({
   conversationId,
 }: LeadsPageWithProviderProps) {
   const { updateSettings, isLoading } = useLeadsPageSettings()
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  // Track whether user has manually overridden the theme
+  const [manualTheme, setManualTheme] = useState<'light' | 'dark' | null>(null)
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
   const [apiLoading, setApiLoading] = useState(loadFromApi)
+
+  // Detect system color scheme preference
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setSystemTheme(e.matches ? 'dark' : 'light')
+    }
+
+    // Set initial value
+    handleChange(mediaQuery)
+
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  // Effective theme: manual override takes precedence, otherwise use system
+  const theme = manualTheme ?? systemTheme
+
+  // Handle theme toggle - sets manual override
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setManualTheme(newTheme)
+  }
 
   useEffect(() => {
     if (!loadFromApi) return
@@ -77,7 +103,7 @@ function LeadsPageLoader({
       showSidebar={showSidebar}
       editMode={editMode}
       theme={theme}
-      onThemeChange={setTheme}
+      onThemeChange={handleThemeChange}
       isEmbed={isEmbed}
       visitorName={visitorName}
       visitorEmail={visitorEmail}
