@@ -161,8 +161,9 @@
     container.appendChild(iframe)
     document.body.appendChild(container)
 
-    // Listen for close message from iframe
+    // Listen for close message from iframe (validate origin for security)
     window.addEventListener('message', function (event) {
+      if (event.origin !== baseUrl) return
       if (event.data && event.data.type === 'WIDGET_CLOSE') {
         window.RoleModelAIWidget.hide()
       }

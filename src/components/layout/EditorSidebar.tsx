@@ -197,7 +197,7 @@ export function EditorSidebar({
   const iframeEmbedCode = `<iframe
   src="${origin}/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
   width="100%"
-  style="height: 100vh; border: none;"
+  frameborder="0"
   allow="clipboard-write"
 ></iframe>`
 
