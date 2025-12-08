@@ -136,11 +136,85 @@ The AI uses these instructions to guide the conversation naturally while collect
 
 Implemented in `/src/lib/ai/rag.ts`.
 
+### Configuration Architecture
+
+The system uses two complementary configuration sources that merge together:
+
+```mermaid
+flowchart TB
+    subgraph "Configuration Sources"
+        WF["/api/workflow<br/>Visual Workflow Editor"]
+        RAG["ragConfig<br/>EditorSidebar Settings"]
+    end
+
+    subgraph "Storage"
+        BC["chatbot.business_context<br/>(JSONB)"]
+        LPS["leads_page_settings.rag_config<br/>(JSONB)"]
+    end
+
+    subgraph "buildSourceContext()"
+        WQ["Workflow Questions<br/>(custom qualification questions)"]
+        RS["RAG Settings<br/>(behavior configuration)"]
+    end
+
+    subgraph "AI System Prompt"
+        KB["Knowledge Base Sources"]
+        QI["Qualification Instructions"]
+        CF["Conversation Flow"]
+        CI["Citation Settings"]
+    end
+
+    WF --> BC
+    RAG --> LPS
+
+    BC --> WQ
+    LPS --> RS
+
+    WQ --> QI
+    RS --> CF
+    RS --> CI
+
+    KB --> SP["Final System Prompt"]
+    QI --> SP
+    CF --> SP
+    CI --> SP
+
+    SP --> AI["GPT-4o-mini"]
+```
+
+### Workflow vs ragConfig
+
+| Source | Provides | UI Location |
+|--------|----------|-------------|
+| **Workflow** | Custom qualification questions, scoring weights, thresholds | Visual Flow Designer |
+| **ragConfig** | Behavior settings (citations, conciseness, BANT, contact collection, personalization) | EditorSidebar Settings |
+
+**Integration Logic:**
+- If workflow has custom questions → use those instead of default BANT
+- ragConfig settings (maxQuestions, responseConciseness, enableCitations, etc.) always apply
+- Both merge together in `buildSourceContext()` to create the final system prompt
+
+### ragConfig Options
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| sourceLimit | number | 5 | Number of knowledge base sources to retrieve |
+| similarityThreshold | number | 0.5 | Minimum similarity score for retrieval |
+| enableCitations | boolean | true | Require inline citations like [1], [2] |
+| enableCaseStudies | boolean | true | Proactively share relevant case studies |
+| enableBANT | boolean | true | Use BANT qualification (when no workflow questions) |
+| askForName | boolean | true | Collect visitor's name |
+| askForEmail | boolean | true | Collect visitor's email |
+| maxQuestions | number | 5 | Maximum qualification questions per session |
+| responseConciseness | 'brief' \| 'moderate' \| 'detailed' | 'moderate' | AI response length |
+| enablePersonalization | boolean | true | Use visitor's name/context in responses |
+| customInstructions | string | '' | Additional AI behavior instructions |
+
 ### How Context Retrieval Works
 
 1. User's message is converted to a vector embedding using OpenAI's `text-embedding-3-small` (1536 dimensions)
 2. pgvector performs cosine similarity search against stored document chunks
-3. Top 5 most relevant chunks are retrieved (similarity threshold: 0.3)
+3. Top N most relevant chunks are retrieved (configurable via `sourceLimit`, threshold via `similarityThreshold`)
 4. Retrieved context is prepended to the AI's system prompt
 
 ### What Gets Retrieved

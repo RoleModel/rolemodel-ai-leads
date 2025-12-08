@@ -38,16 +38,12 @@ export function ModelSelector({ value, onChange, label = 'Model', id }: ModelSel
   }
 
   return (
-    <div>
+    <div className="form-group">
       {label && (
         <Label
           htmlFor={id}
-          style={{
-            marginBottom: 'var(--op-space-small)',
-            display: 'block',
-            fontSize: 'var(--op-font-small)',
-            fontWeight: 'var(--op-font-weight-medium)',
-          }}
+
+          className="form-label"
         >
           {label}
         </Label>

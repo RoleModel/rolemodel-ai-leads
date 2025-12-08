@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
     darkPrimaryColor,
     aiInstructions,
     calendlyUrl,
+    ragConfig,
   } = body
 
   if (!chatbotId) {
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
         dark_primary_color: darkPrimaryColor,
         ai_instructions: aiInstructions,
         calendly_url: calendlyUrl,
+        rag_config: ragConfig,
       },
       {
         onConflict: 'chatbot_id',

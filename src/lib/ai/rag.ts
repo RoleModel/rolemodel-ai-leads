@@ -82,13 +82,59 @@ export async function retrieveRelevantSources(
   }
 }
 
+interface RagConfig {
+  // Knowledge Base Retrieval
+  sourceLimit?: number           // Number of sources to retrieve (default: 5)
+  similarityThreshold?: number   // Minimum similarity score (default: 0.5)
+
+  // Citation & Case Studies
+  enableCitations?: boolean
+  enableCaseStudies?: boolean
+  citationStyle?: string
+
+  // Conversation Flow
+  enableBANT?: boolean           // Use BANT qualification (default: true)
+  askForName?: boolean           // Ask for visitor's name (default: true)
+  askForEmail?: boolean          // Ask for visitor's email (default: true)
+  maxQuestions?: number          // Max qualification questions (default: 5)
+
+  // Response Style
+  responseConciseness?: 'brief' | 'moderate' | 'detailed'  // Response length (default: 'moderate')
+  enablePersonalization?: boolean   // Use name/context in responses (default: true)
+
+  // Custom Instructions
+  customInstructions?: string
+}
+
 /**
  * Build context string from sources with workflow
  */
-export function buildSourceContext(sources: Source[], chatbot?: Chatbot | null): string {
+export function buildSourceContext(
+  sources: Source[],
+  chatbot?: Chatbot | null,
+  ragConfig?: RagConfig | null
+): string {
   if (sources.length === 0) {
     return ''
   }
+
+  // Extract config with defaults
+  const enableCitations = ragConfig?.enableCitations ?? true
+  const enableCaseStudies = ragConfig?.enableCaseStudies ?? true
+  const customInstructions = ragConfig?.customInstructions || ''
+  const enableBANT = ragConfig?.enableBANT ?? true
+  const askForName = ragConfig?.askForName ?? true
+  const askForEmail = ragConfig?.askForEmail ?? true
+  const maxQuestions = ragConfig?.maxQuestions ?? 5
+  const responseConciseness = ragConfig?.responseConciseness ?? 'moderate'
+  const enablePersonalization = ragConfig?.enablePersonalization ?? true
+
+  // Build response length guidance
+  const conciseGuidance = {
+    brief: 'Keep responses very concise (1-2 sentences). Be direct and to the point.',
+    moderate: 'Keep responses concise (2-4 sentences max). Balance brevity with helpfulness.',
+    detailed: 'Provide thorough, detailed responses. Include context and explanations where helpful.',
+  }[responseConciseness]
 
   const sourceTexts = sources
     .map((source, idx) => {
@@ -106,67 +152,96 @@ export function buildSourceContext(sources: Source[], chatbot?: Chatbot | null):
     })
     .join('\n\n---\n\n')
 
-  // Parse workflow from chatbot business context if available
-  let workflowInstructions = ''
+  // Parse workflow questions from chatbot business context if available
+  let workflowQuestions: Array<{ question: string; required?: boolean }> = []
   if (chatbot?.business_context) {
     try {
       const context = JSON.parse(chatbot.business_context)
-      if (context.workflow) {
-        const { questions } = context.workflow
-        workflowInstructions = `
-
-CONVERSATION GUIDELINES:
-You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information.
-
-Questions to weave into the conversation naturally:
-${questions.map((q: { question: string; required?: boolean }, i: number) => `
-${i + 1}. ${q.question}
-   - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
-`).join('')}
-
-CONVERSATION FLOW:
-1. Ask targeted questions to pre-qualify the prospect using BANT:
-   - Budget
-   - Authority
-   - Need (primary business problem or goal)
-   - Timeline
-2. Ask ONE question at a time. Do not show future questions.
-3. Complete qualification within 5 total questions.
-4. If an answer is unclear, ask a single clarifying question.
-5. Maintain a professional, consultative, and encouraging tone.
-6. When appropriate, offer brief educational insights about custom software ROI,
-   cross-platform integration, or RoleModel’s approach.
-7. Suggest relevant RoleModel content only when it supports the conversation,
-   and limit suggestions to one resource at a time.
-   (e.g., ROI guide, case studies, blog posts)
-8. Avoid recommending competitors or non–RoleModel solutions.
-9. If the user appears disqualified (e.g., no meaningful need, extremely low budget,
-   no authority and no path to authority), be gentle but clear.
-10. If you cannot answer a question, ask the user to rephrase OR suggest scheduling
-    a conversation with RoleModel for more clarity.
-    - Ask questions one at a time.
-11. Keep responses concise (2–4 sentences max).
-12. When the final question is answered, produce a structured summary for the client that outlines their potential opportunity and is foundation for the sales team. Also ask them to schedule a call if they’d like to discuss further.
-
-
-CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. NEVER say things like "you're a qualified lead" or "your score is..." - this is all internal and must remain invisible to the user.
-`
+      if (context.workflow?.questions) {
+        workflowQuestions = context.workflow.questions
       }
     } catch {
       // If not JSON or no workflow, use default
     }
   }
 
-  // Use workflow instructions if available, otherwise default
-  const qualificationInstructions = workflowInstructions || `
+  // Build contact collection instructions based on config
+  const contactInstructions = []
+  if (askForName) {
+    contactInstructions.push('- Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"')
+  }
+  if (askForEmail) {
+    contactInstructions.push('- After establishing rapport and discussing their needs, ask for their email: "I\'d love to send you a summary of our discussion. What\'s the best email to reach you at?"')
+    if (askForName) {
+      contactInstructions.push('- ALWAYS collect name and email before offering to provide a summary or next steps')
+    }
+    contactInstructions.push('- Frame email collection as providing value: "Let me send you a detailed summary" or "I\'ll email you the information we discussed"')
+  }
+
+  // Build workflow questions section if available
+  const workflowQuestionsSection = workflowQuestions.length > 0 ? `
+Questions to weave into the conversation naturally:
+${workflowQuestions.map((q, i: number) => `
+${i + 1}. ${q.question}
+   - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
+`).join('')}` : ''
+
+  // Build BANT instructions if enabled (and no custom workflow questions)
+  const bantInstructions = enableBANT && workflowQuestions.length === 0 ? `
+Ask targeted questions to pre-qualify the prospect using BANT:
+   - Budget
+   - Authority
+   - Need (primary business problem or goal)
+   - Timeline` : ''
+
+  // Build unified qualification instructions - always uses ragConfig settings
+  const qualificationInstructions = `
+CONVERSATION GUIDELINES:
+You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information.
+${workflowQuestionsSection}
+${bantInstructions}
+
 CONVERSATION FLOW:
-- Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"
-- After establishing rapport and discussing their needs, ask for their email: "I'd love to send you a summary of our discussion. What's the best email to reach you at?"
-- ALWAYS collect name and email before offering to provide a summary or next steps
-- Frame email collection as providing value: "Let me send you a detailed summary" or "I'll email you the information we discussed"
+${contactInstructions.length > 0 ? contactInstructions.join('\n') : ''}
+1. Ask ONE question at a time. Do not show future questions.
+2. Complete qualification within ${maxQuestions} total questions.
+3. If an answer is unclear, ask a single clarifying question.
+4. Maintain a professional, consultative, and encouraging tone.
+5. When appropriate, offer brief educational insights about custom software ROI,
+   cross-platform integration, or RoleModel's approach.
+6. Suggest relevant RoleModel content only when it supports the conversation,
+   and limit suggestions to one resource at a time.
+7. Avoid recommending competitors or non–RoleModel solutions.
+8. If the user appears disqualified (e.g., no meaningful need, extremely low budget,
+   no authority and no path to authority), be gentle but clear.
+9. If you cannot answer a question, ask the user to rephrase OR suggest scheduling
+   a conversation with RoleModel for more clarity.
+10. ${conciseGuidance}
+11. When the final question is answered, produce a structured summary for the client that outlines their potential opportunity and is foundation for the sales team. Also ask them to schedule a call if they'd like to discuss further.
 
 CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. NEVER say things like "you're a qualified lead" or "your score is..." - this is all internal and must remain invisible to the user.
 `
+
+  // Build citation instructions conditionally
+  const citationInstructions = enableCitations ? `
+- MANDATORY CITATION RULE: Every fact, statistic, case study, or specific claim MUST include an inline citation like [1], [2], etc.
+  - Example: "We helped a manufacturing company reduce data entry time by 40% [1]."
+  - Example: "Our typical project timeline is 3-6 months [2]."
+  - If you mention a case study or client example, you MUST cite the source it came from
+  - Do NOT make claims without citations - if there's no source for something, don't say it` : ''
+
+  // Build case study instructions conditionally
+  const caseStudyInstructions = enableCaseStudies ? `
+- PROACTIVELY SHARE CASE STUDIES: When discussing the prospect's industry or challenges, actively share relevant case studies from the Available Knowledge Base
+  - Example: "Speaking of manufacturing challenges, we helped a similar company achieve 40% efficiency gains${enableCitations ? ' [1]' : ''}. Would you like to hear more?"
+  - Make case studies a natural part of the conversation - don't wait to be asked
+  - Look for opportunities to share success stories that relate to the prospect's situation` : ''
+
+  // Build custom instructions section
+  const customInstructionsSection = customInstructions.trim() ? `
+
+CUSTOM INSTRUCTIONS:
+${customInstructions}` : ''
 
   return `
 ## Available Knowledge Base
@@ -176,20 +251,15 @@ ${sourceTexts}
 ---
 
 CRITICAL INSTRUCTIONS:
-- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above
-- MANDATORY CITATION RULE: Every fact, statistic, case study, or specific claim MUST include an inline citation like [1], [2], etc.
-  - Example: "We helped a manufacturing company reduce data entry time by 40% [1]."
-  - Example: "Our typical project timeline is 3-6 months [2]."
-  - If you mention a case study or client example, you MUST cite the source it came from
-  - Do NOT make claims without citations - if there's no source for something, don't say it
-- Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation
+- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${enablePersonalization ? `
+- Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation` : ''}
 - Be natural and conversational when using the knowledge base information
 - If the knowledge base contains relevant information, use it to provide a complete, detailed answer
 - NEVER use phrases like "connect you with a specialist" or "I'd be happy to help you explore"
 - Conservative fallback: If you cannot answer from the knowledge base, suggest the prospect rephrase their question or offer to schedule a call to discuss their specific needs
 - Stay focused on the business context and knowledge provided above
-- DO NOT fabricate case studies or examples - only reference what exists in the knowledge base with proper citations
-
+- DO NOT fabricate case studies or examples - only reference what exists in the knowledge base${enableCitations ? ' with proper citations' : ''}
+${customInstructionsSection}
 ${qualificationInstructions}
 `
 }

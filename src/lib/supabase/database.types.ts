@@ -162,6 +162,12 @@ export type Database = {
           logo: string | null
           page_description: string | null
           page_title: string | null
+          rag_config: {
+            enableCitations: boolean
+            enableCaseStudies: boolean
+            citationStyle: string
+            customInstructions: string
+          } | null
           updated_at: string | null
         }
         Insert: {
@@ -177,6 +183,12 @@ export type Database = {
           logo?: string | null
           page_description?: string | null
           page_title?: string | null
+          rag_config?: {
+            enableCitations: boolean
+            enableCaseStudies: boolean
+            citationStyle: string
+            customInstructions: string
+          } | null
           updated_at?: string | null
         }
         Update: {
@@ -192,6 +204,12 @@ export type Database = {
           logo?: string | null
           page_description?: string | null
           page_title?: string | null
+          rag_config?: {
+            enableCitations: boolean
+            enableCaseStudies: boolean
+            citationStyle: string
+            customInstructions: string
+          } | null
           updated_at?: string | null
         }
         Relationships: [

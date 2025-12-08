@@ -14,6 +14,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   | 'destructive'
   | 'icon'
   | 'ghosticon'
+  | 'ghostpill'
   | 'pill'
   | 'dashed'
   | 'dashedpill'
@@ -51,6 +52,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         destructive: 'btn btn--destructive',
         icon: 'btn btn--icon btn--pill',
         ghosticon: 'btn btn--ghost btn--icon btn--no-border btn--pill',
+        ghostpill: 'btn btn--ghost btn--no-border btn--pill',
         pill: 'btn btn--pill',
       }[variant] ?? 'btn'
 
@@ -71,6 +73,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         start: 'justify-start',
         center: 'justify-center',
         end: 'justify-end',
+        spacebetween: 'justify-space-between',
       }[justify] ?? undefined
 
     return (

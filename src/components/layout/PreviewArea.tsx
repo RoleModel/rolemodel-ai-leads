@@ -99,7 +99,11 @@ const styles = {
   },
 }
 
-export function PreviewArea() {
+interface PreviewAreaProps {
+  forceCollapseSidebar?: boolean
+}
+
+export function PreviewArea({ forceCollapseSidebar = false }: PreviewAreaProps) {
   const [previewMode, setPreviewMode] = useState<'desktop' | 'mobile'>('desktop')
   const [manualTheme, setManualTheme] = useState<'light' | 'dark' | null>(null)
   const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>('light')
@@ -168,6 +172,7 @@ export function PreviewArea() {
           <LeadsPageView
             chatbotId={DEFAULT_CHATBOT_ID}
             showSidebar={previewMode === 'desktop'}
+            forceSidebarCollapsed={forceCollapseSidebar}
             editMode={editMode}
             theme={theme}
             onThemeChange={setManualTheme}
@@ -179,7 +184,7 @@ export function PreviewArea() {
       <div style={styles.bottomToolbarWrapper}>
         <div style={styles.bottomToolbar}>
           <Button
-            variant="ghost"
+            variant="ghostpill"
             onClick={() => setEditMode(!editMode)}
             style={{
               display: 'flex',

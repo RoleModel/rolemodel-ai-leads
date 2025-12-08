@@ -1,8 +1,12 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 
-import { EditorSidebar } from '@/components/layout/EditorSidebar'
+import {
+  EditorSidebar,
+  DEFAULT_SIDEBAR_WIDTH,
+  SIDEBAR_COLLAPSE_THRESHOLD,
+} from '@/components/layout/EditorSidebar'
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { PreviewArea } from '@/components/layout/PreviewArea'
 import { TopBar } from '@/components/layout/TopBar'
@@ -10,6 +14,11 @@ import { TopBar } from '@/components/layout/TopBar'
 import { LeadsPageSettingsProvider } from '@/contexts/LeadsPageSettingsContext'
 
 export default function HelpPageDesignerPage() {
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH)
+
+  // Collapse the preview sidebar when editor sidebar is wide
+  const shouldCollapsePreviewSidebar = sidebarWidth >= SIDEBAR_COLLAPSE_THRESHOLD
+
   return (
     <LeadsPageSettingsProvider>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -19,8 +28,11 @@ export default function HelpPageDesignerPage() {
           <Suspense fallback={<div>Loading...</div>}>
             <NavigationSidebar />
           </Suspense>
-          <EditorSidebar />
-          <PreviewArea />
+          <EditorSidebar
+            width={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+          />
+          <PreviewArea forceCollapseSidebar={shouldCollapsePreviewSidebar} />
         </div>
       </div>
     </LeadsPageSettingsProvider>

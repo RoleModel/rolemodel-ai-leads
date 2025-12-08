@@ -70,6 +70,7 @@ interface ChatHistory {
 interface LeadsPageViewProps {
   chatbotId: string
   showSidebar?: boolean
+  forceSidebarCollapsed?: boolean
   editMode?: boolean
   theme?: 'light' | 'dark'
   onThemeChange?: (theme: 'light' | 'dark') => void
@@ -88,6 +89,7 @@ const DEFAULT_SUGGESTIONS: Suggestion[] = [
 export function LeadsPageView({
   chatbotId,
   showSidebar = true,
+  forceSidebarCollapsed = false,
   editMode = false,
   theme,
   onThemeChange,
@@ -97,7 +99,9 @@ export function LeadsPageView({
   initialConversationId,
 }: LeadsPageViewProps) {
   useLeadsPageSettings() // Keep the hook for context loading
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsedInternal, setSidebarCollapsedInternal] = useState(false)
+  // Combine internal state with forced collapse prop
+  const sidebarCollapsed = forceSidebarCollapsed || sidebarCollapsedInternal
   const [isMobile, setIsMobile] = useState(false)
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [disliked, setDisliked] = useState<Record<string, boolean>>({});
@@ -110,7 +114,7 @@ export function LeadsPageView({
     const checkMobile = (e: MediaQueryListEvent | MediaQueryList) => {
       const mobile = e.matches
       setIsMobile(mobile)
-      setSidebarCollapsed(mobile)
+      setSidebarCollapsedInternal(mobile)
     }
 
     checkMobile(mediaQuery)
@@ -479,7 +483,7 @@ export function LeadsPageView({
             <Button
               style={{ justifySelf: 'center' }}
               variant="ghosticon"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              onClick={() => setSidebarCollapsedInternal(!sidebarCollapsed)}
             >
               <HugeiconsIcon icon={SidebarLeftIcon} size={20} />
             </Button>

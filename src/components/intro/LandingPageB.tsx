@@ -282,7 +282,7 @@ export function HeroChat(props: HeroChatProps) {
   return (
     <div className={`chat-container ${styles['chat-container']}`}>
       {step === 'intro' ? (
-        <Card className={styles['lead-card']}>
+        <Card variant="dark" borderBottom="var(--brand-Light-Purple)" className={styles['lead-card']}>
           <CardHeader>
             <h2 className={styles['card-title']}>
               <span>Let&apos;s see if we&apos;re a </span>
@@ -338,12 +338,6 @@ export function HeroChat(props: HeroChatProps) {
         </Card>
       ) : (
         <>
-          <h2 className={styles['chat-title']}>
-            <span>Let&apos;s talk about your </span>
-            <span className={styles['chat-title-text']}>project.
-              <span className={styles['chat-title-underline']}></span>
-            </span>
-          </h2>
           <Conversation className="conversation-wrapper conversation-wrapper--flex">
             <ConversationContent>
               {messages.map((message) => (
@@ -596,13 +590,6 @@ function LandingBInner({
         if (gridOpacityRef.current) gsap.set(gridOpacityRef.current, { opacity: gridOpacity })
         if (scrollIndicatorRef.current) gsap.set(scrollIndicatorRef.current, { opacity: Math.max(0, 1 - t), y: scrollIndicatorParallax })
 
-        if (formBoxRef.current) {
-          const formOpacity = Math.max(0, (t - 0.5) * 20)
-          gsap.set(formBoxRef.current, {
-            opacity: formOpacity,
-            pointerEvents: t > 0.6 ? 'auto' : 'none'
-          })
-        }
 
         // Fade glow based on scroll progress - restore when scrolling back up
         if (glowRef.current) {
@@ -617,12 +604,10 @@ function LandingBInner({
     gsap.fromTo(
       "#get-started",
       {
-        opacity: 0,
         y: 100,
         scale: 0.5,
       },
       {
-        opacity: 1,
         scale: 1,
         y: 0,
         scrollTrigger: {
@@ -791,17 +776,16 @@ function LandingBInner({
                         className={styles['highlight-circle']}
                         stroke="var(--brand-RM-Logo-Blue)"
                         strokeWidth={4}
-                        unit="%"
-                        wunit="%"
-                        height={120}
-                        width={130}
+                        unit="em"
+                        wunit="em"
+                        height={1.3}
+                        width={2.8}
                         speed={2}
                         delay={2}
                         trigger="in-view"
                         scrollProgress={progress}
                         preserveAspectRatio="none"
                         d="M1 52.6501C115.88 -2.08648 483.388 1.16489 499.75 52.6501C510.213 85.5762 454.384 99.1037 355.471 112.631C256.559 126.159 48.5456 125.915 17.3586 92.0694C-20.5347 50.9459 89.9842 -1.65508 260.277 3.32941C519.086 10.9048 527.267 80.7065 459.59 112.631"
-
                       />
                     </span>
                     {punctuation}

@@ -2,6 +2,30 @@
 
 import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react'
 
+interface RagConfig {
+  // Knowledge Base Retrieval
+  sourceLimit: number
+  similarityThreshold: number
+
+  // Citation & Case Studies
+  enableCitations: boolean
+  enableCaseStudies: boolean
+  citationStyle: string
+
+  // Conversation Flow
+  enableBANT: boolean
+  askForName: boolean
+  askForEmail: boolean
+  maxQuestions: number
+
+  // Response Style
+  responseConciseness: 'brief' | 'moderate' | 'detailed'
+  enablePersonalization: boolean
+
+  // Custom Instructions
+  customInstructions: string
+}
+
 interface LeadsPageSettings {
   pageTitle: string
   pageDescription: string
@@ -10,6 +34,7 @@ interface LeadsPageSettings {
   aiInstructions: string
   model: string
   calendlyUrl: string
+  ragConfig: RagConfig
 }
 
 interface LeadsPageSettingsContextType {
@@ -30,6 +55,30 @@ interface LeadsPageSettingsProviderProps {
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
+const DEFAULT_RAG_CONFIG: RagConfig = {
+  // Knowledge Base Retrieval
+  sourceLimit: 5,
+  similarityThreshold: 0.5,
+
+  // Citation & Case Studies
+  enableCitations: true,
+  enableCaseStudies: true,
+  citationStyle: 'numbered',
+
+  // Conversation Flow
+  enableBANT: true,
+  askForName: true,
+  askForEmail: true,
+  maxQuestions: 5,
+
+  // Response Style
+  responseConciseness: 'moderate',
+  enablePersonalization: true,
+
+  // Custom Instructions
+  customInstructions: '',
+}
+
 export function LeadsPageSettingsProvider({ children, chatbotId }: LeadsPageSettingsProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [settings, setSettings] = useState<LeadsPageSettings>({
@@ -41,6 +90,7 @@ export function LeadsPageSettingsProvider({ children, chatbotId }: LeadsPageSett
     aiInstructions: '',
     model: 'gpt-4o-mini',
     calendlyUrl: '',
+    ragConfig: DEFAULT_RAG_CONFIG,
   })
 
   // Load settings on mount
@@ -64,6 +114,7 @@ export function LeadsPageSettingsProvider({ children, chatbotId }: LeadsPageSett
               aiInstructions: data.settings.ai_instructions || '',
               model: data.settings.model || 'gpt-4o-mini',
               calendlyUrl: data.settings.calendly_url || '',
+              ragConfig: data.settings.rag_config || DEFAULT_RAG_CONFIG,
             })
           }
         }

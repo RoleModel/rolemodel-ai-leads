@@ -104,13 +104,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Run chatbot fetch and RAG in parallel for better performance
+    // Run chatbot fetch, RAG, visitor info, and page settings fetch in parallel
     // Only run RAG if there's actual content to search for
-    const [chatbot, relevantSources] = await Promise.all([
+    const [chatbot, relevantSources, existingConversation, pageSettings] = await Promise.all([
       getChatbot(activeChatbotId),
       userQuery.trim().length > 0
         ? retrieveRelevantSources(activeChatbotId, userQuery, 5, 0.3)
         : Promise.resolve([]),
+      conversationId
+        ? supabaseServer
+            .from('conversations')
+            .select('visitor_name, visitor_email')
+            .eq('id', conversationId)
+            .single()
+            .then(res => res.data)
+        : Promise.resolve(null),
+      supabaseServer
+        .from('help_page_settings')
+        .select('rag_config')
+        .eq('chatbot_id', activeChatbotId)
+        .single()
+        .then(res => res.data),
     ])
 
     if (!chatbot) {
@@ -128,8 +142,14 @@ export async function POST(req: NextRequest) {
     const effectiveTemperature = temperature !== undefined ? temperature : (chatbot?.temperature || 0.7)
     const effectiveInstructions = instructions || chatbot?.instructions || ''
 
-    // Build context from sources with workflow
-    const sourceContext = buildSourceContext(relevantSources, chatbot)
+    // Build context from sources with workflow and RAG config
+    const ragConfig = pageSettings?.rag_config as {
+      enableCitations?: boolean
+      enableCaseStudies?: boolean
+      citationStyle?: string
+      customInstructions?: string
+    } | null
+    const sourceContext = buildSourceContext(relevantSources, chatbot, ragConfig)
 
     // Build system message with guardrails prepended
     const systemMessage = {
@@ -147,13 +167,16 @@ You have access to a 'thinking' tool that displays your reasoning process to use
 
 When using the thinking tool, provide steps with clear labels and descriptions. Mark steps as 'complete' when finished, 'active' for current step, and 'pending' for upcoming steps.
 
-INLINE CITATIONS:
-When you reference information from the RELEVANT SOURCES section below, cite them using numbered brackets that match the source number.
-- Use [1] for Source 1, [2] for Source 2, etc.
-- Place citations immediately after the relevant statement
-- Example: "Custom software can significantly reduce manual work [1] and has been shown to improve customer satisfaction [2]."
-- ALWAYS cite when mentioning specific facts, case studies, statistics, or recommendations from the knowledge base
-- This creates clickable citation badges that users can hover over to see the source details
+INLINE CITATIONS (MANDATORY):
+When referencing information from the "Available Knowledge Base" section below, you MUST cite using numbered brackets.
+- Use [1] for Source 1, [2] for Source 2, etc. matching the source numbers in the knowledge base
+- Place citations IMMEDIATELY after EVERY factual claim, case study, or statistic
+- Example: "We helped a manufacturing company reduce data entry time by 40% [1]."
+- Example: "Custom software can significantly reduce manual work [1] and improve customer satisfaction [2]."
+- NEVER mention case studies, client stories, or specific results without a citation
+- If you cannot cite something from the knowledge base, DO NOT make the claim
+- Citations create clickable badges for users - they MUST be accurate
+- ACTIVELY look for relevant case studies in the knowledge base to share with the prospect
 
 SUGGESTED QUESTIONS:
 After each response, use the 'suggest_questions' tool to provide 2 relevant follow-up questions the user might want to ask.
@@ -171,7 +194,13 @@ Call this tool whenever you learn new information about:
 - contact: Their name or email address
 
 This updates the progress indicator shown to the user. Mark items as true when you have gathered that information.
+${existingConversation?.visitor_name || existingConversation?.visitor_email ? `
+VISITOR INFORMATION (already collected from intro form):
+${existingConversation.visitor_name ? `- Name: ${existingConversation.visitor_name}` : ''}
+${existingConversation.visitor_email ? `- Email: ${existingConversation.visitor_email}` : ''}
 
+IMPORTANT: This contact information has already been provided. Do NOT ask for their name or email again. Instead, use their name naturally in conversation and focus on understanding their business needs.
+` : ''}
 ${sourceContext}`,
     }
 

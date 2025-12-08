@@ -68,3 +68,7 @@
 .container {
   max-inline-size: var(--op-breakpoint-large) !important;
 }
+
+.form-group--no-margin {
+  padding-block: 0 !important;
+}
