@@ -12,6 +12,7 @@ interface WidgetConfig {
   profilePicture: string
   messagePlaceholder: string
   collectFeedback: boolean
+  collectVisitorInfo: boolean
   regenerateMessages: boolean
   dismissibleNotice: string
   suggestedMessagesPersist: boolean
@@ -39,6 +40,7 @@ export function WidgetConfigProvider({ children }: { children: ReactNode }) {
     profilePicture: 'R',
     messagePlaceholder: 'Message...',
     collectFeedback: true,
+    collectVisitorInfo: true,
     regenerateMessages: true,
     dismissibleNotice: '',
     suggestedMessagesPersist: false,

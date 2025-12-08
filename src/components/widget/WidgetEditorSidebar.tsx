@@ -323,6 +323,51 @@ export function WidgetEditorSidebar() {
                 the user sends a message.
               </p>
             </div>
+
+            {/* Collect Visitor Info Toggle */}
+            <div style={{ marginTop: 'var(--op-space-large)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: 'var(--op-space-small)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  border: '1px solid var(--op-color-border)',
+                  borderRadius: 'var(--op-radius-small)',
+                  gap: 'var(--op-space-small)',
+                }}
+              >
+                <Label
+                  htmlFor="widget-collect-visitor-info"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--op-space-small)',
+                  }}
+                >
+                  <span style={{ fontSize: 'var(--op-font-small)' }}>
+                    Collect name &amp; email before chat
+                  </span>
+                  <InformationCircleIcon className="icon-sm" style={{ opacity: 0.5 }} />
+                </Label>
+                <Switch
+                  id="widget-collect-visitor-info"
+                  checked={config.collectVisitorInfo}
+                  onCheckedChange={(checked) => updateConfig({ collectVisitorInfo: checked })}
+                />
+              </div>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  marginTop: 'var(--op-space-small)',
+                }}
+              >
+                When enabled, visitors must provide their name and email before starting a
+                conversation. This syncs with the leads page.
+              </p>
+            </div>
           </TabsContent>
 
           {/* STYLE TAB */}
@@ -898,7 +943,7 @@ export function WidgetEditorSidebar() {
                     id="widget-embed-bubble"
                     readOnly
                     rows={4}
-                    value={`<script src="${origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`}
+                    value={`<script src="${origin}/embed-script.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`}
                     style={{
                       resize: 'none',
                       fontFamily: 'monospace',
@@ -916,7 +961,7 @@ export function WidgetEditorSidebar() {
                     }}
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `<script src="${origin}/widget.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`
+                        `<script src="${origin}/embed-script.js" data-chatbot-id="a0000000-0000-0000-0000-000000000001"></script>`
                       )
                     }}
                   >

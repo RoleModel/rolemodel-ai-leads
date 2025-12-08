@@ -16,12 +16,15 @@ interface PrivacyTermsLinksProps {
   className?: string
   style?: React.CSSProperties
   variant?: 'light' | 'dark'
+  /** Use compact mode for widget/iframe contexts with limited space */
+  compact?: boolean
 }
 
 export function PrivacyTermsLinks({
   className,
   style,
   variant = 'light',
+  compact = false,
 }: PrivacyTermsLinksProps) {
   const buttonStyle: React.CSSProperties = {
     color:
@@ -29,6 +32,11 @@ export function PrivacyTermsLinks({
         ? 'var(--op-color-white)'
         : 'var(--op-color-neutral-on-plus-max)',
   }
+
+  const dialogWidth = compact ? 'calc(100vw - 32px)' : '600px'
+  const dialogBodyStyle = compact
+    ? { ...styles.dialogBody, ...styles.compactDialogBody }
+    : styles.dialogBody
 
   return (
     <div className={className} style={{ ...styles.container, ...style }}>
@@ -43,13 +51,13 @@ export function PrivacyTermsLinks({
           </Button>
         </DialogTrigger>
         <DialogContent
-          style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}
+          style={{ '--_op-confirm-dialog-width': dialogWidth } as React.CSSProperties}
         >
           <DialogHeader>
             <DialogTitle>Privacy Policy</DialogTitle>
             <DialogDescription>How we handle your information</DialogDescription>
           </DialogHeader>
-          <div className="confirm-dialog__body" style={styles.dialogBody}>
+          <div className="confirm-dialog__body" style={dialogBodyStyle}>
             <p style={styles.section}>
               <strong>Information We Collect</strong>
               <br />
@@ -91,14 +99,14 @@ export function PrivacyTermsLinks({
           </Button>
         </DialogTrigger>
         <DialogContent
-          style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}
+          style={{ '--_op-confirm-dialog-width': dialogWidth } as React.CSSProperties}
         >
           <DialogHeader>
             <DialogTitle>Terms of Service</DialogTitle>
             <DialogDescription>Guidelines for using our service</DialogDescription>
           </DialogHeader>
 
-          <div className="confirm-dialog__body" style={styles.dialogBody}>
+          <div className="confirm-dialog__body" style={dialogBodyStyle}>
             <p style={styles.section}>
               <strong>Acceptable Use</strong>
               <br />
@@ -148,5 +156,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   list: {
     paddingLeft: 'var(--op-space-large)',
     marginBottom: 'var(--op-space-medium)',
+  },
+  compactDialogBody: {
+    maxHeight: '50vh',
+    overflowY: 'auto' as const,
+    fontSize: 'var(--op-font-x-small)',
   },
 }
