@@ -604,11 +604,12 @@ function LandingBInner({
           })
         }
 
-        // Hide glow when scrolled past hero area
+        // Fade glow based on scroll progress - restore when scrolling back up
         if (glowRef.current) {
-          const isInHeroArea = p < 0.5
-          glowRef.current.style.opacity = isInHeroArea ? glowRef.current.style.opacity : '0'
-          glowRef.current.style.scale = isInHeroArea ? glowRef.current.style.scale : '0.5'
+          // Fade out as user scrolls, fade back in when scrolling up
+          const glowOpacity = Math.max(0, 1 - p * 2)
+          const glowScale = Math.max(0.5, 1 - p)
+          gsap.set(glowRef.current, { opacity: glowOpacity, scale: glowScale })
         }
       },
     })
@@ -637,15 +638,13 @@ function LandingBInner({
       mouseRef.current = { x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight }
 
       // Animate glow to follow cursor (centered on mouse) - skip in dark mode or mobile
+      // Only handle position here - scroll handler controls opacity/scale
       if (glowRef.current && !isMobile && !isDarkMode) {
-        const isInHeroArea = progressRef.current < 0.5
         gsap.to(glowRef.current, {
           left: e.clientX,
           top: e.clientY,
           xPercent: -50,
           yPercent: -50,
-          opacity: isInHeroArea ? 1 : 0,
-          scale: isInHeroArea ? 1 : 0.5,
           duration: 0.6,
           ease: "power2.out",
         })

@@ -244,7 +244,7 @@ ${sourceContext}`,
           .catch((err) => console.error('Error creating conversation before inserting message:', err))
       } else {
         void insertMessage().then(
-          () => {},
+          () => { },
           (err) => console.error('Error inserting user message:', err)
         )
       }
