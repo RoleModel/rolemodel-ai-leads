@@ -84,7 +84,7 @@ const didAssistantAskAboutStep = (text: string, patterns: RegExp[]) => {
  */
 export const getBantProgressFromAssistantQuestions = (
   messages: UIMessage[],
-  getMessageContent: (message: UIMessage) => string,
+  getMessageContent: (message: UIMessage) => string
 ) => {
   if (messages.length === 0) {
     return 0
@@ -100,11 +100,10 @@ export const getBantProgressFromAssistantQuestions = (
 
   const completedSteps = BANT_STEPS.reduce((count, step) => {
     const asked = assistantMessages.some((text) =>
-      didAssistantAskAboutStep(text, step.askPatterns),
+      didAssistantAskAboutStep(text, step.askPatterns)
     )
     return asked ? count + 1 : count
   }, 0)
 
   return Math.round((completedSteps / BANT_STEPS.length) * 100)
 }
-

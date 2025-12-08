@@ -49,7 +49,9 @@ export async function GET(req: NextRequest) {
     // Get all conversations with metadata
     const { data: conversations } = await supabaseServer
       .from('conversations')
-      .select('message_count, visitor_metadata, started_at, lead_captured, visitor_name, visitor_email')
+      .select(
+        'message_count, visitor_metadata, started_at, lead_captured, visitor_name, visitor_email'
+      )
       .eq('chatbot_id', chatbotId)
 
     const conversationsTyped = conversations as ConversationWithMetadata[] | null
@@ -67,14 +69,18 @@ export async function GET(req: NextRequest) {
       .eq('chatbot_id', chatbotId)
 
     // Get total leads captured
-    const leadsCount = conversationsTyped?.filter(conv => conv.lead_captured).length || 0
+    const leadsCount =
+      conversationsTyped?.filter((conv) => conv.lead_captured).length || 0
 
     // Get recent activity (last 14 days for better trend visualization)
     const fourteenDaysAgo = new Date()
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
 
     // Group by day - initialize all days to ensure continuous line chart
-    const activityByDay: Record<string, { conversations: number; messages: number; leads: number }> = {}
+    const activityByDay: Record<
+      string,
+      { conversations: number; messages: number; leads: number }
+    > = {}
 
     // Pre-populate all days in range
     for (let i = 13; i >= 0; i--) {
@@ -87,7 +93,10 @@ export async function GET(req: NextRequest) {
     conversationsTyped?.forEach((conv) => {
       const convDate = new Date(conv.started_at)
       if (convDate >= fourteenDaysAgo) {
-        const dateStr = convDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        const dateStr = convDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        })
         if (activityByDay[dateStr]) {
           activityByDay[dateStr].conversations += 1
           activityByDay[dateStr].messages += conv.message_count || 0
@@ -189,18 +198,43 @@ export async function GET(req: NextRequest) {
       // Stage 4: Qualified lead
       qualified: leadsCount,
       // Conversion rates
-      engagementRate: totalConvs > 0 ? ((totalConvs - engagementLevels.bounced) / totalConvs * 100).toFixed(1) : '0',
-      contactCaptureRate: totalConvs > 0 ? (contactInfoCaptured / totalConvs * 100).toFixed(1) : '0',
-      qualificationRate: totalConvs > 0 ? (leadsCount / totalConvs * 100).toFixed(1) : '0',
+      engagementRate:
+        totalConvs > 0
+          ? (((totalConvs - engagementLevels.bounced) / totalConvs) * 100).toFixed(1)
+          : '0',
+      contactCaptureRate:
+        totalConvs > 0 ? ((contactInfoCaptured / totalConvs) * 100).toFixed(1) : '0',
+      qualificationRate:
+        totalConvs > 0 ? ((leadsCount / totalConvs) * 100).toFixed(1) : '0',
     }
 
     // Engagement radar chart data
     const engagementRadarData = [
-      { metric: 'Engagement', value: parseFloat(funnelAnalytics.engagementRate), fullMark: 100 },
-      { metric: 'Contact Capture', value: parseFloat(funnelAnalytics.contactCaptureRate), fullMark: 100 },
-      { metric: 'Lead Qualification', value: parseFloat(funnelAnalytics.qualificationRate), fullMark: 100 },
-      { metric: 'High Engagement', value: totalConvs > 0 ? (engagementLevels.high / totalConvs * 100) : 0, fullMark: 100 },
-      { metric: 'Medium Engagement', value: totalConvs > 0 ? (engagementLevels.medium / totalConvs * 100) : 0, fullMark: 100 },
+      {
+        metric: 'Engagement',
+        value: parseFloat(funnelAnalytics.engagementRate),
+        fullMark: 100,
+      },
+      {
+        metric: 'Contact Capture',
+        value: parseFloat(funnelAnalytics.contactCaptureRate),
+        fullMark: 100,
+      },
+      {
+        metric: 'Lead Qualification',
+        value: parseFloat(funnelAnalytics.qualificationRate),
+        fullMark: 100,
+      },
+      {
+        metric: 'High Engagement',
+        value: totalConvs > 0 ? (engagementLevels.high / totalConvs) * 100 : 0,
+        fullMark: 100,
+      },
+      {
+        metric: 'Medium Engagement',
+        value: totalConvs > 0 ? (engagementLevels.medium / totalConvs) * 100 : 0,
+        fullMark: 100,
+      },
     ]
 
     return NextResponse.json({

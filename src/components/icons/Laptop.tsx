@@ -1,18 +1,19 @@
-import * as React from "react"
-import { SVGProps } from "react"
+import * as React from 'react'
+import { SVGProps } from 'react'
+
 interface SVGRProps {
-  title?: string;
-  titleId?: string;
-  fill?: string;
-  accentColor?: string;
-  className?: string;
+  title?: string
+  titleId?: string
+  fill?: string
+  accentColor?: string
+  className?: string
 }
 const LaptopIcon = ({
   title,
   titleId,
-  fill = "#000",
-  accentColor = "#000",
-  className = "",
+  fill = '#000',
+  accentColor = '#000',
+  className = '',
   ...props
 }: SVGProps<SVGSVGElement> & SVGRProps) => (
   <svg

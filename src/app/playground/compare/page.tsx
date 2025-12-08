@@ -25,7 +25,6 @@ import {
   MessageContent,
   MessageResponse,
 } from '@/components/ai-elements/message'
-import { AVAILABLE_MODELS } from '@/lib/ai/models'
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -55,6 +54,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
+
+import { AVAILABLE_MODELS } from '@/lib/ai/models'
 
 interface ChatInstance {
   id: string

@@ -30,12 +30,13 @@ export async function extractLeadData(
       .join('\n\n')
 
     // Build available resources context for recommendations
-    const resourcesContext = availableSources && availableSources.length > 0
-      ? `\nAVAILABLE RESOURCES FOR RECOMMENDATIONS:
+    const resourcesContext =
+      availableSources && availableSources.length > 0
+        ? `\nAVAILABLE RESOURCES FOR RECOMMENDATIONS:
 ${availableSources.map((s, i) => `${i + 1}. "${s.title}" (ID: ${s.id})`).join('\n')}
 
 When generating recommendations, select 2-4 resources from this list that are most relevant to the prospect's needs and situation.`
-      : ''
+        : ''
 
     const { text } = await generateText({
       model: openai('openai/gpt-4o-mini'),

@@ -17,7 +17,11 @@ interface TrackingOptions {
 function isLocalhost(): boolean {
   if (typeof window === 'undefined') return false
   const hostname = window.location.hostname
-  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('192.168.')
+  )
 }
 
 // Generate a simple session ID if not provided
@@ -136,8 +140,10 @@ export function trackBounce(path: string, metadata?: Record<string, unknown>): v
 export function useABTestTracking(path: string) {
   return {
     trackView: () => trackView(path),
-    trackEngagement: (metadata?: Record<string, unknown>) => trackEngagement(path, metadata),
-    trackConversion: (metadata?: Record<string, unknown>) => trackConversion(path, metadata),
+    trackEngagement: (metadata?: Record<string, unknown>) =>
+      trackEngagement(path, metadata),
+    trackConversion: (metadata?: Record<string, unknown>) =>
+      trackConversion(path, metadata),
     trackBounce: (metadata?: Record<string, unknown>) => trackBounce(path, metadata),
   }
 }

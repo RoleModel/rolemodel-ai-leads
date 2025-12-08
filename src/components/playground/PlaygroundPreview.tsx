@@ -5,6 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 
 import { ChatInterface } from '@/components/chat/ChatInterface'
 import { Button } from '@/components/ui/button'
+
 import type { PlaygroundSettings } from '@/app/playground/page'
 
 interface PlaygroundPreviewProps {

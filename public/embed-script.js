@@ -1,52 +1,55 @@
-(function() {
-    // Get script tag and extract parameters
-    // Try multiple methods for Framer compatibility
-    let currentScript = document.currentScript;
+;(function () {
+  // Get script tag and extract parameters
+  // Try multiple methods for Framer compatibility
+  let currentScript = document.currentScript
 
-    // Fallback: find script by src URL (works in Framer)
-    if (!currentScript) {
-        const scripts = document.querySelectorAll('script[src*="embed-script"]');
-        currentScript = scripts[scripts.length - 1]; // Get the last matching script
+  // Fallback: find script by src URL (works in Framer)
+  if (!currentScript) {
+    const scripts = document.querySelectorAll('script[src*="embed-script"]')
+    currentScript = scripts[scripts.length - 1] // Get the last matching script
+  }
+
+  // Fallback: find script by data attribute
+  if (!currentScript) {
+    currentScript = document.querySelector('script[data-chatbot-id]')
+  }
+
+  // Derive base URL from script src (works on any deployment)
+  let baseUrl = 'https://rolemodel-ai-leads.vercel.app'
+  if (currentScript?.src) {
+    try {
+      const scriptUrl = new URL(currentScript.src)
+      baseUrl = scriptUrl.origin
+    } catch (e) {
+      // Keep default if URL parsing fails
     }
+  }
 
-    // Fallback: find script by data attribute
-    if (!currentScript) {
-        currentScript = document.querySelector('script[data-chatbot-id]');
-    }
+  // Configuration
+  const WIDGET_URL = `${baseUrl}/embed/leads-page`
+  const OPTICS_CSS =
+    'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css'
 
-    // Derive base URL from script src (works on any deployment)
-    let baseUrl = 'https://rolemodel-ai-leads.vercel.app';
-    if (currentScript?.src) {
-        try {
-            const scriptUrl = new URL(currentScript.src);
-            baseUrl = scriptUrl.origin;
-        } catch (e) {
-            // Keep default if URL parsing fails
-        }
-    }
+  const chatbotId =
+    currentScript?.getAttribute('data-chatbot-id') ||
+    window.ROLEMODEL_CHATBOT_ID ||
+    'a0000000-0000-0000-0000-000000000001'
+  const containerId =
+    currentScript?.getAttribute('data-container-id') ||
+    window.ROLEMODEL_CONTAINER_ID ||
+    'rolemodel-ai-widget'
 
-    // Configuration
-    const WIDGET_URL = `${baseUrl}/embed/leads-page`;
-    const OPTICS_CSS = 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css';
+  // Load Optics CSS if not already loaded
+  if (!document.querySelector(`link[href="${OPTICS_CSS}"]`)) {
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = OPTICS_CSS
+    document.head.appendChild(link)
+  }
 
-    const chatbotId = currentScript?.getAttribute('data-chatbot-id') ||
-                      window.ROLEMODEL_CHATBOT_ID ||
-                      'a0000000-0000-0000-0000-000000000001';
-    const containerId = currentScript?.getAttribute('data-container-id') ||
-                        window.ROLEMODEL_CONTAINER_ID ||
-                        'rolemodel-ai-widget';
-
-    // Load Optics CSS if not already loaded
-    if (!document.querySelector(`link[href="${OPTICS_CSS}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = OPTICS_CSS;
-        document.head.appendChild(link);
-    }
-
-    // Add required styles
-    const style = document.createElement('style');
-    style.textContent = `
+  // Add required styles
+  const style = document.createElement('style')
+  style.textContent = `
         #${containerId} {
             position: fixed;
             bottom: 20px;
@@ -92,53 +95,53 @@
             --op-font-small: 14px;
             --op-font-medium: 16px;
         }
-    `;
-    document.head.appendChild(style);
+    `
+  document.head.appendChild(style)
 
-    // Create widget container
-    function createWidget() {
-        // Check if container already exists
-        if (document.getElementById(containerId)) {
-            console.warn('Widget container already exists');
-            return;
-        }
-
-        // Create container
-        const container = document.createElement('div');
-        container.id = containerId;
-
-        // Create iframe
-        const iframe = document.createElement('iframe');
-        iframe.id = `${containerId}-iframe`;
-        iframe.src = `${WIDGET_URL}?chatbotId=${chatbotId}`;
-        iframe.setAttribute('allow', 'microphone');
-
-        container.appendChild(iframe);
-        document.body.appendChild(container);
+  // Create widget container
+  function createWidget() {
+    // Check if container already exists
+    if (document.getElementById(containerId)) {
+      console.warn('Widget container already exists')
+      return
     }
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createWidget);
-    } else {
-        createWidget();
-    }
+    // Create container
+    const container = document.createElement('div')
+    container.id = containerId
 
-    // Export API for controlling the widget
-    window.RoleModelAIWidget = {
-        show: function() {
-            const container = document.getElementById(containerId);
-            if (container) container.style.display = 'block';
-        },
-        hide: function() {
-            const container = document.getElementById(containerId);
-            if (container) container.style.display = 'none';
-        },
-        toggle: function() {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.style.display = container.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-    };
-})();
+    // Create iframe
+    const iframe = document.createElement('iframe')
+    iframe.id = `${containerId}-iframe`
+    iframe.src = `${WIDGET_URL}?chatbotId=${chatbotId}`
+    iframe.setAttribute('allow', 'microphone')
+
+    container.appendChild(iframe)
+    document.body.appendChild(container)
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', createWidget)
+  } else {
+    createWidget()
+  }
+
+  // Export API for controlling the widget
+  window.RoleModelAIWidget = {
+    show: function () {
+      const container = document.getElementById(containerId)
+      if (container) container.style.display = 'block'
+    },
+    hide: function () {
+      const container = document.getElementById(containerId)
+      if (container) container.style.display = 'none'
+    },
+    toggle: function () {
+      const container = document.getElementById(containerId)
+      if (container) {
+        container.style.display = container.style.display === 'none' ? 'block' : 'none'
+      }
+    },
+  }
+})()

@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
           business_context: '',
           instructions: '',
           temperature: 0.7,
-        }
+        },
       })
     }
     return NextResponse.json({ error: error.message }, { status: 500 })

@@ -102,12 +102,14 @@ export async function POST(req: NextRequest) {
         name: visitor_name || undefined,
         email: visitor_email || undefined,
         ip: visitorMetadata?.ip,
-        location: visitorMetadata?.geo ? {
-          city: visitorMetadata.geo.city,
-          region: visitorMetadata.geo.region,
-          country: visitorMetadata.geo.country,
-          timezone: visitorMetadata.geo.timezone,
-        } : undefined,
+        location: visitorMetadata?.geo
+          ? {
+              city: visitorMetadata.geo.city,
+              region: visitorMetadata.geo.region,
+              country: visitorMetadata.geo.country,
+              timezone: visitorMetadata.geo.timezone,
+            }
+          : undefined,
         referrer: visitorMetadata?.referer,
         user_agent: visitorMetadata?.userAgent,
       },
@@ -117,7 +119,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Fire and forget - don't block the response
-    triggerWebhooks('lead.created', webhookData, conversation?.chatbot_id || undefined).catch((err) => {
+    triggerWebhooks(
+      'lead.created',
+      webhookData,
+      conversation?.chatbot_id || undefined
+    ).catch((err) => {
       console.error('Webhook trigger error:', err)
     })
   } catch (webhookError) {

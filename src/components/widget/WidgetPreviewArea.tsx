@@ -134,9 +134,11 @@ export function WidgetPreviewArea() {
                       width: '32px',
                       height: '32px',
                       borderRadius: 'var(--op-radius-small)',
-                      backgroundColor: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
-                        ? 'transparent'
-                        : 'white',
+                      backgroundColor:
+                        config.profilePicture?.startsWith('data:') ||
+                        config.profilePicture?.startsWith('http')
+                          ? 'transparent'
+                          : 'white',
                       color: config.primaryColor,
                       display: 'flex',
                       alignItems: 'center',
@@ -144,14 +146,18 @@ export function WidgetPreviewArea() {
                       fontWeight: 'var(--op-font-weight-bold)',
                       fontSize: 'var(--op-font-medium)',
                       overflow: 'hidden',
-                      backgroundImage: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
-                        ? `url(${config.profilePicture})`
-                        : 'none',
+                      backgroundImage:
+                        config.profilePicture?.startsWith('data:') ||
+                        config.profilePicture?.startsWith('http')
+                          ? `url(${config.profilePicture})`
+                          : 'none',
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }}
                   >
-                    {!config.profilePicture?.startsWith('data:') && !config.profilePicture?.startsWith('http') && (config.profilePicture || 'R')}
+                    {!config.profilePicture?.startsWith('data:') &&
+                      !config.profilePicture?.startsWith('http') &&
+                      (config.profilePicture || 'R')}
                   </div>
                   <span
                     style={{
@@ -163,7 +169,7 @@ export function WidgetPreviewArea() {
                   </span>
                 </div>
                 <Button variant="ghost">
-                  <HugeiconsIcon icon={RefreshIcon} color='white' size={20} />
+                  <HugeiconsIcon icon={RefreshIcon} color="white" size={20} />
                 </Button>
               </div>
 
@@ -172,9 +178,10 @@ export function WidgetPreviewArea() {
                 <div
                   style={{
                     padding: 'var(--op-space-small) var(--op-space-medium)',
-                    backgroundColor: config.theme === 'light'
-                      ? `color-mix(in srgb, ${config.primaryColor} 15%, white)`
-                      : `color-mix(in srgb, ${config.primaryColor} 20%, black)`,
+                    backgroundColor:
+                      config.theme === 'light'
+                        ? `color-mix(in srgb, ${config.primaryColor} 15%, white)`
+                        : `color-mix(in srgb, ${config.primaryColor} 20%, black)`,
                     borderBottom: '1px solid var(--op-color-border)',
                     display: 'flex',
                     alignItems: 'center',

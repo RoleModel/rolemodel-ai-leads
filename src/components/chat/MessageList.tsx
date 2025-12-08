@@ -38,9 +38,7 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
         <MessageBubble key={message.id} message={message} />
       ))}
 
-      {isLoading && (
-        <MessageBubble message={loadingMessage} isLoading />
-      )}
+      {isLoading && <MessageBubble message={loadingMessage} isLoading />}
 
       <div ref={bottomRef} />
     </div>

@@ -2,15 +2,10 @@
 
 import type { FileUIPart, UIMessage } from 'ai'
 import { ChevronLeftIcon, ChevronRightIcon, PaperclipIcon, XIcon } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import type { ComponentProps, HTMLAttributes, ReactElement } from 'react'
 import { createContext, memo, useContext, useEffect, useMemo, useState } from 'react'
-import dynamic from 'next/dynamic'
-
-// Dynamically import Streamdown to avoid SSR issues with DOMParser
-const Streamdown = dynamic(
-  () => import('streamdown').then((mod) => mod.Streamdown),
-  { ssr: false }
-)
 
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
@@ -20,9 +15,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import Image from 'next/image'
 
 import { cn } from '@/lib/utils'
+
+// Dynamically import Streamdown to avoid SSR issues with DOMParser
+const Streamdown = dynamic(() => import('streamdown').then((mod) => mod.Streamdown), {
+  ssr: false,
+})
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage['role']
@@ -39,11 +38,7 @@ export const Message = ({ className, from, ...props }: MessageProps) => (
       fontSize: 'var(--op-font-small)',
       justifyContent: from === 'user' ? 'flex-end' : 'flex-start',
     }}
-    className={cn(
-      'group',
-      from === 'user' ? 'is-user' : 'is-assistant',
-      className
-    )}
+    className={cn('group', from === 'user' ? 'is-user' : 'is-assistant', className)}
     {...props}
   />
 )
@@ -71,7 +66,7 @@ export const MessageContent = ({
       textAlign: 'left',
       padding: 'var(--op-space-small) var(--op-space-medium)',
       borderRadius: 'var(--op-radius-medium)',
-      width: 'fit-content'
+      width: 'fit-content',
     }}
     {...props}
   >
@@ -81,11 +76,18 @@ export const MessageContent = ({
 
 export type MessageActionsProps = ComponentProps<'div'>
 
-export const MessageActions = ({
-  children,
-  ...props
-}: MessageActionsProps) => (
-  <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 'var(--op-space-2x-small)', paddingTop: 'var(--op-space-2x-small)' }} {...props}>
+export const MessageActions = ({ children, ...props }: MessageActionsProps) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: 'var(--op-space-2x-small)',
+      paddingTop: 'var(--op-space-2x-small)',
+    }}
+    {...props}
+  >
     {children}
   </div>
 )
@@ -187,11 +189,15 @@ export const MessageBranch = ({
 
   return (
     <MessageBranchContext.Provider value={contextValue}>
-      <div style={{
-        display: 'grid',
-        width: '100%',
-        gap: 'var(--op-space-small)',
-      }} className={cn('grid w-full gap-2', className)} {...props} />
+      <div
+        style={{
+          display: 'grid',
+          width: '100%',
+          gap: 'var(--op-space-small)',
+        }}
+        className={cn('grid w-full gap-2', className)}
+        {...props}
+      />
     </MessageBranchContext.Provider>
   )
 }
@@ -333,9 +339,7 @@ export type MessageResponseProps = HTMLAttributes<HTMLDivElement> & {
 export const MessageResponse = memo(
   ({ className, children, ...props }: MessageResponseProps) => (
     <div style={{ width: '100%', fontSize: 'inherit' }} {...props}>
-      <Streamdown className={cn('message-response', className)}>
-        {children}
-      </Streamdown>
+      <Streamdown className={cn('message-response', className)}>{children}</Streamdown>
     </div>
   ),
   (prevProps, nextProps) => prevProps.children === nextProps.children

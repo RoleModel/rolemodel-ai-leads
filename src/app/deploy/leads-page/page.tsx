@@ -3,12 +3,12 @@
 import { Suspense, useState } from 'react'
 
 import {
-  EditorSidebar,
   DEFAULT_SIDEBAR_WIDTH,
+  EditorSidebar,
   SIDEBAR_COLLAPSE_THRESHOLD,
 } from '@/components/layout/EditorSidebar'
-import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { PreviewArea } from '@/components/layout/PreviewArea'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 
 import { LeadsPageSettingsProvider } from '@/contexts/LeadsPageSettingsContext'
@@ -28,10 +28,7 @@ export default function HelpPageDesignerPage() {
           <Suspense fallback={<div>Loading...</div>}>
             <NavigationSidebar />
           </Suspense>
-          <EditorSidebar
-            width={sidebarWidth}
-            onWidthChange={setSidebarWidth}
-          />
+          <EditorSidebar width={sidebarWidth} onWidthChange={setSidebarWidth} />
           <PreviewArea forceCollapseSidebar={shouldCollapsePreviewSidebar} />
         </div>
       </div>

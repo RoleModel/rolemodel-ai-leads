@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import {
-  createWebhook,
-  generateWebhookSecret,
-  getWebhooks,
-} from '@/lib/webhooks/service'
+import { createWebhook, generateWebhookSecret, getWebhooks } from '@/lib/webhooks/service'
 import type { WebhookInput } from '@/lib/webhooks/types'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
@@ -44,7 +40,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate events
-    const validEvents = ['lead.created', 'lead.updated', 'conversation.started', 'conversation.completed']
+    const validEvents = [
+      'lead.created',
+      'lead.updated',
+      'conversation.started',
+      'conversation.completed',
+    ]
     const invalidEvents = events.filter((e: string) => !validEvents.includes(e))
     if (invalidEvents.length > 0) {
       return NextResponse.json(

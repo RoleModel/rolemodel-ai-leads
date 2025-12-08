@@ -1,27 +1,28 @@
 // Button component with label transition animation on hover
-import { motion } from "motion/react"
-import type { Transition } from "motion/react"
-import type { CSSProperties, MouseEventHandler } from "react"
-import '@/components/ui/button.css'
-import { cn } from "@/lib/utils"
+import { motion } from 'motion/react'
+import type { Transition } from 'motion/react'
+import type { CSSProperties, MouseEventHandler } from 'react'
 
+import '@/components/ui/button.css'
+
+import { cn } from '@/lib/utils'
 
 interface ButtonPillProps {
   label: string
   useVariant?: boolean
   variant?:
-  | "dark"
-  | "light"
-  | "blue"
-  | "darkblue"
-  | "rmbrightblue"
-  | "brightblue"
-  | "green"
-  | "purple"
-  | "lightpurple"
-  | "bluegreen"
-  | "yellow"
-  | "ghost"
+    | 'dark'
+    | 'light'
+    | 'blue'
+    | 'darkblue'
+    | 'rmbrightblue'
+    | 'brightblue'
+    | 'green'
+    | 'purple'
+    | 'lightpurple'
+    | 'bluegreen'
+    | 'yellow'
+    | 'ghost'
   backgroundColor?: string
   hoverBackground?: boolean
   hoverbackgroundColor?: string
@@ -75,114 +76,115 @@ export default function ButtonPill(props: ButtonPillProps) {
     }
   > = {
     dark: {
-      bg: "var(--blue-green-900)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--blue-green-900)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     light: {
-      bg: "var(--op-color-white)",
-      textColor: "var(--op-color-on-background)",
-      hoverTextColor: "var(--op-color-on-background)",
+      bg: 'var(--op-color-white)',
+      textColor: 'var(--op-color-on-background)',
+      hoverTextColor: 'var(--op-color-on-background)',
     },
     blue: {
-      bg: "var(--blue-500)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--blue-500)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     rmbrightblue: {
-      bg: "var(--blue-400)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--blue-400)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     brightblue: {
-      bg: "var(--blue-100)",
-      textColor: "var(--blue-green-900)",
-      hoverTextColor: "var(--blue-green-900)",
+      bg: 'var(--blue-100)',
+      textColor: 'var(--blue-green-900)',
+      hoverTextColor: 'var(--blue-green-900)',
     },
     darkblue: {
-      bg: "var(--blue-900)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--blue-900)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     green: {
-      bg: "var(--green-800)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--green-800)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     purple: {
-      bg: "var(--purple-900)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--purple-900)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     lightpurple: {
-      bg: "var(--purple-100)",
-      textColor: "var(--op-color-on-background)",
-      hoverTextColor: "var(--op-color-on-background)",
+      bg: 'var(--purple-100)',
+      textColor: 'var(--op-color-on-background)',
+      hoverTextColor: 'var(--op-color-on-background)',
     },
     bluegreen: {
-      bg: "var(--blue-green-400)",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
+      bg: 'var(--blue-green-400)',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
     },
     yellow: {
-      bg: "var(--brand-Bright-Yellow)",
-      textColor: "var(--blue-green-900)",
-      hoverTextColor: "var(--blue-green-900)",
+      bg: 'var(--brand-Bright-Yellow)',
+      textColor: 'var(--blue-green-900)',
+      hoverTextColor: 'var(--blue-green-900)',
     },
     ghost: {
-      bg: "transparent",
-      textColor: "var(--op-color-white)",
-      hoverTextColor: "var(--op-color-white)",
-      boxShadow: "inset 0 0 0 1px var(--op-color-white)",
+      bg: 'transparent',
+      textColor: 'var(--op-color-white)',
+      hoverTextColor: 'var(--op-color-white)',
+      boxShadow: 'inset 0 0 0 1px var(--op-color-white)',
     },
   }
 
   // Use variant if provided and exists, otherwise fall back to custom colors
   const shouldUseVariant = useVariant || (variant && variant in variants)
 
-  const colors = shouldUseVariant && variant && variants[variant]
-    ? variants[variant]
-    : {
-      bg: backgroundColor ?? 'transparent',
-      textColor: textColor ?? 'inherit',
-      hoverTextColor: hoverTextColor ?? textColor ?? 'inherit',
-      hoverbackgroundColor: hoverbackgroundColor,
-    }
+  const colors =
+    shouldUseVariant && variant && variants[variant]
+      ? variants[variant]
+      : {
+          bg: backgroundColor ?? 'transparent',
+          textColor: textColor ?? 'inherit',
+          hoverTextColor: hoverTextColor ?? textColor ?? 'inherit',
+          hoverbackgroundColor: hoverbackgroundColor,
+        }
 
   const MotionButton = motion.button
 
   const buttonVariants = {
     rest: {
-      filter: "brightness(100%) saturate(100%)",
-      transition: { duration: 0.35, ease: "easeInOut" as const },
+      filter: 'brightness(100%) saturate(100%)',
+      transition: { duration: 0.35, ease: 'easeInOut' as const },
     },
     hover: {
       backgroundColor: hoverBackground ? hoverbackgroundColor : undefined,
       filter: hoverBackground
-        ? "brightness(100%) saturate(100%)"
-        : "brightness(110%) saturate(134%)",
-      transition: { duration: 0.25, ease: "easeInOut" as const },
+        ? 'brightness(100%) saturate(100%)'
+        : 'brightness(110%) saturate(134%)',
+      transition: { duration: 0.25, ease: 'easeInOut' as const },
     },
     tap: {
       scale: 0.98,
-      transition: { duration: 0.15, ease: "easeInOut" as const },
+      transition: { duration: 0.15, ease: 'easeInOut' as const },
     },
   }
 
   const textMotion: Transition = {
     duration: 0.25,
-    ease: "easeInOut",
-    type: "tween",
+    ease: 'easeInOut',
+    type: 'tween',
   }
 
   const topVariant = {
     rest: {
-      y: "0%",
+      y: '0%',
       opacity: 1,
       transition: textMotion,
     },
     hover: {
-      y: "-100%",
+      y: '-100%',
       opacity: 0,
       transition: textMotion,
     },
@@ -190,39 +192,38 @@ export default function ButtonPill(props: ButtonPillProps) {
 
   const bottomVariant = {
     rest: {
-      y: "100%",
+      y: '100%',
       opacity: 0,
       transition: textMotion,
     },
     hover: {
-      y: "0%",
+      y: '0%',
       opacity: 1,
       transition: textMotion,
     },
   }
 
-
   const computedLineHeight =
-    typeof font?.lineHeight === "number"
+    typeof font?.lineHeight === 'number'
       ? `${font.lineHeight}px`
-      : font?.lineHeight || "1em"
+      : font?.lineHeight || '1em'
 
   const commonIconStyle: CSSProperties = {
     width: `calc(${computedLineHeight} + 4px)`,
     height: `calc(${computedLineHeight} + 4px)`,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   }
 
   const content = (
     <div
       style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         flex: '1 1 auto',
         gap: iconGap,
         minHeight: computedLineHeight,
@@ -234,7 +235,7 @@ export default function ButtonPill(props: ButtonPillProps) {
         <div
           style={{
             ...commonIconStyle,
-            color: "inherit",
+            color: 'inherit',
           }}
           aria-hidden="true"
         >
@@ -242,16 +243,16 @@ export default function ButtonPill(props: ButtonPillProps) {
         </div>
       )}
       {/* Label pair */}
-      <div style={{ position: "relative", display: "grid" }}>
+      <div style={{ position: 'relative', display: 'grid' }}>
         <motion.span
           variants={topVariant}
           style={{
             color: colors.textColor,
-            gridArea: "1 / 1 / 2 / 2",
-            display: "inline-flex",
-            alignItems: "center",
-            whiteSpace: "nowrap",
-            willChange: "transform, opacity",
+            gridArea: '1 / 1 / 2 / 2',
+            display: 'inline-flex',
+            alignItems: 'center',
+            whiteSpace: 'nowrap',
+            willChange: 'transform, opacity',
           }}
         >
           {label}
@@ -260,11 +261,11 @@ export default function ButtonPill(props: ButtonPillProps) {
           variants={bottomVariant}
           style={{
             color: colors.hoverTextColor,
-            gridArea: "1 / 1 / 2 / 2",
-            display: "inline-flex",
-            alignItems: "center",
-            whiteSpace: "nowrap",
-            willChange: "transform, opacity",
+            gridArea: '1 / 1 / 2 / 2',
+            display: 'inline-flex',
+            alignItems: 'center',
+            whiteSpace: 'nowrap',
+            willChange: 'transform, opacity',
           }}
         >
           {label}
@@ -275,7 +276,7 @@ export default function ButtonPill(props: ButtonPillProps) {
         <div
           style={{
             ...commonIconStyle,
-            color: "inherit",
+            color: 'inherit',
           }}
           aria-hidden="true"
         >
@@ -285,39 +286,36 @@ export default function ButtonPill(props: ButtonPillProps) {
     </div>
   )
 
-
-
   return (
     <>
       <MotionButton
-        className={cn("btn", className)}
+        className={cn('btn', className)}
         variants={buttonVariants}
         initial="rest"
         whileHover="hover"
         whileTap="tap"
         style={{
-          borderRadius: "var(--op-radius-medium)",
+          borderRadius: 'var(--op-radius-medium)',
           backgroundColor: colors.bg,
           color: colors.textColor,
-          position: "relative",
-          overflow: "hidden",
+          position: 'relative',
+          overflow: 'hidden',
           padding: 'var(--_op-btn-padding-large)',
-          border: "none",
-          cursor: "pointer",
-          display: "inline-flex",
+          border: 'none',
+          cursor: 'pointer',
+          display: 'inline-flex',
           boxShadow: 'none',
-          alignItems: "center",
+          alignItems: 'center',
           height: 44,
-          justifyContent: "center",
-          willChange: "border-radius, filter  ",
-          fontFamily: "DM Sans",
+          justifyContent: 'center',
+          willChange: 'border-radius, filter  ',
+          fontFamily: 'DM Sans',
           fontSize: 18,
           fontWeight: 500,
           lineHeight: 1,
-          whiteSpace: "nowrap",
+          whiteSpace: 'nowrap',
           ...style,
         }}
-
         disabled={disabled}
         onClick={onClick}
         type="button"

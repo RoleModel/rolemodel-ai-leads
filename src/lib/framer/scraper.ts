@@ -170,11 +170,17 @@ export async function scrapePage(url: string): Promise<ScrapedPage | null> {
  */
 export async function getFramerUrls(
   baseUrl: string,
-  options: { includeBlog?: boolean; includeCaseStudies?: boolean; includePages?: boolean } = {}
+  options: {
+    includeBlog?: boolean
+    includeCaseStudies?: boolean
+    includePages?: boolean
+  } = {}
 ): Promise<SitemapUrl[]> {
   const { includeBlog = true, includeCaseStudies = true, includePages = true } = options
 
-  const sitemapUrl = baseUrl.endsWith('/') ? `${baseUrl}sitemap.xml` : `${baseUrl}/sitemap.xml`
+  const sitemapUrl = baseUrl.endsWith('/')
+    ? `${baseUrl}sitemap.xml`
+    : `${baseUrl}/sitemap.xml`
   const allUrls = await parseSitemap(sitemapUrl)
 
   return allUrls.filter((item) => {

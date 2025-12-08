@@ -1,10 +1,10 @@
 // CircularText.tsx
-import * as React from "react"
-import { motion, useAnimation } from "motion/react"
+import { motion, useAnimation } from 'motion/react'
+import * as React from 'react'
 
-type HoverMode = "none" | "speedUp" | "slowDown" | "pause" | "goBonkers"
-type Orientation = "outward" | "inward"
-type Align = "start" | "center" | "end"
+type HoverMode = 'none' | 'speedUp' | 'slowDown' | 'pause' | 'goBonkers'
+type Orientation = 'outward' | 'inward'
+type Align = 'start' | 'center' | 'end'
 
 type FontLike = {
   fontSize?: number | string
@@ -101,31 +101,31 @@ export default function CircularText(props: {
   style?: React.CSSProperties
 }) {
   const {
-    text = "Explore • Craft • Ship",
+    text = 'Explore • Craft • Ship',
     size = 320,
     radius = 130,
     startAngle = -90,
     endAngle = 20,
     clockwise = true,
-    orientation = "outward",
-    align = "start",
+    orientation = 'outward',
+    align = 'start',
 
     font = {
       fontSize: 56,
-      lineHeight: "1.1em",
+      lineHeight: '1.1em',
       fontWeight: 700,
-      fontFamily: "DM Sans, system-ui, sans-serif",
+      fontFamily: 'DM Sans, system-ui, sans-serif',
     },
     fontWeight,
     fontSize,
     letterSpacing,
     backgroundColor,
-    border = "solid 1px transparent",
+    border = 'solid 1px transparent',
 
-    fill = "#2E66AF",
+    fill = '#2E66AF',
 
     spinDuration = 0,
-    hover = "none",
+    hover = 'none',
     speedSlow = 40,
     speedFast = 5,
     speedBonkers = 1,
@@ -148,10 +148,9 @@ export default function CircularText(props: {
   )
 
   // Align mapping
-  const textAnchor: "start" | "middle" | "end" =
-    align === "center" ? "middle" : (align as "start" | "end")
-  const startOffset =
-    align === "start" ? "0%" : align === "center" ? "50%" : "100%"
+  const textAnchor: 'start' | 'middle' | 'end' =
+    align === 'center' ? 'middle' : (align as 'start' | 'end')
+  const startOffset = align === 'start' ? '0%' : align === 'center' ? '50%' : '100%'
 
   // Spin controls
   const controls = useAnimation()
@@ -164,7 +163,7 @@ export default function CircularText(props: {
       rotate: [0, 360],
       transition: {
         duration: spinDuration,
-        ease: "linear",
+        ease: 'linear',
         repeat: Infinity,
       },
     })
@@ -179,8 +178,8 @@ export default function CircularText(props: {
   }
 
   const onEnter = () => {
-    if (!spinDuration || hover === "none") return
-    if (hover === "pause") {
+    if (!spinDuration || hover === 'none') return
+    if (hover === 'pause') {
       controls.stop()
       return
     }
@@ -188,7 +187,7 @@ export default function CircularText(props: {
       rotate: [0, 360],
       transition: {
         duration: speedMap[hover],
-        ease: "linear",
+        ease: 'linear',
         repeat: Infinity,
       },
     })
@@ -199,7 +198,7 @@ export default function CircularText(props: {
       rotate: [0, 360],
       transition: {
         duration: spinDuration,
-        ease: "linear",
+        ease: 'linear',
         repeat: Infinity,
       },
     })
@@ -207,10 +206,11 @@ export default function CircularText(props: {
 
   // Flip glyphs inward if needed (doesn't affect arc math)
   const inwardFlip =
-    orientation === "inward"
+    orientation === 'inward'
       ? { transform: `scale(1,-1)`, transformOrigin: `${cx}px ${cy}px` }
       : {}
-  const isSet = (v: string | number | undefined | null) => v !== undefined && v !== null && v !== ""
+  const isSet = (v: string | number | undefined | null) =>
+    v !== undefined && v !== null && v !== ''
   const mergedFontStyle: React.CSSProperties = {
     ...styleFromFont(font),
     ...(isSet(fontSize) ? { fontSize } : null),
@@ -225,7 +225,7 @@ export default function CircularText(props: {
       viewBox={`0 0 ${size} ${size}`}
       className={className}
       style={{
-        display: "block",
+        display: 'block',
         ...style,
         backgroundColor: backgroundColor,
         border: border,

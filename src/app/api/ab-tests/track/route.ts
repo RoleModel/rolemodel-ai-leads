@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { supabase } from '@/lib/supabase/client'
 
 interface Variant {
@@ -30,13 +31,15 @@ export async function POST(request: NextRequest) {
     // Find the variant by path from an active test
     const { data: variant } = await supabase
       .from('ab_test_variants')
-      .select(`
+      .select(
+        `
         id,
         ab_tests!inner (
           id,
           status
         )
-      `)
+      `
+      )
       .eq('path', path)
       .eq('ab_tests.status', 'active')
       .single()
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
       event_type,
       session_id: session_id || null,
       visitor_id: visitor_id || null,
-      metadata: metadata || {}
+      metadata: metadata || {},
     })
     .select()
     .single()
@@ -86,7 +89,8 @@ export async function GET(request: NextRequest) {
   // Get active test with variants
   const { data: test, error: testError } = await supabase
     .from('ab_tests')
-    .select(`
+    .select(
+      `
       id,
       status,
       ab_test_variants (
@@ -95,7 +99,8 @@ export async function GET(request: NextRequest) {
         path,
         weight
       )
-    `)
+    `
+    )
     .eq('id', testId)
     .eq('status', 'active')
     .single()
@@ -116,16 +121,21 @@ export async function GET(request: NextRequest) {
       .from('ab_test_events')
       .select('variant_id')
       .eq('visitor_id', visitorId)
-      .in('variant_id', variants.map((v: Variant) => v.id))
+      .in(
+        'variant_id',
+        variants.map((v: Variant) => v.id)
+      )
       .limit(1)
       .single()
 
     if (existingEvent) {
-      const assignedVariant = variants.find((v: Variant) => v.id === existingEvent.variant_id)
+      const assignedVariant = variants.find(
+        (v: Variant) => v.id === existingEvent.variant_id
+      )
       if (assignedVariant) {
         return NextResponse.json({
           variant: assignedVariant,
-          isReturningVisitor: true
+          isReturningVisitor: true,
         })
       }
     }
@@ -141,7 +151,7 @@ export async function GET(request: NextRequest) {
     if (random <= cumulativeWeight) {
       return NextResponse.json({
         variant,
-        isReturningVisitor: false
+        isReturningVisitor: false,
       })
     }
   }
@@ -149,6 +159,6 @@ export async function GET(request: NextRequest) {
   // Fallback to first variant
   return NextResponse.json({
     variant: variants[0],
-    isReturningVisitor: false
+    isReturningVisitor: false,
   })
 }

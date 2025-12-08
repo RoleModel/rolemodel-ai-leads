@@ -1,66 +1,79 @@
 'use client'
 
-import { useState, useRef, useCallback, useMemo, Fragment } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import gsap from 'gsap'
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ScrollSmoother } from 'gsap/ScrollSmoother'
+import { useChat } from '@ai-sdk/react'
 import { useGSAP } from '@gsap/react'
-
-gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
 import {
   ArrowRight02Icon,
   ArtificialIntelligence04Icon,
-  Time01Icon,
-  File01Icon,
-  SecurityCheckIcon,
-  Idea01Icon,
-  DashboardSpeed01Icon,
-  Link01Icon,
-  ThumbsUpIcon,
-  ThumbsDownIcon,
   Copy01Icon,
-  Refresh01Icon,
-  PlusSignIcon,
-  MinimizeScreenIcon,
+  DashboardSpeed01Icon,
+  File01Icon,
+  Idea01Icon,
+  Link01Icon,
   MaximizeScreenIcon,
+  MinimizeScreenIcon,
+  PlusSignIcon,
+  Refresh01Icon,
+  SecurityCheckIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+  Time01Icon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import styles from './landing-page-c.module.css'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import {
-  useLeadsPageSettings,
-  LeadsPageSettingsProvider,
-} from '@/contexts/LeadsPageSettingsContext'
-import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
-import { Message, MessageContent, MessageResponse, MessageActions, MessageAction } from '@/components/ai-elements/message'
+import gsap from 'gsap'
+import { ScrollSmoother } from 'gsap/ScrollSmoother'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { AnimatePresence, motion } from 'motion/react'
+import { Fragment, useCallback, useMemo, useRef, useState } from 'react'
+
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
-import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+  MessageResponse,
+} from '@/components/ai-elements/message'
 import {
   PromptInput,
-  PromptInputTextarea,
-  PromptInputSubmit,
-  PromptInputProvider,
+  PromptInputActionAddAttachments,
+  PromptInputActionMenu,
+  PromptInputActionMenuContent,
+  PromptInputActionMenuTrigger,
   PromptInputBody,
   PromptInputFooter,
   PromptInputMessage,
-  PromptInputTools,
+  PromptInputProvider,
   PromptInputSpeechButton,
-  PromptInputActionMenuContent,
-  PromptInputActionMenu,
-  PromptInputActionMenuTrigger,
-  PromptInputActionAddAttachments,
+  PromptInputSubmit,
+  PromptInputTextarea,
+  PromptInputTools,
 } from '@/components/ai-elements/prompt-input'
-import { MessageWithCitations, type Citation } from '@/components/leads-page/MessageWithCitations'
+import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
+import AnimatedPath from '@/components/intro/AnimatedPath'
 import Favicon from '@/components/intro/Favicon'
 import Logo from '@/components/intro/Logo'
-import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
-import AnimatedPath from '@/components/intro/AnimatedPath'
-import '@/styles/ai-elements.css'
 import '@/components/leads-page/LeadsPageView.css'
+import {
+  type Citation,
+  MessageWithCitations,
+} from '@/components/leads-page/MessageWithCitations'
+import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+
+import {
+  LeadsPageSettingsProvider,
+  useLeadsPageSettings,
+} from '@/contexts/LeadsPageSettingsContext'
+
+import '@/styles/ai-elements.css'
+
+import styles from './landing-page-c.module.css'
+
+gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
 
 interface AssessmentToolProps {
   chatbotId?: string
@@ -90,9 +103,17 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
       return
     }
     try {
-      const parsed = JSON.parse(header) as Array<{ title: string; url?: string | null; snippet?: string }>
+      const parsed = JSON.parse(header) as Array<{
+        title: string
+        url?: string | null
+        snippet?: string
+      }>
       const formatted: Citation[] = parsed
-        .map((item) => ({ title: item.title, url: item.url ?? undefined, description: item.snippet }))
+        .map((item) => ({
+          title: item.title,
+          url: item.url ?? undefined,
+          description: item.snippet,
+        }))
         .filter((item) => item.title || item.description || item.url)
       setPendingCitations(formatted.length > 0 ? formatted : null)
     } catch {
@@ -100,16 +121,19 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
     }
   }, [])
 
-  const handleChatFinish = useCallback(({ message }: { message: UIMessage }) => {
-    if (message.role !== 'assistant') {
+  const handleChatFinish = useCallback(
+    ({ message }: { message: UIMessage }) => {
+      if (message.role !== 'assistant') {
+        setPendingCitations(null)
+        return
+      }
+      if (pendingCitations && pendingCitations.length > 0) {
+        setMessageCitations((prev) => ({ ...prev, [message.id]: pendingCitations }))
+      }
       setPendingCitations(null)
-      return
-    }
-    if (pendingCitations && pendingCitations.length > 0) {
-      setMessageCitations((prev) => ({ ...prev, [message.id]: pendingCitations }))
-    }
-    setPendingCitations(null)
-  }, [pendingCitations])
+    },
+    [pendingCitations]
+  )
 
   const interceptingFetch = useCallback(
     async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -125,11 +149,12 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   )
 
   const chatTransport = useMemo(
-    () => new DefaultChatTransport({
-      api: '/api/chat',
-      body: { chatbotId: activeChatbotId, conversationId },
-      fetch: interceptingFetch,
-    }),
+    () =>
+      new DefaultChatTransport({
+        api: '/api/chat',
+        body: { chatbotId: activeChatbotId, conversationId },
+        fetch: interceptingFetch,
+      }),
     [activeChatbotId, conversationId, interceptingFetch]
   )
 
@@ -213,11 +238,13 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
 
   const suggestions = [
     "We're drowning in spreadsheets and manual processes",
-    "I need to modernize our legacy software",
+    'I need to modernize our legacy software',
   ]
 
   return (
-    <Card className={`${styles['intro-c-card']} ${step === 'chat' && isExpanded ? styles['intro-c-intro--fixed'] : ''}`}>
+    <Card
+      className={`${styles['intro-c-card']} ${step === 'chat' && isExpanded ? styles['intro-c-intro--fixed'] : ''}`}
+    >
       {step === 'chat' && (
         <Button
           variant="ghost"
@@ -226,12 +253,14 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
           onClick={() => setIsExpanded(!isExpanded)}
           aria-label={isExpanded ? 'Minimize' : 'Maximize'}
         >
-          <HugeiconsIcon icon={isExpanded ? MinimizeScreenIcon : MaximizeScreenIcon} size={20} />
+          <HugeiconsIcon
+            icon={isExpanded ? MinimizeScreenIcon : MaximizeScreenIcon}
+            size={20}
+          />
         </Button>
       )}
       <div className={styles['intro-c-card__content']}>
         <AnimatePresence mode="wait">
-
           {/* Intro Step */}
           {step === 'intro' && (
             <motion.div
@@ -249,16 +278,23 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                   transition={{ delay: 0.1 }}
                   className={styles['intro-c-intro__emoji']}
                 >
-                  {String.fromCodePoint(0x1F44B)}
+                  {String.fromCodePoint(0x1f44b)}
                 </motion.span>
                 <h3 className={styles['intro-c-intro__title']}>
                   Let&apos;s see if we fit.
                 </h3>
                 <p className={styles['intro-c-intro__subtitle']}>
-                  We&apos;ll ask a few key questions to understand your needs. We&apos;ll email you the results.
+                  We&apos;ll ask a few key questions to understand your needs. We&apos;ll
+                  email you the results.
                 </p>
               </div>
-              <form className={styles['intro-c-intro__form']} onSubmit={(e) => { e.preventDefault(); void handleStartChat(); }}>
+              <form
+                className={styles['intro-c-intro__form']}
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  void handleStartChat()
+                }}
+              >
                 <div className="form-group">
                   <label className="form-label">Full Name</label>
                   <input
@@ -322,7 +358,13 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                   {messages.length === 0 && (
                     <Message from="assistant">
                       <div className="message-avatar">
-                        <Favicon className="message-avatar__image" style={{ width: 'var(--op-space-large)', height: 'var(--op-space-large)' }} />
+                        <Favicon
+                          className="message-avatar__image"
+                          style={{
+                            width: 'var(--op-space-large)',
+                            height: 'var(--op-space-large)',
+                          }}
+                        />
                       </div>
                       <MessageContent>
                         <MessageResponse>
@@ -341,13 +383,22 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                                 <Message from={message.role}>
                                   {message.role === 'assistant' && (
                                     <div className="message-avatar">
-                                      <Favicon className="message-avatar__image" style={{ width: 'var(--op-space-large)', height: 'var(--op-space-large)' }} />
+                                      <Favicon
+                                        className="message-avatar__image"
+                                        style={{
+                                          width: 'var(--op-space-large)',
+                                          height: 'var(--op-space-large)',
+                                        }}
+                                      />
                                     </div>
                                   )}
                                   <MessageContent>
                                     {isClient ? (
                                       messageCitations[message.id]?.length ? (
-                                        <MessageWithCitations message={message} citations={messageCitations[message.id]} />
+                                        <MessageWithCitations
+                                          message={message}
+                                          citations={messageCitations[message.id]}
+                                        />
                                       ) : (
                                         <MessageResponse>{part.text}</MessageResponse>
                                       )
@@ -356,16 +407,56 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                                     )}
                                     {message.role === 'assistant' && (
                                       <MessageActions>
-                                        <MessageAction label="Like" onClick={() => setLiked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Like this response">
-                                          <HugeiconsIcon icon={ThumbsUpIcon} size={16} color={liked[message.id] ? "currentColor" : "none"} />
+                                        <MessageAction
+                                          label="Like"
+                                          onClick={() =>
+                                            setLiked((prev) => ({
+                                              ...prev,
+                                              [message.id]: !prev[message.id],
+                                            }))
+                                          }
+                                          tooltip="Like this response"
+                                        >
+                                          <HugeiconsIcon
+                                            icon={ThumbsUpIcon}
+                                            size={16}
+                                            color={
+                                              liked[message.id] ? 'currentColor' : 'none'
+                                            }
+                                          />
                                         </MessageAction>
-                                        <MessageAction label="Dislike" onClick={() => setDisliked((prev) => ({ ...prev, [message.id]: !prev[message.id] }))} tooltip="Dislike this response">
-                                          <HugeiconsIcon icon={ThumbsDownIcon} size={16} color={disliked[message.id] ? "currentColor" : "none"} />
+                                        <MessageAction
+                                          label="Dislike"
+                                          onClick={() =>
+                                            setDisliked((prev) => ({
+                                              ...prev,
+                                              [message.id]: !prev[message.id],
+                                            }))
+                                          }
+                                          tooltip="Dislike this response"
+                                        >
+                                          <HugeiconsIcon
+                                            icon={ThumbsDownIcon}
+                                            size={16}
+                                            color={
+                                              disliked[message.id]
+                                                ? 'currentColor'
+                                                : 'none'
+                                            }
+                                          />
                                         </MessageAction>
-                                        <MessageAction onClick={() => regenerate()} label="Retry">
+                                        <MessageAction
+                                          onClick={() => regenerate()}
+                                          label="Retry"
+                                        >
                                           <HugeiconsIcon icon={Refresh01Icon} size={16} />
                                         </MessageAction>
-                                        <MessageAction onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
+                                        <MessageAction
+                                          onClick={() =>
+                                            navigator.clipboard.writeText(part.text)
+                                          }
+                                          label="Copy"
+                                        >
                                           <HugeiconsIcon icon={Copy01Icon} size={16} />
                                         </MessageAction>
                                       </MessageActions>
@@ -392,18 +483,22 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                       style={{ width: `${bantProgress}%` }}
                     />
                   </div>
-                  <span className="leads-page__bant-text">
-                    {bantProgress}%
-                  </span>
+                  <span className="leads-page__bant-text">{bantProgress}%</span>
                 </div>
               )}
 
-              <div className={styles['intro-c-chat__input-wrapper']} style={{ paddingBottom: 'var(--op-space-medium)' }}>
+              <div
+                className={styles['intro-c-chat__input-wrapper']}
+                style={{ paddingBottom: 'var(--op-space-medium)' }}
+              >
                 <div className="gradient" style={{ top: '80%' }} />
                 <PromptInputProvider>
                   <PromptInput onSubmit={handlePromptSubmit}>
                     <PromptInputBody>
-                      <PromptInputTextarea ref={textareaRef} placeholder="Describe your challenge..." />
+                      <PromptInputTextarea
+                        ref={textareaRef}
+                        placeholder="Describe your challenge..."
+                      />
                     </PromptInputBody>
                     <PromptInputFooter>
                       <PromptInputTools>
@@ -430,7 +525,9 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                       <Suggestion
                         key={suggestion}
                         size="sm"
-                        onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
+                        onClick={() =>
+                          handlePromptSubmit({ text: suggestion, files: [] })
+                        }
                         suggestion={suggestion}
                       />
                     ))}
@@ -439,7 +536,6 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
               )}
             </motion.div>
           )}
-
         </AnimatePresence>
       </div>
     </Card>
@@ -455,27 +551,39 @@ const AssessmentTool = (props: AssessmentToolProps) => (
 
 // Feature items data
 const features = [
-  { icon: Time01Icon, title: "Respects your time", text: "Complete the assessment in under 5 minutes. No lengthy calls required for initial discovery." },
-  { icon: File01Icon, title: "Instant Structured Summary", text: "Receive a summary of your business goals and potential ROI." },
-  { icon: SecurityCheckIcon, title: "Low Risk Exploration", text: "Get AI-driven feedback on technical feasibility before committing to a consultation." }
+  {
+    icon: Time01Icon,
+    title: 'Respects your time',
+    text: 'Complete the assessment in under 5 minutes. No lengthy calls required for initial discovery.',
+  },
+  {
+    icon: File01Icon,
+    title: 'Instant Structured Summary',
+    text: 'Receive a summary of your business goals and potential ROI.',
+  },
+  {
+    icon: SecurityCheckIcon,
+    title: 'Low Risk Exploration',
+    text: 'Get AI-driven feedback on technical feasibility before committing to a consultation.',
+  },
 ]
 
 const featureCards = [
   {
     icon: Idea01Icon,
-    title: "A Clearer Picture of Your Work",
-    text: "Your answers give us enough context about your workflow, pain points, and constraints that we can skip the generic intake and start by talking about what actually needs to change."
+    title: 'A Clearer Picture of Your Work',
+    text: 'Your answers give us enough context about your workflow, pain points, and constraints that we can skip the generic intake and start by talking about what actually needs to change.',
   },
   {
     icon: DashboardSpeed01Icon,
-    title: "Realistic Next Steps",
-    text: "We use what you share to get an honest first read on scope, risk, and timing so we can suggest a starting point that fits your situation—or let you know if custom software isn't the right move yet."
+    title: 'Realistic Next Steps',
+    text: "We use what you share to get an honest first read on scope, risk, and timing so we can suggest a starting point that fits your situation—or let you know if custom software isn't the right move yet.",
   },
   {
     icon: Link01Icon,
-    title: "A More Useful First Conversation",
-    text: "Your responses shape the agenda, who from our team joins the call, and which examples we bring, so our time together feels like a working session focused on your business, not a sales script."
-  }
+    title: 'A More Useful First Conversation',
+    text: 'Your responses shape the agenda, who from our team joins the call, and which examples we bring, so our time together feels like a working session focused on your business, not a sales script.',
+  },
 ]
 
 export interface LandingPageCProps {
@@ -488,26 +596,29 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLElement>(null)
 
-  const { contextSafe } = useGSAP(() => {
-    const smoother = ScrollSmoother.create({
-      wrapper: wrapperRef.current,
-      content: contentRef.current,
-      smooth: 0.5,
-      effects: true,
-      smoothTouch: 0.8,
-    })
+  const { contextSafe } = useGSAP(
+    () => {
+      const smoother = ScrollSmoother.create({
+        wrapper: wrapperRef.current,
+        content: contentRef.current,
+        smooth: 0.5,
+        effects: true,
+        smoothTouch: 0.8,
+      })
 
-    smoother.scrollTo(0)
+      smoother.scrollTo(0)
 
-    // Track scroll progress for AnimatedPath
-    ScrollTrigger.create({
-      trigger: heroRef.current,
-      scroller: smoother.wrapper(),
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-    })
-  }, { scope: wrapperRef })
+      // Track scroll progress for AnimatedPath
+      ScrollTrigger.create({
+        trigger: heroRef.current,
+        scroller: smoother.wrapper(),
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      })
+    },
+    { scope: wrapperRef }
+  )
 
   const handleScrollToTool = contextSafe(() => {
     const smoother = ScrollSmoother.get()
@@ -522,13 +633,14 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
     <div className={styles['intro-c-page']} data-page="intro-c">
       <div ref={wrapperRef} className={styles['smooth-wrapper']}>
         <div ref={contentRef} className={styles['smooth-content']}>
-
-
           {/* Hero Section */}
           <section ref={heroRef} className={styles['intro-c-hero']}>
             {/* Logo */}
             <div className={styles['intro-c-logo']}>
-              <Logo variant="dark" style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }} />
+              <Logo
+                variant="dark"
+                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
+              />
             </div>
             <div className={styles['intro-c-hero__gradient']} />
 
@@ -539,7 +651,11 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
               className={styles['intro-c-hero__container']}
             >
               <div className={styles['intro-c-hero__badge']}>
-                <HugeiconsIcon icon={ArtificialIntelligence04Icon} size={24} color="var(--color---purple-700)" />
+                <HugeiconsIcon
+                  icon={ArtificialIntelligence04Icon}
+                  size={24}
+                  color="var(--color---purple-700)"
+                />
                 <span>AI-Driven Analysis</span>
               </div>
 
@@ -548,7 +664,8 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
                 <span className={styles['title-highlight']}>custom software</span>
                 <div>
                   <span className={styles.title}>right for{` `}</span>
-                  <span className={`${styles.title} ${styles.circle}`}>your
+                  <span className={`${styles.title} ${styles.circle}`}>
+                    your
                     <AnimatedPath
                       className={styles['highlight-circle']}
                       stroke="var(--brand-Bright-Yellow)"
@@ -563,35 +680,28 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
                       preserveAspectRatio="none"
                       d="M1 52.6501C115.88 -2.08648 483.388 1.16489 499.75 52.6501C510.213 85.5762 454.384 99.1037 355.471 112.631C256.559 126.159 48.5456 125.915 17.3586 92.0694C-20.5347 50.9459 89.9842 -1.65508 260.277 3.32941C519.086 10.9048 527.267 80.7065 459.59 112.631"
                     />
-                  </span> <span className={styles.title}>business?</span>
+                  </span>{' '}
+                  <span className={styles.title}>business?</span>
                 </div>
               </h1>
               <p className={styles['intro-c-hero__subtitle']}>
-                Determine your fit, explore ROI, and receive a structured consultation summary in 3-5 minutes with our intelligent assessment tool.
+                Determine your fit, explore ROI, and receive a structured consultation
+                summary in 3-5 minutes with our intelligent assessment tool.
               </p>
 
               <div className={styles['intro-c-hero__actions']}>
-                <Button
-                  variant="brightblue"
-                  size="lg"
-                  onClick={handleScrollToTool}>
+                <Button variant="brightblue" size="lg" onClick={handleScrollToTool}>
                   Start Assessment
                   <HugeiconsIcon icon={ArrowRight02Icon} size={16} />
                 </Button>
-
-
-
               </div>
             </motion.div>
           </section>
-
-
 
           {/* Tool Section */}
           <section id="tool" className={styles['intro-c-tool']}>
             <div className={styles['intro-c-tool__container']}>
               <div className={styles['intro-c-tool__grid']}>
-
                 {/* Left Side Context */}
                 <div className={styles['intro-c-tool__content']}>
                   <motion.div
@@ -601,10 +711,15 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
                     transition={{ duration: 0.5 }}
                   >
                     <h2 className={styles['intro-c-tool__title']}>
-                      Intelligent analysis<br />tailored to your context.
+                      Intelligent analysis
+                      <br />
+                      tailored to your context.
                     </h2>
                     <p className={styles['intro-c-tool__description']}>
-                      Our AI tool moves beyond static forms. It evaluates your project parameters, requirements, and timeline while providing real-time insights into how RoleModel&apos;s custom solutions can scale your operations.
+                      Our AI tool moves beyond static forms. It evaluates your project
+                      parameters, requirements, and timeline while providing real-time
+                      insights into how RoleModel&apos;s custom solutions can scale your
+                      operations.
                     </p>
 
                     <ul className={styles['intro-c-tool__features']}>
@@ -621,8 +736,12 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
                             <HugeiconsIcon icon={item.icon} size={28} />
                           </div>
                           <div>
-                            <h3 className={styles['intro-c-tool__feature-title']}>{item.title}</h3>
-                            <p className={styles['intro-c-tool__feature-text']}>{item.text}</p>
+                            <h3 className={styles['intro-c-tool__feature-title']}>
+                              {item.title}
+                            </h3>
+                            <p className={styles['intro-c-tool__feature-text']}>
+                              {item.text}
+                            </p>
                           </div>
                         </motion.li>
                       ))}
@@ -642,23 +761,44 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
           <section className={styles['intro-c-features']}>
             <div className={styles['intro-c-features__container']}>
               <div className={styles['intro-c-features__header']}>
-                <h2 className={styles['intro-c-features__title']}>Why use the AI Assessment Tool?</h2>
+                <h2 className={styles['intro-c-features__title']}>
+                  Why use the AI Assessment Tool?
+                </h2>
                 <p className={styles['intro-c-features__subtitle']}>
-                  We balance innovation with structured discovery to respect your time and provide immediate value.
+                  We balance innovation with structured discovery to respect your time and
+                  provide immediate value.
                 </p>
               </div>
 
               <div className={styles['intro-c-features__grid']}>
                 {featureCards.map((feature, i) => {
-                  const brandColors = ['var(--brand-Bright-Blue)', 'var(--brand-Light-Purple)', 'var(--brand-Medium-Green)']
+                  const brandColors = [
+                    'var(--brand-Bright-Blue)',
+                    'var(--brand-Light-Purple)',
+                    'var(--brand-Medium-Green)',
+                  ]
                   const color = brandColors[i % brandColors.length]
                   return (
-                    <Card variant="dark" borderBottom={color} key={i} className="card card--padded">
+                    <Card
+                      variant="dark"
+                      borderBottom={color}
+                      key={i}
+                      className="card card--padded"
+                    >
                       <div className={styles['intro-c-features__card-icon']}>
-                        <HugeiconsIcon icon={feature.icon} strokeWidth={1} size={40} color={color} />
+                        <HugeiconsIcon
+                          icon={feature.icon}
+                          strokeWidth={1}
+                          size={40}
+                          color={color}
+                        />
                       </div>
-                      <h3 className={styles['intro-c-features__card-title']}>{feature.title}</h3>
-                      <p className={styles['intro-c-features__card-text']}>{feature.text}</p>
+                      <h3 className={styles['intro-c-features__card-title']}>
+                        {feature.title}
+                      </h3>
+                      <p className={styles['intro-c-features__card-text']}>
+                        {feature.text}
+                      </p>
                     </Card>
                   )
                 })}
@@ -667,7 +807,6 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
           </section>
           {/* Privacy Footer */}
           <PrivacyTermsLinks variant="dark" className={styles['intro-c-footer-links']} />
-
         </div>
       </div>
     </div>

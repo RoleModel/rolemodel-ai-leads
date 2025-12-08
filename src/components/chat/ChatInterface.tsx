@@ -1,13 +1,18 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { useChat } from '@ai-sdk/react'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { AlertCircleIcon, CheckIcon, SearchIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CheckIcon, AlertCircleIcon, SearchIcon } from 'lucide-react'
 
+import {
+  ChainOfThought,
+  ChainOfThoughtContent,
+  ChainOfThoughtHeader,
+  ChainOfThoughtStep,
+} from '@/components/ai-elements/chain-of-thought'
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
   Message,
@@ -22,12 +27,10 @@ import {
   PromptInputTextarea,
 } from '@/components/ai-elements/prompt-input'
 import {
-  ChainOfThought,
-  ChainOfThoughtContent,
-  ChainOfThoughtHeader,
-  ChainOfThoughtStep,
-} from '@/components/ai-elements/chain-of-thought'
-import { MessageWithCitations, type Citation } from '@/components/leads-page/MessageWithCitations'
+  type Citation,
+  MessageWithCitations,
+} from '@/components/leads-page/MessageWithCitations'
+import { Button } from '@/components/ui/button'
 
 interface PlaygroundSettings {
   model: string
@@ -69,9 +72,9 @@ export function ChatInterface({
   collectFeedback = true,
   playgroundSettings,
 }: ChatInterfaceProps) {
-  const [messageFeedback, setMessageFeedback] = useState<Map<string, 'positive' | 'negative'>>(
-    new Map()
-  )
+  const [messageFeedback, setMessageFeedback] = useState<
+    Map<string, 'positive' | 'negative'>
+  >(new Map())
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
 
@@ -143,11 +146,13 @@ export function ChatInterface({
         api: '/api/chat',
         body: {
           ...(chatbotId ? { chatbotId } : {}),
-          ...(playgroundSettings ? {
-            model: playgroundSettings.model,
-            temperature: playgroundSettings.temperature,
-            instructions: playgroundSettings.instructions,
-          } : {}),
+          ...(playgroundSettings
+            ? {
+                model: playgroundSettings.model,
+                temperature: playgroundSettings.temperature,
+                instructions: playgroundSettings.instructions,
+              }
+            : {}),
         },
         fetch: interceptingFetch,
       }),
@@ -219,7 +224,9 @@ export function ChatInterface({
   }
 
   const getToolParts = (message: UIMessage): ToolPart[] => {
-    return message.parts.filter((part) => part.type.startsWith('tool-')) as unknown as ToolPart[]
+    return message.parts.filter((part) =>
+      part.type.startsWith('tool-')
+    ) as unknown as ToolPart[]
   }
 
   const renderChainOfThought = (toolPart: ToolPart) => {
@@ -227,10 +234,14 @@ export function ChatInterface({
 
     const getIcon = (status: string) => {
       switch (status) {
-        case 'complete': return CheckIcon
-        case 'active': return SearchIcon
-        case 'pending': return AlertCircleIcon
-        default: return CheckIcon
+        case 'complete':
+          return CheckIcon
+        case 'active':
+          return SearchIcon
+        case 'pending':
+          return AlertCircleIcon
+        default:
+          return CheckIcon
       }
     }
 
@@ -277,7 +288,8 @@ export function ChatInterface({
               const toolParts = getToolParts(message)
               const chainOfThought = toolParts.find((tp) => tp.type === 'tool-thinking')
               const citations = messageCitations[message.id]
-              const hasCitations = message.role === 'assistant' && citations && citations.length > 0
+              const hasCitations =
+                message.role === 'assistant' && citations && citations.length > 0
 
               return (
                 <Message
@@ -287,10 +299,7 @@ export function ChatInterface({
                   <MessageContent>
                     {chainOfThought && renderChainOfThought(chainOfThought)}
                     {hasCitations ? (
-                      <MessageWithCitations
-                        message={message}
-                        citations={citations}
-                      />
+                      <MessageWithCitations message={message} citations={citations} />
                     ) : (
                       <MessageResponse>{getMessageContent(message)}</MessageResponse>
                     )}

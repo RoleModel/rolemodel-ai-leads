@@ -2,15 +2,21 @@
 import { ArrowLeft01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useRouter } from 'next/navigation'
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ModelSelector } from '@/components/ui/model-selector'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
@@ -115,7 +121,10 @@ interface EditorSidebarProps {
   onWidthChange?: (width: number) => void
 }
 
-export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSidebarProps) {
+export function EditorSidebar({
+  width = DEFAULT_WIDTH,
+  onWidthChange,
+}: EditorSidebarProps) {
   const router = useRouter()
   const { settings, updateSettings } = useLeadsPageSettings()
   const [isSaving, setIsSaving] = useState(false)
@@ -197,10 +206,7 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
 </script>`
 
   return (
-    <aside
-      ref={sidebarRef}
-      style={{ ...styles.editorSidebar, width: `${width}px` }}
-    >
+    <aside ref={sidebarRef} style={{ ...styles.editorSidebar, width: `${width}px` }}>
       {/* Resize Handle */}
       <div
         style={{
@@ -210,12 +216,13 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
         onMouseDown={handleMouseDown}
         onMouseEnter={(e) => {
           if (!isResizing) {
-            (e.target as HTMLElement).style.backgroundColor = 'var(--op-color-primary-minus-four)'
+            ;(e.target as HTMLElement).style.backgroundColor =
+              'var(--op-color-primary-minus-four)'
           }
         }}
         onMouseLeave={(e) => {
           if (!isResizing) {
-            (e.target as HTMLElement).style.backgroundColor = 'transparent'
+            ;(e.target as HTMLElement).style.backgroundColor = 'transparent'
           }
         }}
       />
@@ -231,7 +238,10 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
             <PopoverTrigger asChild>
               <Button size="sm">Deploy</Button>
             </PopoverTrigger>
-            <PopoverContent align="end" style={{ width: '500px', maxHeight: '80vh', overflow: 'auto' }}>
+            <PopoverContent
+              align="end"
+              style={{ width: '500px', maxHeight: '80vh', overflow: 'auto' }}
+            >
               <div
                 style={{
                   display: 'flex',
@@ -270,7 +280,8 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
                       margin: '0 0 var(--op-space-small) 0',
                     }}
                   >
-                    Embeds the leads page as a full-page experience. Best for dedicated landing pages.
+                    Embeds the leads page as a full-page experience. Best for dedicated
+                    landing pages.
                   </p>
                   <div style={{ position: 'relative' }}>
                     <pre
@@ -325,7 +336,8 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
                       margin: '0 0 var(--op-space-small) 0',
                     }}
                   >
-                    Adds a floating widget in the bottom-right corner. Works great in Framer and other platforms.
+                    Adds a floating widget in the bottom-right corner. Works great in
+                    Framer and other platforms.
                   </p>
                   <div style={{ position: 'relative' }}>
                     <pre
@@ -366,12 +378,7 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
                   <Button
                     variant="secondary"
                     style={{ flex: 1 }}
-                    onClick={() =>
-                      window.open(
-                        `/test-embed.html`,
-                        '_blank'
-                      )
-                    }
+                    onClick={() => window.open(`/test-embed.html`, '_blank')}
                   >
                     Test Both Options
                   </Button>
@@ -397,7 +404,6 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
       <ScrollArea style={{ flex: 1, minHeight: 0 }}>
         <div style={styles.settingsForm}>
           <ModelSelector
-
             label="AI Model"
             value={settings.model || 'gpt-4o-mini'}
             onChange={(model) => updateSettings({ model })}
@@ -412,7 +418,14 @@ export function EditorSidebar({ width = DEFAULT_WIDTH, onWidthChange }: EditorSi
             />
           </div>
 
-          <div style={{ ...styles.formSection, borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)', marginTop: 'var(--op-space-medium)' }}>
+          <div
+            style={{
+              ...styles.formSection,
+              borderTop: '1px solid var(--op-color-border)',
+              paddingTop: 'var(--op-space-medium)',
+              marginTop: 'var(--op-space-medium)',
+            }}
+          >
             <Label style={{ fontSize: 'var(--op-font-small)' }}>AI Instructions</Label>
             <textarea
               value={settings.aiInstructions}
@@ -447,49 +460,75 @@ TASK: After qualification, provide:
 
           {/* Knowledge Base Settings */}
           <div style={{ ...styles.formSection }}>
-            <p style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>Knowledge Base Settings</p>
+            <p style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>
+              Knowledge Base Settings
+            </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--op-space-medium)',
+              }}
+            >
               {/* Retrieval Settings */}
               <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <Label style={{ fontSize: 'var(--op-font-x-small)' }}>Sources to Retrieve</Label>
+                  <Label style={{ fontSize: 'var(--op-font-x-small)' }}>
+                    Sources to Retrieve
+                  </Label>
                   <Input
                     type="number"
                     min={1}
                     max={20}
                     value={settings.ragConfig?.sourceLimit ?? 5}
-                    onChange={(e) => updateSettings({
-                      ragConfig: { ...settings.ragConfig, sourceLimit: parseInt(e.target.value) || 5 }
-                    })}
+                    onChange={(e) =>
+                      updateSettings({
+                        ragConfig: {
+                          ...settings.ragConfig,
+                          sourceLimit: parseInt(e.target.value) || 5,
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <Label style={{ fontSize: 'var(--op-font-x-small)' }}>Similarity Threshold</Label>
+                  <Label style={{ fontSize: 'var(--op-font-x-small)' }}>
+                    Similarity Threshold
+                  </Label>
                   <Input
                     type="number"
                     min={0}
                     max={1}
                     step={0.1}
                     value={settings.ragConfig?.similarityThreshold ?? 0.5}
-                    onChange={(e) => updateSettings({
-                      ragConfig: { ...settings.ragConfig, similarityThreshold: parseFloat(e.target.value) || 0.5 }
-                    })}
+                    onChange={(e) =>
+                      updateSettings({
+                        ragConfig: {
+                          ...settings.ragConfig,
+                          similarityThreshold: parseFloat(e.target.value) || 0.5,
+                        },
+                      })
+                    }
                   />
                 </div>
               </div>
 
               {/* Enable Citations Toggle */}
               <div className="form-group form-group--inline form-group--no-margin">
-
                 <Input
                   id="enableCitations"
                   name="enableCitations"
                   type="checkbox"
                   checked={settings.ragConfig?.enableCitations ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, enableCitations: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: {
+                        ...settings.ragConfig,
+                        enableCitations: e.target.checked,
+                      },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <label className="form-label">Enable Citations</label>
@@ -502,9 +541,14 @@ TASK: After qualification, provide:
                   name="enableCaseStudies"
                   type="checkbox"
                   checked={settings.ragConfig?.enableCaseStudies ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, enableCaseStudies: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: {
+                        ...settings.ragConfig,
+                        enableCaseStudies: e.target.checked,
+                      },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <span className="form-label">Proactive Case Studies</span>
@@ -517,22 +561,42 @@ TASK: After qualification, provide:
                   name="enablePersonalization"
                   type="checkbox"
                   checked={settings.ragConfig?.enablePersonalization ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, enablePersonalization: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: {
+                        ...settings.ragConfig,
+                        enablePersonalization: e.target.checked,
+                      },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <label className="form-label">Personalize Responses</label>
               </div>
-              <p style={{ fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  margin: 0,
+                }}
+              >
                 Use visitor&apos;s name and context in responses
               </p>
             </div>
           </div>
 
           {/* Conversation Flow Settings */}
-          <div style={{ ...styles.formSection, borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)', marginTop: 'var(--op-space-medium)' }}>
-            <Label style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>Conversation Flow</Label>
+          <div
+            style={{
+              ...styles.formSection,
+              borderTop: '1px solid var(--op-color-border)',
+              paddingTop: 'var(--op-space-medium)',
+              marginTop: 'var(--op-space-medium)',
+            }}
+          >
+            <Label style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>
+              Conversation Flow
+            </Label>
             <p
               style={{
                 fontSize: 'var(--op-font-x-small)',
@@ -551,9 +615,11 @@ TASK: After qualification, provide:
                   name="enableBANT"
                   type="checkbox"
                   checked={settings.ragConfig?.enableBANT ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, enableBANT: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: { ...settings.ragConfig, enableBANT: e.target.checked },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <Label>BANT Qualification</Label>
@@ -570,14 +636,22 @@ TASK: After qualification, provide:
                   name="askForName"
                   type="checkbox"
                   checked={settings.ragConfig?.askForName ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, askForName: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: { ...settings.ragConfig, askForName: e.target.checked },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <Label>Ask for Name</Label>
               </div>
-              <p style={{ fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  margin: 0,
+                }}
+              >
                 AI will ask for visitor&apos;s name during conversation
               </p>
 
@@ -588,40 +662,62 @@ TASK: After qualification, provide:
                   name="askForEmail"
                   type="checkbox"
                   checked={settings.ragConfig?.askForEmail ?? true}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, askForEmail: e.target.checked }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: { ...settings.ragConfig, askForEmail: e.target.checked },
+                    })
+                  }
                   className="form-control--medium"
                 />
                 <Label>Ask for Email</Label>
               </div>
-              <p style={{ fontSize: 'var(--op-font-x-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+              <p
+                style={{
+                  fontSize: 'var(--op-font-x-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                  margin: 0,
+                }}
+              >
                 AI will ask for visitor&apos;s email for follow-up
               </p>
 
               {/* Max Questions */}
               <div className="form-group">
-                <Label style={{ fontSize: 'var(--op-font-small)' }}>Max Qualification Questions</Label>
+                <Label style={{ fontSize: 'var(--op-font-small)' }}>
+                  Max Qualification Questions
+                </Label>
                 <Input
                   type="number"
                   min={1}
                   max={10}
                   value={settings.ragConfig?.maxQuestions ?? 5}
-                  onChange={(e) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, maxQuestions: parseInt(e.target.value) || 5 }
-                  })}
+                  onChange={(e) =>
+                    updateSettings({
+                      ragConfig: {
+                        ...settings.ragConfig,
+                        maxQuestions: parseInt(e.target.value) || 5,
+                      },
+                    })
+                  }
                   style={{ width: '100px' }}
                 />
               </div>
 
               {/* Response Conciseness */}
               <div className="form-group">
-                <Label style={{ fontSize: 'var(--op-font-small)' }}>Response Length</Label>
+                <Label style={{ fontSize: 'var(--op-font-small)' }}>
+                  Response Length
+                </Label>
                 <Select
                   value={settings.ragConfig?.responseConciseness ?? 'moderate'}
-                  onValueChange={(value) => updateSettings({
-                    ragConfig: { ...settings.ragConfig, responseConciseness: value as 'brief' | 'moderate' | 'detailed' }
-                  })}
+                  onValueChange={(value) =>
+                    updateSettings({
+                      ragConfig: {
+                        ...settings.ragConfig,
+                        responseConciseness: value as 'brief' | 'moderate' | 'detailed',
+                      },
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a response length" />
@@ -629,7 +725,9 @@ TASK: After qualification, provide:
                   <SelectContent>
                     <SelectItem value="brief">Brief (1-2 sentences)</SelectItem>
                     <SelectItem value="moderate">Moderate (2-4 sentences)</SelectItem>
-                    <SelectItem value="detailed">Detailed (thorough responses)</SelectItem>
+                    <SelectItem value="detailed">
+                      Detailed (thorough responses)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -638,7 +736,9 @@ TASK: After qualification, provide:
 
           {/* Custom Instructions */}
           <div style={{ ...styles.formSection }}>
-            <Label style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>Custom Instructions</Label>
+            <Label style={{ fontSize: 'var(--op-font-medium)', fontWeight: 600 }}>
+              Custom Instructions
+            </Label>
             <p
               style={{
                 fontSize: 'var(--op-font-x-small)',
@@ -650,9 +750,14 @@ TASK: After qualification, provide:
             </p>
             <textarea
               value={settings.ragConfig?.customInstructions ?? ''}
-              onChange={(e) => updateSettings({
-                ragConfig: { ...settings.ragConfig, customInstructions: e.target.value }
-              })}
+              onChange={(e) =>
+                updateSettings({
+                  ragConfig: {
+                    ...settings.ragConfig,
+                    customInstructions: e.target.value,
+                  },
+                })
+              }
               placeholder={`Example custom instructions:
 
 - When discussing pricing, always reference the pricing guide

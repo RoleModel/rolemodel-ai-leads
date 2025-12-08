@@ -1,12 +1,11 @@
 'use client'
 
+import { ArrowDown01Icon, BrainIcon } from '@hugeicons-pro/core-stroke-standard'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { useControllableState } from '@radix-ui/react-use-controllable-state'
 import { DotIcon, type LucideIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, memo, useContext, useMemo } from 'react'
-
-import { HugeiconsIcon } from '@hugeicons/react';
-import { BrainIcon, ArrowDown01Icon } from '@hugeicons-pro/core-stroke-standard';
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -92,10 +91,15 @@ export const ChainOfThoughtHeader = memo(
           <span
             style={{
               textAlign: 'left',
-              flex: 1
+              flex: 1,
             }}
-            className="flex-1 text-left">{children ?? 'Chain of Thought'}</span>
-          <HugeiconsIcon icon={ArrowDown01Icon} size={20}
+            className="flex-1 text-left"
+          >
+            {children ?? 'Chain of Thought'}
+          </span>
+          <HugeiconsIcon
+            icon={ArrowDown01Icon}
+            size={20}
             style={{
               transform: isOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
               transition: 'transform 0.2s',
@@ -151,26 +155,30 @@ export const ChainOfThoughtStep = memo(
           <Icon className="size-4" style={{ height: '20px', width: '20px' }} />
         </div>
         <div
-
           style={{
             fontSize: 'var(--op-font-small)',
             display: 'flex',
             flex: 1,
             gap: 'var(--op-space-small)',
           }}
-          className="flex-1 space-y-2">
+          className="flex-1 space-y-2"
+        >
           <div
             style={{
               fontSize: 'var(--op-font-small)',
             }}
-          >{label}</div>
+          >
+            {label}
+          </div>
           {description && (
             <div
               style={{
                 fontSize: 'var(--op-font-small)',
                 color: 'var(--op-color-neutral-on-plus-max)',
               }}
-            >{description}</div>
+            >
+              {description}
+            </div>
           )}
           {children}
         </div>

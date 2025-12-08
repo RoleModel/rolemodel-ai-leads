@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+
 import './PrivacyTermsLinks.css'
 
 interface PrivacyTermsLinksProps {
@@ -17,20 +18,33 @@ interface PrivacyTermsLinksProps {
   variant?: 'light' | 'dark'
 }
 
-export function PrivacyTermsLinks({ className, style, variant = 'light' }: PrivacyTermsLinksProps) {
+export function PrivacyTermsLinks({
+  className,
+  style,
+  variant = 'light',
+}: PrivacyTermsLinksProps) {
   const buttonStyle: React.CSSProperties = {
-    color: variant === 'light'
-      ? 'var(--op-color-white)'
-      : 'var(--op-color-neutral-on-plus-max)',
+    color:
+      variant === 'light'
+        ? 'var(--op-color-white)'
+        : 'var(--op-color-neutral-on-plus-max)',
   }
 
   return (
     <div className={className} style={{ ...styles.container, ...style }}>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="ghost" style={buttonStyle} className="privacy-terms-links__button">Privacy</Button>
+          <Button
+            variant="ghost"
+            style={buttonStyle}
+            className="privacy-terms-links__button"
+          >
+            Privacy
+          </Button>
         </DialogTrigger>
-        <DialogContent style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}>
+        <DialogContent
+          style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}
+        >
           <DialogHeader>
             <DialogTitle>Privacy Policy</DialogTitle>
             <DialogDescription>How we handle your information</DialogDescription>
@@ -59,8 +73,8 @@ export function PrivacyTermsLinks({ className, style, variant = 'light' }: Priva
             <p>
               <strong>Data Retention</strong>
               <br />
-              We retain conversation data to provide you with better service and may delete it upon
-              request.
+              We retain conversation data to provide you with better service and may
+              delete it upon request.
             </p>
           </div>
         </DialogContent>
@@ -68,9 +82,17 @@ export function PrivacyTermsLinks({ className, style, variant = 'light' }: Priva
 
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="ghost" style={buttonStyle} className="privacy-terms-links__button">Terms</Button>
+          <Button
+            variant="ghost"
+            style={buttonStyle}
+            className="privacy-terms-links__button"
+          >
+            Terms
+          </Button>
         </DialogTrigger>
-        <DialogContent style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}>
+        <DialogContent
+          style={{ '--_op-confirm-dialog-width': '600px' } as React.CSSProperties}
+        >
           <DialogHeader>
             <DialogTitle>Terms of Service</DialogTitle>
             <DialogDescription>Guidelines for using our service</DialogDescription>
@@ -90,15 +112,15 @@ export function PrivacyTermsLinks({ className, style, variant = 'light' }: Priva
             <p style={styles.section}>
               <strong>AI-Powered Responses</strong>
               <br />
-              This chat service uses artificial intelligence. While we strive for accuracy, responses
-              may not always be complete or error-free. For critical decisions, please verify
-              information with our team.
+              This chat service uses artificial intelligence. While we strive for
+              accuracy, responses may not always be complete or error-free. For critical
+              decisions, please verify information with our team.
             </p>
             <p>
               <strong>Limitation of Liability</strong>
               <br />
-              We provide this service &quot;as is&quot; without warranties. We are not liable for any
-              damages arising from use of this service.
+              We provide this service &quot;as is&quot; without warranties. We are not
+              liable for any damages arising from use of this service.
             </p>
           </div>
         </DialogContent>

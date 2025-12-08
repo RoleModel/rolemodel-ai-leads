@@ -1,10 +1,18 @@
 'use client'
 
-import { Calendar03Icon, Mail01Icon, } from '@hugeicons-pro/core-stroke-standard'
+import { Calendar03Icon, Mail01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { AlertCircleIcon, CheckIcon, SearchIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
+import {
+  ChainOfThought,
+  ChainOfThoughtContent,
+  ChainOfThoughtHeader,
+  ChainOfThoughtStep,
+} from '@/components/ai-elements/chain-of-thought'
+import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
   InlineCitation,
   InlineCitationCard,
@@ -20,22 +28,10 @@ import {
   InlineCitationSource,
 } from '@/components/ai-elements/inline-citation'
 import {
-  ChainOfThought,
-  ChainOfThoughtContent,
-  ChainOfThoughtHeader,
-  ChainOfThoughtStep,
-} from '@/components/ai-elements/chain-of-thought'
-import {
   Message,
   MessageContent,
   MessageResponse,
 } from '@/components/ai-elements/message'
-import {
-  Conversation,
-  ConversationContent,
-} from '@/components/ai-elements/conversation'
-import Favicon from '@/components/intro/Favicon'
-import { SearchIcon, CheckIcon, AlertCircleIcon } from 'lucide-react'
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -52,10 +48,10 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input'
+import Favicon from '@/components/intro/Favicon'
 import { Button } from '@/components/ui/button'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
-
 
 interface ChainOfThoughtData {
   steps: {
@@ -145,8 +141,7 @@ const demoConversation: Message[] = [
   {
     id: '7',
     role: 'assistant',
-    content:
-      "Got it. And what budget range have you allocated for solving this?",
+    content: 'Got it. And what budget range have you allocated for solving this?',
     delay: 2000,
   },
   {
@@ -192,7 +187,8 @@ const demoConversation: Message[] = [
   {
     id: '13',
     role: 'assistant',
-    content: "Thanks Sarah! Here's a summary of our conversation and recommended next steps.",
+    content:
+      "Thanks Sarah! Here's a summary of our conversation and recommended next steps.",
     delay: 2500,
   },
 ]
@@ -313,10 +309,14 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
   const renderChainOfThought = (chainOfThought: ChainOfThoughtData) => {
     const getIcon = (icon?: string) => {
       switch (icon) {
-        case 'search': return SearchIcon
-        case 'check': return CheckIcon
-        case 'alert': return AlertCircleIcon
-        default: return CheckIcon
+        case 'search':
+          return SearchIcon
+        case 'check':
+          return CheckIcon
+        case 'alert':
+          return AlertCircleIcon
+        default:
+          return CheckIcon
       }
     }
 
@@ -409,10 +409,15 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
     >
       {/* Landing Header */}
       <motion.div
-        initial={{ opacity: 0, filter: "blur(4px)", }}
-        animate={{ opacity: 1, filter: "blur(0px)", }}
+        initial={{ opacity: 0, filter: 'blur(4px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.4 }}
-        style={{ textAlign: 'center', flex: '0 0 auto', marginBottom: 'var(--op-space-medium)' }}>
+        style={{
+          textAlign: 'center',
+          flex: '0 0 auto',
+          marginBottom: 'var(--op-space-medium)',
+        }}
+      >
         <span
           className="aligned-header"
           style={{
@@ -447,15 +452,20 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
             borderRadius: 'var(--op-radius-pill)',
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <circle cx="12" cy="12" r="10" />
             <polyline points="12,6 12,12 16,14" />
           </svg>
           {settings.timeEstimate || '3-5 minutes'}
         </span>
       </motion.div>
-
-
 
       {/* Messages Container */}
       <div
@@ -472,9 +482,14 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           width: '98%',
         }}
       >
-
         <Conversation>
-          <ConversationContent style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+          <ConversationContent
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--op-space-small)',
+            }}
+          >
             <AnimatePresence initial={false} mode="sync">
               {messages.map((message) => (
                 <motion.div
@@ -485,34 +500,52 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 >
                   <Message from={message.role}>
                     {message.role === 'assistant' && (
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 'var(--op-radius-circle)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden',
-                        flexShrink: 0,
-                        fontSize: 'var(--op-font-small)',
-                        fontWeight: 600,
-                      }}>
-                        <Favicon style={{ width: '100%', height: '100%', borderRadius: 'var(--op-radius-circle)' }} />
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 'var(--op-radius-circle)',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          overflow: 'hidden',
+                          flexShrink: 0,
+                          fontSize: 'var(--op-font-small)',
+                          fontWeight: 600,
+                        }}
+                      >
+                        <Favicon
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: 'var(--op-radius-circle)',
+                          }}
+                        />
                       </div>
                     )}
                     <MessageContent>
                       {message.chainOfThought && message.role === 'assistant' ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--op-space-small)',
+                          }}
+                        >
                           {renderChainOfThought(message.chainOfThought)}
                           {message.citations && message.citations.length > 0 ? (
-                            <div style={{ width: '100%', fontSize: 'inherit' }}>{renderMessageWithCitations(message)}</div>
+                            <div style={{ width: '100%', fontSize: 'inherit' }}>
+                              {renderMessageWithCitations(message)}
+                            </div>
                           ) : (
                             <MessageResponse>{message.content}</MessageResponse>
                           )}
                         </div>
                       ) : message.citations && message.citations.length > 0 ? (
-                        <div style={{ width: '100%', fontSize: 'inherit' }}>{renderMessageWithCitations(message)}</div>
+                        <div style={{ width: '100%', fontSize: 'inherit' }}>
+                          {renderMessageWithCitations(message)}
+                        </div>
                       ) : (
                         <MessageResponse>{message.content}</MessageResponse>
                       )}
@@ -606,7 +639,8 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 marginBottom: 'var(--op-space-medium)',
               }}
             >
-              Based on our conversation, here&apos;s what I&apos;ve learned about your needs.
+              Based on our conversation, here&apos;s what I&apos;ve learned about your
+              needs.
             </p>
 
             {/* Summary Grid */}
@@ -618,73 +652,127 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 marginBottom: 'var(--op-space-large)',
               }}
             >
-              <div style={{
-                padding: 'var(--op-space-medium)',
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                borderRadius: 'var(--op-radius-medium)',
-              }}>
-                <span style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 500,
-                }}>Contact</span>
-                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+              <div
+                style={{
+                  padding: 'var(--op-space-medium)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  borderRadius: 'var(--op-radius-medium)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 500,
+                  }}
+                >
+                  Contact
+                </span>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 500,
+                    margin: '4px 0 0 0',
+                  }}
+                >
                   Sarah, CEO
                 </p>
-                <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)', margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    margin: 0,
+                  }}
+                >
                   sarah@techflow.com
                 </p>
               </div>
 
-              <div style={{
-                padding: 'var(--op-space-medium)',
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                borderRadius: 'var(--op-radius-medium)',
-              }}>
-                <span style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 500,
-                }}>Budget</span>
-                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+              <div
+                style={{
+                  padding: 'var(--op-space-medium)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  borderRadius: 'var(--op-radius-medium)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 500,
+                  }}
+                >
+                  Budget
+                </span>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 500,
+                    margin: '4px 0 0 0',
+                  }}
+                >
                   $50k - $75k
                 </p>
               </div>
 
-              <div style={{
-                padding: 'var(--op-space-medium)',
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                borderRadius: 'var(--op-radius-medium)',
-              }}>
-                <span style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 500,
-                }}>Timeline</span>
-                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+              <div
+                style={{
+                  padding: 'var(--op-space-medium)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  borderRadius: 'var(--op-radius-medium)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 500,
+                  }}
+                >
+                  Timeline
+                </span>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 500,
+                    margin: '4px 0 0 0',
+                  }}
+                >
                   6 months
                 </p>
               </div>
 
-              <div style={{
-                padding: 'var(--op-space-medium)',
-                backgroundColor: 'var(--op-color-neutral-plus-seven)',
-                borderRadius: 'var(--op-radius-medium)',
-              }}>
-                <span style={{
-                  fontSize: 'var(--op-font-x-small)',
-                  color: 'var(--op-color-neutral-on-plus-max)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 500,
-                }}>Decision Makers</span>
-                <p style={{ fontSize: 'var(--op-font-small)', fontWeight: 500, margin: '4px 0 0 0' }}>
+              <div
+                style={{
+                  padding: 'var(--op-space-medium)',
+                  backgroundColor: 'var(--op-color-neutral-plus-seven)',
+                  borderRadius: 'var(--op-radius-medium)',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 'var(--op-font-x-small)',
+                    color: 'var(--op-color-neutral-on-plus-max)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 500,
+                  }}
+                >
+                  Decision Makers
+                </span>
+                <p
+                  style={{
+                    fontSize: 'var(--op-font-small)',
+                    fontWeight: 500,
+                    margin: '4px 0 0 0',
+                  }}
+                >
                   CEO + CTO
                 </p>
               </div>
@@ -745,9 +833,9 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                   lineHeight: 1.6,
                 }}
               >
-                A custom data management solution would help TechFlow consolidate customer data,
-                automate manual processes, and scale efficiently. We recommend a 30-minute
-                discovery call to explore the specifics.
+                A custom data management solution would help TechFlow consolidate customer
+                data, automate manual processes, and scale efficiently. We recommend a
+                30-minute discovery call to explore the specifics.
               </p>
             </div>
 
@@ -852,7 +940,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         <div className="gradient" />
         <PromptInputProvider>
           <PromptInput
-            onSubmit={() => { }} // No-op during demo
+            onSubmit={() => {}} // No-op during demo
             style={{ width: '100%', zIndex: 1 }}
           >
             <PromptInputAttachments>
@@ -860,7 +948,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
                 <PromptInputAttachment key={attachment.id} data={attachment} />
               )}
             </PromptInputAttachments>
-            <PromptInputBody style={{ height: "80px" }}>
+            <PromptInputBody style={{ height: '80px' }}>
               <div style={{ position: 'relative', width: '100%' }}>
                 {isTypingInInput && typingText ? (
                   <div
@@ -911,8 +999,6 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
           </PromptInput>
         </PromptInputProvider>
       </div>
-
-
     </div>
   )
 }

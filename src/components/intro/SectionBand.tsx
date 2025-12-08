@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, useMemo, useEffect } from "react"
-import gsap from "gsap"
-import { useGSAP } from "@gsap/react"
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+import { useEffect, useMemo, useRef } from 'react'
 
 gsap.registerPlugin(useGSAP)
 
@@ -28,7 +28,7 @@ interface Props {
  */
 export default function SectionBand(props: Props) {
   const {
-    tint = "rgba(1, 29, 33, 1)",
+    tint = 'rgba(1, 29, 33, 1)',
     minHeight = 2,
     maxHeight = 80,
     rotate = false,
@@ -49,32 +49,29 @@ export default function SectionBand(props: Props) {
   const containerHeightRef = useRef(0)
 
   // Create 6 bands with different tint opacities
-  const bands = useMemo(
-    () => {
-      const baseBands = [
-        { opacity: 0.9 },
-        { opacity: 0.8 },
-        { opacity: 0.6 },
-        { opacity: 0.4 },
-        { opacity: 0.2 },
-        { opacity: 0.05 },
-      ]
-      return reverse ? [...baseBands].reverse() : baseBands
-    },
-    [reverse]
-  )
+  const bands = useMemo(() => {
+    const baseBands = [
+      { opacity: 0.9 },
+      { opacity: 0.8 },
+      { opacity: 0.6 },
+      { opacity: 0.4 },
+      { opacity: 0.2 },
+      { opacity: 0.05 },
+    ]
+    return reverse ? [...baseBands].reverse() : baseBands
+  }, [reverse])
 
   const colors = useMemo(
     () =>
       props.color || [
-        "#364E5D",
-        "#324B59",
-        "#475658",
-        "#646A60",
-        "#8D887D",
-        "#9D95A4",
-        "#9C97BD",
-        "#BDBBFF",
+        '#364E5D',
+        '#324B59',
+        '#475658',
+        '#646A60',
+        '#8D887D',
+        '#9D95A4',
+        '#9C97BD',
+        '#BDBBFF',
       ],
     [props.color]
   )
@@ -110,7 +107,10 @@ export default function SectionBand(props: Props) {
       const rawProgress = distanceScrolled / totalRange
 
       // Map to scrollStart/scrollEnd range
-      const normalizedProgress = Math.min(1, Math.max(0, (rawProgress - scrollStart) / (scrollEnd - scrollStart)))
+      const normalizedProgress = Math.min(
+        1,
+        Math.max(0, (rawProgress - scrollStart) / (scrollEnd - scrollStart))
+      )
       const eased = normalizedProgress * normalizedProgress * (3 - 2 * normalizedProgress)
       const targetHeight = reverse
         ? minHeight + eased * (maxHeight - minHeight)
@@ -143,35 +143,41 @@ export default function SectionBand(props: Props) {
   }, [scrollStart, scrollEnd, minHeight, maxHeight, reverse])
 
   // Auto-animate ticker for gradient movement - updates DOM directly
-  useGSAP(() => {
-    if (!autoAnimate) return
+  useGSAP(
+    () => {
+      if (!autoAnimate) return
 
-    const updateGradient = () => {
-      timeRef.current += 1 / 60
+      const updateGradient = () => {
+        timeRef.current += 1 / 60
 
-      // Smooth mouse offset
-      const target = mouseTargetRef.current
-      mouseOffsetRef.current += (target - mouseOffsetRef.current) * 0.1
+        // Smooth mouse offset
+        const target = mouseTargetRef.current
+        mouseOffsetRef.current += (target - mouseOffsetRef.current) * 0.1
 
-      // Calculate auto offset
-      const autoOffset = Math.sin(timeRef.current * speed) * amplitude
+        // Calculate auto offset
+        const autoOffset = Math.sin(timeRef.current * speed) * amplitude
 
-      // Update CSS custom properties directly on DOM
-      bandsRef.current.forEach((band) => {
-        if (!band) return
-        colors.forEach((_, i) => {
-          const pos = Math.max(0, Math.min(100, i * step + mouseOffsetRef.current + autoOffset))
-          band.style.setProperty(`--stop${i}`, `${pos}%`)
+        // Update CSS custom properties directly on DOM
+        bandsRef.current.forEach((band) => {
+          if (!band) return
+          colors.forEach((_, i) => {
+            const pos = Math.max(
+              0,
+              Math.min(100, i * step + mouseOffsetRef.current + autoOffset)
+            )
+            band.style.setProperty(`--stop${i}`, `${pos}%`)
+          })
         })
-      })
-    }
+      }
 
-    gsap.ticker.add(updateGradient)
+      gsap.ticker.add(updateGradient)
 
-    return () => {
-      gsap.ticker.remove(updateGradient)
-    }
-  }, { scope: containerRef, dependencies: [autoAnimate, colors, step, speed, amplitude] })
+      return () => {
+        gsap.ticker.remove(updateGradient)
+      }
+    },
+    { scope: containerRef, dependencies: [autoAnimate, colors, step, speed, amplitude] }
+  )
 
   // Static stop positions for initial render (auto-animate updates via DOM)
   const stopPositions = useMemo(
@@ -192,31 +198,33 @@ export default function SectionBand(props: Props) {
   }
 
   if (numStops < 2) {
-    const gradientBg = numStops === 1 ? colors[0] : "transparent"
+    const gradientBg = numStops === 1 ? colors[0] : 'transparent'
     return (
       <div
         ref={containerRef}
         style={{
-          width: "100%",
-          transform: rotate ? "rotate(180deg)" : undefined,
+          width: '100%',
+          transform: rotate ? 'rotate(180deg)' : undefined,
         }}
       >
         {bands.map((band, index) => (
           <div
             key={index}
-            ref={(el) => { if (el) bandsRef.current[index] = el }}
+            ref={(el) => {
+              if (el) bandsRef.current[index] = el
+            }}
             style={{
-              position: "relative",
-              width: "100%",
+              position: 'relative',
+              width: '100%',
               background: gradientBg,
               height: reverse ? minHeight : maxHeight,
             }}
           >
             <span
               style={{
-                position: "absolute",
+                position: 'absolute',
                 inset: 0,
-                display: "block",
+                display: 'block',
                 background: tint,
                 opacity: band.opacity,
               }}
@@ -235,18 +243,16 @@ export default function SectionBand(props: Props) {
     {} as Record<string, string>
   )
 
-  const transitionValue = stopPositions
-    .map((_, i) => `--stop${i} 1s ease-out`)
-    .join(", ")
+  const transitionValue = stopPositions.map((_, i) => `--stop${i} 1s ease-out`).join(', ')
 
-  const gradientBg = `linear-gradient(90deg, ${colors.map((color, i) => `${color} var(--stop${i})`).join(", ")})`
+  const gradientBg = `linear-gradient(90deg, ${colors.map((color, i) => `${color} var(--stop${i})`).join(', ')})`
 
   return (
     <div
       ref={containerRef}
       style={{
-        width: "100%",
-        transform: rotate ? "rotate(180deg)" : undefined,
+        width: '100%',
+        transform: rotate ? 'rotate(180deg)' : undefined,
       }}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
@@ -254,10 +260,12 @@ export default function SectionBand(props: Props) {
       {bands.map((band, index) => (
         <div
           key={index}
-          ref={(el) => { if (el) bandsRef.current[index] = el }}
+          ref={(el) => {
+            if (el) bandsRef.current[index] = el
+          }}
           style={{
-            position: "relative",
-            width: "100%",
+            position: 'relative',
+            width: '100%',
             background: gradientBg,
             height: reverse ? minHeight : maxHeight,
             ...customProperties,
@@ -266,9 +274,9 @@ export default function SectionBand(props: Props) {
         >
           <span
             style={{
-              position: "absolute",
+              position: 'absolute',
               inset: 0,
-              display: "block",
+              display: 'block',
               background: tint,
               opacity: band.opacity,
             }}

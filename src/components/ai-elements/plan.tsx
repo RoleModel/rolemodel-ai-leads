@@ -55,7 +55,10 @@ export const Plan = ({
           borderRadius: 'var(--op-radius-medium)',
           gap: 0,
         }}
-        className={cn('shadow-none', className)}>{children}</Card>
+        className={cn('shadow-none', className)}
+      >
+        {children}
+      </Card>
     </Collapsible>
   </PlanContext.Provider>
 )

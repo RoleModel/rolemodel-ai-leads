@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { supabase } from '@/lib/supabase/client'
 
 // POST /api/ab-tests/[id]/variants - Add a variant to a test
@@ -11,10 +12,7 @@ export async function POST(
   const { name, path, weight, is_control } = body
 
   if (!name || !path) {
-    return NextResponse.json(
-      { error: 'Name and path are required' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Name and path are required' }, { status: 400 })
   }
 
   // Check if variant with this path already exists for this test
@@ -58,13 +56,12 @@ export async function PUT(
 ) {
   const { id } = await params
   const body = await request.json()
-  const { variants } = body as { variants: Array<{ id: string; weight: number; is_control?: boolean }> }
+  const { variants } = body as {
+    variants: Array<{ id: string; weight: number; is_control?: boolean }>
+  }
 
   if (!variants || !Array.isArray(variants)) {
-    return NextResponse.json(
-      { error: 'Variants array is required' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Variants array is required' }, { status: 400 })
   }
 
   // Update each variant
@@ -83,7 +80,7 @@ export async function PUT(
     })
   )
 
-  const errors = updates.filter(u => u.error)
+  const errors = updates.filter((u) => u.error)
   if (errors.length > 0) {
     return NextResponse.json({ errors }, { status: 500 })
   }
@@ -101,10 +98,7 @@ export async function DELETE(
   const variantId = searchParams.get('variantId')
 
   if (!variantId) {
-    return NextResponse.json(
-      { error: 'variantId is required' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'variantId is required' }, { status: 400 })
   }
 
   // Check that we're not deleting the last variant
@@ -114,10 +108,7 @@ export async function DELETE(
     .eq('test_id', id)
 
   if ((variants || []).length <= 1) {
-    return NextResponse.json(
-      { error: 'Cannot delete the last variant' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Cannot delete the last variant' }, { status: 400 })
   }
 
   const { error } = await supabase

@@ -3,15 +3,21 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 interface CardHeaderProps extends React.ComponentProps<'div'> {
-  border?: boolean;
+  border?: boolean
 }
 
 interface CardProps extends React.ComponentProps<'div'> {
-  variant?: 'default' | 'dark';
-  borderBottom?: string;
+  variant?: 'default' | 'dark'
+  borderBottom?: string
 }
 
-function Card({ className, variant = 'default', borderBottom, style, ...props }: CardProps) {
+function Card({
+  className,
+  variant = 'default',
+  borderBottom,
+  style,
+  ...props
+}: CardProps) {
   return (
     <div
       data-slot="card"
@@ -37,21 +43,29 @@ function Card({ className, variant = 'default', borderBottom, style, ...props }:
 
 function CardHeader({ className, border = false, ...props }: CardHeaderProps) {
   return (
-    <div data-slot="card-header"
+    <div
+      data-slot="card-header"
       style={{
         fontSize: 'var(--op-font-medium)',
         borderBottom: border ? '1px solid var(--op-color-border)' : 'none',
       }}
-      className={cn('card__header', className)} {...props} />
+      className={cn('card__header', className)}
+      {...props}
+    />
   )
 }
 
 function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="card-title"
-    style={{
-      fontSize: 'var(--op-font-x-small)',
-    }}
-    className={cn('card-title', className)} {...props} />
+  return (
+    <div
+      data-slot="card-title"
+      style={{
+        fontSize: 'var(--op-font-x-small)',
+      }}
+      className={cn('card-title', className)}
+      {...props}
+    />
+  )
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {

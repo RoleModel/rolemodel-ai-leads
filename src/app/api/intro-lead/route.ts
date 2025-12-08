@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
 import { buildVisitorMetadata } from '@/lib/geolocation'
+import { supabaseServer } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
@@ -12,10 +12,7 @@ export async function POST(req: NextRequest) {
     const { name, email, chatbotId } = body
 
     if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Name and email are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
     }
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
@@ -70,9 +67,6 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('Intro lead API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

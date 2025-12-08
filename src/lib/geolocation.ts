@@ -63,15 +63,24 @@ export function getClientIP(headers: Headers): string {
  */
 export async function getGeoData(ip: string): Promise<GeoData | null> {
   // Skip for localhost/private IPs
-  if (ip === 'unknown' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip === '::1') {
+  if (
+    ip === 'unknown' ||
+    ip === '127.0.0.1' ||
+    ip.startsWith('192.168.') ||
+    ip.startsWith('10.') ||
+    ip === '::1'
+  ) {
     return null
   }
 
   try {
-    const response = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,query`, {
-      // Short timeout to not block chat responses
-      signal: AbortSignal.timeout(2000),
-    })
+    const response = await fetch(
+      `http://ip-api.com/json/${ip}?fields=status,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,query`,
+      {
+        // Short timeout to not block chat responses
+        signal: AbortSignal.timeout(2000),
+      }
+    )
 
     if (!response.ok) return null
 
@@ -108,13 +117,15 @@ export async function buildVisitorMetadata(headers: Headers): Promise<VisitorMet
 
   return {
     ip,
-    geo: geoData ? {
-      country: geoData.country,
-      countryCode: geoData.countryCode,
-      region: geoData.regionName,
-      city: geoData.city,
-      timezone: geoData.timezone,
-    } : undefined,
+    geo: geoData
+      ? {
+          country: geoData.country,
+          countryCode: geoData.countryCode,
+          region: geoData.regionName,
+          city: geoData.city,
+          timezone: geoData.timezone,
+        }
+      : undefined,
     userAgent: headers.get('user-agent') || undefined,
     referer: headers.get('referer') || undefined,
     timestamp: new Date().toISOString(),

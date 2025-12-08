@@ -2,30 +2,30 @@
 
 import { useChat } from '@ai-sdk/react'
 import {
+  Copy01Icon,
   Delete02Icon,
+  Message02Icon,
   Moon02Icon,
   PlusSignIcon,
   Refresh01Icon,
   Settings02Icon,
   SidebarLeftIcon,
-  Copy01Icon,
   Sun01Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
-  Message02Icon
 } from '@hugeicons-pro/core-stroke-standard'
-
 import { HugeiconsIcon } from '@hugeicons/react'
 import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
-import Favicon from '@/components/intro/Favicon'
-import Logo from '@/components/intro/Logo'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Message, MessageAction, MessageActions, MessageContent, MessageResponse } from '@/components/ai-elements/message';
-import {
-  Conversation,
-  ConversationContent,
-} from '@/components/ai-elements/conversation';
 
+import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
+import {
+  Message,
+  MessageAction,
+  MessageActions,
+  MessageContent,
+  MessageResponse,
+} from '@/components/ai-elements/message'
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -43,16 +43,18 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input'
-
-import { Button } from '@/components/ui/button'
+import Favicon from '@/components/intro/Favicon'
+import Logo from '@/components/intro/Logo'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
+
 import './LeadsPageView.css'
-import { MessageWithCitations, type Citation } from './MessageWithCitations'
+import { type Citation, MessageWithCitations } from './MessageWithCitations'
 
 interface Suggestion {
   id: string
@@ -85,7 +87,6 @@ const DEFAULT_SUGGESTIONS: Suggestion[] = [
   { id: '2', text: 'How do we reduce manual work?' },
 ]
 
-
 export function LeadsPageView({
   chatbotId,
   showSidebar = true,
@@ -103,9 +104,8 @@ export function LeadsPageView({
   // Combine internal state with forced collapse prop
   const sidebarCollapsed = forceSidebarCollapsed || sidebarCollapsedInternal
   const [isMobile, setIsMobile] = useState(false)
-  const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const [disliked, setDisliked] = useState<Record<string, boolean>>({});
-
+  const [liked, setLiked] = useState<Record<string, boolean>>({})
+  const [disliked, setDisliked] = useState<Record<string, boolean>>({})
 
   // Detect mobile viewport and auto-collapse sidebar
   useEffect(() => {
@@ -168,7 +168,6 @@ export function LeadsPageView({
     loadChatHistory()
   }, [isEmbed])
 
-
   const handleChatResponse = useCallback((response: Response) => {
     const header = response.headers.get('x-sources-used')
     if (!header) {
@@ -196,59 +195,62 @@ export function LeadsPageView({
     }
   }, [])
 
-  const handleChatFinish = useCallback(({ message }: { message: UIMessage }) => {
-    if (message.role !== 'assistant') {
-      setPendingCitations(null)
-      return
-    }
+  const handleChatFinish = useCallback(
+    ({ message }: { message: UIMessage }) => {
+      if (message.role !== 'assistant') {
+        setPendingCitations(null)
+        return
+      }
 
-    if (pendingCitations && pendingCitations.length > 0) {
-      setMessageCitations((prev) => ({
-        ...prev,
-        [message.id]: pendingCitations,
-      }))
-    }
+      if (pendingCitations && pendingCitations.length > 0) {
+        setMessageCitations((prev) => ({
+          ...prev,
+          [message.id]: pendingCitations,
+        }))
+      }
 
-    // Check for tool invocations
-    for (const part of message.parts) {
-      if (part.type.startsWith('tool-') && 'input' in part) {
-        const toolPart = part as { type: string; input?: Record<string, unknown> }
+      // Check for tool invocations
+      for (const part of message.parts) {
+        if (part.type.startsWith('tool-') && 'input' in part) {
+          const toolPart = part as { type: string; input?: Record<string, unknown> }
 
-        // Handle suggest_questions tool
-        if (part.type === 'tool-suggest_questions' && toolPart.input?.questions) {
-          const questions = toolPart.input.questions as string[]
-          if (questions.length > 0) {
-            const newSuggestions: Suggestion[] = questions.map((q, i) => ({
-              id: `suggestion-${Date.now()}-${i}`,
-              text: q,
+          // Handle suggest_questions tool
+          if (part.type === 'tool-suggest_questions' && toolPart.input?.questions) {
+            const questions = toolPart.input.questions as string[]
+            if (questions.length > 0) {
+              const newSuggestions: Suggestion[] = questions.map((q, i) => ({
+                id: `suggestion-${Date.now()}-${i}`,
+                text: q,
+              }))
+              setSuggestions(newSuggestions)
+              setShowSuggestions(true)
+            }
+          }
+
+          // Handle report_bant_progress tool
+          if (part.type === 'tool-report_bant_progress' && toolPart.input) {
+            const progress = toolPart.input as {
+              need?: boolean
+              timeline?: boolean
+              budget?: boolean
+              authority?: boolean
+              contact?: boolean
+            }
+            setBantStatus((prev) => ({
+              need: progress.need ?? prev.need,
+              timeline: progress.timeline ?? prev.timeline,
+              budget: progress.budget ?? prev.budget,
+              authority: progress.authority ?? prev.authority,
+              contact: progress.contact ?? prev.contact,
             }))
-            setSuggestions(newSuggestions)
-            setShowSuggestions(true)
           }
-        }
-
-        // Handle report_bant_progress tool
-        if (part.type === 'tool-report_bant_progress' && toolPart.input) {
-          const progress = toolPart.input as {
-            need?: boolean
-            timeline?: boolean
-            budget?: boolean
-            authority?: boolean
-            contact?: boolean
-          }
-          setBantStatus(prev => ({
-            need: progress.need ?? prev.need,
-            timeline: progress.timeline ?? prev.timeline,
-            budget: progress.budget ?? prev.budget,
-            authority: progress.authority ?? prev.authority,
-            contact: progress.contact ?? prev.contact,
-          }))
         }
       }
-    }
 
-    setPendingCitations(null)
-  }, [pendingCitations])
+      setPendingCitations(null)
+    },
+    [pendingCitations]
+  )
 
   const interceptingFetch = useCallback(
     async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -289,17 +291,21 @@ export function LeadsPageView({
 
     const loadExistingMessages = async () => {
       try {
-        const response = await fetch(`/api/conversations?conversationId=${initialConversationId}`)
+        const response = await fetch(
+          `/api/conversations?conversationId=${initialConversationId}`
+        )
         if (!response.ok) return
 
         const data = await response.json()
         if (data.messages && data.messages.length > 0) {
           // Convert database messages to UIMessage format
-          const uiMessages: UIMessage[] = data.messages.map((msg: { id: string; role: string; content: string }) => ({
-            id: msg.id,
-            role: msg.role as 'user' | 'assistant',
-            parts: [{ type: 'text', text: msg.content }],
-          }))
+          const uiMessages: UIMessage[] = data.messages.map(
+            (msg: { id: string; role: string; content: string }) => ({
+              id: msg.id,
+              role: msg.role as 'user' | 'assistant',
+              parts: [{ type: 'text', text: msg.content }],
+            })
+          )
           setMessages(uiMessages)
           setShowDemo(false)
         }
@@ -322,10 +328,12 @@ export function LeadsPageView({
       const greetingMessage: UIMessage = {
         id: `greeting-${Date.now()}`,
         role: 'assistant',
-        parts: [{
-          type: 'text',
-          text: `Hi ${visitorName}! Thanks for completing the intro form. I'm here to help you figure out if custom software is the right solution for your business.\n\nTo get started, could you tell me a bit about what's prompting you to explore custom software? What challenges or opportunities are you looking to address?`,
-        }],
+        parts: [
+          {
+            type: 'text',
+            text: `Hi ${visitorName}! Thanks for completing the intro form. I'm here to help you figure out if custom software is the right solution for your business.\n\nTo get started, could you tell me a bit about what's prompting you to explore custom software? What challenges or opportunities are you looking to address?`,
+          },
+        ],
       }
       setMessages([greetingMessage])
     }
@@ -377,9 +385,7 @@ export function LeadsPageView({
   }
 
   const handleUpdateSuggestion = (id: string, newText: string) => {
-    setSuggestions(suggestions.map((s) =>
-      s.id === id ? { ...s, text: newText } : s
-    ))
+    setSuggestions(suggestions.map((s) => (s.id === id ? { ...s, text: newText } : s)))
   }
 
   // Chat history handlers
@@ -389,7 +395,7 @@ export function LeadsPageView({
       const firstUserMessage = messages.find((m) => m.role === 'user')
       const title = firstUserMessage
         ? getMessageContent(firstUserMessage).slice(0, 50) +
-        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
+          (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
         : 'New Chat'
 
       const chatToSave: ChatHistory = {
@@ -437,7 +443,7 @@ export function LeadsPageView({
       const firstUserMessage = messages.find((m) => m.role === 'user')
       const title = firstUserMessage
         ? getMessageContent(firstUserMessage).slice(0, 50) +
-        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
+          (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
         : 'New Chat'
 
       // Create new chat entry
@@ -476,7 +482,11 @@ export function LeadsPageView({
           <div className="leads-page__brand-header">
             {!sidebarCollapsed && (
               <div className="leads-page__brand-logo">
-                <Logo variant="auto" className="leads-page__logo-image" style={{ width: 120, height: 'auto' }} />
+                <Logo
+                  variant="auto"
+                  className="leads-page__logo-image"
+                  style={{ width: 120, height: 'auto' }}
+                />
               </div>
             )}
 
@@ -488,8 +498,6 @@ export function LeadsPageView({
               <HugeiconsIcon icon={SidebarLeftIcon} size={20} />
             </Button>
           </div>
-
-
 
           {/* New Chat / Start Chatting Button */}
           {showDemo ? (
@@ -531,10 +539,6 @@ export function LeadsPageView({
             </div>
           )}
 
-
-
-
-
           {/* Dark Mode Toggle at bottom */}
           <div className="leads-page__dark-mode-container">
             <Button
@@ -551,8 +555,6 @@ export function LeadsPageView({
       {/* Main Content */}
       <div className="app__content">
         <div className="leads-page__content">
-
-
           {/* Conversation Messages Container */}
 
           <Conversation className="conversation-wrapper conversation-wrapper--scrollable">
@@ -562,11 +564,12 @@ export function LeadsPageView({
                   {message.parts.map((part, i) => {
                     switch (part.type) {
                       case 'text':
-                        const isLastMessage =
-                          messageIndex === messages.length - 1;
+                        const isLastMessage = messageIndex === messages.length - 1
                         const citations = messageCitations[message.id]
                         const shouldRenderCitations =
-                          message.role === 'assistant' && citations && citations.length > 0
+                          message.role === 'assistant' &&
+                          citations &&
+                          citations.length > 0
                         if (shouldRenderCitations && i > 0) {
                           return null
                         }
@@ -605,7 +608,9 @@ export function LeadsPageView({
                                       <HugeiconsIcon
                                         icon={ThumbsUpIcon}
                                         size={16}
-                                        color={liked[message.id] ? "currentColor" : "none"}
+                                        color={
+                                          liked[message.id] ? 'currentColor' : 'none'
+                                        }
                                       />
                                     </MessageAction>
                                     <MessageAction
@@ -621,7 +626,9 @@ export function LeadsPageView({
                                       <HugeiconsIcon
                                         icon={ThumbsDownIcon}
                                         size={16}
-                                        color={disliked[message.id] ? "currentColor" : "none"}
+                                        color={
+                                          disliked[message.id] ? 'currentColor' : 'none'
+                                        }
                                       />
                                     </MessageAction>
                                     <MessageAction
@@ -639,14 +646,13 @@ export function LeadsPageView({
                                       <HugeiconsIcon icon={Copy01Icon} size={16} />
                                     </MessageAction>
                                   </MessageActions>
-
                                 )}
                               </MessageContent>
                             </Message>
                           </Fragment>
-                        );
+                        )
                       default:
-                        return null;
+                        return null
                     }
                   })}
                 </Fragment>
@@ -662,9 +668,7 @@ export function LeadsPageView({
                   style={{ width: `${bantProgress}%` }}
                 />
               </div>
-              <span className="leads-page__bant-text">
-                {bantProgress}%
-              </span>
+              <span className="leads-page__bant-text">{bantProgress}%</span>
             </div>
           )}
           <div className="leads-page__input-container">
@@ -676,7 +680,7 @@ export function LeadsPageView({
                     <PromptInputAttachment key={attachment.id} data={attachment} />
                   )}
                 </PromptInputAttachments>
-                <PromptInputBody style={{ height: "80px" }}>
+                <PromptInputBody style={{ height: '80px' }}>
                   <PromptInputTextarea
                     placeholder="Tell me about your project..."
                     ref={textareaRef}
@@ -708,7 +712,9 @@ export function LeadsPageView({
                     variant="pill"
                     onClick={() => {
                       if (editMode) {
-                        setActiveSuggestionId(suggestion.id === activeSuggestionId ? null : suggestion.id)
+                        setActiveSuggestionId(
+                          suggestion.id === activeSuggestionId ? null : suggestion.id
+                        )
                       } else {
                         handlePromptSubmit({ text: suggestion.text, files: [] })
                       }
@@ -727,20 +733,27 @@ export function LeadsPageView({
                         <PopoverContent className="w-80">
                           <div className="grid gap-4">
                             <div className="space-y-2">
-                              <h4 className="font-medium leading-none">Edit Suggestion</h4>
+                              <h4 className="font-medium leading-none">
+                                Edit Suggestion
+                              </h4>
                               <p className="text-sm text-muted-foreground">
                                 Update the suggestion text
                               </p>
                             </div>
                             <div className="grid gap-2">
                               <div className="grid gap-2">
-                                <Label htmlFor={`suggestion-text-${suggestion.id}`}>Text</Label>
+                                <Label htmlFor={`suggestion-text-${suggestion.id}`}>
+                                  Text
+                                </Label>
                                 <Input
                                   id={`suggestion-text-${suggestion.id}`}
                                   defaultValue={suggestion.text}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
-                                      handleUpdateSuggestion(suggestion.id, e.currentTarget.value)
+                                      handleUpdateSuggestion(
+                                        suggestion.id,
+                                        e.currentTarget.value
+                                      )
                                       setActiveSuggestionId(null)
                                     }
                                   }}

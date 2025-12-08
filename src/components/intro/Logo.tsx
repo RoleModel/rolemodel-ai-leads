@@ -1,12 +1,13 @@
 'use client'
 
-import { SVGProps } from "react"
 import Link from 'next/link'
+import { SVGProps } from 'react'
+
 import './logo.css'
 
 interface SVGRProps {
-  title?: string;
-  titleId?: string;
+  title?: string
+  titleId?: string
   className?: string
   variant?: 'light' | 'dark' | 'auto' | 'white'
 }
@@ -15,7 +16,7 @@ const Logo = ({
   title,
   titleId,
   className,
-  variant = "auto",
+  variant = 'auto',
   ...props
 }: SVGProps<SVGSVGElement> & SVGRProps) => (
   <>

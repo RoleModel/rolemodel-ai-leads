@@ -80,26 +80,26 @@ const addonDirectionStyles: Record<'column' | 'row', React.CSSProperties> = {
 }
 
 const buttonSizeStyles: Record<'xs' | 'sm' | 'icon-xs' | 'icon-sm', React.CSSProperties> =
-{
-  xs: {
-    minHeight: 24,
-    paddingInline: 'var(--op-space-x-small)',
-  },
-  sm: {
-    minHeight: 32,
-    paddingInline: 'var(--op-space-small)',
-  },
-  'icon-xs': {
-    minHeight: 24,
-    minWidth: 32,
-    padding: 0,
-  },
-  'icon-sm': {
-    minHeight: 32,
-    minWidth: 36,
-    padding: 0,
-  },
-}
+  {
+    xs: {
+      minHeight: 24,
+      paddingInline: 'var(--op-space-x-small)',
+    },
+    sm: {
+      minHeight: 32,
+      paddingInline: 'var(--op-space-small)',
+    },
+    'icon-xs': {
+      minHeight: 24,
+      minWidth: 32,
+      padding: 0,
+    },
+    'icon-sm': {
+      minHeight: 32,
+      minWidth: 36,
+      padding: 0,
+    },
+  }
 
 const controlBaseStyle: React.CSSProperties = {
   flex: 1,
@@ -189,23 +189,28 @@ const InputGroupButton = React.forwardRef<
   Omit<React.ComponentProps<typeof Button>, 'size'> & {
     size?: 'xs' | 'sm' | 'icon-xs' | 'icon-sm'
   }
->(({ className, style, type = 'button', variant = 'ghost', size = 'xs', ...props }, ref) => {
-  const mergedStyle = {
-    ...buttonSizeStyles[size],
-    ...style,
-  }
+>(
+  (
+    { className, style, type = 'button', variant = 'ghost', size = 'xs', ...props },
+    ref
+  ) => {
+    const mergedStyle = {
+      ...buttonSizeStyles[size],
+      ...style,
+    }
 
-  return (
-    <Button
-      ref={ref}
-      type={type}
-      variant={variant}
-      className={className}
-      style={mergedStyle}
-      {...props}
-    />
-  )
-})
+    return (
+      <Button
+        ref={ref}
+        type={type}
+        variant={variant}
+        className={className}
+        style={mergedStyle}
+        {...props}
+      />
+    )
+  }
+)
 InputGroupButton.displayName = 'InputGroupButton'
 
 function InputGroupText({ className, style, ...props }: React.ComponentProps<'span'>) {

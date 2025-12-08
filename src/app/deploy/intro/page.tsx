@@ -1,5 +1,14 @@
 'use client'
 
+import {
+  ArrowLeft02Icon,
+  ArrowRight02Icon,
+  CodeIcon,
+  Link01Icon,
+  Maximize01Icon,
+  RefreshIcon,
+} from '@hugeicons-pro/core-stroke-standard'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { useEffect, useState } from 'react'
 import { Suspense } from 'react'
 import {
@@ -11,18 +20,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import {
-  ArrowLeft02Icon,
-  ArrowRight02Icon,
-  CodeIcon,
-  Link01Icon,
-  Maximize01Icon,
-  RefreshIcon,
-} from '@hugeicons-pro/core-stroke-standard'
-import { HugeiconsIcon } from '@hugeicons/react'
 
-import { NavigationSidebar } from '@/components/layout/Sidebar'
-import { TopBar } from '@/components/layout/TopBar'
 import {
   WebPreview,
   WebPreviewBody,
@@ -31,6 +29,8 @@ import {
   WebPreviewUrl,
   useWebPreview,
 } from '@/components/ai-elements/web-preview'
+import { NavigationSidebar } from '@/components/layout/Sidebar'
+import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
@@ -100,9 +100,8 @@ function PreviewNavControls() {
   )
 }
 
-
 function ComparisonChart({ variants }: { variants: Variant[] }) {
-  const chartData = variants.map(v => ({
+  const chartData = variants.map((v) => ({
     name: v.name,
     views: v.stats.views,
     conversions: v.stats.conversions,
@@ -112,14 +111,19 @@ function ComparisonChart({ variants }: { variants: Variant[] }) {
   return (
     <div className="card">
       <div className="card-header">
-        <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>Variant Comparison</h3>
+        <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
+          Variant Comparison
+        </h3>
       </div>
       <div className="card-body">
         <div style={{ height: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--op-color-border)" />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }} />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }}
+              />
               <YAxis tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }} />
               <Tooltip
                 contentStyle={{
@@ -128,9 +132,24 @@ function ComparisonChart({ variants }: { variants: Variant[] }) {
                   borderRadius: 'var(--op-radius-medium)',
                 }}
               />
-              <Bar dataKey="views" fill="var(--op-color-primary-base)" name="Views" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="conversions" fill="var(--light-green, #86c774)" name="Conversions" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="engagements" fill="var(--orange, #ffcd74)" name="Engagements" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="views"
+                fill="var(--op-color-primary-base)"
+                name="Views"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="conversions"
+                fill="var(--light-green, #86c774)"
+                name="Conversions"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="engagements"
+                fill="var(--orange, #ffcd74)"
+                name="Engagements"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -140,7 +159,7 @@ function ComparisonChart({ variants }: { variants: Variant[] }) {
 }
 
 function ConversionRateComparison({ variants }: { variants: Variant[] }) {
-  const chartData = variants.map(v => ({
+  const chartData = variants.map((v) => ({
     name: v.name,
     conversionRate: v.stats.conversionRate,
     engagementRate: v.stats.engagementRate,
@@ -150,15 +169,26 @@ function ConversionRateComparison({ variants }: { variants: Variant[] }) {
   return (
     <div className="card">
       <div className="card-header">
-        <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>Rate Comparison (%)</h3>
+        <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
+          Rate Comparison (%)
+        </h3>
       </div>
       <div className="card-body">
         <div style={{ height: '300px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="var(--op-color-border)" />
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }} />
-              <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }} width={100} />
+              <XAxis
+                type="number"
+                domain={[0, 100]}
+                tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }}
+              />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tick={{ fontSize: 12, fill: 'var(--op-color-on-background)' }}
+                width={100}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'var(--op-color-background)',
@@ -167,9 +197,24 @@ function ConversionRateComparison({ variants }: { variants: Variant[] }) {
                 }}
                 formatter={(value: number) => `${value.toFixed(1)}%`}
               />
-              <Bar dataKey="conversionRate" fill="var(--light-green, #86c774)" name="Conversion Rate" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="engagementRate" fill="var(--light-blue, #87d4e9)" name="Engagement Rate" radius={[0, 4, 4, 0]} />
-              <Bar dataKey="bounceRate" fill="var(--purple, #9b7bb8)" name="Bounce Rate" radius={[0, 4, 4, 0]} />
+              <Bar
+                dataKey="conversionRate"
+                fill="var(--light-green, #86c774)"
+                name="Conversion Rate"
+                radius={[0, 4, 4, 0]}
+              />
+              <Bar
+                dataKey="engagementRate"
+                fill="var(--light-blue, #87d4e9)"
+                name="Engagement Rate"
+                radius={[0, 4, 4, 0]}
+              />
+              <Bar
+                dataKey="bounceRate"
+                fill="var(--purple, #9b7bb8)"
+                name="Bounce Rate"
+                radius={[0, 4, 4, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -191,7 +236,11 @@ interface VariantPreviewWithSelectProps {
   baseUrl: string
 }
 
-function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPreviewWithSelectProps) {
+function VariantPreviewWithSelect({
+  label,
+  defaultPath,
+  baseUrl,
+}: VariantPreviewWithSelectProps) {
   const [selectedPath, setSelectedPath] = useState(defaultPath)
   const fullUrl = `${baseUrl}${selectedPath}`
 
@@ -203,9 +252,18 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
 ></iframe>`
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)' }}>
-        <span style={{ fontSize: 'var(--op-font-small)', fontWeight: 'var(--op-font-weight-semibold)' }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}
+    >
+      <div
+        style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)' }}
+      >
+        <span
+          style={{
+            fontSize: 'var(--op-font-small)',
+            fontWeight: 'var(--op-font-weight-semibold)',
+          }}
+        >
           {label}:
         </span>
         <select
@@ -228,7 +286,13 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
             </Button>
           </PopoverTrigger>
           <PopoverContent align="start" style={{ width: '400px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--op-space-small)',
+              }}
+            >
               <div style={{ position: 'relative' }}>
                 <pre
                   style={{
@@ -249,7 +313,11 @@ function VariantPreviewWithSelect({ label, defaultPath, baseUrl }: VariantPrevie
                 <Button
                   size="sm"
                   variant="secondary"
-                  style={{ position: 'absolute', top: 'var(--op-space-x-small)', right: 'var(--op-space-x-small)' }}
+                  style={{
+                    position: 'absolute',
+                    top: 'var(--op-space-x-small)',
+                    right: 'var(--op-space-x-small)',
+                  }}
                   onClick={() => navigator.clipboard.writeText(iframeEmbedCode)}
                 >
                   Copy
@@ -300,7 +368,10 @@ export default function IntroABTestingPage() {
     }
   }
 
-  async function updateTestStatus(testId: string, status: 'active' | 'paused' | 'notice' | 'warning' | 'completed') {
+  async function updateTestStatus(
+    testId: string,
+    status: 'active' | 'paused' | 'notice' | 'warning' | 'completed'
+  ) {
     try {
       await fetch(`/api/ab-tests/${testId}`, {
         method: 'PUT',
@@ -328,7 +399,8 @@ export default function IntroABTestingPage() {
     )
   }
 
-  const activeTest = tests.length > 0 ? (tests.find(t => t.status === 'active') || tests[0]) : null
+  const activeTest =
+    tests.length > 0 ? tests.find((t) => t.status === 'active') || tests[0] : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -376,11 +448,19 @@ export default function IntroABTestingPage() {
             </div>
 
             {activeTest && (
-              <div style={{ display: 'flex', gap: 'var(--op-space-medium)', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 'var(--op-space-medium)',
+                  alignItems: 'center',
+                }}
+              >
                 <span
                   className={`badge badge--${activeTest.status === 'active' ? 'notice' : activeTest.status}`}
                 >
-                  {activeTest.status === 'active' ? 'ACTIVE' : activeTest.status.toUpperCase()}
+                  {activeTest.status === 'active'
+                    ? 'ACTIVE'
+                    : activeTest.status.toUpperCase()}
                 </span>
                 {activeTest.status === 'active' ? (
                   <Button
@@ -405,9 +485,13 @@ export default function IntroABTestingPage() {
 
           {!activeTest ? (
             <div className="card">
-              <div className="card-body" style={{ textAlign: 'center', padding: 'var(--op-space-3x-large)' }}>
+              <div
+                className="card-body"
+                style={{ textAlign: 'center', padding: 'var(--op-space-3x-large)' }}
+              >
                 <p style={{ color: 'var(--op-color-on-background)' }}>
-                  No A/B tests found. Run the database migration to create the default intro page test.
+                  No A/B tests found. Run the database migration to create the default
+                  intro page test.
                 </p>
               </div>
             </div>
@@ -450,7 +534,9 @@ export default function IntroABTestingPage() {
               {/* Test Info */}
               <div className="card">
                 <div className="card-header">
-                  <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>Test Details</h3>
+                  <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
+                    Test Details
+                  </h3>
                 </div>
                 <div className="card-body">
                   <div
@@ -461,35 +547,83 @@ export default function IntroABTestingPage() {
                     }}
                   >
                     <div>
-                      <p style={{ margin: 0, fontSize: 'var(--op-font-small)', color: 'var(--op-color-on-background)' }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 'var(--op-font-small)',
+                          color: 'var(--op-color-on-background)',
+                        }}
+                      >
                         Test Name
                       </p>
-                      <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontWeight: 'var(--op-font-weight-semibold)' }}>
+                      <p
+                        style={{
+                          margin: 'var(--op-space-2x-small) 0 0 0',
+                          fontWeight: 'var(--op-font-weight-semibold)',
+                        }}
+                      >
                         {activeTest.name}
                       </p>
                     </div>
                     <div>
-                      <p style={{ margin: 0, fontSize: 'var(--op-font-small)', color: 'var(--op-color-on-background)' }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 'var(--op-font-small)',
+                          color: 'var(--op-color-on-background)',
+                        }}
+                      >
                         Created
                       </p>
-                      <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontWeight: 'var(--op-font-weight-semibold)' }}>
+                      <p
+                        style={{
+                          margin: 'var(--op-space-2x-small) 0 0 0',
+                          fontWeight: 'var(--op-font-weight-semibold)',
+                        }}
+                      >
                         {new Date(activeTest.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <div>
-                      <p style={{ margin: 0, fontSize: 'var(--op-font-small)', color: 'var(--op-color-on-background)' }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 'var(--op-font-small)',
+                          color: 'var(--op-color-on-background)',
+                        }}
+                      >
                         Total Views
                       </p>
-                      <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontWeight: 'var(--op-font-weight-semibold)' }}>
-                        {activeTest.ab_test_variants.reduce((sum, v) => sum + v.stats.views, 0).toLocaleString()}
+                      <p
+                        style={{
+                          margin: 'var(--op-space-2x-small) 0 0 0',
+                          fontWeight: 'var(--op-font-weight-semibold)',
+                        }}
+                      >
+                        {activeTest.ab_test_variants
+                          .reduce((sum, v) => sum + v.stats.views, 0)
+                          .toLocaleString()}
                       </p>
                     </div>
                     <div>
-                      <p style={{ margin: 0, fontSize: 'var(--op-font-small)', color: 'var(--op-color-on-background)' }}>
+                      <p
+                        style={{
+                          margin: 0,
+                          fontSize: 'var(--op-font-small)',
+                          color: 'var(--op-color-on-background)',
+                        }}
+                      >
                         Total Conversions
                       </p>
-                      <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontWeight: 'var(--op-font-weight-semibold)' }}>
-                        {activeTest.ab_test_variants.reduce((sum, v) => sum + v.stats.conversions, 0).toLocaleString()}
+                      <p
+                        style={{
+                          margin: 'var(--op-space-2x-small) 0 0 0',
+                          fontWeight: 'var(--op-font-weight-semibold)',
+                        }}
+                      >
+                        {activeTest.ab_test_variants
+                          .reduce((sum, v) => sum + v.stats.conversions, 0)
+                          .toLocaleString()}
                       </p>
                     </div>
                   </div>

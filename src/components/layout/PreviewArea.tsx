@@ -6,8 +6,7 @@ import {
   SparklesIcon,
   Sun01Icon,
 } from 'hugeicons-react'
-import { useState, useEffect } from 'react'
-
+import { useEffect, useState } from 'react'
 
 import { LeadsPageView } from '@/components/leads-page/LeadsPageView'
 import { Button } from '@/components/ui/button'

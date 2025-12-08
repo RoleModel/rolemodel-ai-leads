@@ -178,7 +178,9 @@ export default function LeadsPage() {
                 <input
                   type="date"
                   value={dateRange.end}
-                  onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
                   className="admin-filters__date-input"
                 />
               </div>
@@ -226,7 +228,9 @@ export default function LeadsPage() {
                     >
                       <LeadSummary
                         data={lead.summary}
-                        visitorName={lead.visitor_name || lead.visitor_email || 'Anonymous'}
+                        visitorName={
+                          lead.visitor_name || lead.visitor_email || 'Anonymous'
+                        }
                         visitorDate={new Date(lead.created_at).toLocaleDateString()}
                         onEmailShare={() => handleEmailShare(lead)}
                         onSlackShare={() => handleSlackShare(lead)}

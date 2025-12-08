@@ -32,10 +32,7 @@ export const Node = ({ handles, className, ...props }: NodeProps) => (
       position: 'relative',
       overflow: 'visible',
     }}
-    className={cn(
-      'node-container',
-      className
-    )}
+    className={cn('node-container', className)}
     {...props}
   >
     {handles.target && <Handle position={Position.Left} type="target" />}

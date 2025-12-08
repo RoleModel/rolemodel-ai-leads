@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { generateEmbedding } from '@/lib/ai/embeddings'
-import { getFramerUrls, scrapePage, categorizeUrl } from '@/lib/framer/scraper'
+import { categorizeUrl, getFramerUrls, scrapePage } from '@/lib/framer/scraper'
 import type { Database } from '@/lib/supabase/database.types'
 import { supabaseServer } from '@/lib/supabase/server'
 
@@ -137,7 +137,12 @@ export async function POST(req: NextRequest) {
             const type = categorizeUrl(url)
             const metadata: Record<string, string> = {
               url,
-              type: type === 'case-study' ? 'case-study' : type === 'blog' ? 'blog' : 'website',
+              type:
+                type === 'case-study'
+                  ? 'case-study'
+                  : type === 'blog'
+                    ? 'blog'
+                    : 'website',
               source: 'framer-sync',
             }
             if (page.description) {
@@ -150,7 +155,8 @@ export async function POST(req: NextRequest) {
               title: page.title || url,
               content: page.content,
               embedding,
-              metadata: metadata as unknown as Database['public']['Tables']['sources']['Insert']['metadata'],
+              metadata:
+                metadata as unknown as Database['public']['Tables']['sources']['Insert']['metadata'],
             }
 
             const { error } = await supabaseServer.from('sources').insert([sourceData])

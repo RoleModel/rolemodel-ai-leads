@@ -315,7 +315,9 @@ export default function ActivityPage() {
                       >
                         {selectedConversation.visitor_metadata.geo && (
                           <div>
-                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                            <span
+                              style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                            >
                               Location
                             </span>
                             <p style={{ margin: 'var(--op-space-2x-small) 0 0 0' }}>
@@ -331,17 +333,26 @@ export default function ActivityPage() {
                         )}
                         {selectedConversation.visitor_metadata.ip && (
                           <div>
-                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                            <span
+                              style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                            >
                               IP Address
                             </span>
-                            <p style={{ margin: 'var(--op-space-2x-small) 0 0 0', fontFamily: 'monospace' }}>
+                            <p
+                              style={{
+                                margin: 'var(--op-space-2x-small) 0 0 0',
+                                fontFamily: 'monospace',
+                              }}
+                            >
                               {selectedConversation.visitor_metadata.ip}
                             </p>
                           </div>
                         )}
                         {selectedConversation.visitor_metadata.geo?.timezone && (
                           <div>
-                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                            <span
+                              style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                            >
                               Timezone
                             </span>
                             <p style={{ margin: 'var(--op-space-2x-small) 0 0 0' }}>
@@ -351,7 +362,9 @@ export default function ActivityPage() {
                         )}
                         {selectedConversation.visitor_metadata.referer && (
                           <div>
-                            <span style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                            <span
+                              style={{ color: 'var(--op-color-neutral-on-plus-max)' }}
+                            >
                               Referrer
                             </span>
                             <p

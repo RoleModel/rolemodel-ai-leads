@@ -5,7 +5,12 @@ import { z } from 'zod'
 
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
-import { buildSourceContext, getChatbot, retrieveRelevantSources, type Source } from '@/lib/ai/rag'
+import {
+  type Source,
+  buildSourceContext,
+  getChatbot,
+  retrieveRelevantSources,
+} from '@/lib/ai/rag'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
 import { supabaseServer } from '@/lib/supabase/server'
@@ -35,10 +40,7 @@ const sanitizeForHeader = (str: string): string =>
 const buildSourceHeaderPayload = (sources: Source[]): SourceHeaderPayload[] =>
   sources.map((source, idx) => {
     const snippet = sanitizeForHeader(
-      source.content
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 320)
+      source.content.replace(/\s+/g, ' ').trim().slice(0, 320)
     )
     const title = sanitizeForHeader(source.title ?? `Source ${idx + 1}`)
     const url =
@@ -93,9 +95,8 @@ export async function POST(req: NextRequest) {
     let userQuery = ''
     if (lastUserMessage) {
       if (lastUserMessage.content) {
-        userQuery = typeof lastUserMessage.content === 'string'
-          ? lastUserMessage.content
-          : ''
+        userQuery =
+          typeof lastUserMessage.content === 'string' ? lastUserMessage.content : ''
       } else if (lastUserMessage.parts) {
         userQuery = lastUserMessage.parts
           .filter((p: { type: string }) => p.type === 'text')
@@ -106,26 +107,27 @@ export async function POST(req: NextRequest) {
 
     // Run chatbot fetch, RAG, visitor info, and page settings fetch in parallel
     // Only run RAG if there's actual content to search for
-    const [chatbot, relevantSources, existingConversation, pageSettings] = await Promise.all([
-      getChatbot(activeChatbotId),
-      userQuery.trim().length > 0
-        ? retrieveRelevantSources(activeChatbotId, userQuery, 5, 0.3)
-        : Promise.resolve([]),
-      conversationId
-        ? supabaseServer
-            .from('conversations')
-            .select('visitor_name, visitor_email')
-            .eq('id', conversationId)
-            .single()
-            .then(res => res.data)
-        : Promise.resolve(null),
-      supabaseServer
-        .from('help_page_settings')
-        .select('rag_config')
-        .eq('chatbot_id', activeChatbotId)
-        .single()
-        .then(res => res.data),
-    ])
+    const [chatbot, relevantSources, existingConversation, pageSettings] =
+      await Promise.all([
+        getChatbot(activeChatbotId),
+        userQuery.trim().length > 0
+          ? retrieveRelevantSources(activeChatbotId, userQuery, 5, 0.3)
+          : Promise.resolve([]),
+        conversationId
+          ? supabaseServer
+              .from('conversations')
+              .select('visitor_name, visitor_email')
+              .eq('id', conversationId)
+              .single()
+              .then((res) => res.data)
+          : Promise.resolve(null),
+        supabaseServer
+          .from('help_page_settings')
+          .select('rag_config')
+          .eq('chatbot_id', activeChatbotId)
+          .single()
+          .then((res) => res.data),
+      ])
 
     if (!chatbot) {
       return new Response(
@@ -139,7 +141,8 @@ export async function POST(req: NextRequest) {
 
     // Override chatbot settings with playground settings if provided
     const effectiveModel = model || chatbot?.model || 'gpt-4o-mini'
-    const effectiveTemperature = temperature !== undefined ? temperature : (chatbot?.temperature || 0.7)
+    const effectiveTemperature =
+      temperature !== undefined ? temperature : chatbot?.temperature || 0.7
     const effectiveInstructions = instructions || chatbot?.instructions || ''
 
     // Build context from sources with workflow and RAG config
@@ -194,13 +197,17 @@ Call this tool whenever you learn new information about:
 - contact: Their name or email address
 
 This updates the progress indicator shown to the user. Mark items as true when you have gathered that information.
-${existingConversation?.visitor_name || existingConversation?.visitor_email ? `
+${
+  existingConversation?.visitor_name || existingConversation?.visitor_email
+    ? `
 VISITOR INFORMATION (already collected from intro form):
 ${existingConversation.visitor_name ? `- Name: ${existingConversation.visitor_name}` : ''}
 ${existingConversation.visitor_email ? `- Email: ${existingConversation.visitor_email}` : ''}
 
 IMPORTANT: This contact information has already been provided. Do NOT ask for their name or email again. Instead, use their name naturally in conversation and focus on understanding their business needs.
-` : ''}
+`
+    : ''
+}
 ${sourceContext}`,
     }
 
@@ -250,30 +257,33 @@ ${sourceContext}`,
           id: activeConversationId,
           chatbot_id: activeChatbotId,
           visitor_id: nanoid(),
-          visitor_metadata: visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
+          visitor_metadata:
+            visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
         }
-        await supabaseServer
-          .from('conversations')
-          .insert([conversationData])
+        await supabaseServer.from('conversations').insert([conversationData])
       })()
     }
 
     // OPTIMIZATION: Save user message in background (non-blocking)
     if (activeConversationId && userQuery) {
       const insertMessage = () =>
-        supabaseServer.from('messages').insert([{
-          conversation_id: activeConversationId,
-          role: 'user',
-          content: userQuery,
-        }])
+        supabaseServer.from('messages').insert([
+          {
+            conversation_id: activeConversationId,
+            role: 'user',
+            content: userQuery,
+          },
+        ])
       // Ensure ordering: insert message only after conversation creation (if needed)
       if (conversationPromise) {
         void conversationPromise
           .then(() => insertMessage())
-          .catch((err) => console.error('Error creating conversation before inserting message:', err))
+          .catch((err) =>
+            console.error('Error creating conversation before inserting message:', err)
+          )
       } else {
         void insertMessage().then(
-          () => { },
+          () => {},
           (err) => console.error('Error inserting user message:', err)
         )
       }
@@ -281,7 +291,9 @@ ${sourceContext}`,
 
     // Stream response - START IMMEDIATELY without waiting for DB writes
     // Vercel AI Gateway uses provider/model format (e.g., openai/gpt-4o-mini)
-    const modelId = effectiveModel.includes('/') ? effectiveModel : `openai/${effectiveModel}`
+    const modelId = effectiveModel.includes('/')
+      ? effectiveModel
+      : `openai/${effectiveModel}`
 
     const sourceHeaderPayload = buildSourceHeaderPayload(relevantSources)
 
@@ -294,26 +306,40 @@ ${sourceContext}`,
         thinking: tool({
           description: 'Show chain of thought reasoning process for complex questions',
           inputSchema: z.object({
-            steps: z.array(z.object({
-              label: z.string(),
-              description: z.string().optional(),
-              status: z.enum(['complete', 'active', 'pending']),
-            })),
+            steps: z.array(
+              z.object({
+                label: z.string(),
+                description: z.string().optional(),
+                status: z.enum(['complete', 'active', 'pending']),
+              })
+            ),
           }),
         }),
         suggest_questions: tool({
-          description: 'Provide suggested follow-up questions for the user to click. Call this at the end of each response.',
+          description:
+            'Provide suggested follow-up questions for the user to click. Call this at the end of each response.',
           inputSchema: z.object({
-            questions: z.array(z.string()).min(1).max(3).describe('1-3 relevant follow-up questions'),
+            questions: z
+              .array(z.string())
+              .min(1)
+              .max(3)
+              .describe('1-3 relevant follow-up questions'),
           }),
         }),
         report_bant_progress: tool({
-          description: 'Report what BANT qualification information has been gathered from the user. Call this when you learn new information.',
+          description:
+            'Report what BANT qualification information has been gathered from the user. Call this when you learn new information.',
           inputSchema: z.object({
-            need: z.boolean().describe('True if you know their challenges, goals, or problems'),
+            need: z
+              .boolean()
+              .describe('True if you know their challenges, goals, or problems'),
             timeline: z.boolean().describe('True if you know when they need a solution'),
-            budget: z.boolean().describe('True if you know their budget or investment range'),
-            authority: z.boolean().describe('True if you know their role or decision-making power'),
+            budget: z
+              .boolean()
+              .describe('True if you know their budget or investment range'),
+            authority: z
+              .boolean()
+              .describe('True if you know their role or decision-making power'),
             contact: z.boolean().describe('True if you have their name or email'),
           }),
         }),
@@ -352,23 +378,24 @@ ${sourceContext}`,
           if (totalMessages >= 3) {
             try {
               // Fetch conversation messages AND the conversation's visitor info in parallel
-              const [messagesResult, conversationResult, sourcesResult] = await Promise.all([
-                supabaseServer
-                  .from('messages')
-                  .select('role, content')
-                  .eq('conversation_id', activeConversationId)
-                  .order('created_at', { ascending: true }),
-                supabaseServer
-                  .from('conversations')
-                  .select('visitor_name, visitor_email, lead_captured')
-                  .eq('id', activeConversationId)
-                  .single(),
-                supabaseServer
-                  .from('sources')
-                  .select('id, title, content')
-                  .eq('chatbot_id', activeChatbotId)
-                  .limit(20),
-              ])
+              const [messagesResult, conversationResult, sourcesResult] =
+                await Promise.all([
+                  supabaseServer
+                    .from('messages')
+                    .select('role, content')
+                    .eq('conversation_id', activeConversationId)
+                    .order('created_at', { ascending: true }),
+                  supabaseServer
+                    .from('conversations')
+                    .select('visitor_name, visitor_email, lead_captured')
+                    .eq('id', activeConversationId)
+                    .single(),
+                  supabaseServer
+                    .from('sources')
+                    .select('id, title, content')
+                    .eq('chatbot_id', activeChatbotId)
+                    .limit(20),
+                ])
 
               const allMessages = messagesResult.data
               const conversation = conversationResult.data
@@ -381,25 +408,26 @@ ${sourceContext}`,
 
               if (allMessages && allMessages.length > 0) {
                 // Extract lead data with available sources for recommendations
-                const leadData = await extractLeadData(
-                  allMessages,
-                  allSources || []
-                )
+                const leadData = await extractLeadData(allMessages, allSources || [])
 
                 // Use conversation's visitor info if AI didn't extract it
                 // (from intro forms where name/email are captured before chat)
-                const visitorName = leadData?.contactInfo?.name || conversation?.visitor_name || undefined
-                const visitorEmail = leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+                const visitorName =
+                  leadData?.contactInfo?.name || conversation?.visitor_name || undefined
+                const visitorEmail =
+                  leadData?.contactInfo?.email || conversation?.visitor_email || undefined
 
                 // Merge conversation visitor info into leadData for qualification check
-                const enrichedLeadData = leadData ? {
-                  ...leadData,
-                  contactInfo: {
-                    ...leadData.contactInfo,
-                    name: visitorName,
-                    email: visitorEmail,
-                  }
-                } : null
+                const enrichedLeadData = leadData
+                  ? {
+                      ...leadData,
+                      contactInfo: {
+                        ...leadData.contactInfo,
+                        name: visitorName,
+                        email: visitorEmail,
+                      },
+                    }
+                  : null
 
                 // Check if lead is qualified and hasn't been saved yet
                 if (enrichedLeadData && isQualifiedLead(enrichedLeadData)) {
@@ -444,9 +472,7 @@ ${sourceContext}`,
     return result.toUIMessageStreamResponse({
       headers: {
         'X-Conversation-ID': activeConversationId || '',
-        'X-Sources-Used': JSON.stringify(
-          sourceHeaderPayload
-        ),
+        'X-Sources-Used': JSON.stringify(sourceHeaderPayload),
       },
     })
   } catch (error) {

@@ -23,10 +23,13 @@ import { useWidgetConfig } from '@/contexts/WidgetConfigContext'
 export function WidgetEditorSidebar() {
   const router = useRouter()
   const { config, updateConfig } = useWidgetConfig()
-  const [alertMessage, setAlertMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [alertMessage, setAlertMessage] = useState<{
+    type: 'success' | 'error'
+    text: string
+  } | null>(null)
 
   const origin = useSyncExternalStore(
-    () => () => { },
+    () => () => {},
     () => (typeof window !== 'undefined' ? window.location.origin : ''),
     () => ''
   )
@@ -526,9 +529,11 @@ export function WidgetEditorSidebar() {
                     width: '48px',
                     height: '48px',
                     borderRadius: '50%',
-                    backgroundColor: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
-                      ? 'transparent'
-                      : 'var(--op-color-primary)',
+                    backgroundColor:
+                      config.profilePicture?.startsWith('data:') ||
+                      config.profilePicture?.startsWith('http')
+                        ? 'transparent'
+                        : 'var(--op-color-primary)',
                     color: 'white',
                     display: 'flex',
                     alignItems: 'center',
@@ -536,14 +541,18 @@ export function WidgetEditorSidebar() {
                     fontSize: 'var(--op-font-large)',
                     fontWeight: 'bold',
                     overflow: 'hidden',
-                    backgroundImage: config.profilePicture?.startsWith('data:') || config.profilePicture?.startsWith('http')
-                      ? `url(${config.profilePicture})`
-                      : 'none',
+                    backgroundImage:
+                      config.profilePicture?.startsWith('data:') ||
+                      config.profilePicture?.startsWith('http')
+                        ? `url(${config.profilePicture})`
+                        : 'none',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
                 >
-                  {!config.profilePicture?.startsWith('data:') && !config.profilePicture?.startsWith('http') && (config.profilePicture || 'R')}
+                  {!config.profilePicture?.startsWith('data:') &&
+                    !config.profilePicture?.startsWith('http') &&
+                    (config.profilePicture || 'R')}
                 </div>
                 <input
                   type="file"
@@ -555,7 +564,10 @@ export function WidgetEditorSidebar() {
                     if (file) {
                       // Check file size (max 1MB)
                       if (file.size > 1024 * 1024) {
-                        setAlertMessage({ type: 'error', text: 'File size must be less than 1MB' })
+                        setAlertMessage({
+                          type: 'error',
+                          text: 'File size must be less than 1MB',
+                        })
                         setTimeout(() => setAlertMessage(null), 3000)
                         return
                       }
@@ -570,7 +582,9 @@ export function WidgetEditorSidebar() {
                 />
                 <Button
                   variant="icon"
-                  onClick={() => document.getElementById('profile-picture-upload')?.click()}
+                  onClick={() =>
+                    document.getElementById('profile-picture-upload')?.click()
+                  }
                 >
                   <Upload01Icon className="icon-sm" />
                 </Button>
@@ -875,7 +889,8 @@ export function WidgetEditorSidebar() {
                     marginBottom: 'var(--op-space-medium)',
                   }}
                 >
-                  Adds a floating chat bubble in the corner of your website. Copy and paste this code before the closing &lt;/body&gt; tag.
+                  Adds a floating chat bubble in the corner of your website. Copy and
+                  paste this code before the closing &lt;/body&gt; tag.
                 </p>
                 <div
                   style={{
@@ -933,7 +948,8 @@ export function WidgetEditorSidebar() {
                     marginBottom: 'var(--op-space-medium)',
                   }}
                 >
-                  Embeds the chat directly in your page. Great for help pages or dedicated chat sections.
+                  Embeds the chat directly in your page. Great for help pages or dedicated
+                  chat sections.
                 </p>
                 <div
                   style={{
@@ -1044,9 +1060,10 @@ export function WidgetEditorSidebar() {
             position: 'fixed',
             top: 'var(--op-space-large)',
             right: 'var(--op-space-large)',
-            backgroundColor: alertMessage.type === 'success'
-              ? 'var(--op-color-alerts-notice-base)'
-              : 'var(--op-color-alerts-danger-base)',
+            backgroundColor:
+              alertMessage.type === 'success'
+                ? 'var(--op-color-alerts-notice-base)'
+                : 'var(--op-color-alerts-danger-base)',
             color: 'white',
             padding: 'var(--op-space-medium) var(--op-space-large)',
             borderRadius: 'var(--op-radius-medium)',

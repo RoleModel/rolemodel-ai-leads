@@ -50,15 +50,15 @@ function SelectTrigger({
         outline: 'none',
         ...props.style,
       }}
-      className={cn(
-        'form-control data-[size=default]:h-9 data-[size=sm]:h-8',
-        className
-      )}
+      className={cn('form-control data-[size=default]:h-9 data-[size=sm]:h-8', className)}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ArrowDown01Icon className="icon-sm" style={{ height: '16px', width: '16px', opacity: 0.5 }} />
+        <ArrowDown01Icon
+          className="icon-sm"
+          style={{ height: '16px', width: '16px', opacity: 0.5 }}
+        />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -103,7 +103,7 @@ function SelectContent({
           'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
           'data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
           position === 'popper' &&
-          'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
+            'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           className
         )}
         position={position}
@@ -166,10 +166,7 @@ function SelectItem({
         transition: 'all 0.2s ease',
         ...props.style,
       }}
-      className={cn(
-        'btn btn--small btn--no-border',
-        className
-      )}
+      className={cn('btn btn--small btn--no-border', className)}
       {...props}
     >
       <span className="absolute right-2 flex size-3.5 items-center justify-center">

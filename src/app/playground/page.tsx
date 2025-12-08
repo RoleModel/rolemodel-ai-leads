@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useState, useCallback } from 'react'
+import { Suspense, useCallback, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
@@ -48,17 +48,10 @@ RoleModel Software is a custom software development company that specializes in 
           }}
         >
           {/* Configuration Panel */}
-          <PlaygroundConfig
-            settings={settings}
-            onSettingsChange={handleSettingsChange}
-          />
+          <PlaygroundConfig settings={settings} onSettingsChange={handleSettingsChange} />
 
           {/* Chat Preview */}
-          <PlaygroundPreview
-            key={resetKey}
-            settings={settings}
-            onReset={handleReset}
-          />
+          <PlaygroundPreview key={resetKey} settings={settings} onReset={handleReset} />
         </main>
       </div>
     </div>

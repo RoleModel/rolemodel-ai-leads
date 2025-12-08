@@ -1,13 +1,26 @@
 'use client'
 
-import { Archive01Icon, ChatIcon, Mail01Icon, RotateClockwiseIcon, SlackIcon } from '@hugeicons-pro/core-stroke-standard'
+import {
+  Archive01Icon,
+  ChatIcon,
+  Mail01Icon,
+  RotateClockwiseIcon,
+  SlackIcon,
+} from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
 
+import {
+  Plan,
+  PlanContent,
+  PlanFooter,
+  PlanHeader,
+  PlanTrigger,
+} from '@/components/ai-elements/plan'
 import { Button } from '@/components/ui/button'
+
 import { decodeHtmlEntities } from '@/lib/utils'
 
-import { Plan, PlanHeader, PlanContent, PlanFooter, PlanTrigger } from '@/components/ai-elements/plan'
 import './LeadSummary.css'
 
 export interface Recommendation {
@@ -76,11 +89,16 @@ function getScoreClass(score: number): string {
 
 function getRecommendationTypeLabel(type: Recommendation['type']): string {
   switch (type) {
-    case 'case-study': return 'Case Study'
-    case 'guide': return 'Guide'
-    case 'article': return 'Article'
-    case 'tool': return 'Tool'
-    default: return 'Resource'
+    case 'case-study':
+      return 'Case Study'
+    case 'guide':
+      return 'Guide'
+    case 'article':
+      return 'Article'
+    case 'tool':
+      return 'Tool'
+    default:
+      return 'Resource'
   }
 }
 
@@ -97,20 +115,20 @@ export function LeadSummary({
 }: LeadSummaryProps) {
   const containerVariants = animated
     ? {
-      hidden: { opacity: 0, y: 20 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.4, staggerChildren: 0.1 },
-      },
-    }
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.4, staggerChildren: 0.1 },
+        },
+      }
     : undefined
 
   const itemVariants = animated
     ? {
-      hidden: { opacity: 0, x: -20 },
-      visible: { opacity: 1, x: 0 },
-    }
+        hidden: { opacity: 0, x: -20 },
+        visible: { opacity: 1, x: 0 },
+      }
     : undefined
 
   const Container = animated ? motion.div : 'div'
@@ -127,21 +145,24 @@ export function LeadSummary({
         <PlanHeader>
           <div>
             <h3 className="lead-summary__header-title">
-              {visitorName && visitorName !== 'null' ? visitorName : 'Conversation Summary'}
+              {visitorName && visitorName !== 'null'
+                ? visitorName
+                : 'Conversation Summary'}
               {visitorName && visitorName !== 'null' && visitorDate && (
                 <span className="lead-summary__header-date">· {visitorDate}</span>
               )}
             </h3>
-            <p className="lead-summary__header-subtitle">
-              Conversation summary
-            </p>
+            <p className="lead-summary__header-subtitle">Conversation summary</p>
           </div>
           <PlanTrigger />
         </PlanHeader>
         <PlanContent>
           {/* Alignment Score */}
           {data.alignmentScore !== undefined && (
-            <Item className="lead-summary_section lead-summary__alignment" variants={itemVariants} >
+            <Item
+              className="lead-summary_section lead-summary__alignment"
+              variants={itemVariants}
+            >
               <h4 className="lead-summary__section-title">Alignment</h4>
               <div className="lead-summary__score-container">
                 <div className="lead-summary__score-bar">
@@ -159,7 +180,9 @@ export function LeadSummary({
           )}
 
           {/* Company Info */}
-          {(data.companyInfo?.name || data.companyInfo?.size || data.companyInfo?.industry) && (
+          {(data.companyInfo?.name ||
+            data.companyInfo?.size ||
+            data.companyInfo?.industry) && (
             <Item className="lead-summary_section" variants={itemVariants}>
               <h4 className="lead-summary__section-title">Company</h4>
               {data.companyInfo.name && (
@@ -167,15 +190,18 @@ export function LeadSummary({
               )}
               {(data.companyInfo.industry || data.companyInfo.size) && (
                 <p className="lead-summary__value lead-summary__value--muted">
-                  {[data.companyInfo.industry, data.companyInfo.size].filter(Boolean).join(' · ')}
+                  {[data.companyInfo.industry, data.companyInfo.size]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
               )}
             </Item>
           )}
 
-
           {/* Budget */}
-          {(data.budget?.range || data.budget?.timeline || data.budget?.approved !== undefined) && (
+          {(data.budget?.range ||
+            data.budget?.timeline ||
+            data.budget?.approved !== undefined) && (
             <Item className="lead-summary_section" variants={itemVariants}>
               <h4 className="lead-summary__section-title">Budget</h4>
               {data.budget.range && (
@@ -193,14 +219,18 @@ export function LeadSummary({
               {data.budget.approved !== undefined && (
                 <div className="lead-summary__field">
                   <span className="lead-summary__label">Approved</span>
-                  <p className="lead-summary__value">{data.budget.approved ? 'Yes' : 'No'}</p>
+                  <p className="lead-summary__value">
+                    {data.budget.approved ? 'Yes' : 'No'}
+                  </p>
                 </div>
               )}
             </Item>
           )}
 
           {/* Need / Problem */}
-          {(data.need?.problem || data.need?.currentSolution || (data.need?.painPoints && data.need.painPoints.length > 0)) && (
+          {(data.need?.problem ||
+            data.need?.currentSolution ||
+            (data.need?.painPoints && data.need.painPoints.length > 0)) && (
             <Item className="lead-summary_section" variants={itemVariants}>
               <h4 className="lead-summary__section-title">Need</h4>
               {data.need.problem && (
@@ -220,7 +250,9 @@ export function LeadSummary({
                   <span className="lead-summary__label">Pain Points</span>
                   <ul className="lead-summary__list">
                     {data.need.painPoints.map((point, i) => (
-                      <li key={i} className="lead-summary__list-item">{point}</li>
+                      <li key={i} className="lead-summary__list-item">
+                        {point}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -229,7 +261,9 @@ export function LeadSummary({
           )}
 
           {/* Authority */}
-          {(data.authority?.role || data.authority?.decisionMaker !== undefined || (data.authority?.stakeholders && data.authority.stakeholders.length > 0)) && (
+          {(data.authority?.role ||
+            data.authority?.decisionMaker !== undefined ||
+            (data.authority?.stakeholders && data.authority.stakeholders.length > 0)) && (
             <Item className="lead-summary_section" variants={itemVariants}>
               <h4 className="lead-summary__section-title">Authority</h4>
               {data.authority.role && (
@@ -241,13 +275,17 @@ export function LeadSummary({
               {data.authority.decisionMaker !== undefined && (
                 <div className="lead-summary__field">
                   <span className="lead-summary__label">Decision Maker</span>
-                  <p className="lead-summary__value">{data.authority.decisionMaker ? 'Yes' : 'No'}</p>
+                  <p className="lead-summary__value">
+                    {data.authority.decisionMaker ? 'Yes' : 'No'}
+                  </p>
                 </div>
               )}
               {data.authority.stakeholders && data.authority.stakeholders.length > 0 && (
                 <div className="lead-summary__field">
                   <span className="lead-summary__label">Other Stakeholders</span>
-                  <p className="lead-summary__value">{data.authority.stakeholders.join(', ')}</p>
+                  <p className="lead-summary__value">
+                    {data.authority.stakeholders.join(', ')}
+                  </p>
                 </div>
               )}
             </Item>
@@ -266,7 +304,9 @@ export function LeadSummary({
               {data.timeline.implementationDate && (
                 <div className="lead-summary__field">
                   <span className="lead-summary__label">Target Date</span>
-                  <p className="lead-summary__value">{data.timeline.implementationDate}</p>
+                  <p className="lead-summary__value">
+                    {data.timeline.implementationDate}
+                  </p>
                 </div>
               )}
             </Item>
@@ -300,7 +340,9 @@ export function LeadSummary({
                         </span>
                       )}
                       {rec.description && (
-                        <p className="lead-summary__recommendation-description">{decodeHtmlEntities(rec.description)}</p>
+                        <p className="lead-summary__recommendation-description">
+                          {decodeHtmlEntities(rec.description)}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -327,13 +369,21 @@ export function LeadSummary({
           {(onEmailShare || onSlackShare || onScheduleConversation || onArchive) && (
             <div className="lead-summary__share-actions">
               {onEmailShare && (
-                <Button variant="secondary" onClick={onEmailShare} className="lead-summary__share-button">
+                <Button
+                  variant="secondary"
+                  onClick={onEmailShare}
+                  className="lead-summary__share-button"
+                >
                   <HugeiconsIcon icon={Mail01Icon} size={18} />
                   <span>Email this summary</span>
                 </Button>
               )}
               {onScheduleConversation && (
-                <Button variant="secondary" onClick={onScheduleConversation} className="lead-summary__share-button">
+                <Button
+                  variant="secondary"
+                  onClick={onScheduleConversation}
+                  className="lead-summary__share-button"
+                >
                   <HugeiconsIcon icon={ChatIcon} size={18} />
                   <span>Schedule a conversation</span>
                 </Button>
@@ -345,8 +395,15 @@ export function LeadSummary({
                 </Button>
               )}
               {onArchive && (
-                <Button variant="secondary" onClick={onArchive} title={isArchived ? 'Restore' : 'Archive'}>
-                  <HugeiconsIcon icon={isArchived ? RotateClockwiseIcon : Archive01Icon} size={18} />
+                <Button
+                  variant="secondary"
+                  onClick={onArchive}
+                  title={isArchived ? 'Restore' : 'Archive'}
+                >
+                  <HugeiconsIcon
+                    icon={isArchived ? RotateClockwiseIcon : Archive01Icon}
+                    size={18}
+                  />
                 </Button>
               )}
             </div>

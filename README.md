@@ -58,12 +58,12 @@ The AI receives these instructions in its system prompt and naturally incorporat
 
 The default workflow uses BANT criteria:
 
-| Question | Weight | Keywords |
-|----------|--------|----------|
-| "What's your budget for this project?" | 30% | 10k, 20k, 50k+, enterprise |
-| "Are you the decision maker?" | 25% | yes, no, team, committee |
-| "What problems are you trying to solve?" | 20% | efficiency, cost, scale, automation |
-| "When do you need this completed?" | 25% | asap, this quarter, next quarter, 6 months |
+| Question                                 | Weight | Keywords                                   |
+| ---------------------------------------- | ------ | ------------------------------------------ |
+| "What's your budget for this project?"   | 30%    | 10k, 20k, 50k+, enterprise                 |
+| "Are you the decision maker?"            | 25%    | yes, no, team, committee                   |
+| "What problems are you trying to solve?" | 20%    | efficiency, cost, scale, automation        |
+| "When do you need this completed?"       | 25%    | asap, this quarter, next quarter, 6 months |
 
 ### Lead Data Extraction
 
@@ -115,6 +115,7 @@ When you save a workflow via POST `/api/workflow`:
 
 1. **Questions are extracted** from all question nodes
 2. **Dynamic instructions are generated**:
+
    ```
    QUALIFICATION QUESTIONS:
    1. What's your budget for this project? (Weight: 30%)
@@ -125,6 +126,7 @@ When you save a workflow via POST `/api/workflow`:
    - Look for these keywords: 10k, 20k, yes, no, efficiency...
    - Qualification threshold: 70%
    ```
+
 3. **Instructions are appended** to the chatbot's existing instructions
 4. **Workflow JSON is stored** in `business_context` field
 
@@ -184,31 +186,32 @@ flowchart TB
 
 ### Workflow vs ragConfig
 
-| Source | Provides | UI Location |
-|--------|----------|-------------|
-| **Workflow** | Custom qualification questions, scoring weights, thresholds | Visual Flow Designer |
+| Source        | Provides                                                                              | UI Location            |
+| ------------- | ------------------------------------------------------------------------------------- | ---------------------- |
+| **Workflow**  | Custom qualification questions, scoring weights, thresholds                           | Visual Flow Designer   |
 | **ragConfig** | Behavior settings (citations, conciseness, BANT, contact collection, personalization) | EditorSidebar Settings |
 
 **Integration Logic:**
+
 - If workflow has custom questions → use those instead of default BANT
 - ragConfig settings (maxQuestions, responseConciseness, enableCitations, etc.) always apply
 - Both merge together in `buildSourceContext()` to create the final system prompt
 
 ### ragConfig Options
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| sourceLimit | number | 5 | Number of knowledge base sources to retrieve |
-| similarityThreshold | number | 0.5 | Minimum similarity score for retrieval |
-| enableCitations | boolean | true | Require inline citations like [1], [2] |
-| enableCaseStudies | boolean | true | Proactively share relevant case studies |
-| enableBANT | boolean | true | Use BANT qualification (when no workflow questions) |
-| askForName | boolean | true | Collect visitor's name |
-| askForEmail | boolean | true | Collect visitor's email |
-| maxQuestions | number | 5 | Maximum qualification questions per session |
-| responseConciseness | 'brief' \| 'moderate' \| 'detailed' | 'moderate' | AI response length |
-| enablePersonalization | boolean | true | Use visitor's name/context in responses |
-| customInstructions | string | '' | Additional AI behavior instructions |
+| Setting               | Type                                | Default    | Description                                         |
+| --------------------- | ----------------------------------- | ---------- | --------------------------------------------------- |
+| sourceLimit           | number                              | 5          | Number of knowledge base sources to retrieve        |
+| similarityThreshold   | number                              | 0.5        | Minimum similarity score for retrieval              |
+| enableCitations       | boolean                             | true       | Require inline citations like [1], [2]              |
+| enableCaseStudies     | boolean                             | true       | Proactively share relevant case studies             |
+| enableBANT            | boolean                             | true       | Use BANT qualification (when no workflow questions) |
+| askForName            | boolean                             | true       | Collect visitor's name                              |
+| askForEmail           | boolean                             | true       | Collect visitor's email                             |
+| maxQuestions          | number                              | 5          | Maximum qualification questions per session         |
+| responseConciseness   | 'brief' \| 'moderate' \| 'detailed' | 'moderate' | AI response length                                  |
+| enablePersonalization | boolean                             | true       | Use visitor's name/context in responses             |
+| customInstructions    | string                              | ''         | Additional AI behavior instructions                 |
 
 ### How Context Retrieval Works
 
@@ -276,6 +279,7 @@ The RAG system searches the `documents` table for chunks matching the user's que
 Main chat endpoint for conversation.
 
 **Request:**
+
 ```json
 {
   "message": "User's message",
@@ -291,6 +295,7 @@ Main chat endpoint for conversation.
 Retrieve workflow configuration for a chatbot.
 
 **Query params:**
+
 - `chatbotId` - UUID of chatbot (optional, uses default)
 
 ### POST /api/workflow
@@ -298,6 +303,7 @@ Retrieve workflow configuration for a chatbot.
 Save workflow configuration.
 
 **Request:**
+
 ```json
 {
   "chatbotId": "uuid (optional)",
@@ -309,6 +315,7 @@ Save workflow configuration.
 ```
 
 **What it does:**
+
 - Extracts questions from workflow nodes
 - Generates dynamic AI instructions
 - Updates chatbot in database

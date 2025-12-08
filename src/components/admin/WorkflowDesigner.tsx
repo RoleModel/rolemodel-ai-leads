@@ -1,32 +1,32 @@
 'use client'
 
-import { useCallback, useState, useEffect } from 'react'
 import {
-  addEdge,
-  reconnectEdge,
-  Controls,
-  useNodesState,
-  useEdgesState,
-  Handle,
-  Position,
-  NodeProps,
-  Connection,
-  MarkerType,
   Background,
   BackgroundVariant,
-  type Node as FlowNode,
+  Connection,
+  Controls,
   type Edge as FlowEdge,
+  type Node as FlowNode,
+  Handle,
+  MarkerType,
+  NodeProps,
+  Position,
+  addEdge,
+  reconnectEdge,
+  useEdgesState,
+  useNodesState,
 } from '@xyflow/react'
-import { Canvas } from "@/components/ai-elements/canvas";
+import '@xyflow/react/dist/style.css'
+import { useCallback, useEffect, useState } from 'react'
+
+import { Canvas } from '@/components/ai-elements/canvas'
 import {
   Node,
   NodeContent,
   NodeDescription,
   NodeHeader,
   NodeTitle,
-} from "@/components/ai-elements/node";
-
-import '@xyflow/react/dist/style.css'
+} from '@/components/ai-elements/node'
 
 // Define custom data type for our nodes
 interface NodeData {
@@ -59,7 +59,9 @@ export interface WorkflowControls {
   selectedEdge: FlowEdge | null
   editMode: boolean
   nodeData: { label: string; description: string; keywords: string }
-  setNodeData: React.Dispatch<React.SetStateAction<{ label: string; description: string; keywords: string }>>
+  setNodeData: React.Dispatch<
+    React.SetStateAction<{ label: string; description: string; keywords: string }>
+  >
   edgeData: EdgeStyleData
   setEdgeData: React.Dispatch<React.SetStateAction<EdgeStyleData>>
   saveStatus: { type: 'success' | 'error' | null; message: string }
@@ -80,7 +82,13 @@ const QualificationNode = ({ data, isConnectable }: NodeProps) => {
       </NodeHeader>
       {nodeData.keywords && nodeData.keywords.length > 0 && (
         <NodeContent>
-          <div style={{ fontSize: '10px', color: 'var(--op-color-neutral-on-plus-max)', marginBottom: '4px' }}>
+          <div
+            style={{
+              fontSize: '10px',
+              color: 'var(--op-color-neutral-on-plus-max)',
+              marginBottom: '4px',
+            }}
+          >
             Keywords:
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -301,9 +309,12 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
     description: '',
     keywords: '',
   })
-  const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({
+  const [saveStatus, setSaveStatus] = useState<{
+    type: 'success' | 'error' | null
+    message: string
+  }>({
     type: null,
-    message: ''
+    message: '',
   })
   const [edgeData, setEdgeData] = useState<EdgeStyleData>({
     stroke: 'var(--op-color-primary-base)',
@@ -321,16 +332,27 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
         if (response.ok) {
           const data = await response.json()
           if (data.workflow?.workflow?.nodes) {
-            const savedNodes = data.workflow.workflow.nodes.map((node: { id: string; position?: { x: number; y: number }; data?: { label?: string; description?: string; question?: string; keywords?: string[] } }) => ({
-              id: node.id,
-              type: 'qualification',
-              position: node.position || { x: 0, y: 0 },
-              data: {
-                label: node.data?.label || node.id,
-                description: node.data?.description || node.data?.question || '',
-                keywords: node.data?.keywords || [],
-              }
-            }))
+            const savedNodes = data.workflow.workflow.nodes.map(
+              (node: {
+                id: string
+                position?: { x: number; y: number }
+                data?: {
+                  label?: string
+                  description?: string
+                  question?: string
+                  keywords?: string[]
+                }
+              }) => ({
+                id: node.id,
+                type: 'qualification',
+                position: node.position || { x: 0, y: 0 },
+                data: {
+                  label: node.data?.label || node.id,
+                  description: node.data?.description || node.data?.question || '',
+                  keywords: node.data?.keywords || [],
+                },
+              })
+            )
             const savedEdges = data.workflow.workflow.edges || []
             if (savedNodes.length > 0) {
               setNodes(savedNodes)
@@ -401,7 +423,9 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
 
   const deleteEdge = useCallback(() => {
     if (selectedEdge) {
-      setEdges((eds: FlowEdge[]) => eds.filter((edge: FlowEdge) => edge.id !== selectedEdge.id))
+      setEdges((eds: FlowEdge[]) =>
+        eds.filter((edge: FlowEdge) => edge.id !== selectedEdge.id)
+      )
       setSelectedEdge(null)
     }
   }, [selectedEdge, setEdges])
@@ -434,7 +458,7 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
               label: edgeData.label || undefined,
               labelStyle: edgeData.label ? edgeLabelStyle : undefined,
               labelBgStyle: edgeData.label ? edgeLabelBgStyle : undefined,
-              labelBgPadding: edgeData.label ? [4, 8] as [number, number] : undefined,
+              labelBgPadding: edgeData.label ? ([4, 8] as [number, number]) : undefined,
               style: {
                 ...edge.style,
                 stroke: edgeData.stroke,
@@ -477,7 +501,9 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
                 ...node.data,
                 label: nodeData.label,
                 description: nodeData.description,
-                keywords: nodeData.keywords ? nodeData.keywords.split(',').map(k => k.trim()) : [],
+                keywords: nodeData.keywords
+                  ? nodeData.keywords.split(',').map((k) => k.trim())
+                  : [],
               },
             }
           }
@@ -490,10 +516,15 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
 
   const deleteNode = useCallback(() => {
     if (selectedNode) {
-      setNodes((nds: FlowNode[]) => nds.filter((node: FlowNode) => node.id !== selectedNode.id))
-      setEdges((eds: FlowEdge[]) => eds.filter((edge: FlowEdge) =>
-        edge.source !== selectedNode.id && edge.target !== selectedNode.id
-      ))
+      setNodes((nds: FlowNode[]) =>
+        nds.filter((node: FlowNode) => node.id !== selectedNode.id)
+      )
+      setEdges((eds: FlowEdge[]) =>
+        eds.filter(
+          (edge: FlowEdge) =>
+            edge.source !== selectedNode.id && edge.target !== selectedNode.id
+        )
+      )
       setSelectedNode(null)
       setEditMode(false)
     }
@@ -502,28 +533,36 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
   const saveWorkflow = useCallback(async () => {
     try {
       const workflow = {
-        nodes: nodes.map(node => ({
+        nodes: nodes.map((node) => ({
           id: node.id,
-          type: node.id.includes('q') ? 'question' :
-            node.id === 'start' ? 'entry' :
-              node.id.includes('qualified') || node.id.includes('nurture') ? 'outcome' : 'step',
+          type: node.id.includes('q')
+            ? 'question'
+            : node.id === 'start'
+              ? 'entry'
+              : node.id.includes('qualified') || node.id.includes('nurture')
+                ? 'outcome'
+                : 'step',
           position: node.position,
           data: {
             ...node.data,
             question: (node.data as unknown as NodeData).description,
-            weight: node.id.includes('q1') ? 30 :
-              node.id.includes('q2') ? 25 :
-                node.id.includes('q3') ? 20 : 25,
-          }
+            weight: node.id.includes('q1')
+              ? 30
+              : node.id.includes('q2')
+                ? 25
+                : node.id.includes('q3')
+                  ? 20
+                  : 25,
+          },
         })),
         edges,
-        qualificationThreshold: 70
+        qualificationThreshold: 70,
       }
 
       const response = await fetch('/api/workflow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workflow })
+        body: JSON.stringify({ workflow }),
       })
 
       if (!response.ok) {
@@ -531,7 +570,10 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
         throw new Error(errorData.details || errorData.error || 'Failed to save')
       }
 
-      setSaveStatus({ type: 'success', message: 'Workflow saved! The bot will now use these questions to qualify leads.' })
+      setSaveStatus({
+        type: 'success',
+        message: 'Workflow saved! The bot will now use these questions to qualify leads.',
+      })
       setTimeout(() => setSaveStatus({ type: null, message: '' }), 4000)
     } catch (error) {
       console.error('Error saving workflow:', error)
@@ -559,10 +601,31 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
       setEdgeData,
       saveStatus,
     })
-  }, [onControlsChange, addNode, deleteNode, deleteEdge, updateNode, updateEdge, saveWorkflow, selectedNode, selectedEdge, editMode, nodeData, edgeData, saveStatus])
+  }, [
+    onControlsChange,
+    addNode,
+    deleteNode,
+    deleteEdge,
+    updateNode,
+    updateEdge,
+    saveWorkflow,
+    selectedNode,
+    selectedEdge,
+    editMode,
+    nodeData,
+    edgeData,
+    saveStatus,
+  ])
 
   return (
-    <div style={{ width: '100%', height: 'calc(100vh + 20px)', position: 'relative', backgroundColor: 'var(--op-color-neutral-plus-six)' }}>
+    <div
+      style={{
+        width: '100%',
+        height: 'calc(100vh + 20px)',
+        position: 'relative',
+        backgroundColor: 'var(--op-color-neutral-plus-six)',
+      }}
+    >
       <Canvas
         defaultViewport={{ x: 20, y: 40, zoom: 1.3 }}
         colorMode="light"
@@ -580,7 +643,12 @@ export function WorkflowDesigner({ onControlsChange }: WorkflowDesignerProps) {
         minZoom={0.1}
         maxZoom={2}
       >
-        <Background variant={BackgroundVariant.Dots} color={'var(--op-color-border)'} gap={5} size={1} />
+        <Background
+          variant={BackgroundVariant.Dots}
+          color={'var(--op-color-border)'}
+          gap={5}
+          size={1}
+        />
         <Controls />
       </Canvas>
     </div>

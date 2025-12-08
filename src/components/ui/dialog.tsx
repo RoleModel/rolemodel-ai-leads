@@ -59,7 +59,6 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-
         className={cn('confirm-dialog', className)}
         {...props}
       >

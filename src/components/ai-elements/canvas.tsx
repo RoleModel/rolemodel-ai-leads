@@ -8,7 +8,7 @@ type CanvasProps = ReactFlowProps & {
   colormode?: 'light' | 'dark'
 }
 
-const defaultviewport: Viewport = { x: 10, y: 15, zoom: 5 };
+const defaultviewport: Viewport = { x: 10, y: 15, zoom: 5 }
 
 export const Canvas = ({ children, ...props }: CanvasProps) => (
   <ReactFlow
@@ -20,7 +20,6 @@ export const Canvas = ({ children, ...props }: CanvasProps) => (
     defaultViewport={defaultviewport}
     colorMode={props.colorMode}
     minZoom={0.1}
-
     {...props}
   >
     <Background bgColor="var(--sidebar)" />

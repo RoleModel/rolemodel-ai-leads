@@ -451,7 +451,8 @@ export default function DeployPage() {
             >
               <div
                 style={{
-                  background: 'linear-gradient(135deg, var(--orange-100) 0%, var(--orange-900) 50%)',
+                  background:
+                    'linear-gradient(135deg, var(--orange-100) 0%, var(--orange-900) 50%)',
                   padding: 'var(--op-space-x-large)',
                   display: 'flex',
                   alignItems: 'center',
@@ -563,10 +564,7 @@ export default function DeployPage() {
                   </p>
                 </div>
 
-                <Button
-                  variant="secondary"
-                  onClick={() => router.push('/deploy/intro')}
-                >
+                <Button variant="secondary" onClick={() => router.push('/deploy/intro')}>
                   <span>View Results</span>
                 </Button>
               </div>

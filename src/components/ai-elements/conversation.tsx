@@ -13,14 +13,12 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    style={
-      {
-        overscrollBehavior: 'contain',
-        position: 'relative',
-        flex: 1,
-        overflowY: 'hidden'
-      }
-    }
+    style={{
+      overscrollBehavior: 'contain',
+      position: 'relative',
+      flex: 1,
+      overflowY: 'hidden',
+    }}
     className={cn(className)}
     initial="smooth"
     resize="smooth"
@@ -67,33 +65,45 @@ export const ConversationEmptyState = ({
       padding: 'var(--op-space-medium)',
       textAlign: 'center',
     }}
-    className={cn(
-      'flex size-full flex-col items-center justify-center',
-      className
-    )}
+    className={cn('flex size-full flex-col items-center justify-center', className)}
     {...props}
   >
     {children ?? (
       <>
-        {icon && <div
-          style={{
-            color: 'var(--op-color-on-background)',
-          }}
-        >{icon}</div>}
+        {icon && (
+          <div
+            style={{
+              color: 'var(--op-color-on-background)',
+            }}
+          >
+            {icon}
+          </div>
+        )}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             gap: 'var(--op-space-small)',
-          }}>
-          <h3 style={{
-            fontWeight: 500,
-            fontSize: 'var(--op-font-small)',
-          }}>{title}</h3>
-          {description && <p style={{
-            color: 'var(--op-color-muted-foreground)',
-            fontSize: 'var(--op-font-small)',
-          }}>{description}</p>}
+          }}
+        >
+          <h3
+            style={{
+              fontWeight: 500,
+              fontSize: 'var(--op-font-small)',
+            }}
+          >
+            {title}
+          </h3>
+          {description && (
+            <p
+              style={{
+                color: 'var(--op-color-muted-foreground)',
+                fontSize: 'var(--op-font-small)',
+              }}
+            >
+              {description}
+            </p>
+          )}
         </div>
       </>
     )}

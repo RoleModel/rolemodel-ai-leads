@@ -1,8 +1,8 @@
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
-import type { Viewport } from 'next';
+import type { Viewport } from 'next'
 import { DM_Sans, Geist_Mono } from 'next/font/google'
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/next"
 
 import './globals.css'
 
@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://rolemodel-ai-leads.vercel.app'),
   openGraph: {
     title: 'A.I. Custom Software Analysis',
-    description: 'Get personalized insights about custom software for your business in minutes through an AI-powered conversation.',
+    description:
+      'Get personalized insights about custom software for your business in minutes through an AI-powered conversation.',
     url: 'https://rolemodel-ai-leads.vercel.app',
     siteName: 'RoleModel Software',
     images: [
@@ -40,7 +41,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'A.I. Custom Software Analysis',
-    description: 'Get personalized insights about custom software for your business in minutes.',
+    description:
+      'Get personalized insights about custom software for your business in minutes.',
     images: ['/og-image.png'],
   },
   robots: {
@@ -54,7 +56,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: '#021b20',
   viewportFit: 'cover',
-};
+}
 
 export default function RootLayout({
   children,

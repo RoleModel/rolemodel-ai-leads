@@ -1,6 +1,10 @@
 // Webhook configuration types
 
-export type WebhookEvent = 'lead.created' | 'lead.updated' | 'conversation.started' | 'conversation.completed'
+export type WebhookEvent =
+  | 'lead.created'
+  | 'lead.updated'
+  | 'conversation.started'
+  | 'conversation.completed'
 
 export interface Webhook {
   id: string

@@ -5,9 +5,9 @@ import {
   ArrowDown01Icon,
   Database01Icon,
   File01Icon,
+  GitCompareIcon,
   Globe02Icon,
   Message01Icon,
-  GitCompareIcon,
   QuestionIcon,
   Rocket01Icon,
   Settings02Icon,
@@ -91,135 +91,135 @@ export function NavigationSidebar() {
   return (
     <aside style={styles.navSidebar} className="sidebar" aria-label="Main navigation">
       <nav role="navigation" aria-label="Primary">
-      {navItems.map((item) => {
-        const ItemIcon = item.icon
-        const isActive = pathname.startsWith(item.href)
-        const isSourcesItem = item.href === '/sources'
-        const isActivityItem = item.href === '/activity'
+        {navItems.map((item) => {
+          const ItemIcon = item.icon
+          const isActive = pathname.startsWith(item.href)
+          const isSourcesItem = item.href === '/sources'
+          const isActivityItem = item.href === '/activity'
 
-        return (
-          <div key={item.href}>
-            {item.expandable ? (
-              <Button
-                variant="ghost"
-                width="full"
-                justify="start"
-                onClick={() => {
-                  if (isSourcesItem) setIsSourcesExpanded(!isSourcesExpanded)
-                  if (isActivityItem) setIsActivityExpanded(!isActivityExpanded)
-                }}
-                style={{
-                  ...styles.navItem,
-                  ...(isActive ? styles.navItemActive : {}),
-                  width: '100%',
-                  border: 'none',
-                  background: 'none',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <div
-                  className="flex items-center flex-grow-1"
-                  style={{ gap: 'var(--op-space-small)' }}
+          return (
+            <div key={item.href}>
+              {item.expandable ? (
+                <Button
+                  variant="ghost"
+                  width="full"
+                  justify="start"
+                  onClick={() => {
+                    if (isSourcesItem) setIsSourcesExpanded(!isSourcesExpanded)
+                    if (isActivityItem) setIsActivityExpanded(!isActivityExpanded)
+                  }}
+                  style={{
+                    ...styles.navItem,
+                    ...(isActive ? styles.navItemActive : {}),
+                    width: '100%',
+                    border: 'none',
+                    background: 'none',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div
+                    className="flex items-center flex-grow-1"
+                    style={{ gap: 'var(--op-space-small)' }}
+                  >
+                    <HugeiconsIcon icon={ItemIcon} size={20} />
+                    <span>{item.label}</span>
+                  </div>
+                  <HugeiconsIcon
+                    icon={ArrowDown01Icon}
+                    size={20}
+                    style={{
+                      transform:
+                        (isSourcesItem && isSourcesExpanded) ||
+                        (isActivityItem && isActivityExpanded)
+                          ? 'rotate(0deg)'
+                          : 'rotate(-90deg)',
+                      transition: 'transform 0.2s',
+                    }}
+                  />
+                </Button>
+              ) : (
+                <Link
+                  href={item.href}
+                  style={{
+                    ...styles.navItem,
+                    ...(isActive ? styles.navItemActive : {}),
+                  }}
                 >
                   <HugeiconsIcon icon={ItemIcon} size={20} />
                   <span>{item.label}</span>
+                </Link>
+              )}
+
+              {/* Activity Sub-items */}
+              {isActivityItem && isActivityExpanded && (
+                <div style={{ paddingLeft: 'var(--op-space-medium)' }}>
+                  {activitySubItems.map((subItem) => {
+                    const SubIcon = subItem.icon
+                    const isSubActive = pathname === subItem.href
+
+                    return (
+                      <Link
+                        key={subItem.href}
+                        href={subItem.href}
+                        style={{
+                          ...styles.navItem,
+                          padding: '6px var(--op-space-medium)',
+                          borderLeft: '1px solid',
+                          borderColor: 'var(--op-color-border)',
+                          fontSize: '13px',
+                          ...(isSubActive
+                            ? {
+                                color: 'var(--op-color-primary-base)',
+                                borderColor: 'var(--op-color-primary-base)',
+                                fontWeight: 500,
+                              }
+                            : {}),
+                        }}
+                      >
+                        <HugeiconsIcon icon={SubIcon} size={20} />
+                        <span>{subItem.label}</span>
+                      </Link>
+                    )
+                  })}
                 </div>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  size={20}
-                  style={{
-                    transform:
-                      (isSourcesItem && isSourcesExpanded) ||
-                        (isActivityItem && isActivityExpanded)
-                        ? 'rotate(0deg)'
-                        : 'rotate(-90deg)',
-                    transition: 'transform 0.2s',
-                  }}
-                />
-              </Button>
-            ) : (
-              <Link
-                href={item.href}
-                style={{
-                  ...styles.navItem,
-                  ...(isActive ? styles.navItemActive : {}),
-                }}
-              >
-                <HugeiconsIcon icon={ItemIcon} size={20} />
-                <span>{item.label}</span>
-              </Link>
-            )}
+              )}
 
-            {/* Activity Sub-items */}
-            {isActivityItem && isActivityExpanded && (
-              <div style={{ paddingLeft: 'var(--op-space-medium)' }}>
-                {activitySubItems.map((subItem) => {
-                  const SubIcon = subItem.icon
-                  const isSubActive = pathname === subItem.href
+              {/* Sources Sub-items */}
+              {isSourcesItem && isSourcesExpanded && (
+                <div style={{ paddingLeft: 'var(--op-space-medium)' }}>
+                  {sourcesSubItems.map((subItem) => {
+                    const SubIcon = subItem.icon
+                    const isSubActive = isActive && activeSection === subItem.id
 
-                  return (
-                    <Link
-                      key={subItem.href}
-                      href={subItem.href}
-                      style={{
-                        ...styles.navItem,
-                        padding: '6px var(--op-space-medium)',
-                        borderLeft: '1px solid',
-                        borderColor: 'var(--op-color-border)',
-                        fontSize: '13px',
-                        ...(isSubActive
-                          ? {
-                            color: 'var(--op-color-primary-base)',
-                            borderColor: 'var(--op-color-primary-base)',
-                            fontWeight: 500,
-                          }
-                          : {}),
-                      }}
-                    >
-                      <HugeiconsIcon icon={SubIcon} size={20} />
-                      <span>{subItem.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Sources Sub-items */}
-            {isSourcesItem && isSourcesExpanded && (
-              <div style={{ paddingLeft: 'var(--op-space-medium)' }}>
-                {sourcesSubItems.map((subItem) => {
-                  const SubIcon = subItem.icon
-                  const isSubActive = isActive && activeSection === subItem.id
-
-                  return (
-                    <Link
-                      key={subItem.id}
-                      href={`/sources?section=${subItem.id}`}
-                      style={{
-                        ...styles.navItem,
-                        padding: '6px var(--op-space-medium)',
-                        borderLeft: '1px solid',
-                        borderColor: 'var(--op-color-border)',
-                        fontSize: '13px',
-                        ...(isSubActive
-                          ? {
-                            color: 'var(--op-color-primary-base)',
-                            borderColor: 'var(--op-color-primary-base)',
-                            fontWeight: 500,
-                          }
-                          : {}),
-                      }}
-                    >
-                      <HugeiconsIcon icon={SubIcon} size={20} />
-                      <span>{subItem.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )
-      })}
+                    return (
+                      <Link
+                        key={subItem.id}
+                        href={`/sources?section=${subItem.id}`}
+                        style={{
+                          ...styles.navItem,
+                          padding: '6px var(--op-space-medium)',
+                          borderLeft: '1px solid',
+                          borderColor: 'var(--op-color-border)',
+                          fontSize: '13px',
+                          ...(isSubActive
+                            ? {
+                                color: 'var(--op-color-primary-base)',
+                                borderColor: 'var(--op-color-primary-base)',
+                                fontWeight: 500,
+                              }
+                            : {}),
+                        }}
+                      >
+                        <HugeiconsIcon icon={SubIcon} size={20} />
+                        <span>{subItem.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </nav>
     </aside>
   )

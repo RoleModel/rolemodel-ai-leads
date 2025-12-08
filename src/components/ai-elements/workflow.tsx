@@ -1,9 +1,10 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import { CheckIcon, ClockIcon, Loader2Icon, type LucideIcon } from 'lucide-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { createContext, memo, useContext, useMemo } from 'react'
+
+import { cn } from '@/lib/utils'
 
 type WorkflowStatus = 'pending' | 'active' | 'complete' | 'error'
 
@@ -110,9 +111,10 @@ export const WorkflowNode = memo(
             width: '32px',
             height: '32px',
             borderRadius: 'var(--op-radius-medium)',
-            backgroundColor: status === 'active' || status === 'complete'
-              ? getStatusColor()
-              : 'var(--op-color-neutral-plus-six)',
+            backgroundColor:
+              status === 'active' || status === 'complete'
+                ? getStatusColor()
+                : 'var(--op-color-neutral-plus-six)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -121,16 +123,14 @@ export const WorkflowNode = memo(
         >
           {StatusIcon && (
             <StatusIcon
-              className={cn(
-                'h-4 w-4',
-                status === 'active' && 'animate-spin'
-              )}
+              className={cn('h-4 w-4', status === 'active' && 'animate-spin')}
               style={{
                 width: '16px',
                 height: '16px',
-                color: status === 'active' || status === 'complete'
-                  ? 'white'
-                  : getStatusColor(),
+                color:
+                  status === 'active' || status === 'complete'
+                    ? 'white'
+                    : getStatusColor(),
               }}
             />
           )}

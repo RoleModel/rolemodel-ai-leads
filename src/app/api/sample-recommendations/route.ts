@@ -31,9 +31,8 @@ export async function GET(req: NextRequest) {
     // Generate a brief description from the content (first ~150 chars)
     // and decode HTML entities
     const content = decodeHtmlEntities(source.content || '')
-    const description = content.length > 150
-      ? content.substring(0, 150).trim() + '...'
-      : content
+    const description =
+      content.length > 150 ? content.substring(0, 150).trim() + '...' : content
 
     return {
       title: decodeHtmlEntities(source.title || 'Resource'),

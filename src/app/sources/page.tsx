@@ -1,23 +1,23 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
 import {
   Add01Icon,
+  ArrowUp01Icon,
   Delete02Icon,
   Globe02Icon,
-  RefreshIcon,
-  Upload01Icon,
-  SidebarRight01Icon,
-  ArrowUp01Icon,
   Link01Icon,
+  RefreshIcon,
+  SidebarRight01Icon,
+  Upload01Icon,
 } from 'hugeicons-react'
-import { CheckIcon, AlertCircleIcon } from 'lucide-react'
+import { AlertCircleIcon, CheckIcon } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
 
+import type { WorkflowControls } from '@/components/admin/WorkflowDesigner'
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
-import type { WorkflowControls } from '@/components/admin/WorkflowDesigner'
 import { Button } from '@/components/ui/button'
 
 // Dynamically import WorkflowDesigner to avoid SSR issues with ReactFlow
@@ -25,7 +25,6 @@ const WorkflowDesigner = dynamic(
   () => import('@/components/admin/WorkflowDesigner').then((mod) => mod.WorkflowDesigner),
   { ssr: false, loading: () => <div>Loading workflow designer...</div> }
 )
-
 
 interface Source {
   id: string
@@ -64,7 +63,7 @@ export default function SourcesPage() {
   } | null>(null)
 
   const toggleSourceExpanded = (id: string) => {
-    setExpandedSources(prev => {
+    setExpandedSources((prev) => {
       const next = new Set(prev)
       if (next.has(id)) {
         next.delete(id)
@@ -231,10 +230,7 @@ export default function SourcesPage() {
   function getSectionType(
     section: SourceType
   ): 'file' | 'text' | 'website' | 'qna' | null {
-    const typeMap: Record<
-      SourceType,
-      'file' | 'text' | 'website' | 'qna' | null
-    > = {
+    const typeMap: Record<SourceType, 'file' | 'text' | 'website' | 'qna' | null> = {
       files: 'file',
       text: 'text',
       website: 'website',
@@ -245,12 +241,13 @@ export default function SourcesPage() {
   }
 
   // Filter sources by type metadata
-  const filteredSources = activeSection === 'workflow'
-    ? [] // No sources to show for workflow section
-    : sources.filter((s) => {
-      // Only show sources that have the matching type
-      return s.metadata?.type === getSectionType(activeSection)
-    })
+  const filteredSources =
+    activeSection === 'workflow'
+      ? [] // No sources to show for workflow section
+      : sources.filter((s) => {
+          // Only show sources that have the matching type
+          return s.metadata?.type === getSectionType(activeSection)
+        })
   console.log('[Sources Page] Active section:', activeSection)
   console.log('[Sources Page] Looking for type:', getSectionType(activeSection))
   console.log('[Sources Page] Filtered sources:', filteredSources.length)
@@ -316,15 +313,17 @@ export default function SourcesPage() {
             {/* Show WorkflowDesigner for workflow section */}
             {activeSection === 'workflow' ? (
               <>
-                <div style={{
-                  // marginBottom: 'var(--op-space-large)',
-                  borderBottom: '1px solid',
-                  borderColor: 'var(--op-color-border)',
-                  padding: 'var(--op-space-large)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}>
+                <div
+                  style={{
+                    // marginBottom: 'var(--op-space-large)',
+                    borderBottom: '1px solid',
+                    borderColor: 'var(--op-color-border)',
+                    padding: 'var(--op-space-large)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <div>
                     <h1
                       style={{
@@ -342,7 +341,8 @@ export default function SourcesPage() {
                         margin: 'var(--op-space-2x-small) 0 0 0',
                       }}
                     >
-                      Configure questions and scoring criteria to automatically qualify leads.
+                      Configure questions and scoring criteria to automatically qualify
+                      leads.
                     </p>
                   </div>
                   <button
@@ -364,12 +364,14 @@ export default function SourcesPage() {
               </>
             ) : (
               <>
-                <div style={{
-                  // marginBottom: 'var(--op-space-large)',
-                  borderBottom: '1px solid',
-                  borderColor: 'var(--op-color-border)',
-                  padding: 'var(--op-space-large)'
-                }}>
+                <div
+                  style={{
+                    // marginBottom: 'var(--op-space-large)',
+                    borderBottom: '1px solid',
+                    borderColor: 'var(--op-color-border)',
+                    padding: 'var(--op-space-large)',
+                  }}
+                >
                   <h1
                     style={{
                       fontSize: 'var(--op-font-x-large)',
@@ -401,19 +403,20 @@ export default function SourcesPage() {
                 {/* File Upload Section */}
                 {activeSection === 'files' && (
                   <div style={{ padding: 'var(--op-space-medium)' }}>
-                    <div className="card" style={{
-                      marginBottom: 'var(--op-space-large)',
-                      borderBottom: '1px solid',
-                      borderColor: 'var(--op-color-border)',
-                    }}>
+                    <div
+                      className="card"
+                      style={{
+                        marginBottom: 'var(--op-space-large)',
+                        borderBottom: '1px solid',
+                        borderColor: 'var(--op-color-border)',
+                      }}
+                    >
                       <div className="card-header">
                         <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                           Add files
                         </h2>
                       </div>
                       <div className="card-body">
-
-
                         {/* Drag & Drop Area */}
                         <div
                           onDragEnter={handleDragEnter}
@@ -476,9 +479,12 @@ export default function SourcesPage() {
                 {/* Text/Other Content Section */}
                 {activeSection !== 'files' && (
                   <div style={{ padding: 'var(--op-space-medium)' }}>
-                    <div className="card" style={{
-                      marginBottom: 'var(--op-space-large)'
-                    }}>
+                    <div
+                      className="card"
+                      style={{
+                        marginBottom: 'var(--op-space-large)',
+                      }}
+                    >
                       <div className="card-header">
                         <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                           Add New{' '}
@@ -562,15 +568,25 @@ export default function SourcesPage() {
 
                     {/* Framer Sync Card - Website section only */}
                     {activeSection === 'website' && (
-                      <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
+                      <div
+                        className="card"
+                        style={{ marginBottom: 'var(--op-space-large)' }}
+                      >
                         <div className="card-header">
                           <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                             Sync from Framer
                           </h2>
                         </div>
                         <div className="card-body">
-                          <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)', marginBottom: 'var(--op-space-medium)' }}>
-                            Automatically import all case studies, blog posts, and pages from your Framer website.
+                          <p
+                            style={{
+                              fontSize: 'var(--op-font-small)',
+                              color: 'var(--op-color-neutral-on-plus-max)',
+                              marginBottom: 'var(--op-space-medium)',
+                            }}
+                          >
+                            Automatically import all case studies, blog posts, and pages
+                            from your Framer website.
                           </p>
 
                           {framerSyncResult && (
@@ -583,17 +599,31 @@ export default function SourcesPage() {
                                 backgroundColor: framerSyncResult.success
                                   ? 'var(--op-color-success-background)'
                                   : 'var(--op-color-error-background)',
-                                border: `1px solid ${framerSyncResult.success
-                                  ? 'var(--op-color-success-border)'
-                                  : 'var(--op-color-error-border)'}`,
+                                border: `1px solid ${
+                                  framerSyncResult.success
+                                    ? 'var(--op-color-success-border)'
+                                    : 'var(--op-color-error-border)'
+                                }`,
                                 borderRadius: 'var(--op-radius-small)',
                                 marginBottom: 'var(--op-space-medium)',
                               }}
                             >
                               {framerSyncResult.success ? (
-                                <CheckIcon className="icon-sm" style={{ color: 'var(--op-color-success)', flexShrink: 0 }} />
+                                <CheckIcon
+                                  className="icon-sm"
+                                  style={{
+                                    color: 'var(--op-color-success)',
+                                    flexShrink: 0,
+                                  }}
+                                />
                               ) : (
-                                <AlertCircleIcon className="icon-sm" style={{ color: 'var(--op-color-error)', flexShrink: 0 }} />
+                                <AlertCircleIcon
+                                  className="icon-sm"
+                                  style={{
+                                    color: 'var(--op-color-error)',
+                                    flexShrink: 0,
+                                  }}
+                                />
                               )}
                               <span
                                 style={{
@@ -614,7 +644,14 @@ export default function SourcesPage() {
                             disabled={isSyncingFramer}
                             style={{ alignSelf: 'flex-start' }}
                           >
-                            <RefreshIcon className="icon-sm" style={{ animation: isSyncingFramer ? 'spin 1s linear infinite' : 'none' }} />
+                            <RefreshIcon
+                              className="icon-sm"
+                              style={{
+                                animation: isSyncingFramer
+                                  ? 'spin 1s linear infinite'
+                                  : 'none',
+                              }}
+                            />
                             {isSyncingFramer ? 'Syncing...' : 'Sync from Framer'}
                           </button>
                         </div>
@@ -636,7 +673,9 @@ export default function SourcesPage() {
                   </h2>
 
                   {isLoading ? (
-                    <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>Loading...</p>
+                    <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+                      Loading...
+                    </p>
                   ) : filteredSources.length === 0 ? (
                     <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
                       No sources yet. Add your first source above to get started.
@@ -661,26 +700,45 @@ export default function SourcesPage() {
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 cursor: 'pointer',
-                                borderBottom: isExpanded ? '1px solid var(--op-color-border)' : 'none',
+                                borderBottom: isExpanded
+                                  ? '1px solid var(--op-color-border)'
+                                  : 'none',
                               }}
                               onClick={() => toggleSourceExpanded(source.id)}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)', flex: 1, minWidth: 0 }}>
-
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 'var(--op-space-small)',
+                                  flex: 1,
+                                  minWidth: 0,
+                                }}
+                              >
                                 <ArrowUp01Icon
                                   className="icon-sm"
                                   style={{
                                     flexShrink: 0,
                                     color: 'var(--op-color-neutral-on-plus-max)',
                                     transition: 'transform 0.2s ease-in-out',
-                                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                                  }} />
+                                    transform: isExpanded
+                                      ? 'rotate(180deg)'
+                                      : 'rotate(0deg)',
+                                  }}
+                                />
 
-                                <h3 style={{ fontSize: 'var(--op-font-medium)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <h3
+                                  style={{
+                                    fontSize: 'var(--op-font-medium)',
+                                    margin: 0,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
                                   {source.title || 'Untitled Source'}
                                 </h3>
                               </div>
-
                             </div>
 
                             {/* URL display */}
@@ -690,7 +748,9 @@ export default function SourcesPage() {
                                   display: isExpanded ? 'block' : 'none',
                                   padding: 'var(--op-space-medium)',
                                   // paddingBottom: 'var(--op-space-small)',
-                                  borderBottom: isExpanded ? '1px solid var(--op-color-border)' : 'none',
+                                  borderBottom: isExpanded
+                                    ? '1px solid var(--op-color-border)'
+                                    : 'none',
                                 }}
                               >
                                 <a
@@ -711,7 +771,13 @@ export default function SourcesPage() {
                                     whiteSpace: 'nowrap',
                                   }}
                                 >
-                                  <Link01Icon style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+                                  <Link01Icon
+                                    style={{
+                                      width: '12px',
+                                      height: '12px',
+                                      flexShrink: 0,
+                                    }}
+                                  />
                                   {source.metadata.url}
                                 </a>
                               </div>
@@ -748,7 +814,6 @@ export default function SourcesPage() {
                                 backgroundColor: 'var(--op-color-neutral-plus-eight)',
                               }}
                             >
-
                               <p
                                 style={{
                                   fontSize: 'var(--op-font-small)',
@@ -756,9 +821,10 @@ export default function SourcesPage() {
                                   margin: 0,
                                 }}
                               >
-                                Added {new Date(source.created_at).toLocaleDateString()}{"  "}  |  {" "}
-                                {source.content.length.toLocaleString()} chars
-                                {source.metadata?.size && ` · ${(source.metadata.size / 1024).toFixed(1)} KB`}
+                                Added {new Date(source.created_at).toLocaleDateString()}
+                                {'  '} | {source.content.length.toLocaleString()} chars
+                                {source.metadata?.size &&
+                                  ` · ${(source.metadata.size / 1024).toFixed(1)} KB`}
                               </p>
                               <button
                                 className="btn btn--destructive btn--small btn--icon"
@@ -795,7 +861,8 @@ export default function SourcesPage() {
               gap: 'var(--op-space-large)',
               backgroundColor: 'var(--op-color-background)',
               overflow: 'hidden',
-              transition: 'width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, border 0.3s ease',
+              transition:
+                'width 0.3s ease, min-width 0.3s ease, padding 0.3s ease, border 0.3s ease',
             }}
           >
             {activeSection === 'workflow' && workflowControls ? (
@@ -817,27 +884,37 @@ export default function SourcesPage() {
                       alignItems: 'center',
                       gap: 'var(--op-space-small)',
                       padding: 'var(--op-space-medium)',
-                      backgroundColor: workflowControls.saveStatus.type === 'success'
-                        ? 'var(--op-color-success-background)'
-                        : 'var(--op-color-error-background)',
-                      border: `1px solid ${workflowControls.saveStatus.type === 'success'
-                        ? 'var(--op-color-success-border)'
-                        : 'var(--op-color-error-border)'}`,
+                      backgroundColor:
+                        workflowControls.saveStatus.type === 'success'
+                          ? 'var(--op-color-success-background)'
+                          : 'var(--op-color-error-background)',
+                      border: `1px solid ${
+                        workflowControls.saveStatus.type === 'success'
+                          ? 'var(--op-color-success-border)'
+                          : 'var(--op-color-error-border)'
+                      }`,
                       borderRadius: 'var(--op-radius-small)',
                       marginBottom: 'var(--op-space-medium)',
                     }}
                   >
                     {workflowControls.saveStatus.type === 'success' ? (
-                      <CheckIcon className="icon-sm" style={{ color: 'var(--op-color-success)', flexShrink: 0 }} />
+                      <CheckIcon
+                        className="icon-sm"
+                        style={{ color: 'var(--op-color-success)', flexShrink: 0 }}
+                      />
                     ) : (
-                      <AlertCircleIcon className="icon-sm" style={{ color: 'var(--op-color-error)', flexShrink: 0 }} />
+                      <AlertCircleIcon
+                        className="icon-sm"
+                        style={{ color: 'var(--op-color-error)', flexShrink: 0 }}
+                      />
                     )}
                     <span
                       style={{
                         fontSize: 'var(--op-font-small)',
-                        color: workflowControls.saveStatus.type === 'success'
-                          ? 'var(--op-color-success)'
-                          : 'var(--op-color-error)',
+                        color:
+                          workflowControls.saveStatus.type === 'success'
+                            ? 'var(--op-color-success)'
+                            : 'var(--op-color-error)',
                       }}
                     >
                       {workflowControls.saveStatus.message}
@@ -845,7 +922,14 @@ export default function SourcesPage() {
                   </div>
                 )}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-small)', marginBottom: 'var(--op-space-large)' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--op-space-small)',
+                    marginBottom: 'var(--op-space-large)',
+                  }}
+                >
                   <Button
                     variant="secondary"
                     style={{ width: '100%' }}
@@ -888,7 +972,12 @@ export default function SourcesPage() {
                 </div>
 
                 {workflowControls.editMode && workflowControls.selectedNode && (
-                  <div style={{ borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)' }}>
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--op-color-border)',
+                      paddingTop: 'var(--op-space-medium)',
+                    }}
+                  >
                     <h4
                       style={{
                         fontSize: 'var(--op-font-small)',
@@ -900,32 +989,62 @@ export default function SourcesPage() {
                     </h4>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Step Name</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Step Name
+                      </label>
                       <input
                         className="form-control"
                         placeholder="Step name"
                         value={workflowControls.nodeData.label}
-                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, label: e.target.value })}
+                        onChange={(e) =>
+                          workflowControls.setNodeData({
+                            ...workflowControls.nodeData,
+                            label: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Question/Description</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Question/Description
+                      </label>
                       <input
                         className="form-control"
                         placeholder="Description"
                         value={workflowControls.nodeData.description}
-                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, description: e.target.value })}
+                        onChange={(e) =>
+                          workflowControls.setNodeData({
+                            ...workflowControls.nodeData,
+                            description: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Keywords (comma-separated)</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Keywords (comma-separated)
+                      </label>
                       <input
                         className="form-control"
                         placeholder="keyword1, keyword2"
                         value={workflowControls.nodeData.keywords}
-                        onChange={(e) => workflowControls.setNodeData({ ...workflowControls.nodeData, keywords: e.target.value })}
+                        onChange={(e) =>
+                          workflowControls.setNodeData({
+                            ...workflowControls.nodeData,
+                            keywords: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
@@ -940,7 +1059,12 @@ export default function SourcesPage() {
                 )}
 
                 {workflowControls.selectedEdge && (
-                  <div style={{ borderTop: '1px solid var(--op-color-border)', paddingTop: 'var(--op-space-medium)' }}>
+                  <div
+                    style={{
+                      borderTop: '1px solid var(--op-color-border)',
+                      paddingTop: 'var(--op-space-medium)',
+                    }}
+                  >
                     <h4
                       style={{
                         fontSize: 'var(--op-font-small)',
@@ -952,26 +1076,52 @@ export default function SourcesPage() {
                     </h4>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Label</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Label
+                      </label>
                       <input
                         className="form-control"
                         placeholder="Connection label"
                         value={workflowControls.edgeData.label}
-                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, label: e.target.value })}
+                        onChange={(e) =>
+                          workflowControls.setEdgeData({
+                            ...workflowControls.edgeData,
+                            label: e.target.value,
+                          })
+                        }
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Color</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Color
+                      </label>
                       <select
                         className="form-control"
                         value={workflowControls.edgeData.stroke}
-                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, stroke: e.target.value })}
+                        onChange={(e) =>
+                          workflowControls.setEdgeData({
+                            ...workflowControls.edgeData,
+                            stroke: e.target.value,
+                          })
+                        }
                       >
                         <option value="var(--op-color-primary-base)">Primary</option>
-                        <option value="var(--op-color-alerts-notice-plus-one)">Notice (Green)</option>
-                        <option value="var(--op-color-alerts-warning-plus-one)">Warning (Yellow)</option>
-                        <option value="var(--op-color-alerts-danger-plus-one)">Danger (Red)</option>
+                        <option value="var(--op-color-alerts-notice-plus-one)">
+                          Notice (Green)
+                        </option>
+                        <option value="var(--op-color-alerts-warning-plus-one)">
+                          Warning (Yellow)
+                        </option>
+                        <option value="var(--op-color-alerts-danger-plus-one)">
+                          Danger (Red)
+                        </option>
                         <option value="var(--purple)">Purple</option>
                         <option value="var(--orange)">Orange</option>
                         <option value="var(--light-green)">Light Green</option>
@@ -981,23 +1131,47 @@ export default function SourcesPage() {
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Stroke Width</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Stroke Width
+                      </label>
                       <input
                         className="form-control"
                         type="number"
                         min="1"
                         max="5"
                         value={workflowControls.edgeData.strokeWidth}
-                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, strokeWidth: Number(e.target.value) })}
+                        onChange={(e) =>
+                          workflowControls.setEdgeData({
+                            ...workflowControls.edgeData,
+                            strokeWidth: Number(e.target.value),
+                          })
+                        }
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label" style={{ fontSize: 'var(--op-font-x-small)' }}>Line Style</label>
+                      <label
+                        className="form-label"
+                        style={{ fontSize: 'var(--op-font-x-small)' }}
+                      >
+                        Line Style
+                      </label>
                       <select
                         className="form-control"
                         value={workflowControls.edgeData.lineStyle}
-                        onChange={(e) => workflowControls.setEdgeData({ ...workflowControls.edgeData, lineStyle: e.target.value as 'solid' | 'dashed' | 'dotted' | 'animated' })}
+                        onChange={(e) =>
+                          workflowControls.setEdgeData({
+                            ...workflowControls.edgeData,
+                            lineStyle: e.target.value as
+                              | 'solid'
+                              | 'dashed'
+                              | 'dotted'
+                              | 'animated',
+                          })
+                        }
                       >
                         <option value="solid">Solid</option>
                         <option value="dashed">Dashed</option>

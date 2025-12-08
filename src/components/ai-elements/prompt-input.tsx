@@ -19,7 +19,6 @@ import {
   type ComponentProps,
   type FormEvent,
   type FormEventHandler,
-  forwardRef,
   Fragment,
   type HTMLAttributes,
   type KeyboardEventHandler,
@@ -27,6 +26,7 @@ import {
   type ReactNode,
   type RefObject,
   createContext,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -142,7 +142,7 @@ export function PromptInputProvider({
   // ----- attachments state (global when wrapped)
   const [attachements, setAttachements] = useState<(FileUIPart & { id: string })[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const openRef = useRef<() => void>(() => { })
+  const openRef = useRef<() => void>(() => {})
 
   const add = useCallback((files: File[] | FileList) => {
     const incoming = Array.from(files)
@@ -678,9 +678,9 @@ export const PromptInput = ({
       usingProvider && controller
         ? controller.textInput.value
         : (() => {
-          const formData = new FormData(form)
-          return (formData.get('message') as string) || ''
-        })()
+            const formData = new FormData(form)
+            return (formData.get('message') as string) || ''
+          })()
 
     // Reset form/input immediately after capturing text to provide instant feedback
     if (usingProvider && controller) {
@@ -740,7 +740,12 @@ export const PromptInput = ({
           type="file"
         />
       )}
-      <form className={className} style={{ width: '100%' }} onSubmit={handleSubmit} {...props}>
+      <form
+        className={className}
+        style={{ width: '100%' }}
+        onSubmit={handleSubmit}
+        {...props}
+      >
         <InputGroup direction="column" style={{ overflow: 'visible' }}>
           {children}
         </InputGroup>
@@ -837,15 +842,15 @@ export const PromptInputTextarea = ({
 
   const controlledProps = controller
     ? {
-      value: controller.textInput.value,
-      onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
-        controller.textInput.setInput(e.currentTarget.value)
-        onChange?.(e)
-      },
-    }
+        value: controller.textInput.value,
+        onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
+          controller.textInput.setInput(e.currentTarget.value)
+          onChange?.(e)
+        },
+      }
     : {
-      onChange,
-    }
+        onChange,
+      }
 
   return (
     <InputGroupTextarea
@@ -896,7 +901,11 @@ export const PromptInputFooter = ({
 
 export type PromptInputToolsProps = HTMLAttributes<HTMLDivElement>
 
-export const PromptInputTools = ({ className, style, ...props }: PromptInputToolsProps) => (
+export const PromptInputTools = ({
+  className,
+  style,
+  ...props
+}: PromptInputToolsProps) => (
   <div
     className={className}
     style={{
@@ -956,7 +965,12 @@ export const PromptInputActionMenuContent = ({
   ...props
 }: PromptInputActionMenuContentProps) => (
   // container={null} disables portal to fix positioning when inside transformed elements
-  <DropdownMenuContent align="start" container={null} className={cn(className)} {...props} />
+  <DropdownMenuContent
+    align="start"
+    container={null}
+    className={cn(className)}
+    {...props}
+  />
 )
 
 export type PromptInputActionMenuItemProps = ComponentProps<typeof DropdownMenuItem>
@@ -1048,10 +1062,10 @@ interface SpeechRecognitionErrorEvent extends Event {
 declare global {
   interface Window {
     SpeechRecognition: {
-      new(): SpeechRecognition
+      new (): SpeechRecognition
     }
     webkitSpeechRecognition: {
-      new(): SpeechRecognition
+      new (): SpeechRecognition
     }
   }
 }
@@ -1071,11 +1085,11 @@ export const PromptInputSpeechButton = ({
   const recognitionRef = useRef<SpeechRecognition | null>(null)
 
   const recognitionSupported = useSyncExternalStore(
-    () => () => { },
+    () => () => {},
     () =>
       Boolean(
         typeof window !== 'undefined' &&
-        (window.SpeechRecognition || window.webkitSpeechRecognition)
+          (window.SpeechRecognition || window.webkitSpeechRecognition)
       ),
     () => false
   )

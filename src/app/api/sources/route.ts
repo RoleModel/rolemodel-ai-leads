@@ -112,7 +112,10 @@ export async function POST(req: NextRequest) {
           workingHtml = workingHtml.replace(/<aside\b[^>]*>[\s\S]*?<\/aside>/gi, '')
 
           // Remove common navigation/menu class patterns
-          workingHtml = workingHtml.replace(/<[^>]+(class|id)="[^"]*\b(nav|menu|sidebar|footer|header|breadcrumb|cookie|banner|popup|modal|advertisement|social-share)[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi, '')
+          workingHtml = workingHtml.replace(
+            /<[^>]+(class|id)="[^"]*\b(nav|menu|sidebar|footer|header|breadcrumb|cookie|banner|popup|modal|advertisement|social-share)[^"]*"[^>]*>[\s\S]*?<\/[^>]+>/gi,
+            ''
+          )
 
           // Try to extract content from semantic elements first
           let mainContent = ''
@@ -125,7 +128,9 @@ export async function POST(req: NextRequest) {
 
           // Priority 2: Look for <article> content
           if (!mainContent) {
-            const articleMatch = workingHtml.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i)
+            const articleMatch = workingHtml.match(
+              /<article\b[^>]*>([\s\S]*?)<\/article>/i
+            )
             if (articleMatch && articleMatch[1]) {
               mainContent = articleMatch[1]
             }
@@ -155,8 +160,12 @@ export async function POST(req: NextRequest) {
           let textContent = mainContent.replace(/<[^>]+>/g, ' ')
 
           // Decode HTML entities
-          textContent = textContent.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
-          textContent = textContent.replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
+          textContent = textContent.replace(/&#(\d+);/g, (_, code) =>
+            String.fromCharCode(parseInt(code, 10))
+          )
+          textContent = textContent.replace(/&#x([0-9a-fA-F]+);/g, (_, code) =>
+            String.fromCharCode(parseInt(code, 16))
+          )
           textContent = textContent.replace(/&nbsp;/g, ' ')
           textContent = textContent.replace(/&amp;/g, '&')
           textContent = textContent.replace(/&lt;/g, '<')
@@ -181,7 +190,9 @@ export async function POST(req: NextRequest) {
             // Try to extract title from HTML if not provided
             if (!finalTitle) {
               // First try og:title meta tag (often cleaner)
-              const ogTitleMatch = html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i)
+              const ogTitleMatch = html.match(
+                /<meta[^>]+property="og:title"[^>]+content="([^"]+)"/i
+              )
               if (ogTitleMatch && ogTitleMatch[1]) {
                 finalTitle = ogTitleMatch[1].trim()
               } else {
@@ -203,8 +214,12 @@ export async function POST(req: NextRequest) {
             }
 
             // Also try to get meta description for better context
-            const metaDescMatch = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/i)
-            const ogDescMatch = html.match(/<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i)
+            const metaDescMatch = html.match(
+              /<meta[^>]+name="description"[^>]+content="([^"]+)"/i
+            )
+            const ogDescMatch = html.match(
+              /<meta[^>]+property="og:description"[^>]+content="([^"]+)"/i
+            )
             const metaDescription = ogDescMatch?.[1] || metaDescMatch?.[1]
 
             if (metaDescription && metaDescription.length > 50) {

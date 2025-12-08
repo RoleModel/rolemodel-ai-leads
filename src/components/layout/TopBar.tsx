@@ -1,6 +1,10 @@
 'use client'
 
-import { ArrowDown01Icon, PlusSignIcon, Search01Icon } from '@hugeicons-pro/core-stroke-standard'
+import {
+  ArrowDown01Icon,
+  PlusSignIcon,
+  Search01Icon,
+} from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useEffect, useState } from 'react'
 
@@ -171,7 +175,12 @@ export function TopBar() {
   }
 
   return (
-    <header style={styles.topBar} className="app__header" role="banner" aria-label="Application header">
+    <header
+      style={styles.topBar}
+      className="app__header"
+      role="banner"
+      aria-label="Application header"
+    >
       <div style={styles.logoBlock}>R</div>
 
       <div style={styles.breadcrumbItem}>
@@ -223,7 +232,6 @@ export function TopBar() {
                   )}
                 </Button>
               ))}
-
 
               <Button
                 variant="primary"

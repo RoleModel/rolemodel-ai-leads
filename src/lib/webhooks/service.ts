@@ -33,7 +33,8 @@ async function deliverWebhook(
 
   // Add signature if secret is configured
   if (webhook.secret) {
-    headers['X-Webhook-Signature'] = `sha256=${generateSignature(payloadString, webhook.secret)}`
+    headers['X-Webhook-Signature'] =
+      `sha256=${generateSignature(payloadString, webhook.secret)}`
   }
 
   try {
@@ -58,7 +59,9 @@ async function deliverWebhook(
 }
 
 // Get all webhooks for a chatbot
-export async function getWebhooks(chatbotId: string = DEFAULT_CHATBOT_ID): Promise<Webhook[]> {
+export async function getWebhooks(
+  chatbotId: string = DEFAULT_CHATBOT_ID
+): Promise<Webhook[]> {
   const { data, error } = await supabaseServer
     .from('webhooks')
     .select('*')
@@ -117,7 +120,10 @@ export async function createWebhook(
 }
 
 // Update an existing webhook
-export async function updateWebhook(id: string, input: Partial<WebhookInput>): Promise<Webhook> {
+export async function updateWebhook(
+  id: string,
+  input: Partial<WebhookInput>
+): Promise<Webhook> {
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   }

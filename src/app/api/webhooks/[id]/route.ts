@@ -57,7 +57,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     // Validate events if provided
     if (events) {
-      const validEvents = ['lead.created', 'lead.updated', 'conversation.started', 'conversation.completed']
+      const validEvents = [
+        'lead.created',
+        'lead.updated',
+        'conversation.started',
+        'conversation.completed',
+      ]
       const invalidEvents = events.filter((e: string) => !validEvents.includes(e))
       if (invalidEvents.length > 0) {
         return NextResponse.json(

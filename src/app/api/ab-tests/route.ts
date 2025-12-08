@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { supabase } from '@/lib/supabase/client'
 
 // GET /api/ab-tests - Get all A/B tests with their variants and stats
 export async function GET() {
   const { data: tests, error: testsError } = await supabase
     .from('ab_tests')
-    .select(`
+    .select(
+      `
       *,
       ab_test_variants (
         id,
@@ -15,7 +17,8 @@ export async function GET() {
         is_control,
         created_at
       )
-    `)
+    `
+    )
     .order('created_at', { ascending: false })
 
   if (testsError) {
@@ -42,10 +45,14 @@ export async function GET() {
             .eq('variant_id', variant.id)
 
           const eventList = (events || []) as Array<{ event_type: string }>
-          const views = eventList.filter(e => e.event_type === 'view').length
-          const conversions = eventList.filter(e => e.event_type === 'conversion').length
-          const engagements = eventList.filter(e => e.event_type === 'engagement').length
-          const bounces = eventList.filter(e => e.event_type === 'bounce').length
+          const views = eventList.filter((e) => e.event_type === 'view').length
+          const conversions = eventList.filter(
+            (e) => e.event_type === 'conversion'
+          ).length
+          const engagements = eventList.filter(
+            (e) => e.event_type === 'engagement'
+          ).length
+          const bounces = eventList.filter((e) => e.event_type === 'bounce').length
 
           return {
             ...variant,
@@ -57,14 +64,14 @@ export async function GET() {
               conversionRate: views > 0 ? (conversions / views) * 100 : 0,
               engagementRate: views > 0 ? (engagements / views) * 100 : 0,
               bounceRate: views > 0 ? (bounces / views) * 100 : 0,
-            }
+            },
           }
         })
       )
 
       return {
         ...test,
-        ab_test_variants: variantsWithStats
+        ab_test_variants: variantsWithStats,
       }
     })
   )
@@ -90,23 +97,31 @@ export async function POST(request: NextRequest) {
     .insert({
       name,
       description,
-      status: 'draft'
+      status: 'draft',
     })
     .select()
     .single()
 
   if (testError || !test) {
-    return NextResponse.json({ error: testError?.message || 'Failed to create test' }, { status: 500 })
+    return NextResponse.json(
+      { error: testError?.message || 'Failed to create test' },
+      { status: 500 }
+    )
   }
 
   // Create the variants
-  const variantsToInsert = variants.map((v: { name: string; path: string; weight?: number; is_control?: boolean }, index: number) => ({
-    test_id: test.id,
-    name: v.name,
-    path: v.path,
-    weight: v.weight || Math.floor(100 / variants.length),
-    is_control: v.is_control || index === 0
-  }))
+  const variantsToInsert = variants.map(
+    (
+      v: { name: string; path: string; weight?: number; is_control?: boolean },
+      index: number
+    ) => ({
+      test_id: test.id,
+      name: v.name,
+      path: v.path,
+      weight: v.weight || Math.floor(100 / variants.length),
+      is_control: v.is_control || index === 0,
+    })
+  )
 
   const { error: variantsError } = await supabase
     .from('ab_test_variants')

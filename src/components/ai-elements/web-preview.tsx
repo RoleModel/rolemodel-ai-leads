@@ -71,7 +71,17 @@ export const WebPreview = ({
   return (
     <WebPreviewContext.Provider value={contextValue}>
       <div
-        style={{ display: 'flex', width: '100%', contain: ' paint', borderRadius: 'var(--op-radius-large)', height: '100%', minHeight: '600px', flexDirection: 'column', backgroundColor: 'var(--op-color-background)', border: '1px solid var(--op-color-border)' }}
+        style={{
+          display: 'flex',
+          width: '100%',
+          contain: ' paint',
+          borderRadius: 'var(--op-radius-large)',
+          height: '100%',
+          minHeight: '600px',
+          flexDirection: 'column',
+          backgroundColor: 'var(--op-color-background)',
+          border: '1px solid var(--op-color-border)',
+        }}
         {...props}
       >
         {children}
@@ -87,9 +97,14 @@ export const WebPreviewNavigation = ({
   ...props
 }: WebPreviewNavigationProps) => (
   <div
-
-    style={{ display: 'flex', gap: 'var(--op-space-medium)', padding: 'var(--op-space-small)', borderBottom: '1px solid var(--op-color-border)' }}
-    {...props}>
+    style={{
+      display: 'flex',
+      gap: 'var(--op-space-medium)',
+      padding: 'var(--op-space-small)',
+      borderBottom: '1px solid var(--op-color-border)',
+    }}
+    {...props}
+  >
     {children}
   </div>
 )
@@ -172,11 +187,7 @@ export type WebPreviewBodyProps = ComponentProps<'iframe'> & {
   loading?: ReactNode
 }
 
-export const WebPreviewBody = ({
-  loading,
-  src,
-  ...props
-}: WebPreviewBodyProps) => {
+export const WebPreviewBody = ({ loading, src, ...props }: WebPreviewBodyProps) => {
   const { url } = useWebPreview()
 
   return (

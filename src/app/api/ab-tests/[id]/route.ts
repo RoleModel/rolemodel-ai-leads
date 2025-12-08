@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { supabase } from '@/lib/supabase/client'
 
 interface EventWithDate {
@@ -15,7 +16,8 @@ export async function GET(
 
   const { data: test, error: testError } = await supabase
     .from('ab_tests')
-    .select(`
+    .select(
+      `
       *,
       ab_test_variants (
         id,
@@ -25,7 +27,8 @@ export async function GET(
         is_control,
         created_at
       )
-    `)
+    `
+    )
     .eq('id', id)
     .single()
 
@@ -51,10 +54,10 @@ export async function GET(
         .eq('variant_id', variant.id)
 
       const typedEvents = (events || []) as EventWithDate[]
-      const views = typedEvents.filter(e => e.event_type === 'view').length
-      const conversions = typedEvents.filter(e => e.event_type === 'conversion').length
-      const engagements = typedEvents.filter(e => e.event_type === 'engagement').length
-      const bounces = typedEvents.filter(e => e.event_type === 'bounce').length
+      const views = typedEvents.filter((e) => e.event_type === 'view').length
+      const conversions = typedEvents.filter((e) => e.event_type === 'conversion').length
+      const engagements = typedEvents.filter((e) => e.event_type === 'engagement').length
+      const bounces = typedEvents.filter((e) => e.event_type === 'bounce').length
 
       // Get daily stats for the last 7 days
       const dailyStats = getDailyStats(typedEvents)
@@ -69,15 +72,15 @@ export async function GET(
           conversionRate: views > 0 ? (conversions / views) * 100 : 0,
           engagementRate: views > 0 ? (engagements / views) * 100 : 0,
           bounceRate: views > 0 ? (bounces / views) * 100 : 0,
-          dailyStats
-        }
+          dailyStats,
+        },
       }
     })
   )
 
   return NextResponse.json({
     ...test,
-    ab_test_variants: variantsWithStats
+    ab_test_variants: variantsWithStats,
   })
 }
 
@@ -118,10 +121,7 @@ export async function DELETE(
 ) {
   const { id } = await params
 
-  const { error } = await supabase
-    .from('ab_tests')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('ab_tests').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -140,12 +140,12 @@ function getDailyStats(events: EventWithDate[]) {
     date.setDate(date.getDate() - i)
     const dateStr = date.toISOString().split('T')[0]
 
-    const dayEvents = events.filter(e => e.created_at.startsWith(dateStr))
+    const dayEvents = events.filter((e) => e.created_at.startsWith(dateStr))
 
     stats.push({
       date: dateStr,
-      views: dayEvents.filter(e => e.event_type === 'view').length,
-      conversions: dayEvents.filter(e => e.event_type === 'conversion').length
+      views: dayEvents.filter((e) => e.event_type === 'view').length,
+      conversions: dayEvents.filter((e) => e.event_type === 'conversion').length,
     })
   }
 

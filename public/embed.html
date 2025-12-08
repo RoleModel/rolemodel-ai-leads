@@ -1,72 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RoleModel AI Leads Widget</title>
     <!-- Load Optics CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
+      body,
+      html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
 
-        #embed-container {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-        }
+      #embed-container {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+      }
 
-        /* Ensure CSS variables are available */
-        :root {
-            /* Fallback colors if Optics doesn't load */
-            --op-color-background: #ffffff;
-            --op-color-on-background: #000000;
-            --op-color-primary-base: #7f51b1;
-            --op-color-primary-on-base: #ffffff;
-            --op-space-small: 8px;
-            --op-space-medium: 16px;
-            --op-space-large: 24px;
-            --op-space-3x-large: 48px;
-            --op-radius-medium: 8px;
-            --op-font-small: 14px;
-            --op-font-medium: 16px;
-        }
+      /* Ensure CSS variables are available */
+      :root {
+        /* Fallback colors if Optics doesn't load */
+        --op-color-background: #ffffff;
+        --op-color-on-background: #000000;
+        --op-color-primary-base: #7f51b1;
+        --op-color-primary-on-base: #ffffff;
+        --op-space-small: 8px;
+        --op-space-medium: 16px;
+        --op-space-large: 24px;
+        --op-space-3x-large: 48px;
+        --op-radius-medium: 8px;
+        --op-font-small: 14px;
+        --op-font-medium: 16px;
+      }
 
-        /* Layer definitions */
-        @layer utilities, overrides, app;
+      /* Layer definitions */
+      @layer utilities, overrides, app;
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <iframe
-        id="embed-container"
-        src="/embed/leads-page"
-        frameborder="0"
-        allow="microphone"
+      id="embed-container"
+      src="/embed/leads-page"
+      frameborder="0"
+      allow="microphone"
     ></iframe>
 
     <script>
-        // Get chatbot ID from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatbotId = urlParams.get('chatbotId') || 'a0000000-0000-0000-0000-000000000001';
+      // Get chatbot ID from URL parameters
+      const urlParams = new URLSearchParams(window.location.search)
+      const chatbotId =
+        urlParams.get('chatbotId') || 'a0000000-0000-0000-0000-000000000001'
 
-        // Set iframe source with chatbot ID
-        const iframe = document.getElementById('embed-container');
-        iframe.src = `/embed/leads-page?chatbotId=${chatbotId}`;
+      // Set iframe source with chatbot ID
+      const iframe = document.getElementById('embed-container')
+      iframe.src = `/embed/leads-page?chatbotId=${chatbotId}`
 
-        // Optional: Post message communication with parent window
-        window.addEventListener('message', function(event) {
-            // Handle messages from parent window if needed
-            console.log('Received message:', event.data);
-        });
+      // Optional: Post message communication with parent window
+      window.addEventListener('message', function (event) {
+        // Handle messages from parent window if needed
+        console.log('Received message:', event.data)
+      })
     </script>
-</body>
+  </body>
 </html>

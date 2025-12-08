@@ -57,7 +57,10 @@ export async function retrieveRelevantSources(
       const { data: metadataRows } = await supabaseServer
         .from('sources')
         .select('id, metadata')
-        .in('id', data.map((row: { id: string }) => row.id))
+        .in(
+          'id',
+          data.map((row: { id: string }) => row.id)
+        )
 
       const metadataMap = new Map(
         (metadataRows || []).map((row) => [row.id, row.metadata])
@@ -84,8 +87,8 @@ export async function retrieveRelevantSources(
 
 interface RagConfig {
   // Knowledge Base Retrieval
-  sourceLimit?: number           // Number of sources to retrieve (default: 5)
-  similarityThreshold?: number   // Minimum similarity score (default: 0.5)
+  sourceLimit?: number // Number of sources to retrieve (default: 5)
+  similarityThreshold?: number // Minimum similarity score (default: 0.5)
 
   // Citation & Case Studies
   enableCitations?: boolean
@@ -93,14 +96,14 @@ interface RagConfig {
   citationStyle?: string
 
   // Conversation Flow
-  enableBANT?: boolean           // Use BANT qualification (default: true)
-  askForName?: boolean           // Ask for visitor's name (default: true)
-  askForEmail?: boolean          // Ask for visitor's email (default: true)
-  maxQuestions?: number          // Max qualification questions (default: 5)
+  enableBANT?: boolean // Use BANT qualification (default: true)
+  askForName?: boolean // Ask for visitor's name (default: true)
+  askForEmail?: boolean // Ask for visitor's email (default: true)
+  maxQuestions?: number // Max qualification questions (default: 5)
 
   // Response Style
-  responseConciseness?: 'brief' | 'moderate' | 'detailed'  // Response length (default: 'moderate')
-  enablePersonalization?: boolean   // Use name/context in responses (default: true)
+  responseConciseness?: 'brief' | 'moderate' | 'detailed' // Response length (default: 'moderate')
+  enablePersonalization?: boolean // Use name/context in responses (default: true)
 
   // Custom Instructions
   customInstructions?: string
@@ -132,8 +135,10 @@ export function buildSourceContext(
   // Build response length guidance
   const conciseGuidance = {
     brief: 'Keep responses very concise (1-2 sentences). Be direct and to the point.',
-    moderate: 'Keep responses concise (2-4 sentences max). Balance brevity with helpfulness.',
-    detailed: 'Provide thorough, detailed responses. Include context and explanations where helpful.',
+    moderate:
+      'Keep responses concise (2-4 sentences max). Balance brevity with helpfulness.',
+    detailed:
+      'Provide thorough, detailed responses. Include context and explanations where helpful.',
   }[responseConciseness]
 
   const sourceTexts = sources
@@ -168,31 +173,49 @@ export function buildSourceContext(
   // Build contact collection instructions based on config
   const contactInstructions = []
   if (askForName) {
-    contactInstructions.push('- Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"')
+    contactInstructions.push(
+      '- Early in the conversation (after 1-2 messages), naturally ask for their name: "Who am I speaking with?"'
+    )
   }
   if (askForEmail) {
-    contactInstructions.push('- After establishing rapport and discussing their needs, ask for their email: "I\'d love to send you a summary of our discussion. What\'s the best email to reach you at?"')
+    contactInstructions.push(
+      '- After establishing rapport and discussing their needs, ask for their email: "I\'d love to send you a summary of our discussion. What\'s the best email to reach you at?"'
+    )
     if (askForName) {
-      contactInstructions.push('- ALWAYS collect name and email before offering to provide a summary or next steps')
+      contactInstructions.push(
+        '- ALWAYS collect name and email before offering to provide a summary or next steps'
+      )
     }
-    contactInstructions.push('- Frame email collection as providing value: "Let me send you a detailed summary" or "I\'ll email you the information we discussed"')
+    contactInstructions.push(
+      '- Frame email collection as providing value: "Let me send you a detailed summary" or "I\'ll email you the information we discussed"'
+    )
   }
 
   // Build workflow questions section if available
-  const workflowQuestionsSection = workflowQuestions.length > 0 ? `
+  const workflowQuestionsSection =
+    workflowQuestions.length > 0
+      ? `
 Questions to weave into the conversation naturally:
-${workflowQuestions.map((q, i: number) => `
+${workflowQuestions
+  .map(
+    (q, i: number) => `
 ${i + 1}. ${q.question}
    - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
-`).join('')}` : ''
+`
+  )
+  .join('')}`
+      : ''
 
   // Build BANT instructions if enabled (and no custom workflow questions)
-  const bantInstructions = enableBANT && workflowQuestions.length === 0 ? `
+  const bantInstructions =
+    enableBANT && workflowQuestions.length === 0
+      ? `
 Ask targeted questions to pre-qualify the prospect using BANT:
    - Budget
    - Authority
    - Need (primary business problem or goal)
-   - Timeline` : ''
+   - Timeline`
+      : ''
 
   // Build unified qualification instructions - always uses ragConfig settings
   const qualificationInstructions = `
@@ -223,25 +246,31 @@ CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that yo
 `
 
   // Build citation instructions conditionally
-  const citationInstructions = enableCitations ? `
+  const citationInstructions = enableCitations
+    ? `
 - MANDATORY CITATION RULE: Every fact, statistic, case study, or specific claim MUST include an inline citation like [1], [2], etc.
   - Example: "We helped a manufacturing company reduce data entry time by 40% [1]."
   - Example: "Our typical project timeline is 3-6 months [2]."
   - If you mention a case study or client example, you MUST cite the source it came from
-  - Do NOT make claims without citations - if there's no source for something, don't say it` : ''
+  - Do NOT make claims without citations - if there's no source for something, don't say it`
+    : ''
 
   // Build case study instructions conditionally
-  const caseStudyInstructions = enableCaseStudies ? `
+  const caseStudyInstructions = enableCaseStudies
+    ? `
 - PROACTIVELY SHARE CASE STUDIES: When discussing the prospect's industry or challenges, actively share relevant case studies from the Available Knowledge Base
   - Example: "Speaking of manufacturing challenges, we helped a similar company achieve 40% efficiency gains${enableCitations ? ' [1]' : ''}. Would you like to hear more?"
   - Make case studies a natural part of the conversation - don't wait to be asked
-  - Look for opportunities to share success stories that relate to the prospect's situation` : ''
+  - Look for opportunities to share success stories that relate to the prospect's situation`
+    : ''
 
   // Build custom instructions section
-  const customInstructionsSection = customInstructions.trim() ? `
+  const customInstructionsSection = customInstructions.trim()
+    ? `
 
 CUSTOM INSTRUCTIONS:
-${customInstructions}` : ''
+${customInstructions}`
+    : ''
 
   return `
 ## Available Knowledge Base
@@ -251,8 +280,12 @@ ${sourceTexts}
 ---
 
 CRITICAL INSTRUCTIONS:
-- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${enablePersonalization ? `
-- Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation` : ''}
+- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${
+    enablePersonalization
+      ? `
+- Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation`
+      : ''
+  }
 - Be natural and conversational when using the knowledge base information
 - If the knowledge base contains relevant information, use it to provide a complete, detailed answer
 - NEVER use phrases like "connect you with a specialist" or "I'd be happy to help you explore"

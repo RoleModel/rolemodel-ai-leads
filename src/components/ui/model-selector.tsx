@@ -1,12 +1,12 @@
 'use client'
 
 import { Tick01Icon } from '@hugeicons-pro/core-stroke-standard'
+import { ArrowDown01Icon } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import Image from 'next/image'
 import { useState } from 'react'
-import { ArrowDown01Icon } from '@hugeicons-pro/core-stroke-standard';
 
-import { AVAILABLE_MODELS, getModelById, type ModelInfo } from '@/lib/ai/models'
+import { AVAILABLE_MODELS, type ModelInfo, getModelById } from '@/lib/ai/models'
 
 import { Button } from './button'
 import { Label } from './label'
@@ -19,7 +19,12 @@ interface ModelSelectorProps {
   id?: string
 }
 
-export function ModelSelector({ value, onChange, label = 'Model', id }: ModelSelectorProps) {
+export function ModelSelector({
+  value,
+  onChange,
+  label = 'Model',
+  id,
+}: ModelSelectorProps) {
   const [modelSearch, setModelSearch] = useState('')
   const [open, setOpen] = useState(false)
 
@@ -40,11 +45,7 @@ export function ModelSelector({ value, onChange, label = 'Model', id }: ModelSel
   return (
     <div className="form-group">
       {label && (
-        <Label
-          htmlFor={id}
-
-          className="form-label"
-        >
+        <Label htmlFor={id} className="form-label">
           {label}
         </Label>
       )}
@@ -143,11 +144,15 @@ export function ModelSelector({ value, onChange, label = 'Model', id }: ModelSel
                     borderRadius: '0',
                     borderBottom: '1px solid var(--op-color-border)',
                     textAlign: 'left',
-                    backgroundColor: value === model.id ? 'var(--op-color-neutral-plus-six)' : 'transparent',
+                    backgroundColor:
+                      value === model.id
+                        ? 'var(--op-color-neutral-plus-six)'
+                        : 'transparent',
                   }}
                   onMouseEnter={(e) => {
                     if (value !== model.id) {
-                      e.currentTarget.style.backgroundColor = 'var(--op-color-neutral-plus-six)'
+                      e.currentTarget.style.backgroundColor =
+                        'var(--op-color-neutral-plus-six)'
                     }
                   }}
                   onMouseLeave={(e) => {

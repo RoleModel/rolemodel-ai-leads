@@ -2,8 +2,8 @@
 
 import {
   Add01Icon,
-  AppStoreIcon,
   Alert02Icon,
+  AppStoreIcon,
   Cancel01Icon,
   CheckmarkCircle02Icon,
   Copy01Icon,
@@ -17,6 +17,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
+
 import type { Webhook, WebhookEvent } from '@/lib/webhooks/types'
 
 const AVAILABLE_EVENTS: { id: WebhookEvent; label: string; description: string }[] = [
@@ -66,7 +67,11 @@ export default function WebhooksPage() {
   const [formData, setFormData] = useState<WebhookFormData>(initialFormData)
   const [isSaving, setIsSaving] = useState(false)
   const [testingId, setTestingId] = useState<string | null>(null)
-  const [testResult, setTestResult] = useState<{ id: string; success: boolean; message: string } | null>(null)
+  const [testResult, setTestResult] = useState<{
+    id: string
+    success: boolean
+    message: string
+  } | null>(null)
   const [copiedSecret, setCopiedSecret] = useState(false)
 
   useEffect(() => {
@@ -285,7 +290,9 @@ export default function WebhooksPage() {
                         className="form-control form-control--large"
                         placeholder="My CRM Integration"
                         value={formData.name}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, name: e.target.value }))
+                        }
                         required
                       />
                     </div>
@@ -298,17 +305,27 @@ export default function WebhooksPage() {
                         className="form-control form-control--large"
                         placeholder="https://your-crm.com/webhook"
                         value={formData.url}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, url: e.target.value }))
+                        }
                         required
                       />
                     </div>
                   </div>
 
                   {/* Secret */}
-                  <div className="form-group" style={{ marginBottom: 'var(--op-space-medium)' }}>
+                  <div
+                    className="form-group"
+                    style={{ marginBottom: 'var(--op-space-medium)' }}
+                  >
                     <label className="form-label">
                       Webhook Secret{' '}
-                      <span style={{ color: 'var(--op-color-neutral-on-plus-max)', fontWeight: 'normal' }}>
+                      <span
+                        style={{
+                          color: 'var(--op-color-neutral-on-plus-max)',
+                          fontWeight: 'normal',
+                        }}
+                      >
                         (optional, for signature verification)
                       </span>
                     </label>
@@ -318,7 +335,9 @@ export default function WebhooksPage() {
                         className="form-control form-control--large"
                         placeholder="Leave empty or generate a secret"
                         value={formData.secret}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, secret: e.target.value }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, secret: e.target.value }))
+                        }
                         style={{ flex: 1, fontFamily: 'monospace' }}
                       />
                       <Button type="button" variant="secondary" onClick={generateSecret}>
@@ -328,7 +347,10 @@ export default function WebhooksPage() {
                       {formData.secret && (
                         <Button type="button" variant="ghost" onClick={copySecret}>
                           {copiedSecret ? (
-                            <Tick01Icon className="icon-sm" style={{ color: 'var(--op-color-alerts-positive-base)' }} />
+                            <Tick01Icon
+                              className="icon-sm"
+                              style={{ color: 'var(--op-color-alerts-positive-base)' }}
+                            />
                           ) : (
                             <Copy01Icon className="icon-sm" />
                           )}
@@ -342,12 +364,16 @@ export default function WebhooksPage() {
                         margin: 'var(--op-space-2x-small) 0 0 0',
                       }}
                     >
-                      If set, webhooks will include an X-Webhook-Signature header for verification
+                      If set, webhooks will include an X-Webhook-Signature header for
+                      verification
                     </p>
                   </div>
 
                   {/* Events */}
-                  <div className="form-group" style={{ marginBottom: 'var(--op-space-medium)' }}>
+                  <div
+                    className="form-group"
+                    style={{ marginBottom: 'var(--op-space-medium)' }}
+                  >
                     <label className="form-label">Events to trigger webhook</label>
                     <div
                       style={{
@@ -380,7 +406,12 @@ export default function WebhooksPage() {
                             style={{ marginTop: '2px' }}
                           />
                           <div>
-                            <div style={{ fontSize: 'var(--op-font-small)', fontWeight: 500 }}>
+                            <div
+                              style={{
+                                fontSize: 'var(--op-font-small)',
+                                fontWeight: 500,
+                              }}
+                            >
                               {event.label}
                             </div>
                             <div
@@ -398,7 +429,10 @@ export default function WebhooksPage() {
                   </div>
 
                   {/* Active toggle */}
-                  <div className="form-group" style={{ marginBottom: 'var(--op-space-large)' }}>
+                  <div
+                    className="form-group"
+                    style={{ marginBottom: 'var(--op-space-large)' }}
+                  >
                     <label
                       style={{
                         display: 'flex',
@@ -411,7 +445,12 @@ export default function WebhooksPage() {
                         type="checkbox"
                         className="form-control"
                         checked={formData.is_active}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, is_active: e.target.checked }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            is_active: e.target.checked,
+                          }))
+                        }
                       />
                       <span style={{ fontSize: 'var(--op-font-small)' }}>Active</span>
                     </label>
@@ -419,8 +458,15 @@ export default function WebhooksPage() {
 
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: 'var(--op-space-small)' }}>
-                    <Button type="submit" disabled={isSaving || formData.events.length === 0}>
-                      {isSaving ? 'Saving...' : editingId ? 'Update Webhook' : 'Create Webhook'}
+                    <Button
+                      type="submit"
+                      disabled={isSaving || formData.events.length === 0}
+                    >
+                      {isSaving
+                        ? 'Saving...'
+                        : editingId
+                          ? 'Update Webhook'
+                          : 'Create Webhook'}
                     </Button>
                     <Button type="button" variant="ghost" onClick={resetForm}>
                       Cancel
@@ -433,7 +479,9 @@ export default function WebhooksPage() {
 
           {/* Webhooks List */}
           {isLoading ? (
-            <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>Loading webhooks...</p>
+            <p style={{ color: 'var(--op-color-neutral-on-plus-max)' }}>
+              Loading webhooks...
+            </p>
           ) : webhooks.length === 0 && !showForm ? (
             <div
               className="card"
@@ -458,7 +506,13 @@ export default function WebhooksPage() {
                   marginBottom: 'var(--op-space-medium)',
                 }}
               >
-                <AppStoreIcon style={{ width: '32px', height: '32px', color: 'var(--op-color-primary-base)' }} />
+                <AppStoreIcon
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    color: 'var(--op-color-primary-base)',
+                  }}
+                />
               </div>
               <h3
                 style={{
@@ -477,8 +531,8 @@ export default function WebhooksPage() {
                   maxWidth: '400px',
                 }}
               >
-                Create a webhook to automatically send lead data to your CRM, Zapier, or any custom endpoint when leads
-                are captured.
+                Create a webhook to automatically send lead data to your CRM, Zapier, or
+                any custom endpoint when leads are captured.
               </p>
               <Button onClick={() => setShowForm(true)}>
                 <Add01Icon className="icon-sm" />
@@ -486,7 +540,13 @@ export default function WebhooksPage() {
               </Button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--op-space-medium)' }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--op-space-medium)',
+              }}
+            >
               {webhooks.map((webhook) => (
                 <div key={webhook.id} className="card">
                   <div
@@ -498,7 +558,13 @@ export default function WebhooksPage() {
                     }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--op-space-small)',
+                        }}
+                      >
                         <h3
                           style={{
                             fontSize: 'var(--op-font-medium)',
@@ -540,7 +606,8 @@ export default function WebhooksPage() {
                               padding: '2px var(--op-space-small)',
                               borderRadius: 'var(--op-radius-pill)',
                               fontSize: 'var(--op-font-x-small)',
-                              backgroundColor: 'var(--op-color-alerts-negative-plus-four)',
+                              backgroundColor:
+                                'var(--op-color-alerts-negative-plus-four)',
                               color: 'var(--op-color-alerts-negative-on-plus-four)',
                             }}
                           >
@@ -561,7 +628,13 @@ export default function WebhooksPage() {
                         {webhook.url}
                       </p>
 
-                      <div style={{ display: 'flex', gap: 'var(--op-space-x-small)', flexWrap: 'wrap' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: 'var(--op-space-x-small)',
+                          flexWrap: 'wrap',
+                        }}
+                      >
                         {webhook.events.map((event) => (
                           <span
                             key={event}
@@ -586,7 +659,8 @@ export default function WebhooksPage() {
                             margin: 'var(--op-space-small) 0 0 0',
                           }}
                         >
-                          Last triggered: {new Date(webhook.last_triggered_at).toLocaleString()}
+                          Last triggered:{' '}
+                          {new Date(webhook.last_triggered_at).toLocaleString()}
                         </p>
                       )}
 
@@ -619,7 +693,10 @@ export default function WebhooksPage() {
                         title="Send test webhook"
                       >
                         {testingId === webhook.id ? (
-                          <RefreshIcon size="20" style={{ animation: 'spin 1s linear infinite' }} />
+                          <RefreshIcon
+                            size="20"
+                            style={{ animation: 'spin 1s linear infinite' }}
+                          />
                         ) : (
                           <RefreshIcon size="20" />
                         )}
@@ -636,7 +713,12 @@ export default function WebhooksPage() {
                           <CheckmarkCircle02Icon size="20" />
                         )}
                       </Button>
-                      <Button variant="ghost" size="lg" onClick={() => handleEdit(webhook)} title="Edit webhook">
+                      <Button
+                        variant="ghost"
+                        size="lg"
+                        onClick={() => handleEdit(webhook)}
+                        title="Edit webhook"
+                      >
                         <Edit02Icon className="icon-sm" />
                       </Button>
                       <Button
@@ -645,7 +727,10 @@ export default function WebhooksPage() {
                         onClick={() => handleDelete(webhook.id)}
                         title="Delete webhook"
                       >
-                        <Delete02Icon size="20" color='var(--op-color-alerts-danger-base)' />
+                        <Delete02Icon
+                          size="20"
+                          color="var(--op-color-alerts-danger-base)"
+                        />
                       </Button>
                     </div>
                   </div>
@@ -657,11 +742,19 @@ export default function WebhooksPage() {
           {/* Webhook Payload Documentation */}
           <div className="card" style={{ marginTop: 'var(--op-space-x-large)' }}>
             <div className="card-header">
-              <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0 }}>Webhook Payload Format</h2>
+              <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0 }}>
+                Webhook Payload Format
+              </h2>
             </div>
             <div className="card-body">
-              <p style={{ fontSize: 'var(--op-font-small)', color: 'var(--op-color-neutral-on-plus-max)' }}>
-                When triggered, webhooks send a POST request with the following JSON payload:
+              <p
+                style={{
+                  fontSize: 'var(--op-font-small)',
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                }}
+              >
+                When triggered, webhooks send a POST request with the following JSON
+                payload:
               </p>
               <pre
                 style={{
@@ -710,7 +803,12 @@ export default function WebhooksPage() {
                 )}
               </pre>
 
-              <h4 style={{ marginTop: 'var(--op-space-medium)', marginBottom: 'var(--op-space-small)' }}>
+              <h4
+                style={{
+                  marginTop: 'var(--op-space-medium)',
+                  marginBottom: 'var(--op-space-small)',
+                }}
+              >
                 Request Headers
               </h4>
               <ul

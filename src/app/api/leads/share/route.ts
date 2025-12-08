@@ -125,7 +125,9 @@ export async function POST(req: NextRequest) {
 }
 
 function formatLeadSummaryForEmail(lead: Lead, summary: LeadSummary): string {
-  const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'Unknown'
+  const date = lead.created_at
+    ? new Date(lead.created_at).toLocaleDateString()
+    : 'Unknown'
 
   let html = `
     <h2>New Lead: ${lead.visitor_name || lead.visitor_email || 'Anonymous'}</h2>
@@ -210,8 +212,13 @@ function formatLeadSummaryForEmail(lead: Lead, summary: LeadSummary): string {
   return html
 }
 
-function formatLeadSummaryForSlack(lead: Lead, summary: LeadSummary): { blocks: SlackBlock[] } {
-  const date = lead.created_at ? new Date(lead.created_at).toLocaleDateString() : 'Unknown'
+function formatLeadSummaryForSlack(
+  lead: Lead,
+  summary: LeadSummary
+): { blocks: SlackBlock[] } {
+  const date = lead.created_at
+    ? new Date(lead.created_at).toLocaleDateString()
+    : 'Unknown'
   const name = lead.visitor_name || lead.visitor_email || 'Anonymous'
 
   const blocks = [

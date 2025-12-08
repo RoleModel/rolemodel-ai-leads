@@ -2,8 +2,8 @@
 
 'use client'
 
-import { motion, useAnimationControls, easeInOut, easeOut } from "framer-motion"
-import { useEffect, useMemo, type CSSProperties } from "react"
+import { easeInOut, easeOut, motion, useAnimationControls } from 'framer-motion'
+import { type CSSProperties, useEffect, useMemo } from 'react'
 
 interface ScrollIndicatorProps {
   borderColor?: string
@@ -15,10 +15,10 @@ interface ScrollIndicatorProps {
   borderWidth?: number
   borderRadius?: number
   animationSpeed?: number
-  scrollType?: "section" | "link"
+  scrollType?: 'section' | 'link'
   sectionName?: string
   customLink?: string
-  animationPreset?: "default" | "elegant-chevrons" | "minimalist-scroll"
+  animationPreset?: 'default' | 'elegant-chevrons' | 'minimalist-scroll'
   chevronColor?: string
   chevronSize?: number
   chevronGap?: number
@@ -58,7 +58,7 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
   } = props
 
   // Resolve optional props with sensible defaults so visuals always render
-  const resolvedBorderColor = borderColor ?? "#ffffff"
+  const resolvedBorderColor = borderColor ?? '#ffffff'
   const resolvedBorderOpacity = borderOpacity ?? 0.8
   const resolvedBorderWidth = borderWidth ?? 2
   const resolvedBorderRadius = borderRadius ?? 9999
@@ -84,47 +84,47 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
         transition: {
           duration: resolvedAnimationSpeed,
           repeat: Infinity,
-          repeatType: "reverse" as const,
+          repeatType: 'reverse' as const,
           ease: easeInOut,
         },
       },
-      "elegant-chevrons": {
+      'elegant-chevrons': {
         y: [0, 0, 14, 14, 14, 14, 0],
         opacity: [0, 1, 1, 0.6, 0.85, 0, 0],
         transition: {
           duration: 1.8,
           repeat: Infinity,
-          repeatType: "loop" as const,
+          repeatType: 'loop' as const,
           ease: easeInOut,
           times: [0, 0.167, 0.5, 0.583, 0.667, 0.833, 1],
         },
       },
-      "elegant-chevrons-glow": {
+      'elegant-chevrons-glow': {
         filter: [
-          "drop-shadow(0 0 0px rgba(255,255,255,0))",
-          "drop-shadow(0 0 2px rgba(255,255,255,0.35))",
-          "drop-shadow(0 0 2px rgba(255,255,255,0.2))",
-          "drop-shadow(0 0 4px rgba(255,255,255,0.4))",
-          "drop-shadow(0 0 4px rgba(255,255,255,0.4))",
-          "drop-shadow(0 0 0px rgba(255,255,255,0))",
-          "drop-shadow(0 0 0px rgba(255,255,255,0))",
+          'drop-shadow(0 0 0px rgba(255,255,255,0))',
+          'drop-shadow(0 0 2px rgba(255,255,255,0.35))',
+          'drop-shadow(0 0 2px rgba(255,255,255,0.2))',
+          'drop-shadow(0 0 4px rgba(255,255,255,0.4))',
+          'drop-shadow(0 0 4px rgba(255,255,255,0.4))',
+          'drop-shadow(0 0 0px rgba(255,255,255,0))',
+          'drop-shadow(0 0 0px rgba(255,255,255,0))',
         ],
         transition: {
           duration: 1.8,
           repeat: Infinity,
-          repeatType: "loop" as const,
+          repeatType: 'loop' as const,
           ease: easeInOut,
           times: [0, 0.167, 0.5, 0.583, 0.667, 0.833, 1],
         },
       },
-      "minimalist-scroll": {
+      'minimalist-scroll': {
         label: {
           y: [0, 0, 6, 6, 6],
           opacity: [1, 1, 1, 0, 0],
           transition: {
             duration: 2.5,
             repeat: Infinity,
-            repeatType: "loop" as const,
+            repeatType: 'loop' as const,
             ease: easeInOut,
             times: [0, 0.4, 0.6, 0.8, 1],
           },
@@ -134,7 +134,7 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
           transition: {
             duration: 2.5,
             repeat: Infinity,
-            repeatType: "loop" as const,
+            repeatType: 'loop' as const,
             ease: easeOut,
             times: [0, 0.6, 0.8, 0.8, 1],
           },
@@ -145,20 +145,14 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
   )
 
   useEffect(() => {
-    if (animationPreset === "default") {
+    if (animationPreset === 'default') {
       controls.start(animationPresets.default)
-    } else if (animationPreset === "elegant-chevrons") {
-      elegantChevronControls.start(animationPresets["elegant-chevrons"])
-      elegantChevronGlowControls.start(
-        animationPresets["elegant-chevrons-glow"]
-      )
-    } else if (animationPreset === "minimalist-scroll") {
-      minimalistLabelControls.start(
-        animationPresets["minimalist-scroll"].label
-      )
-      minimalistLineControls.start(
-        animationPresets["minimalist-scroll"].line
-      )
+    } else if (animationPreset === 'elegant-chevrons') {
+      elegantChevronControls.start(animationPresets['elegant-chevrons'])
+      elegantChevronGlowControls.start(animationPresets['elegant-chevrons-glow'])
+    } else if (animationPreset === 'minimalist-scroll') {
+      minimalistLabelControls.start(animationPresets['minimalist-scroll'].label)
+      minimalistLineControls.start(animationPresets['minimalist-scroll'].line)
     }
   }, [
     controls,
@@ -171,15 +165,15 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
   ])
 
   const handleClick = () => {
-    if (scrollType === "section" && sectionName) {
+    if (scrollType === 'section' && sectionName) {
       if (onScrollToSection) {
         onScrollToSection(sectionName)
         return
       }
       const element = document.getElementById(sectionName)
       if (!element) return
-      element.scrollIntoView({ behavior: "smooth" })
-    } else if (scrollType === "link" && customLink) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    } else if (scrollType === 'link' && customLink) {
       window.location.href = customLink
     }
   }
@@ -200,54 +194,46 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
       <div
         onClick={handleClick}
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          cursor: "pointer",
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          cursor: 'pointer',
         }}
       >
         <motion.div
           animate={{
-            ...animationPresets["elegant-chevrons-glow"],
+            ...animationPresets['elegant-chevrons-glow'],
             filter: [
-              "drop-shadow(0 0 0px rgba(255,255,255,0))",
+              'drop-shadow(0 0 0px rgba(255,255,255,0))',
               `drop-shadow(0 0 ${2 * scale}px rgba(255,255,255,0.35))`,
               `drop-shadow(0 0 ${2 * scale}px rgba(255,255,255,0.2))`,
               `drop-shadow(0 0 ${4 * scale}px rgba(255,255,255,0.4))`,
               `drop-shadow(0 0 ${4 * scale}px rgba(255,255,255,0.4))`,
-              "drop-shadow(0 0 0px rgba(255,255,255,0))",
-              "drop-shadow(0 0 0px rgba(255,255,255,0))",
+              'drop-shadow(0 0 0px rgba(255,255,255,0))',
+              'drop-shadow(0 0 0px rgba(255,255,255,0))',
             ],
           }}
           style={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             gap: `${gap}px`,
           }}
         >
           {/* Upper chevron */}
           <motion.svg
             animate={{
-              y: [
-                0,
-                0,
-                driftDistance,
-                driftDistance,
-                driftDistance,
-                driftDistance,
-                0,
-              ],
+              y: [0, 0, driftDistance, driftDistance, driftDistance, driftDistance, 0],
               opacity: [0, 1, 1, 0.6, 0.85, 0, 0],
               transition: {
                 duration: 1.8,
                 repeat: Infinity,
-                repeatType: "loop" as const,
+                repeatType: 'loop' as const,
                 ease: easeInOut,
                 times: [0, 0.167, 0.5, 0.583, 0.667, 0.833, 1],
               },
@@ -258,7 +244,7 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{
-              position: "relative",
+              position: 'relative',
             }}
           >
             <path
@@ -272,20 +258,12 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
           {/* Lower chevron */}
           <motion.svg
             animate={{
-              y: [
-                0,
-                0,
-                driftDistance,
-                driftDistance,
-                driftDistance,
-                driftDistance,
-                0,
-              ],
+              y: [0, 0, driftDistance, driftDistance, driftDistance, driftDistance, 0],
               opacity: [0, 1, 1, 0.6, 0.85, 0, 0],
               transition: {
                 duration: 1.8,
                 repeat: Infinity,
-                repeatType: "loop" as const,
+                repeatType: 'loop' as const,
                 ease: easeInOut,
                 times: [0, 0.167, 0.5, 0.583, 0.667, 0.833, 1],
               },
@@ -296,7 +274,7 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{
-              position: "relative",
+              position: 'relative',
             }}
           >
             <path
@@ -325,14 +303,14 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
       <div
         onClick={handleClick}
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          cursor: "pointer",
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          cursor: 'pointer',
         }}
       >
         <motion.div
@@ -342,17 +320,17 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
             transition: {
               duration: duration,
               repeat: Infinity,
-              repeatType: "loop" as const,
+              repeatType: 'loop' as const,
               ease: easeInOut,
               times: [0, 0.4, 0.6, 0.8, 1],
             },
           }}
           style={{
             fontSize: `${fontSize}px`,
-            fontWeight: "bold",
-            letterSpacing: "2px",
+            fontWeight: 'bold',
+            letterSpacing: '2px',
             color: minimalistColor,
-            marginBottom: "8px",
+            marginBottom: '8px',
           }}
         >
           SCROLL
@@ -363,14 +341,14 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
             transition: {
               duration: duration,
               repeat: Infinity,
-              repeatType: "loop" as const,
+              repeatType: 'loop' as const,
               ease: easeOut,
               times: [0, 0.6, 0.8, 0.8, 1],
             },
           }}
           style={{
-            width: "1px",
-            height: "20px",
+            width: '1px',
+            height: '20px',
             backgroundColor: minimalistColor,
           }}
         />
@@ -382,13 +360,13 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
     <div
       onClick={handleClick}
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        cursor: "pointer",
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        cursor: 'pointer',
       }}
     >
       <div
@@ -398,10 +376,10 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
           border: `${resolvedBorderWidth}px solid ${resolvedBorderColor}`,
           opacity: resolvedBorderOpacity,
           borderRadius: resolvedBorderRadius,
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <motion.div
@@ -409,9 +387,9 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
           style={{
             width: resolvedDotSize,
             height: resolvedDotSize,
-            borderRadius: "50%",
+            borderRadius: '50%',
             backgroundColor: dotColor,
-            position: "absolute",
+            position: 'absolute',
           }}
         />
       </div>
@@ -420,9 +398,9 @@ export default function ScrollIndicator(props: ScrollIndicatorProps) {
 
   // Render based on animation preset
   switch (animationPreset) {
-    case "elegant-chevrons":
+    case 'elegant-chevrons':
       return renderDoubleChevron()
-    case "minimalist-scroll":
+    case 'minimalist-scroll':
       return renderMinimalistScroll()
     default:
       return renderDefault()

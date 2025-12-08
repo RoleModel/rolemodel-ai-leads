@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+
 import { supabaseServer } from '@/lib/supabase/server'
 
 interface WorkflowNode {
@@ -62,7 +63,7 @@ export async function GET(req: NextRequest) {
           {
             id: 'start',
             type: 'entry',
-            data: { label: 'Lead Enters', description: 'Conversation starts' }
+            data: { label: 'Lead Enters', description: 'Conversation starts' },
           },
           {
             id: 'q1',
@@ -71,8 +72,8 @@ export async function GET(req: NextRequest) {
               label: 'Budget',
               question: "What's your budget for this project?",
               keywords: ['10k', '20k', '50k+', 'enterprise'],
-              weight: 30
-            }
+              weight: 30,
+            },
           },
           {
             id: 'q2',
@@ -81,8 +82,8 @@ export async function GET(req: NextRequest) {
               label: 'Timeline',
               question: 'When do you need this completed?',
               keywords: ['asap', 'this quarter', 'next quarter', '6 months'],
-              weight: 25
-            }
+              weight: 25,
+            },
           },
           {
             id: 'q3',
@@ -91,8 +92,8 @@ export async function GET(req: NextRequest) {
               label: 'Authority',
               question: 'Are you the decision maker for this project?',
               keywords: ['yes', 'no', 'team', 'committee'],
-              weight: 25
-            }
+              weight: 25,
+            },
           },
           {
             id: 'q4',
@@ -101,8 +102,8 @@ export async function GET(req: NextRequest) {
               label: 'Need',
               question: 'What specific problems are you trying to solve?',
               keywords: ['efficiency', 'cost', 'scale', 'automation'],
-              weight: 20
-            }
+              weight: 20,
+            },
           },
           {
             id: 'qualified',
@@ -110,8 +111,8 @@ export async function GET(req: NextRequest) {
             data: {
               label: 'Qualified Lead',
               threshold: 70,
-              action: 'notify_sales'
-            }
+              action: 'notify_sales',
+            },
           },
           {
             id: 'nurture',
@@ -119,22 +120,19 @@ export async function GET(req: NextRequest) {
             data: {
               label: 'Nurture Lead',
               threshold: 40,
-              action: 'add_to_sequence'
-            }
-          }
+              action: 'add_to_sequence',
+            },
+          },
         ],
         qualificationThreshold: 70,
-        questions: []
+        questions: [],
       }
     }
 
     return NextResponse.json({ workflow })
   } catch (error) {
     console.error('Error fetching workflow:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch workflow' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch workflow' }, { status: 500 })
   }
 }
 
@@ -159,14 +157,14 @@ export async function POST(req: NextRequest) {
         question: node.data.question || node.data.label || '',
         keywords: node.data.keywords || [],
         weight: node.data.weight || 25,
-        required: node.data.required || false
+        required: node.data.required || false,
       }))
 
     const qualificationRules = {
       workflow,
       questions,
       threshold: workflow.qualificationThreshold || 70,
-      scoringMethod: workflow.scoringMethod || 'weighted_keywords'
+      scoringMethod: workflow.scoringMethod || 'weighted_keywords',
     }
 
     // Check if chatbot exists
@@ -188,7 +186,7 @@ export async function POST(req: NextRequest) {
     // Merge workflow into business context
     businessContext = {
       ...businessContext,
-      workflow: qualificationRules
+      workflow: qualificationRules,
     }
 
     // Generate dynamic instructions based on workflow
@@ -196,9 +194,11 @@ export async function POST(req: NextRequest) {
 You are a lead qualification assistant. Follow this workflow:
 
 QUALIFICATION QUESTIONS:
-${questions.map((q: WorkflowQuestion, i: number) =>
-  `${i + 1}. ${q.question} (Weight: ${q.weight}%)`
-).join('\n')}
+${questions
+  .map(
+    (q: WorkflowQuestion, i: number) => `${i + 1}. ${q.question} (Weight: ${q.weight}%)`
+  )
+  .join('\n')}
 
 SCORING CRITERIA:
 - Look for these keywords in responses: ${questions.flatMap((q: WorkflowQuestion) => q.keywords).join(', ')}
@@ -223,7 +223,7 @@ IMPORTANT:
           instructions: existing.instructions
             ? existing.instructions + '\n\n' + dynamicInstructions
             : dynamicInstructions,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', chatbotId)
         .select()
@@ -238,7 +238,7 @@ IMPORTANT:
           business_context: JSON.stringify(businessContext),
           instructions: dynamicInstructions,
           model: 'gpt-4o-mini',
-          temperature: 0.7
+          temperature: 0.7,
         })
         .select()
         .single()
@@ -252,7 +252,7 @@ IMPORTANT:
     return NextResponse.json({
       success: true,
       workflow: qualificationRules,
-      message: 'Workflow saved and connected to chatbot'
+      message: 'Workflow saved and connected to chatbot',
     })
   } catch (error) {
     console.error('Error saving workflow:', error)

@@ -44,7 +44,13 @@ export const CheckpointTrigger = ({
   tooltip ? (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button className={className} size={size} type="button" variant={variant} {...props}>
+        <Button
+          className={className}
+          size={size}
+          type="button"
+          variant={variant}
+          {...props}
+        >
           {children}
         </Button>
       </TooltipTrigger>

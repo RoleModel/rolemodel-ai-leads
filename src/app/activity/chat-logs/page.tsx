@@ -277,8 +277,9 @@ export default function ChatLogsPage() {
                             <div className="admin-info-card__field">
                               <span className="admin-info-card__label">Location</span>
                               <p className="admin-info-card__value">
-                                {getLocationString(selectedConversation.visitor_metadata) ||
-                                  'Unknown'}
+                                {getLocationString(
+                                  selectedConversation.visitor_metadata
+                                ) || 'Unknown'}
                               </p>
                             </div>
                           )}
@@ -359,7 +360,9 @@ export default function ChatLogsPage() {
                                 : 'admin-message__bubble--assistant'
                             }`}
                           >
-                            <div className="admin-message__content">{message.content}</div>
+                            <div className="admin-message__content">
+                              {message.content}
+                            </div>
                             <div className="admin-message__time">
                               {new Date(message.created_at).toLocaleTimeString()}
                             </div>

@@ -1,6 +1,13 @@
 'use client'
 
-import { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react'
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 
 interface RagConfig {
   // Knowledge Base Retrieval
@@ -44,9 +51,9 @@ interface LeadsPageSettingsContextType {
   isLoading: boolean
 }
 
-export const LeadsPageSettingsContext = createContext<LeadsPageSettingsContextType | undefined>(
-  undefined
-)
+export const LeadsPageSettingsContext = createContext<
+  LeadsPageSettingsContextType | undefined
+>(undefined)
 
 interface LeadsPageSettingsProviderProps {
   children: ReactNode
@@ -79,13 +86,17 @@ const DEFAULT_RAG_CONFIG: RagConfig = {
   customInstructions: '',
 }
 
-export function LeadsPageSettingsProvider({ children, chatbotId }: LeadsPageSettingsProviderProps) {
+export function LeadsPageSettingsProvider({
+  children,
+  chatbotId,
+}: LeadsPageSettingsProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [settings, setSettings] = useState<LeadsPageSettings>({
     pageTitle: 'Leads page',
     pageDescription:
       'Get personalized answers about your project in minutes. Quick, conversational, and built for busy founders.',
-    introText: 'This tool helps you see if custom software makes sense for your business.',
+    introText:
+      'This tool helps you see if custom software makes sense for your business.',
     timeEstimate: '3-5 minutes',
     aiInstructions: '',
     model: 'gpt-4o-mini',
