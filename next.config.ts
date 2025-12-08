@@ -19,12 +19,12 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   async headers() {
+    // Headers to allow embedding in iframes from any origin
+    // Using CSP frame-ancestors (modern standard) - do NOT set X-Frame-Options
+    // as there's no valid "allow all" value for X-Frame-Options
     const frameableHeaders = [
       {
-        key: 'X-Frame-Options',
-        value: 'ALLOWALL',
-      },
-      {
+        // frame-ancestors * allows embedding from any origin
         key: 'Content-Security-Policy',
         value: 'frame-ancestors *',
       },
@@ -34,31 +34,42 @@ const nextConfig: NextConfig = {
       },
     ]
 
-    return [
+    // Headers to protect from clickjacking
+    const protectedHeaders = [
       {
-        // Allow embedding embed pages in iframes (for Framer, etc.)
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN',
+      },
+      {
+        key: 'Content-Security-Policy',
+        value: "frame-ancestors 'self'",
+      },
+    ]
+
+    return [
+      // Frameable routes - allow embedding in any iframe
+      {
         source: '/embed/:path*',
         headers: frameableHeaders,
       },
       {
-        // Allow embedding widget pages in iframes
         source: '/widget/:path*',
         headers: frameableHeaders,
       },
       {
-        // Allow embedding intro/landing pages in iframes
         source: '/intro/:path*',
         headers: frameableHeaders,
       },
+      // All other routes - protect from clickjacking
+      // Uses negative lookahead to exclude frameable routes
       {
-        // Protect other pages from clickjacking
         source: '/((?!embed|widget|intro).*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-        ],
+        headers: protectedHeaders,
+      },
+      // Ensure root path is protected
+      {
+        source: '/',
+        headers: protectedHeaders,
       },
     ]
   },
