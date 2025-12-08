@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { Viewport } from 'next';
 import { DM_Sans, Geist_Mono } from 'next/font/google'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import './globals.css'
 
@@ -42,6 +43,7 @@ export default function RootLayout({
       </head>
       <body className={`${dmSans.variable} ${geistMono.variable} antialiased app-body`}>
         {children}
+        <SpeedInsights />
       </body>
     </html>
   )
