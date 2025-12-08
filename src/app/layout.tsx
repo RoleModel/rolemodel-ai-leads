@@ -17,9 +17,36 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'A.I. Custom Software Analysis',
+  title: 'A.I. Custom Software Analysis | RoleModel Software',
   description:
-    'A tool that helps you analyze your need for custom software.',
+    'A tool that helps you analyze your need for custom software. Get personalized insights in minutes through an AI-powered conversation.',
+  metadataBase: new URL('https://rolemodel-ai-leads.vercel.app'),
+  openGraph: {
+    title: 'A.I. Custom Software Analysis',
+    description: 'Get personalized insights about custom software for your business in minutes through an AI-powered conversation.',
+    url: 'https://rolemodel-ai-leads.vercel.app',
+    siteName: 'RoleModel Software',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'RoleModel A.I. Custom Software Analysis',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'A.I. Custom Software Analysis',
+    description: 'Get personalized insights about custom software for your business in minutes.',
+    images: ['/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export const viewport: Viewport = {
