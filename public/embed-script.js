@@ -1,8 +1,4 @@
 (function() {
-    // Configuration
-    const WIDGET_URL = 'https://rolemodel-ai-leads.vercel.app/embed/leads-page';
-    const OPTICS_CSS = 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css';
-
     // Get script tag and extract parameters
     // Try multiple methods for Framer compatibility
     let currentScript = document.currentScript;
@@ -17,6 +13,21 @@
     if (!currentScript) {
         currentScript = document.querySelector('script[data-chatbot-id]');
     }
+
+    // Derive base URL from script src (works on any deployment)
+    let baseUrl = 'https://rolemodel-ai-leads.vercel.app';
+    if (currentScript?.src) {
+        try {
+            const scriptUrl = new URL(currentScript.src);
+            baseUrl = scriptUrl.origin;
+        } catch (e) {
+            // Keep default if URL parsing fails
+        }
+    }
+
+    // Configuration
+    const WIDGET_URL = `${baseUrl}/embed/leads-page`;
+    const OPTICS_CSS = 'https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css';
 
     const chatbotId = currentScript?.getAttribute('data-chatbot-id') ||
                       window.ROLEMODEL_CHATBOT_ID ||
