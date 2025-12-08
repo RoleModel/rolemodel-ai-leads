@@ -134,3 +134,40 @@
     top: 86%;
   }
 }
+
+/* -------------------------------------------------
+   Unlayered overrides (highest priority)
+   These beat all layered styles including Optics
+   ------------------------------------------------- */
+.form-group--on-dark {
+  --op-color-on-background: currentColor;
+}
+
+.form-group--on-dark .form-label {
+  color: inherit !important;
+}
+
+.form-group--on-dark .form-control:not([type='radio']):not([type='checkbox']) {
+  color: inherit !important;
+  background: transparent !important;
+  border-color: currentColor !important;
+  box-shadow: var(--op-border-bottom) var(--brand-Light-Purple);
+  border-radius: 0;
+  padding: var(--op-space-x-small);
+}
+.form-group--on-dark .form-control:not([type='radio']):not([type='checkbox']):focus {
+  box-shadow: var(--op-border-bottom) var(--brand-Bright-Blue);
+  border-radius: 0;
+  padding: var(--op-space-x-small);
+}
+.form-group--on-dark .form-control:not([type='radio']):not([type='checkbox']):hover {
+  box-shadow: var(--op-border-bottom) var(--brand-Bright-Blue);
+  border-radius: 0;
+  padding: var(--op-space-x-small);
+}
+
+.form-group--on-dark
+  .form-control:not([type='radio']):not([type='checkbox'])::placeholder {
+  color: inherit !important;
+  opacity: 0.8;
+}

@@ -336,7 +336,7 @@ export function HeroChat(props: HeroChatProps) {
                 void handleStartChat()
               }}
             >
-              <div className="form-group">
+              <div className="form-group form-group--on-dark">
                 <label className="form-label" htmlFor="lead-name">
                   Full Name
                 </label>
@@ -348,11 +348,11 @@ export function HeroChat(props: HeroChatProps) {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="form-control--large"
+                  className="form-control--large form-control--no-border form-control-border-bottom"
                   placeholder="Jane Doe"
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group form-group--on-dark">
                 <label className="form-label" htmlFor="lead-email">
                   Work Email
                 </label>
@@ -364,7 +364,7 @@ export function HeroChat(props: HeroChatProps) {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="form-control--large"
+                  className="form-control--large form-control--no-border form-control-border-bottom"
                   placeholder="jane@company.com"
                 />
               </div>

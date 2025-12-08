@@ -21,13 +21,13 @@
   color-scheme: dark;
 }
 
-.card__header {
+.card:not(.card--dark) .card__header {
   padding: var(--op-space-medium) var(--op-space-large);
   background-color: var(--op-color-neutral-plus-seven);
 }
 
 /* Add border when header has body sibling */
-.card:has(.card__header + .card__body) > .card__header {
+.card:not(.card--dark):has(.card__header + .card__body) > .card__header {
   border-bottom: var(--op-border-width) solid var(--op-color-border);
 }
 
