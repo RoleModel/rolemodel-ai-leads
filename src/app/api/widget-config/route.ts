@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         config: {
           displayName: 'RoleModel Software',
-          initialMessage: "Hi! Let's talk about your project!",
+          initialMessage: "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?",
           theme: 'light',
           primaryColor: '#007BFF',
           buttonColor: '#000000',

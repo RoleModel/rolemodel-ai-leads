@@ -200,7 +200,7 @@ export function WidgetEditorSidebar() {
                   variant="ghost"
                   size="sm"
                   onClick={() =>
-                    updateConfig({ initialMessage: "Hi! Let's talk about your project!" })
+                    updateConfig({ initialMessage: "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?" })
                   }
                 >
                   Reset
@@ -573,7 +573,7 @@ export function WidgetEditorSidebar() {
                     borderRadius: '50%',
                     backgroundColor:
                       config.profilePicture?.startsWith('data:') ||
-                      config.profilePicture?.startsWith('http')
+                        config.profilePicture?.startsWith('http')
                         ? 'transparent'
                         : 'var(--op-color-primary)',
                     color: 'white',
@@ -585,7 +585,7 @@ export function WidgetEditorSidebar() {
                     overflow: 'hidden',
                     backgroundImage:
                       config.profilePicture?.startsWith('data:') ||
-                      config.profilePicture?.startsWith('http')
+                        config.profilePicture?.startsWith('http')
                         ? `url(${config.profilePicture})`
                         : 'none',
                     backgroundSize: 'cover',

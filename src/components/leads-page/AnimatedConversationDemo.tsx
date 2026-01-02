@@ -80,7 +80,7 @@ const demoConversation: Message[] = [
     id: '1',
     role: 'assistant',
     content:
-      "Hi! I'm here to help you explore whether custom software makes sense for your business. This takes about 3-5 minutes. Who am I speaking with?",
+      "Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business. To get started: What problem or opportunity is prompting you to consider custom software?",
     delay: 1000,
   },
   {
@@ -940,7 +940,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         <div className="gradient" />
         <PromptInputProvider>
           <PromptInput
-            onSubmit={() => {}} // No-op during demo
+            onSubmit={() => { }} // No-op during demo
             style={{ width: '100%', zIndex: 1 }}
           >
             <PromptInputAttachments>

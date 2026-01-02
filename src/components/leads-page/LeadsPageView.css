@@ -140,42 +140,6 @@
 }
 
 /* ==========================================================================
-   BANT Progress
-   ========================================================================== */
-
-.leads-page__bant-progress {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--op-space-small);
-  padding: 0 var(--op-space-x-large);
-}
-
-.leads-page__bant-bar {
-  flex: 1;
-  height: var(--op-space-x-small);
-  background-color: var(--op-color-neutral-plus-five);
-  border-radius: var(--op-radius-pill);
-  overflow: hidden;
-}
-
-.leads-page__bant-fill {
-  height: 100%;
-  background-color: var(--op-color-primary-base);
-  border-radius: var(--op-radius-pill);
-  transition: width 0.5s ease-out;
-}
-
-.leads-page__bant-text {
-  font-size: var(--op-font-small);
-  font-weight: var(--op-font-weight-medium);
-  font-family: var(--font-geist-mono);
-  color: var(--op-color-neutral-on-plus-max);
-  min-width: calc(var(--op-space-scale-unit) * 3.8);
-  text-align: right;
-}
-
-/* ==========================================================================
    Input Container
    ========================================================================== */
 

@@ -16,7 +16,8 @@ interface SourceContext {
 }
 
 /**
- * Extract BANT (Budget, Authority, Need, Timeline) information from a conversation
+ * Extract qualification information from a conversation
+ * (budget, authority, need, timeline, company/contact info)
  * and generate relevant recommendations based on available sources
  */
 export async function extractLeadData(
@@ -44,7 +45,7 @@ When generating recommendations, select 2-4 resources from this list that are mo
       messages: [
         {
           role: 'system',
-          content: `You are a lead qualification assistant. Analyze sales conversations and extract BANT information (Budget, Authority, Need, Timeline) along with other qualifying details.
+          content: `You are a lead qualification assistant. Analyze conversations and extract key qualification information (Budget, Authority, Need, Timeline) along with other qualifying details. Internally assess fit using BANT concepts (Budget, Authority, Need, Timeline), without explicitly naming them to the user.
 
 CRITICAL - Contact Information:
 - Pay special attention to extracting the prospect's NAME and EMAIL ADDRESS

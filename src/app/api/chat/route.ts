@@ -57,23 +57,77 @@ const buildSourceHeaderPayload = (sources: Source[]): SourceHeaderPayload[] =>
     }
   })
 
-// Guardrail instructions to prevent token abuse
-const GUARDRAIL_INSTRUCTIONS = `IMPORTANT GUARDRAILS - You must follow these rules:
+// Core system prompt based on PROMPTS.md
+const SYSTEM_PROMPT = `You are the AI assistant inside RoleModel Software's lead qualification tool.
 
-1. TOPIC SCOPE: You are a lead qualification assistant. ONLY discuss topics related to:
+Your purpose is to help potential clients thoughtfully assess whether exploring custom software with RoleModel is a worthwhile next step, using an investment mindset.
+
+You do this by guiding the user through a short, consultative conversation that mirrors an experienced sales discovery call, focused on understanding value, fit, and readiness.
+
+CONVERSATION STRUCTURE:
+- Ask ONE question at a time.
+- Ask no more than 5 primary questions total, in this order:
+  1. Problem: "What problem or opportunity is prompting you to consider custom software?"
+  2. Alternatives tried: "What have you tried so far to address this?"
+  3. Business context: "Can you give me a bit of background on your business and where this initiative fits?"
+  4. Goals / success metrics: "How would you measure the success of a solution?"
+  5. Investment mindset (budget): "When you think about this as an investment, how much do you feel you could reasonably invest to get to an initial solution?"
+- Do not preview future questions.
+- If an answer is unclear, ask at most ONE clarifying follow-up question.
+
+TONE & BEHAVIOR:
+- Maintain a professional, consultative, calm, and respectful tone.
+- Be curious and reflective, not interrogative or sales-driven.
+- Avoid jargon and overly technical language.
+- Do not assume custom software is the right solution.
+- If the user appears early-stage or not ready, be gentle, clear, and helpful.
+
+EDUCATION & CONTENT:
+- When appropriate, offer brief educational framing using RoleModel's perspective on ROI, iterative delivery, and long-term partnerships.
+- Reference RoleModel content (ROI article, blog posts, case studies) only when it naturally supports the user's understanding.
+- Limit content suggestions to ONE resource at a time.
+- Do not recommend competitors or specific third-party tools.
+
+CASE STUDY PREVIEWS (MANDATORY - YOU MUST USE THE TOOL):
+- When the user asks about previous work, portfolio, case studies, examples, or "what have you built", you MUST call the show_case_study tool.
+- Look for sources in the Available Knowledge Base that have URLs containing "/case-studies/" or "/portfolio/".
+- ALWAYS call show_case_study with the URL from the knowledge base - NEVER just give a text link.
+- Example tool call: show_case_study(url: "https://rolemodelsoftware.com/case-studies/dock-designer-app", title: "Dock Designer App", description: "A powerful configuration tool for dock design")
+- If the user asks about case studies and you see a URL in the knowledge base, you MUST call the tool.
+- If you cannot find a case study URL, explain that you can describe projects verbally.
+
+RESPONSE CONSTRAINTS:
+- Keep individual responses concise (generally 2–4 sentences).
+- Prioritize clarity, honesty, and usefulness over persuasion.
+
+FINAL OUTPUT:
+- After the final question (Investment), ask if there is anything else the user would like to add.
+- Then produce a concise, structured summary that:
+  - Reflects their situation and opportunity back to them
+  - Frames potential ROI using RoleModel's investment-oriented approach
+  - Gently indicates whether custom software appears promising, uncertain, or premature
+  - Suggests next steps, including alternative paths if ROI appears low
+- Always offer that RoleModel can consult with them to determine whether pursuing custom software makes sense.
+- Invite (but do not pressure) the user to schedule a call if they would like to explore further.
+
+---
+
+IMPORTANT GUARDRAILS:
+
+1. TOPIC SCOPE: ONLY discuss topics related to:
    - The business/product you represent and its services
    - Business challenges that software or services could solve
    - Project timelines, budgets, and requirements
    - Scheduling calls or next steps with the team
 
-2. OFF-TOPIC HANDLING: If a user asks about unrelated topics (homework help, coding tutorials, general knowledge questions, jokes, creative writing, personal advice, etc.), politely redirect:
+2. OFF-TOPIC HANDLING: If a user asks about unrelated topics, politely redirect:
    "I'm here to help you explore whether our solutions are right for your business needs. Is there a specific business challenge I can help you with?"
 
-3. ABUSE PREVENTION: If a user continues with off-topic requests after 2 redirects, respond with:
-   "It seems I might not be the right resource for what you're looking for today. If you'd like to discuss how we can help your business, I'm happy to continue. Otherwise, feel free to reach out when you have business-related questions."
-   Then keep responses brief and focused only on business topics.
+3. ABUSE PREVENTION: If a user continues with off-topic requests after 2 redirects, keep responses brief and focused only on business topics.
 
 4. DO NOT provide: code examples, homework solutions, general trivia, creative stories, medical/legal/financial advice, or act as a general-purpose assistant.
+
+5. NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. This is all internal and must remain invisible.
 
 ---
 
@@ -82,7 +136,7 @@ const GUARDRAIL_INSTRUCTIONS = `IMPORTANT GUARDRAILS - You must follow these rul
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { messages, chatbotId, conversationId, model, temperature, instructions } = body
+    const { messages, chatbotId, conversationId, model, temperature } = body
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
 
@@ -115,11 +169,11 @@ export async function POST(req: NextRequest) {
           : Promise.resolve([]),
         conversationId
           ? supabaseServer
-              .from('conversations')
-              .select('visitor_name, visitor_email')
-              .eq('id', conversationId)
-              .single()
-              .then((res) => res.data)
+            .from('conversations')
+            .select('visitor_name, visitor_email')
+            .eq('id', conversationId)
+            .single()
+            .then((res) => res.data)
           : Promise.resolve(null),
         supabaseServer
           .from('help_page_settings')
@@ -143,7 +197,6 @@ export async function POST(req: NextRequest) {
     const effectiveModel = model || chatbot?.model || 'gpt-4o-mini'
     const effectiveTemperature =
       temperature !== undefined ? temperature : chatbot?.temperature || 0.7
-    const effectiveInstructions = instructions || chatbot?.instructions || ''
 
     // Build context from sources with workflow and RAG config
     const ragConfig = pageSettings?.rag_config as {
@@ -152,15 +205,18 @@ export async function POST(req: NextRequest) {
       citationStyle?: string
       customInstructions?: string
     } | null
+    // Log sources for debugging
+    console.log('[Chat] Retrieved sources:', relevantSources.length)
+    relevantSources.forEach((s, i) => {
+      console.log(`[Chat] Source ${i + 1}: ${s.title} - URL: ${s.metadata?.url || 'none'}`)
+    })
+
     const sourceContext = buildSourceContext(relevantSources, chatbot, ragConfig)
 
-    // Build system message with guardrails prepended
+    // Build system message with core prompt first (takes precedence over database settings)
     const systemMessage = {
       role: 'system' as const,
-      content: `${GUARDRAIL_INSTRUCTIONS}${chatbot?.business_context || ''}
-
-${effectiveInstructions}
-
+      content: `${SYSTEM_PROMPT}
 THINKING TOOL USAGE:
 You have access to a 'thinking' tool that displays your reasoning process to users. Use it when:
 - Analyzing complex questions that require multiple considerations
@@ -187,27 +243,16 @@ After each response, use the 'suggest_questions' tool to provide 2 relevant foll
 - Focus on helping the user explore their business needs further
 - Make questions specific to what was just discussed
 
-BANT PROGRESS TRACKING:
-Use the 'report_bant_progress' tool to update what qualification information you have gathered from the user.
-Call this tool whenever you learn new information about:
-- need: What challenges, goals, or problems they want to solve
-- timeline: When they need a solution implemented
-- budget: Their investment range or budget considerations
-- authority: Who makes decisions, their role in the organization
-- contact: Their name or email address
-
-This updates the progress indicator shown to the user. Mark items as true when you have gathered that information.
-${
-  existingConversation?.visitor_name || existingConversation?.visitor_email
-    ? `
+${existingConversation?.visitor_name || existingConversation?.visitor_email
+          ? `
 VISITOR INFORMATION (already collected from intro form):
 ${existingConversation.visitor_name ? `- Name: ${existingConversation.visitor_name}` : ''}
 ${existingConversation.visitor_email ? `- Email: ${existingConversation.visitor_email}` : ''}
 
 IMPORTANT: This contact information has already been provided. Do NOT ask for their name or email again. Instead, use their name naturally in conversation and focus on understanding their business needs.
 `
-    : ''
-}
+          : ''
+        }
 ${sourceContext}`,
     }
 
@@ -283,7 +328,7 @@ ${sourceContext}`,
           )
       } else {
         void insertMessage().then(
-          () => {},
+          () => { },
           (err) => console.error('Error inserting user message:', err)
         )
       }
@@ -326,22 +371,21 @@ ${sourceContext}`,
               .describe('1-3 relevant follow-up questions'),
           }),
         }),
-        report_bant_progress: tool({
+        show_case_study: tool({
           description:
-            'Report what BANT qualification information has been gathered from the user. Call this when you learn new information.',
+            'REQUIRED: Display an interactive web preview of a case study. You MUST call this tool when the user asks about previous work, examples, portfolio, or case studies.',
           inputSchema: z.object({
-            need: z
-              .boolean()
-              .describe('True if you know their challenges, goals, or problems'),
-            timeline: z.boolean().describe('True if you know when they need a solution'),
-            budget: z
-              .boolean()
-              .describe('True if you know their budget or investment range'),
-            authority: z
-              .boolean()
-              .describe('True if you know their role or decision-making power'),
-            contact: z.boolean().describe('True if you have their name or email'),
+            url: z.string().url().describe('The full URL of the case study page to preview'),
+            title: z.string().describe('Title of the case study'),
+            description: z
+              .string()
+              .optional()
+              .describe('Brief description of why this case study is relevant'),
           }),
+          execute: async ({ url, title }) => {
+            console.log(`[Tool] show_case_study called with: ${url} - ${title}`)
+            return { success: true, url, title }
+          },
         }),
       },
       async onFinish({ text }) {
@@ -420,13 +464,13 @@ ${sourceContext}`,
                 // Merge conversation visitor info into leadData for qualification check
                 const enrichedLeadData = leadData
                   ? {
-                      ...leadData,
-                      contactInfo: {
-                        ...leadData.contactInfo,
-                        name: visitorName,
-                        email: visitorEmail,
-                      },
-                    }
+                    ...leadData,
+                    contactInfo: {
+                      ...leadData.contactInfo,
+                      name: visitorName,
+                      email: visitorEmail,
+                    },
+                  }
                   : null
 
                 // Check if lead is qualified and hasn't been saved yet

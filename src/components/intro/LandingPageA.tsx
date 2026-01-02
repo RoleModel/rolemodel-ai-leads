@@ -104,8 +104,9 @@ export interface LandingPageAProps {
 
 export function LandingPageA({ chatbotId }: LandingPageAProps) {
   const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
-  const [showChat, setShowChat] = useState(false)
   const storedVisitor = useSessionStorage<VisitorData>(STORAGE_KEY)
+  // Auto-show chat if there's an existing session
+  const [showChat, setShowChat] = useState(false)
   const [visitorData, setVisitorData] = useState<VisitorData | null>(null)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
@@ -115,6 +116,13 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
   // Use stored visitor if available and no local state set yet
   const activeVisitor = visitorData ?? storedVisitor
   const hasExistingSession = storedVisitor !== null
+
+  // Auto-show chat when there's an existing session (on page load/refresh)
+  useEffect(() => {
+    if (hasExistingSession && !showChat) {
+      setShowChat(true)
+    }
+  }, [hasExistingSession, showChat])
 
   // Track page view on mount
   useEffect(() => {

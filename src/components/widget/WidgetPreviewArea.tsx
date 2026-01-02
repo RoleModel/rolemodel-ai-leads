@@ -136,7 +136,7 @@ export function WidgetPreviewArea() {
                       borderRadius: 'var(--op-radius-small)',
                       backgroundColor:
                         config.profilePicture?.startsWith('data:') ||
-                        config.profilePicture?.startsWith('http')
+                          config.profilePicture?.startsWith('http')
                           ? 'transparent'
                           : 'white',
                       color: config.primaryColor,
@@ -148,7 +148,7 @@ export function WidgetPreviewArea() {
                       overflow: 'hidden',
                       backgroundImage:
                         config.profilePicture?.startsWith('data:') ||
-                        config.profilePicture?.startsWith('http')
+                          config.profilePicture?.startsWith('http')
                           ? `url(${config.profilePicture})`
                           : 'none',
                       backgroundSize: 'cover',
@@ -227,7 +227,7 @@ export function WidgetPreviewArea() {
               >
                 <ChatInterface
                   initialMessage={
-                    config.initialMessage || 'Hi! Let&apos;s talk about your project!'
+                    config.initialMessage || 'Hi! I\'m here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?'
                   }
                   collectFeedback={config.collectFeedback}
                 />

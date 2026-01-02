@@ -195,7 +195,7 @@ function ConversionRateComparison({ variants }: { variants: Variant[] }) {
                   border: '1px solid var(--op-color-border)',
                   borderRadius: 'var(--op-radius-medium)',
                 }}
-                formatter={(value: number) => `${value.toFixed(1)}%`}
+                formatter={(value) => `${Number(value).toFixed(1)}%`}
               />
               <Bar
                 dataKey="conversionRate"

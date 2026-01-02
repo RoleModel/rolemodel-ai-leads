@@ -218,13 +218,13 @@ export function EditorSidebar({
         onMouseDown={handleMouseDown}
         onMouseEnter={(e) => {
           if (!isResizing) {
-            ;(e.target as HTMLElement).style.backgroundColor =
+            ; (e.target as HTMLElement).style.backgroundColor =
               'var(--op-color-primary-minus-four)'
           }
         }}
         onMouseLeave={(e) => {
           if (!isResizing) {
-            ;(e.target as HTMLElement).style.backgroundColor = 'transparent'
+            ; (e.target as HTMLElement).style.backgroundColor = 'transparent'
           }
         }}
       />
@@ -432,23 +432,25 @@ export function EditorSidebar({
             <textarea
               value={settings.aiInstructions}
               onChange={(e) => updateSettings({ aiInstructions: e.target.value })}
-              placeholder={`Example using CRIT™ framework:
+              placeholder={`Example using consultative approach:
 
-CONTEXT: We're a B2B SaaS platform helping mid-market companies (10-50 employees, $5M-$50M revenue) automate sales workflows.
+CONTEXT: We're helping potential clients assess whether custom software makes sense for their business, using an investment mindset.
 
-ROLE: You are an expert B2B sales qualification specialist with 15+ years in SaaS, using BANT methodology.
+ROLE: You are a consultative advisor helping prospects thoughtfully evaluate their options.
 
-INTERVIEW: Ask questions one at a time (3-5 total) to assess:
-- Budget: Can they invest $50K-$500K annually?
-- Authority: Are they a decision-maker or influencer?
-- Need: What workflow challenges are they facing?
-- Timeline: When do they need a solution?
+CONVERSATION: Ask questions one at a time (max 5) in this order:
+1. Problem/Opportunity - What's prompting them to consider custom software?
+2. Alternatives Tried - What solutions have they already explored?
+3. Business Context - Background on their business and how this fits
+4. Success Metrics - How would they measure success?
+5. Investment Mindset - How do they think about investing in an initial solution?
 
-TASK: After qualification, provide:
-1. Qualification score (0-100)
-2. Summary of their needs
-3. Recommended next steps
-4. Offer to schedule a discovery call`}
+TASK: After the conversation, provide:
+1. A summary reflecting their situation back to them
+2. Potential ROI framing using investment-oriented approach
+3. Clear indication of whether custom software appears promising
+4. Suggested next steps with alternative paths if needed
+5. Offer to schedule a consultation`}
               className="form-control"
               rows={15}
               style={{
@@ -610,27 +612,6 @@ TASK: After qualification, provide:
             </p>
 
             <div>
-              <div className="form-group">
-                {/* BANT Qualification Toggle */}
-                <Input
-                  id="enableBANT"
-                  name="enableBANT"
-                  type="checkbox"
-                  checked={settings.ragConfig?.enableBANT ?? true}
-                  onChange={(e) =>
-                    updateSettings({
-                      ragConfig: { ...settings.ragConfig, enableBANT: e.target.checked },
-                    })
-                  }
-                  className="form-control--medium"
-                />
-                <Label>BANT Qualification</Label>
-              </div>
-
-              <p style={{ fontSize: 'var(--op-font-x-small)', margin: 0 }}>
-                Ask about Budget, Authority, Need, Timeline
-              </p>
-
               {/* Ask for Name Toggle */}
               <div className="form-group">
                 <Input
