@@ -26,7 +26,8 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { AnimatePresence, motion } from 'motion/react'
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
@@ -84,6 +85,20 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   useLeadsPageSettings()
   const [step, setStep] = useState<'intro' | 'chat'>('intro')
   const [isExpanded, setIsExpanded] = useState(false)
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null)
+
+  // Set up portal container on mount
+  useEffect(() => {
+    setPortalContainer(document.body)
+  }, [])
+
+  const handleToggleExpand = () => {
+    setIsExpanded((prev) => !prev)
+  }
+
+  const handleCloseExpanded = () => {
+    setIsExpanded(false)
+  }
   const [formData, setFormData] = useState({ name: '', email: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
@@ -206,298 +221,327 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
     'I need to modernize our legacy software',
   ]
 
-  return (
-    <Card
-      className={`${styles['intro-c-card']} ${step === 'chat' && isExpanded ? styles['intro-c-intro--fixed'] : ''}`}
+  // Chat content shared between inline and expanded modes
+  const chatContent = (
+    <motion.div
+      key="chat"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={styles['intro-c-chat']}
     >
-      {step === 'chat' && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className={styles['intro-c-card__expand-btn']}
-          onClick={() => setIsExpanded(!isExpanded)}
-          aria-label={isExpanded ? 'Minimize' : 'Maximize'}
-        >
-          <HugeiconsIcon
-            icon={isExpanded ? MinimizeScreenIcon : MaximizeScreenIcon}
-            size={20}
-          />
-        </Button>
-      )}
-      <div className={styles['intro-c-card__content']}>
-        <AnimatePresence mode="wait">
-          {/* Intro Step */}
-          {step === 'intro' && (
-            <motion.div
-              key="intro"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className={styles['intro-c-intro']}
-            >
-              <div className={styles['intro-c-intro__header']}>
-                <motion.span
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className={styles['intro-c-intro__emoji']}
-                >
-                  {String.fromCodePoint(0x1f44b)}
-                </motion.span>
-                <h3 className={styles['intro-c-intro__title']}>
-                  Let&apos;s see if we fit.
-                </h3>
-                <p className={styles['intro-c-intro__subtitle']}>
-                  We&apos;ll ask a few key questions to understand your needs. We&apos;ll
-                  email you the results.
-                </p>
+      <Conversation className={styles['intro-c-chat__conversation']}>
+        <ConversationContent>
+          {messages.length === 0 && (
+            <Message from="assistant">
+              <div className="message-avatar">
+                <Favicon
+                  className="message-avatar__image"
+                  style={{
+                    width: 'var(--op-space-large)',
+                    height: 'var(--op-space-large)',
+                  }}
+                />
               </div>
-              <form
-                className={styles['intro-c-intro__form']}
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  void handleStartChat()
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label">Full Name</label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    autoComplete="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="form-control form-control--large"
-                    placeholder="Jane Doe"
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Work Email</label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="form-control form-control--large"
-                    placeholder="jane@company.com"
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  size="lg"
-                  variant="primary"
-                  style={{ width: 'fit-content' }}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Starting...' : 'Start Conversation'}
-                  {!isSubmitting && <HugeiconsIcon icon={ArrowRight02Icon} size={20} />}
-                </Button>
-
-                <p className={styles['intro-c-intro__disclaimer']}>
-                  By continuing, you agree to our privacy policy. Your data is secure.
-                </p>
-              </form>
-            </motion.div>
+              <MessageContent>
+                <MessageResponse>
+                  {`Hi ${formData.name.split(' ')[0]}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`}
+                </MessageResponse>
+              </MessageContent>
+            </Message>
           )}
+          {messages.map((message) => (
+            <Fragment key={message.id}>
+              {message.parts.map((part, index) => {
+                switch (part.type) {
+                  case 'text':
+                    return (
+                      <Fragment key={`${message.id}-${index}`}>
+                        <Message from={message.role}>
+                          {message.role === 'assistant' && (
+                            <div className="message-avatar">
+                              <Favicon
+                                className="message-avatar__image"
+                                style={{
+                                  width: 'var(--op-space-large)',
+                                  height: 'var(--op-space-large)',
+                                }}
+                              />
+                            </div>
+                          )}
+                          <MessageContent>
+                            {isClient ? (
+                              messageCitations[message.id]?.length ? (
+                                <MessageWithCitations
+                                  message={message}
+                                  citations={messageCitations[message.id]}
+                                />
+                              ) : (
+                                <MessageResponse>{part.text}</MessageResponse>
+                              )
+                            ) : (
+                              <div>{part.text}</div>
+                            )}
+                            {message.role === 'assistant' && (
+                              <MessageActions>
+                                <MessageAction
+                                  label="Like"
+                                  onClick={() =>
+                                    setLiked((prev) => ({
+                                      ...prev,
+                                      [message.id]: !prev[message.id],
+                                    }))
+                                  }
+                                  tooltip="Like this response"
+                                >
+                                  <HugeiconsIcon
+                                    icon={ThumbsUpIcon}
+                                    size={16}
+                                    color={liked[message.id] ? 'currentColor' : 'none'}
+                                  />
+                                </MessageAction>
+                                <MessageAction
+                                  label="Dislike"
+                                  onClick={() =>
+                                    setDisliked((prev) => ({
+                                      ...prev,
+                                      [message.id]: !prev[message.id],
+                                    }))
+                                  }
+                                  tooltip="Dislike this response"
+                                >
+                                  <HugeiconsIcon
+                                    icon={ThumbsDownIcon}
+                                    size={16}
+                                    color={disliked[message.id] ? 'currentColor' : 'none'}
+                                  />
+                                </MessageAction>
+                                <MessageAction
+                                  onClick={() => regenerate()}
+                                  label="Retry"
+                                >
+                                  <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                                </MessageAction>
+                                <MessageAction
+                                  onClick={() =>
+                                    navigator.clipboard.writeText(part.text)
+                                  }
+                                  label="Copy"
+                                >
+                                  <HugeiconsIcon icon={Copy01Icon} size={16} />
+                                </MessageAction>
+                              </MessageActions>
+                            )}
+                          </MessageContent>
+                        </Message>
+                      </Fragment>
+                    )
+                  default:
+                    return null
+                }
+              })}
+            </Fragment>
+          ))}
+        </ConversationContent>
+      </Conversation>
 
-          {/* Chat Step - Real AI Chat */}
-          {step === 'chat' && (
-            <motion.div
-              key="chat"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={styles['intro-c-chat']}
-            >
-              <Conversation className={styles['intro-c-chat__conversation']}>
-                <ConversationContent>
-                  {messages.length === 0 && (
-                    <Message from="assistant">
-                      <div className="message-avatar">
-                        <Favicon
-                          className="message-avatar__image"
-                          style={{
-                            width: 'var(--op-space-large)',
-                            height: 'var(--op-space-large)',
-                          }}
-                        />
-                      </div>
-                      <MessageContent>
-                        <MessageResponse>
-                          {`Hi ${formData.name.split(' ')[0]}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`}
-                        </MessageResponse>
-                      </MessageContent>
-                    </Message>
-                  )}
-                  {messages.map((message) => (
-                    <Fragment key={message.id}>
-                      {message.parts.map((part, index) => {
-                        switch (part.type) {
-                          case 'text':
-                            return (
-                              <Fragment key={`${message.id}-${index}`}>
-                                <Message from={message.role}>
-                                  {message.role === 'assistant' && (
-                                    <div className="message-avatar">
-                                      <Favicon
-                                        className="message-avatar__image"
-                                        style={{
-                                          width: 'var(--op-space-large)',
-                                          height: 'var(--op-space-large)',
-                                        }}
-                                      />
-                                    </div>
-                                  )}
-                                  <MessageContent>
-                                    {isClient ? (
-                                      messageCitations[message.id]?.length ? (
-                                        <MessageWithCitations
-                                          message={message}
-                                          citations={messageCitations[message.id]}
-                                        />
-                                      ) : (
-                                        <MessageResponse>{part.text}</MessageResponse>
-                                      )
-                                    ) : (
-                                      <div>{part.text}</div>
-                                    )}
-                                    {message.role === 'assistant' && (
-                                      <MessageActions>
-                                        <MessageAction
-                                          label="Like"
-                                          onClick={() =>
-                                            setLiked((prev) => ({
-                                              ...prev,
-                                              [message.id]: !prev[message.id],
-                                            }))
-                                          }
-                                          tooltip="Like this response"
-                                        >
-                                          <HugeiconsIcon
-                                            icon={ThumbsUpIcon}
-                                            size={16}
-                                            color={
-                                              liked[message.id] ? 'currentColor' : 'none'
-                                            }
-                                          />
-                                        </MessageAction>
-                                        <MessageAction
-                                          label="Dislike"
-                                          onClick={() =>
-                                            setDisliked((prev) => ({
-                                              ...prev,
-                                              [message.id]: !prev[message.id],
-                                            }))
-                                          }
-                                          tooltip="Dislike this response"
-                                        >
-                                          <HugeiconsIcon
-                                            icon={ThumbsDownIcon}
-                                            size={16}
-                                            color={
-                                              disliked[message.id]
-                                                ? 'currentColor'
-                                                : 'none'
-                                            }
-                                          />
-                                        </MessageAction>
-                                        <MessageAction
-                                          onClick={() => regenerate()}
-                                          label="Retry"
-                                        >
-                                          <HugeiconsIcon icon={Refresh01Icon} size={16} />
-                                        </MessageAction>
-                                        <MessageAction
-                                          onClick={() =>
-                                            navigator.clipboard.writeText(part.text)
-                                          }
-                                          label="Copy"
-                                        >
-                                          <HugeiconsIcon icon={Copy01Icon} size={16} />
-                                        </MessageAction>
-                                      </MessageActions>
-                                    )}
-                                  </MessageContent>
-                                </Message>
-                              </Fragment>
-                            )
-                          default:
-                            return null
-                        }
-                      })}
-                    </Fragment>
-                  ))}
-                </ConversationContent>
-              </Conversation>
-
-              <div
-                className={styles['intro-c-chat__input-wrapper']}
-                style={{ paddingBottom: 'var(--op-space-medium)' }}
-              >
-                <div className="gradient" style={{ top: '80%' }} />
-                <PromptInputProvider>
-                  <PromptInput onSubmit={handlePromptSubmit}>
-                    <PromptInputBody>
-                      <PromptInputTextarea
-                        ref={textareaRef}
-                        placeholder="Describe your challenge..."
-                      />
-                    </PromptInputBody>
-                    <PromptInputFooter>
-                      <PromptInputTools>
-                        <PromptInputActionMenu>
-                          <PromptInputActionMenuTrigger>
-                            <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                          </PromptInputActionMenuTrigger>
-                          <PromptInputActionMenuContent>
-                            <PromptInputActionAddAttachments />
-                          </PromptInputActionMenuContent>
-                        </PromptInputActionMenu>
-                        <PromptInputSpeechButton textareaRef={textareaRef} />
-                      </PromptInputTools>
-                      <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-                    </PromptInputFooter>
-                  </PromptInput>
-                </PromptInputProvider>
-              </div>
-
-              {messages.length < 2 && (
-                <div className={styles['intro-c-chat__suggestions']}>
-                  <Suggestions>
-                    {suggestions.map((suggestion) => (
-                      <Suggestion
-                        key={suggestion}
-                        size="sm"
-                        onClick={() =>
-                          handlePromptSubmit({ text: suggestion, files: [] })
-                        }
-                        suggestion={suggestion}
-                      />
-                    ))}
-                  </Suggestions>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div
+        className={styles['intro-c-chat__input-wrapper']}
+        style={{ paddingBottom: 'var(--op-space-medium)' }}
+      >
+        <div className="gradient" style={{ top: '80%' }} />
+        <PromptInputProvider>
+          <PromptInput onSubmit={handlePromptSubmit}>
+            <PromptInputBody>
+              <PromptInputTextarea
+                ref={textareaRef}
+                placeholder="Describe your challenge..."
+              />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <PromptInputTools>
+                <PromptInputActionMenu>
+                  <PromptInputActionMenuTrigger>
+                    <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                  </PromptInputActionMenuTrigger>
+                  <PromptInputActionMenuContent>
+                    <PromptInputActionAddAttachments />
+                  </PromptInputActionMenuContent>
+                </PromptInputActionMenu>
+                <PromptInputSpeechButton textareaRef={textareaRef} />
+              </PromptInputTools>
+              <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+            </PromptInputFooter>
+          </PromptInput>
+        </PromptInputProvider>
       </div>
-    </Card>
+
+      {messages.length < 2 && (
+        <div className={styles['intro-c-chat__suggestions']}>
+          <Suggestions>
+            {suggestions.map((suggestion) => (
+              <Suggestion
+                key={suggestion}
+                size="sm"
+                onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
+                suggestion={suggestion}
+              />
+            ))}
+          </Suggestions>
+        </div>
+      )}
+    </motion.div>
+  )
+
+  // Expanded modal rendered via portal (outside smooth-wrapper stacking context)
+  const expandedModal =
+    step === 'chat' && isExpanded && portalContainer
+      ? createPortal(
+        <>
+          {/* Backdrop */}
+          <div
+            className={styles['intro-c-lightbox-backdrop']}
+            onClick={handleCloseExpanded}
+            aria-hidden="true"
+          />
+          {/* Modal Card */}
+          <Card className={styles['intro-c-lightbox']}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={styles['intro-c-card__expand-btn']}
+              onClick={handleCloseExpanded}
+              aria-label="Minimize"
+            >
+              <HugeiconsIcon icon={MinimizeScreenIcon} size={20} />
+            </Button>
+            <div className={styles['intro-c-card__content']}>{chatContent}</div>
+          </Card>
+        </>,
+        portalContainer
+      )
+      : null
+
+  return (
+    <>
+      {/* Inline card (when not expanded or intro step) */}
+      <Card className={styles['intro-c-card']}>
+        {step === 'chat' && !isExpanded && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={styles['intro-c-card__expand-btn']}
+            onClick={handleToggleExpand}
+            aria-label="Maximize"
+          >
+            <HugeiconsIcon icon={MaximizeScreenIcon} size={20} />
+          </Button>
+        )}
+        <div className={styles['intro-c-card__content']}>
+          <AnimatePresence mode="wait">
+            {/* Intro Step */}
+            {step === 'intro' && (
+              <motion.div
+                key="intro"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className={styles['intro-c-intro']}
+              >
+                <div className={styles['intro-c-intro__header']}>
+                  <motion.span
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className={styles['intro-c-intro__emoji']}
+                  >
+                    {String.fromCodePoint(0x1f44b)}
+                  </motion.span>
+                  <h3 className={styles['intro-c-intro__title']}>
+                    Let&apos;s see if we fit.
+                  </h3>
+                  <p className={styles['intro-c-intro__subtitle']}>
+                    We&apos;ll ask a few key questions to understand your needs.
+                    We&apos;ll email you the results.
+                  </p>
+                </div>
+                <form
+                  className={styles['intro-c-intro__form']}
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    void handleStartChat()
+                  }}
+                >
+                  <div className="form-group">
+                    <label className="form-label">Full Name</label>
+                    <input
+                      id="name"
+                      type="text"
+                      name="name"
+                      autoComplete="name"
+                      required
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="form-control form-control--large"
+                      placeholder="Jane Doe"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Work Email</label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className="form-control form-control--large"
+                      placeholder="jane@company.com"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    variant="primary"
+                    style={{ width: 'fit-content' }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Starting...' : 'Start Conversation'}
+                    {!isSubmitting && <HugeiconsIcon icon={ArrowRight02Icon} size={20} />}
+                  </Button>
+
+                  <p className={styles['intro-c-intro__disclaimer']}>
+                    By continuing, you agree to our privacy policy. Your data is secure.
+                  </p>
+                </form>
+              </motion.div>
+            )}
+
+            {/* Chat Step - inline (non-expanded) */}
+            {step === 'chat' && !isExpanded && chatContent}
+          </AnimatePresence>
+        </div>
+      </Card>
+
+      {/* Portal-rendered expanded modal */}
+      {expandedModal}
+    </>
   )
 }
 
 // Wrap with provider
-const AssessmentTool = (props: AssessmentToolProps) => (
+const AssessmentTool = ({ chatbotId }: AssessmentToolProps) => (
   <LeadsPageSettingsProvider>
-    <AssessmentToolInner {...props} />
+    <AssessmentToolInner chatbotId={chatbotId} />
   </LeadsPageSettingsProvider>
 )
 

@@ -294,6 +294,7 @@ html:has([data-page='intro-c']) body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -307,32 +308,61 @@ html:has([data-page='intro-c']) body {
   width: 100%;
 }
 
-body:has(.intro-c-intro--fixed),
-.intro-c-intro:has(.intro-c-intro--fixed) {
-  overflow: hidden;
-}
+/* NOTE: Body scroll lock for .intro-c-intro--fixed is deprecated - see .intro-c-lightbox styles above */
 
-.intro-c-intro--fixed {
-  position: fixed;
-  inset: 24px;
-  z-index: 100;
-  box-shadow: var(--op-shadow-large);
-}
+/* NOTE: .intro-c-intro--fixed is deprecated - use .intro-c-lightbox via portal instead */
 
-.intro-c-page::before {
-  content: '';
+/* ===== LIGHTBOX MODAL (rendered via portal) ===== */
+.intro-c-lightbox-backdrop {
   position: fixed;
   inset: 0;
-  background-color: color-mix(in srgb, var(--blue-green-900) 80%, transparent);
-  z-index: 99;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: color-mix(in srgb, var(--blue-green-900) 85%, transparent);
+  z-index: 9998;
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-.intro-c-page:has(.intro-c-intro--fixed)::before {
-  opacity: 1;
-  pointer-events: auto;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.intro-c-lightbox {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--op-shadow-large);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Lock body scroll when lightbox is open */
+:global(body:has(.intro-c-lightbox)) {
+  overflow: hidden !important;
+}
+
+:global(html:has(.intro-c-lightbox)) {
+  overflow: hidden !important;
 }
 
 .intro-c-intro__emoji {
@@ -432,7 +462,8 @@ body:has(.intro-c-intro--fixed),
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 600px;
+  min-height: 0;
+  max-height: 100%;
   min-width: 0;
   overflow: hidden;
 }
