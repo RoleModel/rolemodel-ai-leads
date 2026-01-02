@@ -91,7 +91,6 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
-  const [contactCaptured, setContactCaptured] = useState(false)
 
   const activeChatbotId = chatbotId || 'a0000000-0000-0000-0000-000000000001'
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -166,38 +165,6 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const isStreaming = status === 'streaming'
   const isClient = typeof window !== 'undefined'
 
-  // Derive BANT status from messages
-  const bantStatus = useMemo(() => {
-    const status = {
-      need: false,
-      timeline: false,
-      budget: false,
-      authority: false,
-      contact: contactCaptured,
-    }
-    for (const message of messages) {
-      for (const part of message.parts) {
-        if (part.type === 'tool-report_bant_progress') {
-          const toolPart = part as { type: string; input?: Record<string, boolean> }
-          if (toolPart.input) {
-            status.need = toolPart.input.need ?? status.need
-            status.timeline = toolPart.input.timeline ?? status.timeline
-            status.budget = toolPart.input.budget ?? status.budget
-            status.authority = toolPart.input.authority ?? status.authority
-            status.contact = toolPart.input.contact ?? status.contact
-          }
-        }
-      }
-    }
-    return status
-  }, [messages, contactCaptured])
-
-  // Calculate BANT progress
-  const bantProgress = useMemo(() => {
-    const completed = Object.values(bantStatus).filter(Boolean).length
-    return Math.round((completed / 5) * 100)
-  }, [bantStatus])
-
   const handlePromptSubmit = async (message: PromptInputMessage) => {
     if (!message.text.trim()) return
     await sendMessage({ text: message.text })
@@ -225,8 +192,6 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
       const result = await response.json()
       setConversationId(result.conversationId)
 
-      // Mark contact as captured since we have name and email
-      setContactCaptured(true)
       setStep('chat')
       setIsExpanded(true)
     } catch (error) {
@@ -368,7 +333,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                       </div>
                       <MessageContent>
                         <MessageResponse>
-                          {`Hi ${formData.name.split(' ')[0]}! To start, could you describe the primary business problem you want to solve with custom software?`}
+                          {`Hi ${formData.name.split(' ')[0]}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`}
                         </MessageResponse>
                       </MessageContent>
                     </Message>
@@ -473,19 +438,6 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                   ))}
                 </ConversationContent>
               </Conversation>
-
-              {/* BANT Progress Indicator */}
-              {bantProgress < 100 && (
-                <div className="leads-page__bant-progress">
-                  <div className="leads-page__bant-bar">
-                    <div
-                      className="leads-page__bant-fill"
-                      style={{ width: `${bantProgress}%` }}
-                    />
-                  </div>
-                  <span className="leads-page__bant-text">{bantProgress}%</span>
-                </div>
-              )}
 
               <div
                 className={styles['intro-c-chat__input-wrapper']}

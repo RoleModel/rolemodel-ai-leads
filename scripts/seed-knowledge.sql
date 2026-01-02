@@ -219,3 +219,106 @@ We typically respond to inquiries within one business day. Our team values respo
 
 The best way to get started is to share a bit about your project, and we''ll set up a time to talk. What questions can I help answer to determine if RoleModel might be a good fit for your needs?'
 );
+
+-- Case Study: American Muscle Docks
+INSERT INTO sources (chatbot_id, title, content, metadata) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'Case Study: American Muscle Docks',
+  'American Muscle Docks - Powerful dock design and sales tool
+
+KEY HIGHLIGHTS:
+1. Precise placement of visualized accessories
+2. Enhanced PDF export
+3. Customizable admin pricing controls
+4. Toggle decking to view internal structure
+5. Grade ratings for gangways
+
+THE CUSTOMIZATION STORY:
+American Muscle Docks came to us looking to improve their overall dock selling process. From designing to visualizing to estimating, American Muscle had thus far been feeling the strain of doing each of these separately and manually. They used SketchUp to model their designs, which was a slow process, and not one that they could bring their customers in on. AM Docks recognized how important visual selling was to their product, and wanted something that could provide an intriguing experience for their customers. AM Docks was also dealing with issues from data entry mistakes which we realized could be solved by automation.
+
+As the process began, the task list grew. AM Docks has a wide variety of parts that make up their docks, and we realized that it would be especially necessary on this project to prioritize effectively. Their most common product was their wood dock, so we started there. We introduced visualization for their dock accessories (cleats, rub rail, pile guides, pipe holds, and more), removal of decking to see internal hardware, and an updated pricing system and breakdown. We also worked with them to figure out what other operational features would streamline their process.
+
+The result of this push was an improved PDF plan download, options to update pricing, and the ability to add additional items to the displayed pricing breakdown. Before long, the AM Docks team was seeing the Dock Designer platform with their products integrated, allowing for intuitive and powerful design.
+
+By the time their minimum viable product was completed, AM Docks'' three most common dock types were supported, along with the accessories that come with them. They had a platform that would not only work well internally, but they could also push it to their website to allow customers to design their own docks with the peace of mind that the designer would ensure each dock fit their standards.
+
+CLIENT TESTIMONIAL:
+"It used to take me two hours to get a rough quote to a customer, and I needed to find the time in my week to do it. Now, in less than 5 minutes, I can get them a quote while I still have them on the line." - American Muscle Docks',
+  '{"url": "https://rolemodelsoftware.com/case-studies/american-muscle-docks", "type": "case-study"}'::jsonb
+);
+
+-- Case Study: LightningCAD (Airfield Design)
+INSERT INTO sources (chatbot_id, title, content, metadata) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'Case Study: LightningCAD - Airfield Design Platform',
+  'LightningCAD - Revolutionizing Airfield Design with a Guided and Flexible Platform
+
+RoleModel built LightningCAD, a powerful airfield design tool that helps engineers and planners create precise airfield layouts. The platform provides a guided and flexible approach to designing complex airfield infrastructure.
+
+KEY FEATURES:
+- Intuitive design interface for airfield layouts
+- Guided workflows for common design patterns
+- Flexible enough for custom requirements
+- Accurate measurements and specifications
+- Export capabilities for engineering documents
+
+This project showcases RoleModel''s expertise in building specialized CAD-like applications that simplify complex design processes while maintaining professional-grade accuracy.',
+  '{"url": "https://rolemodelsoftware.com/portfolio", "type": "case-study"}'::jsonb
+);
+
+-- Case Study: BGEA Volunteer Management
+INSERT INTO sources (chatbot_id, title, content, metadata) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'Case Study: BGEA Volunteer Management',
+  'BGEA Volunteer Management Application
+
+RoleModel developed a comprehensive volunteer management application for the Billy Graham Evangelistic Association (BGEA) to manage and track volunteer lifecycles.
+
+KEY FEATURES:
+- Complete volunteer lifecycle management
+- Internationalization (i18n) support for global events
+- Complex integrations with existing BGEA systems
+- Volunteer tracking and scheduling
+- Event management capabilities
+
+This application demonstrates RoleModel''s ability to handle complex enterprise requirements including multi-language support and integration with existing organizational systems.',
+  '{"url": "https://rolemodelsoftware.com/case-studies/bgea-volunteer-management", "type": "case-study"}'::jsonb
+);
+
+-- Case Study: Viewpoint Forum (Executive Coaching)
+INSERT INTO sources (chatbot_id, title, content, metadata) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'Case Study: Viewpoint Forum - Executive Coaching Platform',
+  'Viewpoint Forum - Branded Mobile PWA and Desktop Web Application
+
+RoleModel created a branded Progressive Web App (PWA) and desktop web application for Viewpoint Forum, a business forum and executive coaching firm.
+
+KEY FEATURES:
+- Progressive Web App for mobile access
+- Desktop web application
+- Branded experience matching client identity
+- Executive coaching tools and resources
+- Business forum functionality
+
+This project showcases RoleModel''s expertise in building cross-platform applications that work seamlessly on both mobile and desktop while maintaining a consistent branded experience.',
+  '{"url": "https://rolemodelsoftware.com/portfolio", "type": "case-study"}'::jsonb
+);
+
+-- Case Study: E-commerce Cable Railing
+INSERT INTO sources (chatbot_id, title, content, metadata) VALUES (
+  'a0000000-0000-0000-0000-000000000001',
+  'Case Study: DIY Cable Railing E-commerce Platform',
+  'E-commerce Platform for DIY Cable Railing Company
+
+RoleModel built a comprehensive e-commerce platform for a DIY cable railing company, enabling customers to design and purchase custom cable railing systems online.
+
+KEY FEATURES:
+- Online cable railing design tools
+- E-commerce shopping experience
+- Custom configuration options
+- Accurate pricing calculations
+- Order management system
+
+This project demonstrates RoleModel''s ability to combine product configurators with e-commerce functionality, creating a seamless buying experience for custom products.',
+  '{"url": "https://rolemodelsoftware.com/portfolio", "type": "case-study"}'::jsonb
+);

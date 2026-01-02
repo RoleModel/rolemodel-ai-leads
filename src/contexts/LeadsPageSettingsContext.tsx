@@ -20,7 +20,6 @@ interface RagConfig {
   citationStyle: string
 
   // Conversation Flow
-  enableBANT: boolean
   askForName: boolean
   askForEmail: boolean
   maxQuestions: number
@@ -73,7 +72,6 @@ const DEFAULT_RAG_CONFIG: RagConfig = {
   citationStyle: 'numbered',
 
   // Conversation Flow
-  enableBANT: true,
   askForName: true,
   askForEmail: true,
   maxQuestions: 5,

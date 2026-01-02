@@ -147,7 +147,7 @@ export default function DeployPage() {
                         color: 'var(--op-color-neutral-on-plus-four)',
                       }}
                     >
-                      Hi! Let&apos;s talk about your project!
+                      What problem or opportunity is prompting you to consider custom software?
                     </div>
                   </div>
                 </div>

@@ -81,7 +81,7 @@ export function PlaygroundPreview({ settings, onReset }: PlaygroundPreviewProps)
         style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
       >
         <ChatInterface
-          initialMessage="Hi! Let's talk about your project!"
+          initialMessage="Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?"
           playgroundSettings={settings}
         />
       </div>

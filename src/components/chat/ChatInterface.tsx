@@ -30,6 +30,12 @@ import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
+import {
+  WebPreview,
+  WebPreviewBody,
+  WebPreviewNavigation,
+  WebPreviewUrl,
+} from '@/components/ai-elements/web-preview'
 import { Button } from '@/components/ui/button'
 
 interface PlaygroundSettings {
@@ -60,9 +66,15 @@ interface ThinkingStep {
 // Tool part from AI SDK - type is `tool-${toolName}`
 interface ToolPart {
   type: string
+  toolName?: string
   toolCallId?: string
   input?: {
     steps?: ThinkingStep[]
+  }
+  args?: {
+    url?: string
+    title?: string
+    description?: string
   }
 }
 
@@ -148,10 +160,10 @@ export function ChatInterface({
           ...(chatbotId ? { chatbotId } : {}),
           ...(playgroundSettings
             ? {
-                model: playgroundSettings.model,
-                temperature: playgroundSettings.temperature,
-                instructions: playgroundSettings.instructions,
-              }
+              model: playgroundSettings.model,
+              temperature: playgroundSettings.temperature,
+              instructions: playgroundSettings.instructions,
+            }
             : {}),
         },
         fetch: interceptingFetch,
@@ -263,6 +275,52 @@ export function ChatInterface({
     )
   }
 
+  const renderCaseStudyPreview = (toolPart: ToolPart) => {
+    const isShowCaseStudy =
+      toolPart.toolName === 'show_case_study' || toolPart.type === 'tool-show_case_study'
+
+    if (!isShowCaseStudy || !toolPart.args?.url) return null
+
+    return (
+      <div
+        className="case-study-preview"
+        style={{
+          margin: 'var(--op-space-medium) 0',
+          maxWidth: '100%',
+        }}
+      >
+        {toolPart.args.title && (
+          <p
+            style={{
+              marginBottom: 'var(--op-space-small)',
+              fontWeight: 500,
+              color: 'var(--op-color-text)',
+            }}
+          >
+            {toolPart.args.title}
+          </p>
+        )}
+        {toolPart.args.description && (
+          <p
+            style={{
+              marginBottom: 'var(--op-space-small)',
+              fontSize: '0.875rem',
+              color: 'var(--op-color-text-secondary)',
+            }}
+          >
+            {toolPart.args.description}
+          </p>
+        )}
+        <WebPreview defaultUrl={toolPart.args.url}>
+          <WebPreviewNavigation>
+            <WebPreviewUrl readOnly />
+          </WebPreviewNavigation>
+          <WebPreviewBody />
+        </WebPreview>
+      </div>
+    )
+  }
+
   const isStreaming = status === 'streaming'
 
   return (
@@ -287,6 +345,9 @@ export function ChatInterface({
             {messages.map((message) => {
               const toolParts = getToolParts(message)
               const chainOfThought = toolParts.find((tp) => tp.type === 'tool-thinking')
+              const caseStudyParts = toolParts.filter(
+                (tp) => tp.toolName === 'show_case_study' || tp.type === 'tool-show_case_study'
+              )
               const citations = messageCitations[message.id]
               const hasCitations =
                 message.role === 'assistant' && citations && citations.length > 0
@@ -298,6 +359,9 @@ export function ChatInterface({
                 >
                   <MessageContent>
                     {chainOfThought && renderChainOfThought(chainOfThought)}
+                    {caseStudyParts.map((tp, idx) => (
+                      <div key={`case-study-${idx}`}>{renderCaseStudyPreview(tp)}</div>
+                    ))}
                     {hasCitations ? (
                       <MessageWithCitations message={message} citations={citations} />
                     ) : (

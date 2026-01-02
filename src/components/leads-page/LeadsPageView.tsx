@@ -53,6 +53,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
+import {
+  WebPreview,
+  WebPreviewBody,
+  WebPreviewNavigation,
+  WebPreviewUrl,
+} from '@/components/ai-elements/web-preview'
+
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
 
@@ -136,13 +143,6 @@ export function LeadsPageView({
   const [showDemo, setShowDemo] = useState(true)
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
-  const [bantStatus, setBantStatus] = useState({
-    need: false,
-    timeline: false,
-    budget: false,
-    authority: false,
-    contact: false,
-  })
 
   // Load chat history from localStorage only on client (runs once on mount)
   useEffect(() => {
@@ -225,24 +225,6 @@ export function LeadsPageView({
               setSuggestions(newSuggestions)
               setShowSuggestions(true)
             }
-          }
-
-          // Handle report_bant_progress tool
-          if (part.type === 'tool-report_bant_progress' && toolPart.input) {
-            const progress = toolPart.input as {
-              need?: boolean
-              timeline?: boolean
-              budget?: boolean
-              authority?: boolean
-              contact?: boolean
-            }
-            setBantStatus((prev) => ({
-              need: progress.need ?? prev.need,
-              timeline: progress.timeline ?? prev.timeline,
-              budget: progress.budget ?? prev.budget,
-              authority: progress.authority ?? prev.authority,
-              contact: progress.contact ?? prev.contact,
-            }))
           }
         }
       }
@@ -331,7 +313,7 @@ export function LeadsPageView({
         parts: [
           {
             type: 'text',
-            text: `Hi ${visitorName}! Thanks for completing the intro form. I'm here to help you figure out if custom software is the right solution for your business.\n\nTo get started, could you tell me a bit about what's prompting you to explore custom software? What challenges or opportunities are you looking to address?`,
+            text: `Hi ${visitorName}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
           },
         ],
       }
@@ -361,12 +343,6 @@ export function LeadsPageView({
 
   const isStreaming = status === 'streaming'
 
-  // Calculate BANT progress from tool-reported status
-  const bantProgress = useMemo(() => {
-    const completed = Object.values(bantStatus).filter(Boolean).length
-    return Math.round((completed / 5) * 100)
-  }, [bantStatus])
-
   // Suggestion handlers
   const handleAddSuggestion = () => {
     const newSuggestion: Suggestion = {
@@ -395,7 +371,7 @@ export function LeadsPageView({
       const firstUserMessage = messages.find((m) => m.role === 'user')
       const title = firstUserMessage
         ? getMessageContent(firstUserMessage).slice(0, 50) +
-          (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
+        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
         : 'New Chat'
 
       const chatToSave: ChatHistory = {
@@ -412,9 +388,23 @@ export function LeadsPageView({
       setChatHistory(trimmedHistory)
     }
 
-    // Create new chat
+    // Create new chat with initial AI greeting
     setCurrentChatId(`chat-${Date.now()}`)
-    setMessages([])
+
+    // Create initial greeting message for new chat
+    const greetingMessage: UIMessage = {
+      id: `greeting-${Date.now()}`,
+      role: 'assistant',
+      parts: [
+        {
+          type: 'text',
+          text: visitorName
+            ? `Hi ${visitorName}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+            : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
+        },
+      ],
+    }
+    setMessages([greetingMessage])
     setShowDemo(false)
   }
 
@@ -443,7 +433,7 @@ export function LeadsPageView({
       const firstUserMessage = messages.find((m) => m.role === 'user')
       const title = firstUserMessage
         ? getMessageContent(firstUserMessage).slice(0, 50) +
-          (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
+        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
         : 'New Chat'
 
       // Create new chat entry
@@ -651,26 +641,74 @@ export function LeadsPageView({
                             </Message>
                           </Fragment>
                         )
-                      default:
+                      default: {
+                        // Handle tool invocations
+                        if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
+                          const toolPart = part as {
+                            type: string
+                            toolName?: string
+                            toolCallId?: string
+                            state?: string
+                            result?: unknown
+                            args?: { url?: string; title?: string; description?: string }
+                          }
+
+                          // Check for show_case_study tool
+                          const isShowCaseStudy =
+                            toolPart.toolName === 'show_case_study' ||
+                            part.type === 'tool-show_case_study'
+
+                          if (isShowCaseStudy && toolPart.args?.url) {
+                            return (
+                              <div
+                                key={`${message.id}-${i}`}
+                                className="case-study-preview"
+                                style={{
+                                  margin: 'var(--op-space-medium) 0',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                {toolPart.args.title && (
+                                  <p
+                                    style={{
+                                      marginBottom: 'var(--op-space-small)',
+                                      fontWeight: 500,
+                                      color: 'var(--op-color-text)',
+                                    }}
+                                  >
+                                    {toolPart.args.title}
+                                  </p>
+                                )}
+                                {toolPart.args.description && (
+                                  <p
+                                    style={{
+                                      marginBottom: 'var(--op-space-small)',
+                                      fontSize: '0.875rem',
+                                      color: 'var(--op-color-text-secondary)',
+                                    }}
+                                  >
+                                    {toolPart.args.description}
+                                  </p>
+                                )}
+                                <WebPreview defaultUrl={toolPart.args.url}>
+                                  <WebPreviewNavigation>
+                                    <WebPreviewUrl readOnly />
+                                  </WebPreviewNavigation>
+                                  <WebPreviewBody />
+                                </WebPreview>
+                              </div>
+                            )
+                          }
+                        }
                         return null
+                      }
                     }
                   })}
                 </Fragment>
               ))}
             </ConversationContent>
           </Conversation>
-          {/* BANT Progress Indicator */}
-          {bantProgress < 100 && (
-            <div className="leads-page__bant-progress">
-              <div className="leads-page__bant-bar">
-                <div
-                  className="leads-page__bant-fill"
-                  style={{ width: `${bantProgress}%` }}
-                />
-              </div>
-              <span className="leads-page__bant-text">{bantProgress}%</span>
-            </div>
-          )}
+
           <div className="leads-page__input-container">
             <div className="gradient" />
             <PromptInputProvider>
