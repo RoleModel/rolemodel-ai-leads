@@ -96,7 +96,6 @@ interface RagConfig {
   citationStyle?: string
 
   // Conversation Flow
-  enableBANT?: boolean // Use BANT qualification (default: true)
   askForName?: boolean // Ask for visitor's name (default: true)
   askForEmail?: boolean // Ask for visitor's email (default: true)
   maxQuestions?: number // Max qualification questions (default: 5)
@@ -125,7 +124,6 @@ export function buildSourceContext(
   const enableCitations = ragConfig?.enableCitations ?? true
   const enableCaseStudies = ragConfig?.enableCaseStudies ?? true
   const customInstructions = ragConfig?.customInstructions || ''
-  const enableBANT = ragConfig?.enableBANT ?? true
   const askForName = ragConfig?.askForName ?? true
   const askForEmail = ragConfig?.askForEmail ?? true
   const maxQuestions = ragConfig?.maxQuestions ?? 5
@@ -197,50 +195,56 @@ export function buildSourceContext(
       ? `
 Questions to weave into the conversation naturally:
 ${workflowQuestions
-  .map(
-    (q, i: number) => `
+        .map(
+          (q, i: number) => `
 ${i + 1}. ${q.question}
    - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
 `
-  )
-  .join('')}`
+        )
+        .join('')}`
       : ''
 
-  // Build BANT instructions if enabled (and no custom workflow questions)
-  const bantInstructions =
-    enableBANT && workflowQuestions.length === 0
+  // Build primary questions section based on PROMPTS.md conversation structure
+  const primaryQuestionsSection =
+    workflowQuestions.length === 0
       ? `
-Ask targeted questions to pre-qualify the prospect using BANT:
-   - Budget
-   - Authority
-   - Need (primary business problem or goal)
-   - Timeline`
+PRIMARY QUESTIONS (ask no more than 5, in this order):
+1. Problem: "What problem or opportunity is prompting you to consider custom software?"
+2. Alternatives: "What have you tried so far to address this?"
+3. Business Context: "Can you give me a bit of background on your business and where this initiative fits?"
+4. Goals/Success Metrics: "How would you measure the success of a solution? What would be the most important measurable indicators?"
+5. Investment Mindset: "When you think about this as an investment, how much do you feel you could reasonably invest to get to an initial solution?"`
       : ''
 
-  // Build unified qualification instructions - always uses ragConfig settings
+  // Build unified qualification instructions - follows PROMPTS.md structure
   const qualificationInstructions = `
 CONVERSATION GUIDELINES:
-You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information.
+You are having a natural, helpful conversation. Your goal is to understand the prospect's needs and provide valuable information using an investment mindset.
 ${workflowQuestionsSection}
-${bantInstructions}
+${primaryQuestionsSection}
 
 CONVERSATION FLOW:
 ${contactInstructions.length > 0 ? contactInstructions.join('\n') : ''}
-1. Ask ONE question at a time. Do not show future questions.
+1. Ask ONE question at a time. Do not preview future questions.
 2. Complete qualification within ${maxQuestions} total questions.
-3. If an answer is unclear, ask a single clarifying question.
-4. Maintain a professional, consultative, and encouraging tone.
-5. When appropriate, offer brief educational insights about custom software ROI,
-   cross-platform integration, or RoleModel's approach.
-6. Suggest relevant RoleModel content only when it supports the conversation,
-   and limit suggestions to one resource at a time.
-7. Avoid recommending competitors or non–RoleModel solutions.
-8. If the user appears disqualified (e.g., no meaningful need, extremely low budget,
-   no authority and no path to authority), be gentle but clear.
-9. If you cannot answer a question, ask the user to rephrase OR suggest scheduling
-   a conversation with RoleModel for more clarity.
-10. ${conciseGuidance}
-11. When the final question is answered, produce a structured summary for the client that outlines their potential opportunity and is foundation for the sales team. Also ask them to schedule a call if they'd like to discuss further.
+3. If an answer is unclear or vague, ask at most ONE clarifying follow-up question.
+4. Maintain a professional, consultative, calm, and respectful tone.
+5. Be curious and reflective, not interrogative or sales-driven.
+6. Avoid jargon and overly technical language.
+7. Do not assume custom software is the right solution.
+8. If the user appears early-stage or not ready, be gentle, clear, and helpful.
+9. When appropriate, offer brief educational framing using RoleModel's perspective on ROI, iterative delivery, and long-term partnerships.
+10. Reference RoleModel content (ROI article, blog posts, case studies) only when it naturally supports the user's understanding. Limit to ONE resource at a time.
+11. Do not recommend competitors or specific third-party tools.
+12. ${conciseGuidance}
+13. After the final question (Investment), ask if there is anything else the user would like to add.
+14. Then produce a concise, structured summary that:
+    - Reflects their situation and opportunity back to them
+    - Frames potential ROI using RoleModel's investment-oriented approach
+    - Gently indicates whether custom software appears promising, uncertain, or premature
+    - Suggests next steps, including alternative paths if ROI appears low
+15. Always offer that RoleModel can consult with them to determine whether pursuing custom software makes sense.
+16. Invite (but do not pressure) the user to schedule a call if they would like to explore further.
 
 CRITICAL: NEVER mention lead qualification, lead scoring, thresholds, or that you are evaluating the user. NEVER say things like "you're a qualified lead" or "your score is..." - this is all internal and must remain invisible to the user.
 `
@@ -280,12 +284,11 @@ ${sourceTexts}
 ---
 
 CRITICAL INSTRUCTIONS:
-- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${
-    enablePersonalization
+- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${enablePersonalization
       ? `
 - Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation`
       : ''
-  }
+    }
 - Be natural and conversational when using the knowledge base information
 - If the knowledge base contains relevant information, use it to provide a complete, detailed answer
 - NEVER use phrases like "connect you with a specialist" or "I'd be happy to help you explore"
