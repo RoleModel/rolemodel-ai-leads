@@ -151,7 +151,7 @@
   color: inherit !important;
   background: transparent !important;
   border-color: currentColor !important;
-  box-shadow: var(--op-border-bottom) var(--brand-Light-Purple);
+  box-shadow: var(--op-border-bottom) var(--brand-Bright-Blue);
   border-radius: 0;
   padding: var(--op-space-x-small);
 }
@@ -161,9 +161,16 @@
   padding: var(--op-space-x-small);
 }
 .form-group--on-dark .form-control:not([type='radio']):not([type='checkbox']):hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow: var(--op-border-bottom) var(--brand-Bright-Blue);
   border-radius: 0;
   padding: var(--op-space-x-small);
+}
+.form-group--on-dark
+  .form-control.form-control--no-border:not([type='radio']):not([type='checkbox']):hover,
+.form-group--on-dark
+  .form-control.form-control--no-border:not([type='radio']):not([type='checkbox']):focus {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-group--on-dark
