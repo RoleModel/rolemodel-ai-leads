@@ -110,7 +110,7 @@ function ComparisonChart({ variants }: { variants: Variant[] }) {
 
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card__header">
         <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
           Variant Comparison
         </h3>
@@ -168,7 +168,7 @@ function ConversionRateComparison({ variants }: { variants: Variant[] }) {
 
   return (
     <div className="card">
-      <div className="card-header">
+      <div className="card__header">
         <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
           Rate Comparison (%)
         </h3>
@@ -484,7 +484,7 @@ export default function IntroABTestingPage() {
           </div>
 
           {!activeTest ? (
-            <div className="card">
+            <div className="card card--padded">
               <div
                 className="card-body"
                 style={{ textAlign: 'center', padding: 'var(--op-space-3x-large)' }}
@@ -533,7 +533,7 @@ export default function IntroABTestingPage() {
 
               {/* Test Info */}
               <div className="card">
-                <div className="card-header">
+                <div className="card__header">
                   <h3 style={{ margin: 0, fontSize: 'var(--op-font-large)' }}>
                     Test Details
                   </h3>
