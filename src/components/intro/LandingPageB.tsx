@@ -396,287 +396,287 @@ export function HeroChat(props: HeroChatProps) {
     return () => window.removeEventListener('hero-submit-suggestion', listener)
   }, [handleExternalSuggestion])
 
-  return (
-    <div className={`chat-container ${styles['chat-container']}`}>
-      {step === 'intro' ? (
-        <Card
-          variant="dark"
-          borderBottom="var(--brand-Light-Purple)"
-          className={styles['lead-card']}
-        >
-          <CardHeader>
-            <h2 className={styles['card-title']}>
-              <span>Let&apos;s see if we&apos;re a </span>
-              <span className={styles['chat-title-text']}>
-                fit.
-                <span className={styles['chat-title-underline']}></span>
-              </span>
-            </h2>
-          </CardHeader>
-          <CardContent>
-            <p className={styles['lead-form__subtitle']}>
-              Share a few details and we&apos;ll help you explore whether custom software
-              makes sense for your business.
-            </p>
-            <form
-              className={styles['lead-form__form']}
-              onSubmit={(e) => {
-                e.preventDefault()
-                void handleStartChat()
-              }}
-            >
-              <div className="form-group form-group--on-dark">
-                <label className="form-label" htmlFor="lead-name">
-                  Full Name
-                </label>
-                <Input
-                  id="lead-name"
-                  type="text"
-                  name="name"
-                  autoComplete="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="form-control--large form-control--no-border form-control-border-bottom"
-                  placeholder="Jane Doe"
-                />
-              </div>
-              <div className="form-group form-group--on-dark">
-                <label className="form-label" htmlFor="lead-email">
-                  Work Email
-                </label>
-                <Input
-                  id="lead-email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="form-control--large form-control--no-border form-control-border-bottom"
-                  placeholder="jane@company.com"
-                />
-              </div>
-              <CardAction>
-                <button
-                  type="submit"
-                  className="btn btn--primary btn--large"
-                  disabled={!formData.name || !formData.email || isSubmitting}
-                >
-                  {isSubmitting ? 'Starting...' : 'Start Conversation'}
-                </button>
-              </CardAction>
-            </form>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <Conversation className="conversation-wrapper conversation-wrapper--flex">
-            <ConversationContent>
-              {messages.map((message) => (
-                <Fragment key={message.id}>
-                  {message.parts.map((part, index) => {
-                    switch (part.type) {
-                      case 'text':
-                        return (
-                          <Fragment key={`${message.id}-${index}`}>
-                            <Message from={message.role}>
-                              {message.role === 'assistant' && (
-                                <div className="message-avatar">
-                                  <Favicon
-                                    className="message-avatar__image"
-                                    style={{
-                                      width: 'var(--op-space-x-large)',
-                                      height: 'var(--op-space-x-large)',
-                                    }}
-                                  />
-                                </div>
-                              )}
-                              <MessageContent>
-                                {isClient ? (
-                                  messageCitations[message.id]?.length ? (
-                                    <MessageWithCitations
-                                      message={message}
-                                      citations={messageCitations[message.id]}
-                                    />
-                                  ) : (
-                                    <MessageResponse>{part.text}</MessageResponse>
-                                  )
-                                ) : (
-                                  <div>{part.text}</div>
-                                )}
-                                {message.role === 'assistant' && (
-                                  <MessageActions>
-                                    <MessageAction
-                                      label="Like"
-                                      onClick={() =>
-                                        setLiked((prev) => ({
-                                          ...prev,
-                                          [message.id]: !prev[message.id],
-                                        }))
-                                      }
-                                      tooltip="Like this response"
-                                    >
-                                      <HugeiconsIcon
-                                        icon={ThumbsUpIcon}
-                                        size={16}
-                                        color={
-                                          liked[message.id] ? 'currentColor' : 'none'
-                                        }
-                                      />
-                                    </MessageAction>
-                                    <MessageAction
-                                      label="Dislike"
-                                      onClick={() =>
-                                        setDisliked((prev) => ({
-                                          ...prev,
-                                          [message.id]: !prev[message.id],
-                                        }))
-                                      }
-                                      tooltip="Dislike this response"
-                                    >
-                                      <HugeiconsIcon
-                                        icon={ThumbsDownIcon}
-                                        size={16}
-                                        color={
-                                          disliked[message.id] ? 'currentColor' : 'none'
-                                        }
-                                      />
-                                    </MessageAction>
-                                    <MessageAction
-                                      onClick={() => regenerate()}
-                                      label="Retry"
-                                    >
-                                      <HugeiconsIcon icon={Refresh01Icon} size={16} />
-                                    </MessageAction>
-                                    <MessageAction
-                                      onClick={() =>
-                                        navigator.clipboard.writeText(part.text)
-                                      }
-                                      label="Copy"
-                                    >
-                                      <HugeiconsIcon icon={Copy01Icon} size={16} />
-                                    </MessageAction>
-                                  </MessageActions>
-                                )}
-                              </MessageContent>
-                            </Message>
-                          </Fragment>
-                        )
-                      default: {
-                        // Debug: log all non-text parts
-                        console.log('[LandingPageB] Non-text part:', part.type, JSON.stringify(part).slice(0, 500))
+  return (<>
 
-                        // Handle tool invocations
-                        if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
-                          const toolPart = part as {
-                            type: string
-                            toolName?: string
-                            toolCallId?: string
-                            state?: string
-                            result?: unknown
-                            args?: { url?: string; title?: string; description?: string }
-                          }
-
-                          console.log('[LandingPageB] Tool part detected:', toolPart.toolName, toolPart.args)
-
-                          // Check for show_case_study tool
-                          const isShowCaseStudy =
-                            toolPart.toolName === 'show_case_study' ||
-                            part.type === 'tool-show_case_study'
-
-                          if (isShowCaseStudy && toolPart.args?.url) {
-                            console.log('[LandingPageB] Rendering case study preview:', toolPart.args.url)
-                            return (
-                              <div
-                                key={`${message.id}-${index}`}
-                                className="case-study-preview"
-                                style={{
-                                  margin: 'var(--op-space-medium) 0',
-                                  maxWidth: '100%',
-                                }}
-                              >
-                                {toolPart.args.title && (
-                                  <p style={{
-                                    marginBottom: 'var(--op-space-small)',
-                                    fontWeight: 500,
-                                    color: 'var(--op-color-text)',
-                                  }}>
-                                    {toolPart.args.title}
-                                  </p>
-                                )}
-                                {toolPart.args.description && (
-                                  <p style={{
-                                    marginBottom: 'var(--op-space-small)',
-                                    fontSize: '0.875rem',
-                                    color: 'var(--op-color-text-secondary)',
-                                  }}>
-                                    {toolPart.args.description}
-                                  </p>
-                                )}
-                                <WebPreview defaultUrl={toolPart.args.url}>
-                                  <WebPreviewNavigation>
-                                    <WebPreviewUrl readOnly />
-                                  </WebPreviewNavigation>
-                                  <WebPreviewBody />
-                                </WebPreview>
-                              </div>
-                            )
-                          }
-                        }
-                        return null
-                      }
-                    }
-                  })}
-                </Fragment>
-              ))}
-            </ConversationContent>
-          </Conversation>
-
-          <div className="prompt-input-wrapper">
-            <div className="gradient" style={{ top: '80%' }} />
-            <PromptInputProvider>
-              <PromptInput onSubmit={handlePromptSubmit}>
-                <PromptInputBody>
-                  <PromptInputTextarea
-                    ref={textareaRef}
-                    placeholder="Ask a question..."
-                  />
-                </PromptInputBody>
-                <PromptInputFooter>
-                  <PromptInputTools>
-                    <PromptInputActionMenu>
-                      <PromptInputActionMenuTrigger>
-                        <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                      </PromptInputActionMenuTrigger>
-                      <PromptInputActionMenuContent>
-                        <PromptInputActionAddAttachments />
-                      </PromptInputActionMenuContent>
-                    </PromptInputActionMenu>
-                    <PromptInputSpeechButton textareaRef={textareaRef} />
-                  </PromptInputTools>
-                  <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-                </PromptInputFooter>
-              </PromptInput>
-            </PromptInputProvider>
-          </div>
-          {messages.length < 3 && (
-            <div className="suggestions-container">
-              <Suggestions>
-                {suggestions.map((suggestion) => (
-                  <Suggestion
-                    key={suggestion}
-                    size="lg"
-                    onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
-                    suggestion={suggestion}
-                  />
-                ))}
-              </Suggestions>
+    {step === 'intro' ? (
+      <Card
+        variant="dark"
+        borderBottom="var(--brand-Light-Purple)"
+        className={styles['lead-card']}
+      >
+        <CardHeader>
+          <h2 className={styles['card-title']}>
+            <span>Let&apos;s see if we&apos;re a </span>
+            <span className={styles['chat-title-text']}>
+              fit.
+              <span className={styles['chat-title-underline']}></span>
+            </span>
+          </h2>
+        </CardHeader>
+        <CardContent>
+          <p className={styles['lead-form__subtitle']}>
+            Share a few details and we&apos;ll help you explore whether custom software
+            makes sense for your business.
+          </p>
+          <form
+            className={styles['lead-form__form']}
+            onSubmit={(e) => {
+              e.preventDefault()
+              void handleStartChat()
+            }}
+          >
+            <div className="form-group form-group--on-dark">
+              <label className="form-label" htmlFor="lead-name">
+                Full Name
+              </label>
+              <Input
+                id="lead-name"
+                type="text"
+                name="name"
+                autoComplete="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="form-control--large form-control--no-border form-control-border-bottom"
+                placeholder="Jane Doe"
+              />
             </div>
-          )}
-        </>
-      )}
-    </div>
+            <div className="form-group form-group--on-dark">
+              <label className="form-label" htmlFor="lead-email">
+                Work Email
+              </label>
+              <Input
+                id="lead-email"
+                type="email"
+                name="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="form-control--large form-control--no-border form-control-border-bottom"
+                placeholder="jane@company.com"
+              />
+            </div>
+            <CardAction>
+              <button
+                type="submit"
+                className="btn btn--primary btn--large"
+                disabled={!formData.name || !formData.email || isSubmitting}
+              >
+                {isSubmitting ? 'Starting...' : 'Start Conversation'}
+              </button>
+            </CardAction>
+          </form>
+        </CardContent>
+      </Card>
+    ) : (
+      <div className={`chat-container ${styles['chat-container']}`}>
+        <Conversation className="conversation-wrapper conversation-wrapper--flex">
+          <ConversationContent>
+            {messages.map((message) => (
+              <Fragment key={message.id}>
+                {message.parts.map((part, index) => {
+                  switch (part.type) {
+                    case 'text':
+                      return (
+                        <Fragment key={`${message.id}-${index}`}>
+                          <Message from={message.role}>
+                            {message.role === 'assistant' && (
+                              <div className="message-avatar">
+                                <Favicon
+                                  className="message-avatar__image"
+                                  style={{
+                                    width: 'var(--op-space-x-large)',
+                                    height: 'var(--op-space-x-large)',
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <MessageContent>
+                              {isClient ? (
+                                messageCitations[message.id]?.length ? (
+                                  <MessageWithCitations
+                                    message={message}
+                                    citations={messageCitations[message.id]}
+                                  />
+                                ) : (
+                                  <MessageResponse>{part.text}</MessageResponse>
+                                )
+                              ) : (
+                                <div>{part.text}</div>
+                              )}
+                              {message.role === 'assistant' && (
+                                <MessageActions>
+                                  <MessageAction
+                                    label="Like"
+                                    onClick={() =>
+                                      setLiked((prev) => ({
+                                        ...prev,
+                                        [message.id]: !prev[message.id],
+                                      }))
+                                    }
+                                    tooltip="Like this response"
+                                  >
+                                    <HugeiconsIcon
+                                      icon={ThumbsUpIcon}
+                                      size={16}
+                                      color={
+                                        liked[message.id] ? 'currentColor' : 'none'
+                                      }
+                                    />
+                                  </MessageAction>
+                                  <MessageAction
+                                    label="Dislike"
+                                    onClick={() =>
+                                      setDisliked((prev) => ({
+                                        ...prev,
+                                        [message.id]: !prev[message.id],
+                                      }))
+                                    }
+                                    tooltip="Dislike this response"
+                                  >
+                                    <HugeiconsIcon
+                                      icon={ThumbsDownIcon}
+                                      size={16}
+                                      color={
+                                        disliked[message.id] ? 'currentColor' : 'none'
+                                      }
+                                    />
+                                  </MessageAction>
+                                  <MessageAction
+                                    onClick={() => regenerate()}
+                                    label="Retry"
+                                  >
+                                    <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                                  </MessageAction>
+                                  <MessageAction
+                                    onClick={() =>
+                                      navigator.clipboard.writeText(part.text)
+                                    }
+                                    label="Copy"
+                                  >
+                                    <HugeiconsIcon icon={Copy01Icon} size={16} />
+                                  </MessageAction>
+                                </MessageActions>
+                              )}
+                            </MessageContent>
+                          </Message>
+                        </Fragment>
+                      )
+                    default: {
+                      // Debug: log all non-text parts
+                      console.log('[LandingPageB] Non-text part:', part.type, JSON.stringify(part).slice(0, 500))
+
+                      // Handle tool invocations
+                      if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
+                        const toolPart = part as {
+                          type: string
+                          toolName?: string
+                          toolCallId?: string
+                          state?: string
+                          result?: unknown
+                          args?: { url?: string; title?: string; description?: string }
+                        }
+
+                        console.log('[LandingPageB] Tool part detected:', toolPart.toolName, toolPart.args)
+
+                        // Check for show_case_study tool
+                        const isShowCaseStudy =
+                          toolPart.toolName === 'show_case_study' ||
+                          part.type === 'tool-show_case_study'
+
+                        if (isShowCaseStudy && toolPart.args?.url) {
+                          console.log('[LandingPageB] Rendering case study preview:', toolPart.args.url)
+                          return (
+                            <div
+                              key={`${message.id}-${index}`}
+                              className="case-study-preview"
+                              style={{
+                                margin: 'var(--op-space-medium) 0',
+                                maxWidth: '100%',
+                              }}
+                            >
+                              {toolPart.args.title && (
+                                <p style={{
+                                  marginBottom: 'var(--op-space-small)',
+                                  fontWeight: 500,
+                                  color: 'var(--op-color-text)',
+                                }}>
+                                  {toolPart.args.title}
+                                </p>
+                              )}
+                              {toolPart.args.description && (
+                                <p style={{
+                                  marginBottom: 'var(--op-space-small)',
+                                  fontSize: '0.875rem',
+                                  color: 'var(--op-color-text-secondary)',
+                                }}>
+                                  {toolPart.args.description}
+                                </p>
+                              )}
+                              <WebPreview defaultUrl={toolPart.args.url}>
+                                <WebPreviewNavigation>
+                                  <WebPreviewUrl readOnly />
+                                </WebPreviewNavigation>
+                                <WebPreviewBody />
+                              </WebPreview>
+                            </div>
+                          )
+                        }
+                      }
+                      return null
+                    }
+                  }
+                })}
+              </Fragment>
+            ))}
+          </ConversationContent>
+        </Conversation>
+
+        <div className="prompt-input-wrapper">
+          <div className="gradient" style={{ top: '80%' }} />
+          <PromptInputProvider>
+            <PromptInput onSubmit={handlePromptSubmit}>
+              <PromptInputBody>
+                <PromptInputTextarea
+                  ref={textareaRef}
+                  placeholder="Ask a question..."
+                />
+              </PromptInputBody>
+              <PromptInputFooter>
+                <PromptInputTools>
+                  <PromptInputActionMenu>
+                    <PromptInputActionMenuTrigger>
+                      <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                    </PromptInputActionMenuTrigger>
+                    <PromptInputActionMenuContent>
+                      <PromptInputActionAddAttachments />
+                    </PromptInputActionMenuContent>
+                  </PromptInputActionMenu>
+                  <PromptInputSpeechButton textareaRef={textareaRef} />
+                </PromptInputTools>
+                <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+              </PromptInputFooter>
+            </PromptInput>
+          </PromptInputProvider>
+        </div>
+        {messages.length < 3 && (
+          <div className="suggestions-container">
+            <Suggestions>
+              {suggestions.map((suggestion) => (
+                <Suggestion
+                  key={suggestion}
+                  size="lg"
+                  onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
+                  suggestion={suggestion}
+                />
+              ))}
+            </Suggestions>
+          </div>
+        )}
+      </div>
+    )}
+  </>
   )
 }
 
