@@ -10,13 +10,21 @@ import {
   ThumbsUpIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import gsap from 'gsap'
 import { ScrollSmoother } from 'gsap/ScrollSmoother'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import dynamic from 'next/dynamic'
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
 import {
@@ -48,13 +56,18 @@ import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
+import {
+  WebPreview,
+  WebPreviewBody,
+  WebPreviewNavigation,
+  WebPreviewUrl,
+} from '@/components/ai-elements/web-preview'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ScrollIndicator from '@/components/ui/ScrollIndicator'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
 import { trackConversion, trackEngagement, trackView } from '@/lib/ab-testing/tracking'
-import { getBantProgressFromAssistantQuestions } from '@/lib/chat/bant'
 
 import {
   LeadsPageSettingsProvider,
@@ -69,6 +82,38 @@ import styles from './landing-page-b.module.css'
 gsap.registerPlugin(useGSAP, ScrollToPlugin, ScrollTrigger, ScrollSmoother)
 
 const AnimatedPath = dynamic(() => import('./AnimatedPath'), { ssr: false })
+
+const STORAGE_KEY = 'intro-b-visitor'
+
+interface VisitorData {
+  name: string
+  email: string
+  conversationId: string
+}
+
+// Use useSyncExternalStore to safely read sessionStorage
+function useSessionStorage<T>(key: string): T | null {
+  const subscribe = (callback: () => void) => {
+    window.addEventListener('storage', callback)
+    return () => window.removeEventListener('storage', callback)
+  }
+
+  const getSnapshot = () => {
+    if (typeof window === 'undefined') return null
+    return sessionStorage.getItem(key)
+  }
+
+  const getServerSnapshot = () => null
+
+  const stored = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+
+  if (!stored) return null
+  try {
+    return JSON.parse(stored) as T
+  } catch {
+    return null
+  }
+}
 
 interface FloatingQuestion {
   id: string
@@ -130,10 +175,32 @@ export interface HeroChatProps {
 export function HeroChat(props: HeroChatProps) {
   const { chatbotId, initialQuestion, onQuestionConsumed } = props
   useLeadsPageSettings()
+
+  // Check for existing session
+  const storedVisitor = useSessionStorage<VisitorData>(STORAGE_KEY)
+  const hasExistingSession = storedVisitor !== null
+
+  // Initialize state with defaults
   const [step, setStep] = useState<'intro' | 'chat'>('intro')
   const [formData, setFormData] = useState({ name: '', email: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
+
+  // Track if we've restored the session
+  const hasRestoredSessionRef = useRef(false)
+
+  // Restore session from storage after hydration
+  useEffect(() => {
+    if (hasExistingSession && step === 'intro' && !hasRestoredSessionRef.current) {
+      hasRestoredSessionRef.current = true
+      setStep('chat')
+      setFormData({
+        name: storedVisitor?.name || '',
+        email: storedVisitor?.email || '',
+      })
+      setConversationId(storedVisitor?.conversationId || null)
+    }
+  }, [hasExistingSession, step, storedVisitor])
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
@@ -203,8 +270,24 @@ export function HeroChat(props: HeroChatProps) {
     [activeChatbotId, conversationId, interceptingFetch]
   )
 
-  const { messages, sendMessage, status, error } = useChat<UIMessage>({
+  // Create initial greeting message for returning visitors
+  const initialGreetingMessages = useMemo((): UIMessage[] => {
+    if (!storedVisitor) return []
+
+    const greeting = storedVisitor.name
+      ? `Welcome back, ${storedVisitor.name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+      : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+
+    return [{
+      id: `greeting-${Date.now()}`,
+      role: 'assistant' as const,
+      parts: [{ type: 'text' as const, text: greeting }],
+    }]
+  }, [storedVisitor])
+
+  const { messages, setMessages, sendMessage, regenerate, status, error } = useChat<UIMessage>({
     transport: chatTransport,
+    messages: initialGreetingMessages,
     onFinish: handleChatFinish,
     onError: (err) => console.error('[Chat] Error:', err),
   })
@@ -249,6 +332,25 @@ export function HeroChat(props: HeroChatProps) {
       const result = await response.json()
       setConversationId(result.conversationId)
 
+      // Persist to sessionStorage for page refresh
+      const visitor: VisitorData = {
+        name: formData.name,
+        email: formData.email,
+        conversationId: result.conversationId,
+      }
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(visitor))
+
+      // Add initial greeting message
+      const greeting: UIMessage = {
+        id: `greeting-${Date.now()}`,
+        role: 'assistant',
+        parts: [{
+          type: 'text',
+          text: `Hi ${formData.name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
+        }],
+      }
+      setMessages([greeting])
+
       // Dispatch conversion event for A/B tracking
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('intro-b-conversion'))
@@ -276,8 +378,6 @@ export function HeroChat(props: HeroChatProps) {
     "We're exploring options for our business",
   ]
 
-  const { regenerate } = useChat()
-
   const handleExternalSuggestion = useCallback(
     (event: Event) => {
       const custom = event as CustomEvent<{ text?: string }>
@@ -295,17 +395,6 @@ export function HeroChat(props: HeroChatProps) {
     window.addEventListener('hero-submit-suggestion', listener)
     return () => window.removeEventListener('hero-submit-suggestion', listener)
   }, [handleExternalSuggestion])
-
-  const getMessageContent = useCallback((message: UIMessage) => {
-    const textParts = message.parts.filter(isTextUIPart)
-    return textParts.map((part) => part.text).join('\n')
-  }, [])
-
-  const calculateBANTProgress = useCallback(() => {
-    return getBantProgressFromAssistantQuestions(messages, getMessageContent)
-  }, [messages, getMessageContent])
-
-  const bantProgress = messages.length > 0 ? calculateBANTProgress() : 0
 
   return (
     <div className={`chat-container ${styles['chat-container']}`}>
@@ -474,8 +563,69 @@ export function HeroChat(props: HeroChatProps) {
                             </Message>
                           </Fragment>
                         )
-                      default:
+                      default: {
+                        // Debug: log all non-text parts
+                        console.log('[LandingPageB] Non-text part:', part.type, JSON.stringify(part).slice(0, 500))
+
+                        // Handle tool invocations
+                        if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
+                          const toolPart = part as {
+                            type: string
+                            toolName?: string
+                            toolCallId?: string
+                            state?: string
+                            result?: unknown
+                            args?: { url?: string; title?: string; description?: string }
+                          }
+
+                          console.log('[LandingPageB] Tool part detected:', toolPart.toolName, toolPart.args)
+
+                          // Check for show_case_study tool
+                          const isShowCaseStudy =
+                            toolPart.toolName === 'show_case_study' ||
+                            part.type === 'tool-show_case_study'
+
+                          if (isShowCaseStudy && toolPart.args?.url) {
+                            console.log('[LandingPageB] Rendering case study preview:', toolPart.args.url)
+                            return (
+                              <div
+                                key={`${message.id}-${index}`}
+                                className="case-study-preview"
+                                style={{
+                                  margin: 'var(--op-space-medium) 0',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                {toolPart.args.title && (
+                                  <p style={{
+                                    marginBottom: 'var(--op-space-small)',
+                                    fontWeight: 500,
+                                    color: 'var(--op-color-text)',
+                                  }}>
+                                    {toolPart.args.title}
+                                  </p>
+                                )}
+                                {toolPart.args.description && (
+                                  <p style={{
+                                    marginBottom: 'var(--op-space-small)',
+                                    fontSize: '0.875rem',
+                                    color: 'var(--op-color-text-secondary)',
+                                  }}>
+                                    {toolPart.args.description}
+                                  </p>
+                                )}
+                                <WebPreview defaultUrl={toolPart.args.url}>
+                                  <WebPreviewNavigation>
+                                    <WebPreviewUrl readOnly />
+                                  </WebPreviewNavigation>
+                                  <WebPreviewBody />
+                                </WebPreview>
+                              </div>
+                            )
+                          }
+                        }
                         return null
+                      }
                     }
                   })}
                 </Fragment>
@@ -483,17 +633,6 @@ export function HeroChat(props: HeroChatProps) {
             </ConversationContent>
           </Conversation>
 
-          {bantProgress < 100 && messages.some((m) => m.role === 'user') && (
-            <div className="leads-page__bant-progress">
-              <div className="leads-page__bant-bar">
-                <div
-                  className="leads-page__bant-fill"
-                  style={{ width: `${bantProgress}%` }}
-                />
-              </div>
-              <span className="leads-page__bant-text">{bantProgress}%</span>
-            </div>
-          )}
           <div className="prompt-input-wrapper">
             <div className="gradient" style={{ top: '80%' }} />
             <PromptInputProvider>
