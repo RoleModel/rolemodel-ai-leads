@@ -124,7 +124,7 @@
       positionRule +
       'bottom: 90px !important;' +
       'width: 400px !important;' +
-      'height: 600px !important;' +
+      'height: 70vh !important;' +
       'max-height: calc(100vh - 120px) !important;' +
       'border: none !important;' +
       'border-radius: 12px !important;' +

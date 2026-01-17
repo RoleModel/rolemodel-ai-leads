@@ -316,7 +316,6 @@ export default function WidgetPage() {
             Your information helps us provide better assistance.
           </p>
         </div>
-        <PrivacyTermsLinks variant="dark" className="widget-page__footer-links" compact />
       </div>
     )
   }

@@ -544,7 +544,7 @@ export function LeadsPageView({
 
       {/* Main Content */}
       <div className="app__content">
-        <div className="leads-page__content">
+        <div className={`leads-page__content${isEmbed ? ' leads-page__content--embed' : ''}`}>
           {/* Conversation Messages Container */}
 
           <Conversation className="conversation-wrapper conversation-wrapper--scrollable">
@@ -834,7 +834,7 @@ export function LeadsPageView({
         </div>
       </div>
 
-      <PrivacyTermsLinks className="leads-page__footer-links" />
+      {!isEmbed && <PrivacyTermsLinks className="leads-page__footer-links" />}
     </div>
   )
 }
