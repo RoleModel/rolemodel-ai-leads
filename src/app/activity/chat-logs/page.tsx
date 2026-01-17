@@ -176,11 +176,10 @@ export default function ChatLogsPage() {
                       <div
                         key={conv.id}
                         onClick={() => loadMessages(conv.id)}
-                        className={`admin-list-item ${
-                          selectedConversation?.id === conv.id
+                        className={`admin-list-item ${selectedConversation?.id === conv.id
                             ? 'admin-list-item--selected'
                             : ''
-                        }`}
+                          }`}
                       >
                         <div className="admin-list-item__header">
                           <UserIcon className="icon-sm admin-list-item__icon" />
@@ -347,18 +346,16 @@ export default function ChatLogsPage() {
                       {messages.map((message) => (
                         <div
                           key={message.id}
-                          className={`admin-message ${
-                            message.role === 'user'
+                          className={`admin-message ${message.role === 'user'
                               ? 'admin-message--user'
                               : 'admin-message--assistant'
-                          }`}
+                            }`}
                         >
                           <div
-                            className={`admin-message__bubble ${
-                              message.role === 'user'
+                            className={`admin-message__bubble ${message.role === 'user'
                                 ? 'admin-message__bubble--user'
                                 : 'admin-message__bubble--assistant'
-                            }`}
+                              }`}
                           >
                             <div className="admin-message__content">
                               {message.content}
