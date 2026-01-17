@@ -66,7 +66,11 @@
   // Fetch widget configuration from API
   function fetchWidgetConfig(callback) {
     var xhr = new XMLHttpRequest()
-    xhr.open('GET', config.baseUrl + '/api/widget-config?chatbotId=' + config.chatbotId, true)
+    xhr.open(
+      'GET',
+      config.baseUrl + '/api/widget-config?chatbotId=' + config.chatbotId,
+      true
+    )
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
@@ -79,7 +83,11 @@
               if (response.config.primaryColor) {
                 primaryColor = response.config.primaryColor
               }
-              console.log('[RoleModel Embed] Using admin colors:', buttonColor, primaryColor)
+              console.log(
+                '[RoleModel Embed] Using admin colors:',
+                buttonColor,
+                primaryColor
+              )
             }
           } catch (e) {
             console.log('[RoleModel Embed] Could not parse config response')
@@ -97,63 +105,83 @@
     if (document.getElementById(styleId)) return
 
     var css =
-      '#' + containerId + ' {' +
-        'position: fixed !important;' +
-        'bottom: 90px !important;' +
-        'right: 20px !important;' +
-        'width: 400px !important;' +
-        'height: 600px !important;' +
-        'border: none !important;' +
-        'border-radius: 12px !important;' +
-        'box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;' +
-        'overflow: hidden !important;' +
-        'z-index: 2147483646 !important;' +
-        'background: white !important;' +
-        'transition: opacity 0.2s, transform 0.2s !important;' +
+      '#' +
+      containerId +
+      ' {' +
+      'position: fixed !important;' +
+      'bottom: 90px !important;' +
+      'right: 20px !important;' +
+      'width: 400px !important;' +
+      'height: 600px !important;' +
+      'border: none !important;' +
+      'border-radius: 12px !important;' +
+      'box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;' +
+      'overflow: hidden !important;' +
+      'z-index: 2147483646 !important;' +
+      'background: white !important;' +
+      'transition: opacity 0.2s, transform 0.2s, width 0s, height 0s !important;' +
       '}' +
-      '#' + containerId + '.hidden {' +
-        'opacity: 0 !important;' +
-        'transform: scale(0.95) !important;' +
-        'pointer-events: none !important;' +
+      '#' +
+      containerId +
+      '.hidden {' +
+      'opacity: 0 !important;' +
+      'visibility: hidden !important;' +
+      'width: 0 !important;' +
+      'height: 0 !important;' +
+      'transform: scale(0.95) !important;' +
+      'pointer-events: none !important;' +
+      'transition: opacity 0.2s, transform 0.2s, width 0s 0.2s, height 0s 0.2s !important;' +
       '}' +
-      '#' + containerId + '-iframe {' +
-        'width: 100% !important;' +
-        'height: 100% !important;' +
-        'border: none !important;' +
+      '#' +
+      containerId +
+      '-iframe {' +
+      'width: 100% !important;' +
+      'height: 100% !important;' +
+      'border: none !important;' +
       '}' +
-      '#' + containerId + '-toggle {' +
-        'position: fixed !important;' +
-        'bottom: 20px !important;' +
-        'right: 20px !important;' +
-        'width: 56px !important;' +
-        'height: 56px !important;' +
-        'border-radius: 50% !important;' +
-        'background-color: ' + buttonColor + ' !important;' +
-        'box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;' +
-        'border: none !important;' +
-        'cursor: pointer !important;' +
-        'display: flex !important;' +
-        'align-items: center !important;' +
-        'justify-content: center !important;' +
-        'color: white !important;' +
-        'z-index: 2147483647 !important;' +
-        'transition: transform 0.2s !important;' +
+      '#' +
+      containerId +
+      '-toggle {' +
+      'position: fixed !important;' +
+      'bottom: 20px !important;' +
+      'right: 20px !important;' +
+      'width: 56px !important;' +
+      'height: 56px !important;' +
+      'border-radius: 50% !important;' +
+      'background-color: ' +
+      buttonColor +
+      ' !important;' +
+      'box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;' +
+      'border: none !important;' +
+      'cursor: pointer !important;' +
+      'display: flex !important;' +
+      'align-items: center !important;' +
+      'justify-content: center !important;' +
+      'color: white !important;' +
+      'z-index: 2147483647 !important;' +
+      'transition: transform 0.2s !important;' +
       '}' +
-      '#' + containerId + '-toggle:hover {' +
-        'transform: scale(1.05) !important;' +
+      '#' +
+      containerId +
+      '-toggle:hover {' +
+      'transform: scale(1.05) !important;' +
       '}' +
-      '#' + containerId + '-toggle svg {' +
-        'width: 24px !important;' +
-        'height: 24px !important;' +
+      '#' +
+      containerId +
+      '-toggle svg {' +
+      'width: 24px !important;' +
+      'height: 24px !important;' +
       '}' +
       '@media (max-width: 768px) {' +
-        '#' + containerId + ' {' +
-          'width: 100% !important;' +
-          'height: calc(100% - 80px) !important;' +
-          'bottom: 80px !important;' +
-          'right: 0 !important;' +
-          'border-radius: 0 !important;' +
-        '}' +
+      '#' +
+      containerId +
+      ' {' +
+      'width: 100% !important;' +
+      'height: calc(100% - 80px) !important;' +
+      'bottom: 80px !important;' +
+      'right: 0 !important;' +
+      'border-radius: 0 !important;' +
+      '}' +
       '}'
 
     var style = document.createElement('style')

@@ -80,37 +80,46 @@
 
   // Fetch widget configuration from API to get admin-set colors
   function fetchWidgetConfig(callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', config.baseUrl + '/api/widget-config?chatbotId=' + config.chatbotId, true);
-    xhr.onreadystatechange = function() {
+    var xhr = new XMLHttpRequest()
+    xhr.open(
+      'GET',
+      config.baseUrl + '/api/widget-config?chatbotId=' + config.chatbotId,
+      true
+    )
+    xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           try {
-            var response = JSON.parse(xhr.responseText);
+            var response = JSON.parse(xhr.responseText)
             if (response.config && response.config.buttonColor) {
-              buttonColor = response.config.buttonColor;
-              console.log('[RoleModel Widget] Using admin button color:', buttonColor);
+              buttonColor = response.config.buttonColor
+              console.log('[RoleModel Widget] Using admin button color:', buttonColor)
             }
           } catch (e) {
-            console.log('[RoleModel Widget] Could not parse config response');
+            console.log('[RoleModel Widget] Could not parse config response')
           }
         }
-        callback();
+        callback()
       }
-    };
-    xhr.send();
+    }
+    xhr.send()
   }
 
   // Add required styles with !important for Framer compatibility
   function injectStyles() {
-    var styleId = containerId + '-styles';
-    if (document.getElementById(styleId)) return;
-    
-    var positionLeft = position === 'bottom-left';
-    var positionRule = positionLeft ? 'left: 20px !important;' : 'right: 20px !important;';
-    var mobilePositionRule = positionLeft ? 'left: 16px !important;' : 'right: 16px !important;';
-    
-    var css = '#' + containerId + ' {' +
+    var styleId = containerId + '-styles'
+    if (document.getElementById(styleId)) return
+
+    var positionLeft = position === 'bottom-left'
+    var positionRule = positionLeft ? 'left: 20px !important;' : 'right: 20px !important;'
+    var mobilePositionRule = positionLeft
+      ? 'left: 16px !important;'
+      : 'right: 16px !important;'
+
+    var css =
+      '#' +
+      containerId +
+      ' {' +
       'position: fixed !important;' +
       positionRule +
       'bottom: 90px !important;' +
@@ -125,29 +134,41 @@
       'background: white !important;' +
       'opacity: 0 !important;' +
       'visibility: hidden !important;' +
+      'width: 0 !important;' +
+      'height: 0 !important;' +
       'pointer-events: none !important;' +
       'transform: translateY(20px) !important;' +
-      'transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease !important;' +
-    '}' +
-    '#' + containerId + '.rm-open {' +
+      'transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease, width 0s 0.3s, height 0s 0.3s !important;' +
+      '}' +
+      '#' +
+      containerId +
+      '.rm-open {' +
       'opacity: 1 !important;' +
       'visibility: visible !important;' +
+      'width: 400px !important;' +
+      'height: 600px !important;' +
       'pointer-events: auto !important;' +
       'transform: translateY(0) !important;' +
-    '}' +
-    '#' + containerId + '-iframe {' +
+      '}' +
+      '#' +
+      containerId +
+      '-iframe {' +
       'width: 100% !important;' +
       'height: 100% !important;' +
       'border: none !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn {' +
       'position: fixed !important;' +
       positionRule +
       'bottom: 20px !important;' +
       'width: 60px !important;' +
       'height: 60px !important;' +
       'border-radius: 50% !important;' +
-      'background: ' + buttonColor + ' !important;' +
+      'background: ' +
+      buttonColor +
+      ' !important;' +
       'border: none !important;' +
       'cursor: pointer !important;' +
       'z-index: 2147483647 !important;' +
@@ -158,56 +179,70 @@
       'transition: transform 0.2s ease, box-shadow 0.2s ease !important;' +
       'padding: 0 !important;' +
       'margin: 0 !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn:hover {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn:hover {' +
       'transform: scale(1.05) !important;' +
       'box-shadow: 0 6px 16px rgba(0,0,0,0.25) !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn svg {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn svg {' +
       'width: 28px !important;' +
       'height: 28px !important;' +
       'fill: white !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn .rm-close-icon {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn .rm-close-icon {' +
       'display: none !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn.rm-open .rm-chat-icon {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn.rm-open .rm-chat-icon {' +
       'display: none !important;' +
-    '}' +
-    '#' + containerId + '-toggle-btn.rm-open .rm-close-icon {' +
+      '}' +
+      '#' +
+      containerId +
+      '-toggle-btn.rm-open .rm-close-icon {' +
       'display: block !important;' +
-    '}' +
-    '@media (max-width: 768px) {' +
-      '#' + containerId + ' {' +
-        'width: 100% !important;' +
-        'height: 100% !important;' +
-        'max-height: 100% !important;' +
-        'bottom: 0 !important;' +
-        'right: 0 !important;' +
-        'left: 0 !important;' +
-        'border-radius: 0 !important;' +
       '}' +
-      '#' + containerId + '-toggle-btn {' +
-        'bottom: 16px !important;' +
-        mobilePositionRule +
+      '@media (max-width: 768px) {' +
+      '#' +
+      containerId +
+      ' {' +
+      'width: 100% !important;' +
+      'height: 100% !important;' +
+      'max-height: 100% !important;' +
+      'bottom: 0 !important;' +
+      'right: 0 !important;' +
+      'left: 0 !important;' +
+      'border-radius: 0 !important;' +
       '}' +
-    '}';
-    
-    var style = document.createElement('style');
-    style.id = styleId;
-    style.type = 'text/css';
+      '#' +
+      containerId +
+      '-toggle-btn {' +
+      'bottom: 16px !important;' +
+      mobilePositionRule +
+      '}' +
+      '}'
+
+    var style = document.createElement('style')
+    style.id = styleId
+    style.type = 'text/css'
     if (style.styleSheet) {
-      style.styleSheet.cssText = css; // IE8
+      style.styleSheet.cssText = css // IE8
     } else {
-      style.appendChild(document.createTextNode(css));
+      style.appendChild(document.createTextNode(css))
     }
-    
-    var head = document.head || document.getElementsByTagName('head')[0];
+
+    var head = document.head || document.getElementsByTagName('head')[0]
     if (head) {
-      head.appendChild(style);
-      console.log('[RoleModel Widget] Styles injected');
+      head.appendChild(style)
+      console.log('[RoleModel Widget] Styles injected')
     } else {
-      console.error('[RoleModel Widget] No head element found');
+      console.error('[RoleModel Widget] No head element found')
     }
   }
 
@@ -215,110 +250,110 @@
   function createWidget() {
     // Check if container already exists
     if (document.getElementById(containerId)) {
-      console.log('[RoleModel Widget] Already initialized');
-      return;
+      console.log('[RoleModel Widget] Already initialized')
+      return
     }
 
-    console.log('[RoleModel Widget] Creating widget...');
+    console.log('[RoleModel Widget] Creating widget...')
 
     // Create toggle button
-    var toggleBtn = document.createElement('button');
-    toggleBtn.id = containerId + '-toggle-btn';
-    toggleBtn.setAttribute('type', 'button');
-    toggleBtn.setAttribute('aria-label', 'Toggle chat widget');
-    toggleBtn.innerHTML = 
+    var toggleBtn = document.createElement('button')
+    toggleBtn.id = containerId + '-toggle-btn'
+    toggleBtn.setAttribute('type', 'button')
+    toggleBtn.setAttribute('aria-label', 'Toggle chat widget')
+    toggleBtn.innerHTML =
       '<svg class="rm-chat-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.2L4 17.2V4H20V16Z"/>' +
-        '<path d="M7 9H17V11H7V9ZM7 6H17V8H7V6ZM7 12H14V14H7V12Z"/>' +
+      '<path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.2L4 17.2V4H20V16Z"/>' +
+      '<path d="M7 9H17V11H7V9ZM7 6H17V8H7V6ZM7 12H14V14H7V12Z"/>' +
       '</svg>' +
       '<svg class="rm-close-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>' +
-      '</svg>';
+      '<path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>' +
+      '</svg>'
 
     // Create container
-    var container = document.createElement('div');
-    container.id = containerId;
+    var container = document.createElement('div')
+    container.id = containerId
 
     // Create iframe
-    var iframe = document.createElement('iframe');
-    iframe.id = containerId + '-iframe';
-    iframe.src = WIDGET_URL;
-    iframe.setAttribute('allow', 'microphone');
-    iframe.setAttribute('loading', 'lazy');
+    var iframe = document.createElement('iframe')
+    iframe.id = containerId + '-iframe'
+    iframe.src = WIDGET_URL
+    iframe.setAttribute('allow', 'microphone')
+    iframe.setAttribute('loading', 'lazy')
 
-    container.appendChild(iframe);
-    
+    container.appendChild(iframe)
+
     // Append to body
-    document.body.appendChild(toggleBtn);
-    document.body.appendChild(container);
-    
-    console.log('[RoleModel Widget] Elements added to body');
+    document.body.appendChild(toggleBtn)
+    document.body.appendChild(container)
+
+    console.log('[RoleModel Widget] Elements added to body')
 
     // Toggle functionality
     toggleBtn.addEventListener('click', function () {
-      var isOpen = container.classList.toggle('rm-open');
-      toggleBtn.classList.toggle('rm-open', isOpen);
-      toggleBtn.setAttribute('aria-label', isOpen ? 'Close chat' : 'Open chat');
-      console.log('[RoleModel Widget] Toggled:', isOpen ? 'open' : 'closed');
-    });
-    
-    console.log('[RoleModel Widget] Initialized successfully');
+      var isOpen = container.classList.toggle('rm-open')
+      toggleBtn.classList.toggle('rm-open', isOpen)
+      toggleBtn.setAttribute('aria-label', isOpen ? 'Close chat' : 'Open chat')
+      console.log('[RoleModel Widget] Toggled:', isOpen ? 'open' : 'closed')
+    })
+
+    console.log('[RoleModel Widget] Initialized successfully')
   }
 
   // Initialize when DOM is ready
   function init() {
     // Fetch config from API first to get admin colors, then create widget
-    fetchWidgetConfig(function() {
-      injectStyles();
-      
+    fetchWidgetConfig(function () {
+      injectStyles()
+
       if (document.body) {
-        createWidget();
+        createWidget()
       } else if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', createWidget);
+        document.addEventListener('DOMContentLoaded', createWidget)
       } else {
         // Fallback: poll for body
-        var attempts = 0;
-        var checkBody = setInterval(function() {
-          attempts++;
+        var attempts = 0
+        var checkBody = setInterval(function () {
+          attempts++
           if (document.body) {
-            clearInterval(checkBody);
-            createWidget();
+            clearInterval(checkBody)
+            createWidget()
           } else if (attempts > 100) {
-            clearInterval(checkBody);
-            console.error('[RoleModel Widget] Could not find document.body');
+            clearInterval(checkBody)
+            console.error('[RoleModel Widget] Could not find document.body')
           }
-        }, 50);
+        }, 50)
       }
-    });
+    })
   }
-  
-  init();
+
+  init()
 
   // Export API for controlling the widget
   window.RoleModelWidget = {
     show: function () {
-      var container = document.getElementById(containerId);
-      var toggleBtn = document.getElementById(containerId + '-toggle-btn');
+      var container = document.getElementById(containerId)
+      var toggleBtn = document.getElementById(containerId + '-toggle-btn')
       if (container) {
-        container.classList.add('rm-open');
-        if (toggleBtn) toggleBtn.classList.add('rm-open');
+        container.classList.add('rm-open')
+        if (toggleBtn) toggleBtn.classList.add('rm-open')
       }
     },
     hide: function () {
-      var container = document.getElementById(containerId);
-      var toggleBtn = document.getElementById(containerId + '-toggle-btn');
+      var container = document.getElementById(containerId)
+      var toggleBtn = document.getElementById(containerId + '-toggle-btn')
       if (container) {
-        container.classList.remove('rm-open');
-        if (toggleBtn) toggleBtn.classList.remove('rm-open');
+        container.classList.remove('rm-open')
+        if (toggleBtn) toggleBtn.classList.remove('rm-open')
       }
     },
     toggle: function () {
-      var container = document.getElementById(containerId);
-      var toggleBtn = document.getElementById(containerId + '-toggle-btn');
+      var container = document.getElementById(containerId)
+      var toggleBtn = document.getElementById(containerId + '-toggle-btn')
       if (container) {
-        var isOpen = container.classList.toggle('rm-open');
-        if (toggleBtn) toggleBtn.classList.toggle('rm-open', isOpen);
+        var isOpen = container.classList.toggle('rm-open')
+        if (toggleBtn) toggleBtn.classList.toggle('rm-open', isOpen)
       }
-    }
-  };
-})();
+    },
+  }
+})()
