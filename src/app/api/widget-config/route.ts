@@ -4,6 +4,18 @@ import { supabaseServer } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
+// CORS headers for widget embed
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+// Handle CORS preflight
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders })
+}
+
 // GET - Fetch widget configuration
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
@@ -18,30 +30,34 @@ export async function GET(req: NextRequest) {
   if (error) {
     // If no config exists, return default config
     if (error.code === 'PGRST116') {
-      return NextResponse.json({
-        config: {
-          displayName: 'RoleModel Software',
-          initialMessage: "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?",
-          theme: 'light',
-          primaryColor: '#007BFF',
-          buttonColor: '#000000',
-          alignment: 'right',
-          profilePicture: 'R',
-          messagePlaceholder: 'Message...',
-          collectFeedback: true,
-          regenerateMessages: true,
-          dismissibleNotice: '',
-          suggestedMessagesPersist: false,
-          usePrimaryForHeader: true,
-          syncInstructions: true,
-          instructions: '',
+      return NextResponse.json(
+        {
+          config: {
+            displayName: 'RoleModel Software',
+            initialMessage:
+              "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?",
+            theme: 'light',
+            primaryColor: '#007BFF',
+            buttonColor: '#000000',
+            alignment: 'right',
+            profilePicture: 'R',
+            messagePlaceholder: 'Message...',
+            collectFeedback: true,
+            regenerateMessages: true,
+            dismissibleNotice: '',
+            suggestedMessagesPersist: false,
+            usePrimaryForHeader: true,
+            syncInstructions: true,
+            instructions: '',
+          },
         },
-      })
+        { headers: corsHeaders }
+      )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
   }
 
-  return NextResponse.json({ config: data.config })
+  return NextResponse.json({ config: data.config }, { headers: corsHeaders })
 }
 
 // POST - Save widget configuration
