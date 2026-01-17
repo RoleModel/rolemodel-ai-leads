@@ -267,7 +267,7 @@ export default function WebhooksPage() {
           {/* Webhook Form */}
           {showForm && (
             <div className="card" style={{ marginBottom: 'var(--op-space-large)' }}>
-              <div className="card-header">
+              <div className="card__header">
                 <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0 }}>
                   {editingId ? 'Edit Webhook' : 'New Webhook'}
                 </h2>
@@ -741,7 +741,7 @@ export default function WebhooksPage() {
 
           {/* Webhook Payload Documentation */}
           <div className="card" style={{ marginTop: 'var(--op-space-x-large)' }}>
-            <div className="card-header">
+            <div className="card__header">
               <h2 style={{ fontSize: 'var(--op-font-large)', margin: 0 }}>
                 Webhook Payload Format
               </h2>

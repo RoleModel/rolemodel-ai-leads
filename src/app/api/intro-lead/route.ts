@@ -46,6 +46,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: convError.message }, { status: 500 })
     }
 
+    // Save the initial greeting message so it appears in chat logs
+    const greeting = name
+      ? `Welcome back, ${name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+      : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+
+    await supabaseServer.from('messages').insert([
+      {
+        conversation_id: conversation.id,
+        role: 'assistant',
+        content: greeting,
+      },
+    ])
+
     // Track analytics event for form submission
     await supabaseServer.from('analytics_events').insert([
       {

@@ -44,7 +44,7 @@ function Card({
 function CardHeader({ className, border = false, ...props }: CardHeaderProps) {
   return (
     <div
-      data-slot="card-header"
+      data-slot="card__header"
       style={{
         fontSize: 'var(--op-font-medium)',
         borderBottom: border ? '1px solid var(--op-color-border)' : 'none',

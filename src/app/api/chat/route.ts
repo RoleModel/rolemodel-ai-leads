@@ -311,14 +311,20 @@ ${sourceContext}`,
 
     // OPTIMIZATION: Save user message in background (non-blocking)
     if (activeConversationId && userQuery) {
-      const insertMessage = () =>
-        supabaseServer.from('messages').insert([
+      const insertMessage = async () => {
+        const { error } = await supabaseServer.from('messages').insert([
           {
             conversation_id: activeConversationId,
             role: 'user',
             content: userQuery,
           },
         ])
+        if (error) {
+          console.error('[Chat] Error inserting user message:', error)
+        } else {
+          console.log('[Chat] User message saved for conversation:', activeConversationId)
+        }
+      }
       // Ensure ordering: insert message only after conversation creation (if needed)
       if (conversationPromise) {
         void conversationPromise
@@ -327,10 +333,7 @@ ${sourceContext}`,
             console.error('Error creating conversation before inserting message:', err)
           )
       } else {
-        void insertMessage().then(
-          () => { },
-          (err) => console.error('Error inserting user message:', err)
-        )
+        void insertMessage()
       }
     }
 
@@ -401,7 +404,12 @@ ${sourceContext}`,
               title: s.title,
             })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
           }
-          await supabaseServer.from('messages').insert([assistantMessage])
+          const { error: msgError } = await supabaseServer.from('messages').insert([assistantMessage])
+          if (msgError) {
+            console.error('[Chat] Error saving assistant message:', msgError)
+          } else {
+            console.log('[Chat] Assistant message saved for conversation:', activeConversationId)
+          }
 
           // Track analytics event
           type AnalyticsInsert =

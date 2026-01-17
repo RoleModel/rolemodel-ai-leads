@@ -411,7 +411,7 @@ export default function SourcesPage() {
                         borderColor: 'var(--op-color-border)',
                       }}
                     >
-                      <div className="card-header">
+                      <div className="card__header">
                         <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                           Add files
                         </h2>
@@ -485,7 +485,7 @@ export default function SourcesPage() {
                         marginBottom: 'var(--op-space-large)',
                       }}
                     >
-                      <div className="card-header">
+                      <div className="card__header">
                         <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                           Add New{' '}
                           {activeSection === 'text'
@@ -572,7 +572,7 @@ export default function SourcesPage() {
                         className="card"
                         style={{ marginBottom: 'var(--op-space-large)' }}
                       >
-                        <div className="card-header">
+                        <div className="card__header">
                           <h2 style={{ fontSize: 'var(--op-font-medium)', margin: 0 }}>
                             Sync from Framer
                           </h2>
@@ -600,8 +600,8 @@ export default function SourcesPage() {
                                   ? 'var(--op-color-success-background)'
                                   : 'var(--op-color-error-background)',
                                 border: `1px solid ${framerSyncResult.success
-                                    ? 'var(--op-color-success-border)'
-                                    : 'var(--op-color-error-border)'
+                                  ? 'var(--op-color-success-border)'
+                                  : 'var(--op-color-error-border)'
                                   }`,
                                 borderRadius: 'var(--op-radius-small)',
                                 marginBottom: 'var(--op-space-medium)',
@@ -691,9 +691,9 @@ export default function SourcesPage() {
                         const isExpanded = expandedSources.has(source.id)
 
                         return (
-                          <div key={source.id} className="card" style={{ padding: '24px' }}>
+                          <div key={source.id} className="card">
                             <div
-                              className="card-header"
+                              className="card__header"
                               style={{
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -888,8 +888,8 @@ export default function SourcesPage() {
                           ? 'var(--op-color-success-background)'
                           : 'var(--op-color-error-background)',
                       border: `1px solid ${workflowControls.saveStatus.type === 'success'
-                          ? 'var(--op-color-success-border)'
-                          : 'var(--op-color-error-border)'
+                        ? 'var(--op-color-success-border)'
+                        : 'var(--op-color-error-border)'
                         }`,
                       borderRadius: 'var(--op-radius-small)',
                       marginBottom: 'var(--op-space-medium)',

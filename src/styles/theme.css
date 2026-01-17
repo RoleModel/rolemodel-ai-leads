@@ -115,6 +115,6 @@
     --op-color-neutral-h: 193 !important;
     --op-color-neutral-s: 10% !important;
     --op-color-neutral-l: 2% !important;
-    --op-color-primary-l: 80% !important;
+    --op-color-primary-base: hsl(var(--op-color-primary-h) 80% 50%) !important;
   }
 }

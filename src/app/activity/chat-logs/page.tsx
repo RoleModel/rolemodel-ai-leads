@@ -31,7 +31,7 @@ interface VisitorMetadata {
 
 interface Conversation {
   id: string
-  visitor_id: string
+  visitor_id: string | null
   visitor_name: string | null
   visitor_email: string | null
   visitor_metadata: VisitorMetadata | null
@@ -187,7 +187,7 @@ export default function ChatLogsPage() {
                           <span className="admin-list-item__title">
                             {conv.visitor_name ||
                               conv.visitor_email ||
-                              `Visitor ${conv.visitor_id.slice(0, 8)}`}
+                              `Visitor ${conv.visitor_id?.slice(0, 8) || conv.id.slice(0, 8)}`}
                           </span>
                           {conv.is_archived && (
                             <span className="admin-badge admin-badge--archived">
