@@ -1,6 +1,6 @@
 'use client'
 
-import IntroBPage from '@/app/intro/b/page'
+import { LandingPageB } from '@/components/intro/LandingPageB'
 
 export default function EmbedIntroB() {
   return (
@@ -14,7 +14,7 @@ export default function EmbedIntroB() {
       data-theme="leads"
       data-theme-mode="light"
     >
-      <IntroBPage />
+      <LandingPageB isEmbed />
     </div>
   )
 }
