@@ -1008,6 +1008,11 @@ function LandingBInner({
   )
 
   const handleCardClick = contextSafe(() => {
+    const smoother = ScrollSmoother.get()
+    if (smoother) {
+      smoother.scrollTo('#get-started', true)
+      return
+    }
     gsap.to(window, { duration: 0.9, scrollTo: '#get-started' })
   })
 
