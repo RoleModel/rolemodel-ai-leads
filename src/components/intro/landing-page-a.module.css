@@ -64,12 +64,6 @@
   pointer-events: auto;
 }
 
-/* Embed cap: prevent vh-based runaway when iframe is tall */
-::global(.intro-page) {
-  min-height: min(100vh, var(--rm-embed-vh-cap, 100vh));
-  min-height: min(100dvh, var(--rm-embed-vh-cap, 100dvh));
-}
-
 .hero-no-background {
   background-color: transparent;
   background-image: none;
