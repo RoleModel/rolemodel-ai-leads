@@ -13,7 +13,7 @@ html:has([data-page='intro-c']) body {
 
 /* ===== PAGE LAYOUT ===== */
 .intro-c-page {
-  min-height: 100vh;
+  min-height: min(100vh, var(--rm-embed-vh-cap, 100vh));
   display: flex;
   flex-direction: column;
   position: relative;
@@ -45,7 +45,7 @@ html:has([data-page='intro-c']) body {
   justify-content: center;
   position: relative;
   overflow: visible;
-  min-height: 80vh;
+  min-height: min(80vh, var(--rm-embed-vh-cap, 80vh));
   padding: var(--op-space-3x-large);
   color: var(--op-color-white);
   background-color: var(--blue-green-900);
@@ -340,7 +340,7 @@ html:has([data-page='intro-c']) body {
   display: flex;
   flex-direction: column;
   box-shadow: var(--op-shadow-large);
-  max-height: calc(100vh - 48px);
+  max-height: calc(min(100vh, var(--rm-embed-vh-cap, 100vh)) - 48px);
   overflow: hidden;
   animation: slideUp 0.3s ease-out forwards;
 }

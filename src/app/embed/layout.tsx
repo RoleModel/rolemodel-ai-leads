@@ -22,6 +22,10 @@ export default function EmbedLayout({ children }: { children: React.ReactNode })
               *, *::before, *::after {
                 box-sizing: border-box;
               }
+              :root {
+                /* Cap viewport-based sections inside embeds to avoid huge heroes when the iframe is tall. */
+                --rm-embed-vh-cap: 820px;
+              }
               html, body {
                 margin: 0;
                 padding: 0;

@@ -54,7 +54,7 @@
   background-position: center;
   background-repeat: no-repeat;
   color: white;
-  min-height: 90vh;
+  min-height: min(90vh, var(--rm-embed-vh-cap, 90vh));
   display: flex;
   align-items: center;
   padding: calc(var(--op-size-unit) * 40) var(--op-space-large);
@@ -62,6 +62,12 @@
   transition: font-size 0.3s ease-in-out;
   border-bottom: var(--op-space-x-small) solid var(--purple-100);
   pointer-events: auto;
+}
+
+/* Embed cap: prevent vh-based runaway when iframe is tall */
+::global(.intro-page) {
+  min-height: min(100vh, var(--rm-embed-vh-cap, 100vh));
+  min-height: min(100dvh, var(--rm-embed-vh-cap, 100dvh));
 }
 
 .hero-no-background {
@@ -245,7 +251,7 @@
   background-color: var(--blue-green-1000);
   color: white;
   padding: calc(var(--op-size-unit) * 20) 0;
-  min-height: 90vh;
+  min-height: min(90vh, var(--rm-embed-vh-cap, 90vh));
   display: flex;
   align-items: center;
   justify-content: center;
