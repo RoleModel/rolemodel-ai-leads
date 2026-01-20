@@ -1,10 +1,10 @@
 import { streamText, tool } from 'ai'
-import { nanoid } from 'nanoid'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
+import { getModelById } from '@/lib/ai/models'
 import {
   type Source,
   buildSourceContext,
@@ -293,7 +293,7 @@ ${sourceContext}`,
 
     if (!activeConversationId) {
       // Generate ID upfront so we can use it immediately
-      activeConversationId = nanoid()
+      activeConversationId = crypto.randomUUID()
 
       // Create conversation in background (non-blocking)
       conversationPromise = (async () => {
@@ -301,7 +301,7 @@ ${sourceContext}`,
         const conversationData = {
           id: activeConversationId,
           chatbot_id: activeChatbotId,
-          visitor_id: nanoid(),
+          visitor_id: crypto.randomUUID(),
           visitor_metadata:
             visitorMetadata as unknown as Database['public']['Tables']['conversations']['Insert']['visitor_metadata'],
         }
@@ -338,10 +338,16 @@ ${sourceContext}`,
     }
 
     // Stream response - START IMMEDIATELY without waiting for DB writes
-    // Vercel AI Gateway uses provider/model format (e.g., openai/gpt-4o-mini)
-    const modelId = effectiveModel.includes('/')
-      ? effectiveModel
-      : `openai/${effectiveModel}`
+    // Vercel AI Gateway uses provider/model format (e.g., openai/gpt-4o-mini, anthropic/claude-sonnet-4.5)
+    let modelId: string
+    if (effectiveModel.includes('/')) {
+      modelId = effectiveModel
+    } else {
+      // Get model info to determine provider
+      const modelInfo = getModelById(effectiveModel)
+      const provider = modelInfo?.provider || 'openai'
+      modelId = `${provider}/${effectiveModel}`
+    }
 
     const sourceHeaderPayload = buildSourceHeaderPayload(relevantSources)
 

@@ -21,7 +21,7 @@ CREATE TABLE sources (
   chatbot_id UUID REFERENCES chatbots(id) ON DELETE CASCADE,
   title TEXT,
   content TEXT NOT NULL,
-  embedding vector(1536), -- OpenAI ada-002 dimensions
+  embedding vector(1536), -- OpenAI text-embedding-3-small dimensions
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
