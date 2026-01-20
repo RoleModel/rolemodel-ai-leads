@@ -110,7 +110,9 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
   const [visitorData, setVisitorData] = useState<VisitorData | null>(null)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [formLoadTime] = useState(Date.now())
   const heroContainerRef = useRef<HTMLDivElement>(null)
 
   // Use stored visitor if available and no local state set yet
@@ -169,6 +171,19 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
   const handleFormSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
+    // Honeypot spam check - if filled, silently reject
+    if (honeypot) {
+      // Silently fail for bots
+      return
+    }
+
+    // Time-based validation - reject submissions faster than 3 seconds
+    const timeTaken = Date.now() - formLoadTime
+    if (timeTaken < 3000) {
+      // Too fast, likely a bot
+      return
+    }
+
     setIsLoading(true)
     try {
       // Submit to API to create conversation and capture lead
@@ -179,6 +194,7 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
           name,
           email,
           chatbotId: activeChatbotId,
+          submissionTime: timeTaken,
         }),
       })
 
@@ -416,6 +432,23 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
               <form onSubmit={handleFormSubmit} className={styles.form}>
                 <div className={styles['form-card']}>
                   <div className={styles['form-fields']}>
+                    {/* Honeypot field - hidden from real users, but bots will fill it */}
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        left: '-9999px',
+                        width: '1px',
+                        height: '1px',
+                        opacity: 0,
+                      }}
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
                     <input
                       type="text"
                       name="name"

@@ -9,10 +9,32 @@ const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, chatbotId } = body
+    const { name, email, chatbotId, submissionTime } = body
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+    }
+
+    // Additional server-side time check (backup for client-side validation)
+    if (submissionTime && submissionTime < 2000) {
+      // Suspicious - submitted too quickly
+      return NextResponse.json({ error: 'Invalid submission' }, { status: 400 })
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
+    }
+
+    // Block common disposable email domains
+    const disposableDomains = [
+      'tempmail.com', 'throwaway.email', '10minutemail.com', 'guerrillamail.com',
+      'mailinator.com', 'trashmail.com', 'temp-mail.org', 'getnada.com'
+    ]
+    const emailDomain = email.split('@')[1]?.toLowerCase()
+    if (emailDomain && disposableDomains.includes(emailDomain)) {
+      return NextResponse.json({ error: 'Please use a valid email address' }, { status: 400 })
     }
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
@@ -48,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     // Save the initial greeting message so it appears in chat logs
     const greeting = name
-      ? `Welcome back, ${name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+      ? `Hey, ${name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
       : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
 
     await supabaseServer.from('messages').insert([
