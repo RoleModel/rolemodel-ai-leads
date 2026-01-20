@@ -14,7 +14,6 @@ interface LeadsPageWithProviderProps {
   showSidebar?: boolean
   editMode?: boolean
   loadFromApi?: boolean
-  isEmbed?: boolean
   visitorName?: string
   visitorEmail?: string
   conversationId?: string
@@ -25,7 +24,6 @@ function LeadsPageLoader({
   showSidebar,
   editMode,
   loadFromApi,
-  isEmbed,
   visitorName,
   visitorEmail,
   conversationId,
@@ -104,7 +102,6 @@ function LeadsPageLoader({
       editMode={editMode}
       theme={theme}
       onThemeChange={handleThemeChange}
-      isEmbed={isEmbed}
       visitorName={visitorName}
       visitorEmail={visitorEmail}
       initialConversationId={conversationId}

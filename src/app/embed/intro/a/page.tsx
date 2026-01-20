@@ -14,7 +14,7 @@ export default function EmbedIntroA() {
       data-theme="leads"
       data-theme-mode="light"
     >
-      <LandingPageA isEmbed />
+      <LandingPageA />
     </div>
   )
 }

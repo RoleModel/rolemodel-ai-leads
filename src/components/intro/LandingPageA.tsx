@@ -100,10 +100,9 @@ function useSessionStorage<T>(key: string): T | null {
 
 export interface LandingPageAProps {
   chatbotId?: string
-  isEmbed?: boolean
 }
 
-export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) {
+export function LandingPageA({ chatbotId }: LandingPageAProps) {
   const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
   const storedVisitor = useSessionStorage<VisitorData>(STORAGE_KEY)
   // Auto-show chat if there's an existing session
@@ -239,14 +238,12 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
       >
         {/* Hero Section */}
         <section className={styles.hero}>
-          {!isEmbed && (
-            <div className={styles.logo}>
-              <Logo
-                variant="white"
-                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
-              />
-            </div>
-          )}
+          <div className={styles.logo}>
+            <Logo
+              variant="white"
+              style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
+            />
+          </div>
           <div className={`container ${styles['hero-container']}`}>
             <div ref={heroContainerRef}>
               <h1 id="heading" className={styles['hero-title']}>
@@ -499,7 +496,6 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
               chatbotId={activeChatbotId}
               showSidebar={true}
               loadFromApi={true}
-              isEmbed={false}
               visitorName={activeVisitor.name}
               visitorEmail={activeVisitor.email}
               conversationId={activeVisitor.conversationId}

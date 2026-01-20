@@ -584,11 +584,10 @@ const featureCards = [
 
 export interface LandingPageCProps {
   chatbotId?: string
-  isEmbed?: boolean
 }
 
 // --- Main Component ---
-export function LandingPageC({ chatbotId, isEmbed = false }: LandingPageCProps) {
+export function LandingPageC({ chatbotId }: LandingPageCProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const heroRef = useRef<HTMLElement>(null)
@@ -633,14 +632,12 @@ export function LandingPageC({ chatbotId, isEmbed = false }: LandingPageCProps) 
           {/* Hero Section */}
           <section ref={heroRef} className={styles['intro-c-hero']}>
             {/* Logo */}
-            {!isEmbed && (
-              <div className={styles['intro-c-logo']}>
-                <Logo
-                  variant="dark"
-                  style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
-                />
-              </div>
-            )}
+            <div className={styles['intro-c-logo']}>
+              <Logo
+                variant="dark"
+                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
+              />
+            </div>
             <div className={styles['intro-c-hero__gradient']} />
 
             <motion.div

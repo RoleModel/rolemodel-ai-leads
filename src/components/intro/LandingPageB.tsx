@@ -144,7 +144,6 @@ export interface LandingPageBProps {
   subheadline?: string
   className?: string
   chatbotId?: string
-  isEmbed?: boolean
 }
 
 export function LandingPageB(props: LandingPageBProps) {
@@ -690,7 +689,6 @@ function LandingBInner({
   punctuation = '?',
   className,
   chatbotId,
-  isEmbed = false,
 }: LandingPageBProps) {
   useLeadsPageSettings()
   const [isMobile, setIsMobile] = useState(false)
@@ -1033,14 +1031,12 @@ function LandingBInner({
     <div className="intro-b-page">
       <div ref={containerRef} className={`${styles.root} ${className || ''}`}>
         {showGlow && <div ref={glowRef} className={styles['hero-glow']} />}
-        {!isEmbed && (
-          <div className={styles.logo}>
-            <Logo
-              variant="auto"
-              style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }}
-            />
-          </div>
-        )}
+        <div className={styles.logo}>
+          <Logo
+            variant="auto"
+            style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }}
+          />
+        </div>
         <div className={styles['grid-background']} />
         <div ref={gridOpacityRef} className={styles.grid} />
         <div ref={wrapperRef} className={styles['smooth-wrapper']}>

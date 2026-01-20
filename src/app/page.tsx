@@ -17,7 +17,6 @@ function RootPageContent() {
       chatbotId={chatbotId}
       showSidebar={true}
       loadFromApi={true}
-      isEmbed={true}
     />
   )
 }
