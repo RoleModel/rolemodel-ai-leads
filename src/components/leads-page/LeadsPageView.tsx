@@ -4,13 +4,9 @@ import { useChat } from '@ai-sdk/react'
 import {
   Copy01Icon,
   Delete02Icon,
-  Message02Icon,
-  Moon02Icon,
   PlusSignIcon,
   Refresh01Icon,
   Settings02Icon,
-  SidebarLeftIcon,
-  Sun01Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from '@hugeicons-pro/core-stroke-standard'
@@ -83,7 +79,6 @@ interface LeadsPageViewProps {
   editMode?: boolean
   theme?: 'light' | 'dark'
   onThemeChange?: (theme: 'light' | 'dark') => void
-  isEmbed?: boolean
   visitorName?: string
   visitorEmail?: string
   initialConversationId?: string
@@ -101,34 +96,13 @@ export function LeadsPageView({
   editMode = false,
   theme,
   onThemeChange,
-  isEmbed = false,
   visitorName,
   visitorEmail,
   initialConversationId,
 }: LeadsPageViewProps) {
   useLeadsPageSettings() // Keep the hook for context loading
-  const [sidebarCollapsedInternal, setSidebarCollapsedInternal] = useState(false)
-  // Combine internal state with forced collapse prop
-  const sidebarCollapsed = forceSidebarCollapsed || sidebarCollapsedInternal
-  const [isMobile, setIsMobile] = useState(false)
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
-
-  // Detect mobile viewport and auto-collapse sidebar
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 768px)')
-
-    const checkMobile = (e: MediaQueryListEvent | MediaQueryList) => {
-      const mobile = e.matches
-      setIsMobile(mobile)
-      setSidebarCollapsedInternal(mobile)
-    }
-
-    checkMobile(mediaQuery)
-    mediaQuery.addEventListener('change', checkMobile)
-
-    return () => mediaQuery.removeEventListener('change', checkMobile)
-  }, [])
   const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
   const [showSuggestions, setShowSuggestions] = useState(true)
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null)
@@ -137,36 +111,9 @@ export function LeadsPageView({
   // Check if we're on the client to avoid SSR issues
   const isClient = typeof window !== 'undefined'
 
-  // Chat history - use state to avoid hydration mismatch
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([])
-  const [currentChatId, setCurrentChatId] = useState<string>(() => `chat-${Date.now()}`)
   const [showDemo, setShowDemo] = useState(true)
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
-
-  // Load chat history from localStorage only on client (runs once on mount)
-  useEffect(() => {
-    const loadChatHistory = () => {
-      const saved = localStorage.getItem('leads-page-chat-history')
-      if (saved) {
-        try {
-          const history = JSON.parse(saved)
-          setChatHistory(history)
-          // Only hide demo based on chat history if in embed mode
-          if (isEmbed) {
-            setShowDemo(history.length === 0)
-          }
-        } catch {
-          setChatHistory([])
-          setShowDemo(true)
-        }
-      } else {
-        setChatHistory([])
-        setShowDemo(true)
-      }
-    }
-    loadChatHistory()
-  }, [isEmbed])
 
   const handleChatResponse = useCallback((response: Response) => {
     const header = response.headers.get('x-sources-used')
@@ -364,60 +311,6 @@ export function LeadsPageView({
     setSuggestions(suggestions.map((s) => (s.id === id ? { ...s, text: newText } : s)))
   }
 
-  // Chat history handlers
-  const handleNewChat = () => {
-    // Save current chat if there are messages
-    if (messages.length > 0 && currentChatId) {
-      const firstUserMessage = messages.find((m) => m.role === 'user')
-      const title = firstUserMessage
-        ? getMessageContent(firstUserMessage).slice(0, 50) +
-        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
-        : 'New Chat'
-
-      const chatToSave: ChatHistory = {
-        id: currentChatId,
-        title,
-        messages,
-        timestamp: Date.now(),
-      }
-
-      const updatedHistory = chatHistory.filter((c) => c.id !== currentChatId)
-      updatedHistory.unshift(chatToSave)
-      const trimmedHistory = updatedHistory.slice(0, 50)
-      localStorage.setItem('leads-page-chat-history', JSON.stringify(trimmedHistory))
-      setChatHistory(trimmedHistory)
-    }
-
-    // Create new chat with initial AI greeting
-    setCurrentChatId(`chat-${Date.now()}`)
-
-    // Create initial greeting message for new chat
-    const greetingMessage: UIMessage = {
-      id: `greeting-${Date.now()}`,
-      role: 'assistant',
-      parts: [
-        {
-          type: 'text',
-          text: visitorName
-            ? `Hi ${visitorName}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
-            : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
-        },
-      ],
-    }
-    setMessages([greetingMessage])
-    setShowDemo(false)
-  }
-
-  const handleSwitchChat = (chatId: string) => {
-    const chat = chatHistory.find((c) => c.id === chatId)
-    if (chat) {
-      setCurrentChatId(chatId)
-      setShowDemo(false)
-      // Load the chat's messages
-      setMessages(chat.messages)
-    }
-  }
-
   // Dark mode handler
   const handleToggleDarkMode = () => {
     if (onThemeChange) {
@@ -426,125 +319,16 @@ export function LeadsPageView({
     }
   }
 
-  // Save current chat to localStorage when messages change (external system sync)
-  useEffect(() => {
-    if (messages.length > 0 && !showDemo && currentChatId) {
-      // Generate title from first user message
-      const firstUserMessage = messages.find((m) => m.role === 'user')
-      const title = firstUserMessage
-        ? getMessageContent(firstUserMessage).slice(0, 50) +
-        (getMessageContent(firstUserMessage).length > 50 ? '...' : '')
-        : 'New Chat'
-
-      // Create new chat entry
-      const newChat: ChatHistory = {
-        id: currentChatId,
-        title,
-        messages,
-        timestamp: Date.now(),
-      }
-
-      // Read current history from localStorage, update it, and save back
-      const saved = localStorage.getItem('leads-page-chat-history')
-      let currentHistory: ChatHistory[] = []
-      if (saved) {
-        try {
-          currentHistory = JSON.parse(saved)
-        } catch {
-          currentHistory = []
-        }
-      }
-
-      const updatedHistory = currentHistory.filter((c) => c.id !== currentChatId)
-      updatedHistory.unshift(newChat)
-      const trimmedHistory = updatedHistory.slice(0, 50)
-      localStorage.setItem('leads-page-chat-history', JSON.stringify(trimmedHistory))
-    }
-  }, [messages, currentChatId, showDemo, getMessageContent])
-
   return (
-    <div className={`app-with-sidebar leads-page${isEmbed ? ' leads-page--embed' : ''}`}>
-      {/* Sidebar */}
-      {showSidebar && (
-        <div
-          className={`sidebar leads-page__sidebar${sidebarCollapsed ? ' sidebar--rail leads-page__sidebar--collapsed' : ''}${isMobile ? ' sidebar--compact' : ''}`}
-        >
-          <div className="leads-page__brand-header">
-            {!sidebarCollapsed && (
-              <div className="leads-page__brand-logo">
-                <Logo
-                  variant="auto"
-                  className="leads-page__logo-image"
-                  style={{ width: 120, height: 'auto' }}
-                />
-              </div>
-            )}
-
-            <Button
-              style={{ justifySelf: 'center' }}
-              variant="ghosticon"
-              onClick={() => setSidebarCollapsedInternal(!sidebarCollapsed)}
-            >
-              <HugeiconsIcon icon={SidebarLeftIcon} size={20} />
-            </Button>
-          </div>
-
-          {/* New Chat / Start Chatting Button */}
-          {showDemo ? (
-            <Button
-              variant={sidebarCollapsed ? 'primaryicon' : 'primary'}
-              size="lg"
-              style={{ width: '100%' }}
-              onClick={() => setShowDemo(false)}
-            >
-              <HugeiconsIcon icon={Message02Icon} size={20} />
-              {!sidebarCollapsed && 'New chat'}
-            </Button>
-          ) : (
-            <Button
-              variant={!sidebarCollapsed ? 'secondary' : 'icon'}
-              className="leads-page__new-chat-btn"
-              onClick={handleNewChat}
-            >
-              <HugeiconsIcon icon={PlusSignIcon} size={20} />{' '}
-              {!sidebarCollapsed && 'New chat'}
-            </Button>
-          )}
-
-          {/* Chat History List */}
-          {!sidebarCollapsed && chatHistory.length > 0 && (
-            <div className="leads-page__chat-history">
-              {chatHistory.map((chat) => (
-                <Button
-                  key={chat.id}
-                  variant="secondary"
-                  className="leads-page__chat-history-item"
-                  onClick={() => handleSwitchChat(chat.id)}
-                >
-                  <span className="leads-page__chat-history-text">
-                    {chat.title.trim()}
-                  </span>
-                </Button>
-              ))}
-            </div>
-          )}
-
-          {/* Dark Mode Toggle at bottom */}
-          <div className="leads-page__dark-mode-container">
-            <Button
-              variant="ghosticon"
-              className="leads-page__dark-mode-btn"
-              onClick={handleToggleDarkMode}
-            >
-              <HugeiconsIcon icon={theme === 'dark' ? Sun01Icon : Moon02Icon} size={20} />
-            </Button>
-          </div>
-        </div>
-      )}
+    <div className="leads-page">
+      {/* Logo Header */}
+      <div className="leads-page__logo-header">
+        <Logo variant="auto" style={{ width: 120, height: 'auto' }} />
+      </div>
 
       {/* Main Content */}
       <div className="app__content">
-        <div className={`leads-page__content${isEmbed ? ' leads-page__content--embed' : ''}`}>
+        <div className="leads-page__content">
           {/* Conversation Messages Container */}
 
           <Conversation className="conversation-wrapper conversation-wrapper--scrollable">
@@ -834,7 +618,7 @@ export function LeadsPageView({
         </div>
       </div>
 
-      {!isEmbed && <PrivacyTermsLinks className="leads-page__footer-links" />}
+      <PrivacyTermsLinks className="leads-page__footer-links" />
     </div>
   )
 }

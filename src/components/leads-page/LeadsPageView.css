@@ -6,6 +6,7 @@
 /* Container */
 .leads-page {
   display: flex;
+  flex-direction: column;
   background-color: var(--op-color-neutral-plus-seven);
   height: 100%;
   width: 100%;
@@ -13,6 +14,15 @@
 
 .leads-page--embed {
   height: 100%;
+}
+
+/* Logo Header */
+.leads-page__logo-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: var(--op-space-medium);
+  z-index: 10;
 }
 
 /* ==========================================================================
