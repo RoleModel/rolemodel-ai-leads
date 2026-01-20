@@ -360,7 +360,7 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
 
         {/* Section Band */}
         <SectionBand
-          autoAnimate={true}
+          autoAnimate={false}
           reverse={true}
           minHeight={12}
           maxHeight={14}
