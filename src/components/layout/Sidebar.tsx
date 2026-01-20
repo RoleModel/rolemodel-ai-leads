@@ -59,23 +59,23 @@ export function NavigationSidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(
-    pathname.startsWith('/sources')
+    pathname.startsWith('/admin/sources')
   )
   const [isActivityExpanded, setIsActivityExpanded] = useState(
-    pathname.startsWith('/activity')
+    pathname.startsWith('/admin/activity')
   )
 
   const navItems = [
-    { href: '/playground', icon: GitCompareIcon, label: 'Explore' },
-    { href: '/activity', icon: Time01Icon, label: 'Activity', expandable: true },
-    { href: '/analytics', icon: Analytics01Icon, label: 'Analytics' },
-    { href: '/sources', icon: Database01Icon, label: 'Sources', expandable: true },
-    { href: '/deploy', icon: Rocket01Icon, label: 'Deploy' },
+    { href: '/admin/playground', icon: GitCompareIcon, label: 'Explore' },
+    { href: '/admin/activity', icon: Time01Icon, label: 'Activity', expandable: true },
+    { href: '/admin/analytics', icon: Analytics01Icon, label: 'Analytics' },
+    { href: '/admin/sources', icon: Database01Icon, label: 'Sources', expandable: true },
+    { href: '/admin/deploy', icon: Rocket01Icon, label: 'Deploy' },
   ]
 
   const activitySubItems = [
-    { href: '/activity/chat-logs', icon: Message01Icon, label: 'Chat logs' },
-    { href: '/activity/leads', icon: UserIcon, label: 'Leads' },
+    { href: '/admin/activity/chat-logs', icon: Message01Icon, label: 'Chat logs' },
+    { href: '/admin/activity/leads', icon: UserIcon, label: 'Leads' },
   ]
 
   const sourcesSubItems = [
@@ -94,8 +94,8 @@ export function NavigationSidebar() {
         {navItems.map((item) => {
           const ItemIcon = item.icon
           const isActive = pathname.startsWith(item.href)
-          const isSourcesItem = item.href === '/sources'
-          const isActivityItem = item.href === '/activity'
+          const isSourcesItem = item.href === '/admin/sources'
+          const isActivityItem = item.href === '/admin/activity'
 
           return (
             <div key={item.href}>
@@ -194,7 +194,7 @@ export function NavigationSidebar() {
                     return (
                       <Link
                         key={subItem.id}
-                        href={`/sources?section=${subItem.id}`}
+                        href={`/admin/sources?section=${subItem.id}`}
                         style={{
                           ...styles.navItem,
                           padding: '6px var(--op-space-medium)',

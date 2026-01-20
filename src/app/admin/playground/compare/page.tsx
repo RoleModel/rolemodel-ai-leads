@@ -686,7 +686,7 @@ export default function ComparePage() {
         <div
           style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-medium)' }}
         >
-          <Button variant="ghost" onClick={() => router.push('/playground')}>
+          <Button variant="ghost" onClick={() => router.push('/admin/playground')}>
             <HugeiconsIcon icon={ArrowLeft01Icon} size={20} />
             <span>Back to Playground</span>
           </Button>
