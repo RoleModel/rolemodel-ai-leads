@@ -47,6 +47,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^1.12.6",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.84.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@vercel/analytics": "^1.6.1",

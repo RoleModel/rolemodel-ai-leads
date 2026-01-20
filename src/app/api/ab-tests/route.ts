@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 
 // GET /api/ab-tests - Get all A/B tests with their variants and stats
 export async function GET() {
-  const { data: tests, error: testsError } = await supabase
+  const { data: tests, error: testsError } = await supabaseServer
     .from('ab_tests')
     .select(
       `
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 
   if (variantsError) {
     // Rollback test creation
-    await supabase.from('ab_tests').delete().eq('id', test.id)
+    await supabaseServer.from('ab_tests').delete().eq('id', test.id)
     return NextResponse.json({ error: variantsError.message }, { status: 500 })
   }
 

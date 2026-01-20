@@ -18,9 +18,12 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import type { User } from '@supabase/supabase-js'
 
 import { Button } from '@/components/ui/button'
+import { LogoutButton } from '@/components/admin/LogoutButton'
+import { createClient } from '@/lib/supabase/client'
 
 const styles = {
   navSidebar: {
@@ -58,12 +61,31 @@ const styles = {
 export function NavigationSidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [user, setUser] = useState<User | null>(null)
   const [isSourcesExpanded, setIsSourcesExpanded] = useState(
     pathname.startsWith('/admin/sources')
   )
   const [isActivityExpanded, setIsActivityExpanded] = useState(
     pathname.startsWith('/admin/activity')
   )
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const navItems = [
     { href: '/admin/playground', icon: GitCompareIcon, label: 'Explore' },
@@ -221,6 +243,30 @@ export function NavigationSidebar() {
           )
         })}
       </nav>
-    </aside>
+      {/* User section at bottom */}
+      {user && (
+        <div
+          style={{
+            marginTop: 'auto',
+            padding: 'var(--op-space-small)',
+            borderTop: '1px solid var(--op-color-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--op-space-2x-small)',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '12px',
+              color: 'var(--op-color-neutral-on-plus-max)',
+              opacity: 0.7,
+              padding: '0 var(--op-space-small)',
+            }}
+          >
+            {user.email}
+          </span>
+          <LogoutButton />
+        </div>
+      )}    </aside>
   )
 }

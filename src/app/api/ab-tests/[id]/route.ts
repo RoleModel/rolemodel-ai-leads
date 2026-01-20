@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 
 interface EventWithDate {
   event_type: string
@@ -121,7 +121,7 @@ export async function DELETE(
 ) {
   const { id } = await params
 
-  const { error } = await supabase.from('ab_tests').delete().eq('id', id)
+  const { error } = await supabaseServer.from('ab_tests').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
