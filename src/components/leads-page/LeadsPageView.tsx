@@ -321,11 +321,6 @@ export function LeadsPageView({
 
   return (
     <div className="leads-page">
-      {/* Logo Header */}
-      <div className="leads-page__logo-header">
-        <Logo variant="auto" style={{ width: 120, height: 'auto' }} />
-      </div>
-
       {/* Main Content */}
       <div className="app__content">
         <div className="leads-page__content">
