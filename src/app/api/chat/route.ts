@@ -109,6 +109,7 @@ FINAL OUTPUT:
   - Suggests next steps, including alternative paths if ROI appears low
 - Always offer that RoleModel can consult with them to determine whether pursuing custom software makes sense.
 - Invite (but do not pressure) the user to schedule a call if they would like to explore further.
+- When suggesting scheduling a call, provide this link: https://calendly.com/rolemodel-software/45-minute-conversation
 
 ---
 
