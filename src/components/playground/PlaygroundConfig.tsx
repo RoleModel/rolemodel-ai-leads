@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ModelSelector } from '@/components/ui/model-selector'
 
-import type { PlaygroundSettings } from '@/app/playground/page'
+import type { PlaygroundSettings } from '@/app/admin/playground/page'
 
 interface PlaygroundConfigProps {
   settings: PlaygroundSettings
@@ -107,7 +107,7 @@ export function PlaygroundConfig({ settings, onSettingsChange }: PlaygroundConfi
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => router.push('/playground/compare')}
+            onClick={() => router.push('/admin/playground/compare')}
           >
             Compare
           </Button>

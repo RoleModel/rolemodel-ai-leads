@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Transform sources into recommendation format
-  const recommendations = (data || []).slice(0, 3).map((source) => {
+  const recommendations = (data || []).slice(0, 3).map((source: any) => {
     const metadata = source.metadata as Record<string, string> | null
     const type = metadata?.type || 'article'
 

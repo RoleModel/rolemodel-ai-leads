@@ -2,6 +2,31 @@
 
 A lead qualification and chatbot system that uses AI to engage website visitors, collect contact information, and score leads based on configurable qualification workflows.
 
+## Authentication
+
+The admin dashboard (`/admin/*`) is protected by **Supabase Auth**. You must log in to access admin features.
+
+### Quick Setup
+
+1. Create an Admin User (Using Supabase Dashboard)
+  a. Go to your Supabase project dashboard
+  b. Navigate to **Authentication** > **Users**
+  c. Click **Add User** (or **Invite User**)
+  d. Enter the email and password for your admin account
+  e. Click **Create User**
+
+2. Environment Variables
+
+Ensure you have these environment variables set in your `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+3. **Log in** at `/login` with your credentials
+
 ## Architecture Overview
 
 The system consists of three main components:

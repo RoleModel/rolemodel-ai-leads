@@ -1,14 +1,7 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { LandingPageA } from '@/components/intro/LandingPageA'
 
-export default function HomePage() {
-  const router = useRouter()
-
-  useEffect(() => {
-    router.push('/playground')
-  }, [router])
-
-  return null
+export default function RootPage() {
+  return <LandingPageA />
 }

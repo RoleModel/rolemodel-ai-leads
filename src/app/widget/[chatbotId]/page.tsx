@@ -336,7 +336,6 @@ export default function WidgetPage() {
         chatbotId={chatbotId}
         showSidebar={false}
         loadFromApi={true}
-        isEmbed={true}
         visitorName={activeVisitor?.name}
         visitorEmail={activeVisitor?.email}
         conversationId={activeVisitor?.conversationId}

@@ -195,7 +195,7 @@ export function EditorSidebar({
   const origin = 'https://rolemodel-ai-leads.vercel.app'
 
   const iframeEmbedCode = `<iframe
-  src="${origin}/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
+  src="${origin}/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}"
   width="100%"
   frameborder="0"
   allow="clipboard-write"
@@ -229,7 +229,7 @@ export function EditorSidebar({
         }}
       />
       <div style={styles.navHeader}>
-        <button style={styles.navBackBtn} onClick={() => router.push('/deploy')}>
+        <button style={styles.navBackBtn} onClick={() => router.push('/admin/deploy')}>
           <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
           Back to Deploy
         </button>
@@ -389,7 +389,7 @@ export function EditorSidebar({
                     style={{ flex: 1 }}
                     onClick={() =>
                       window.open(
-                        `/embed/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`,
+                        `/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`,
                         '_blank'
                       )
                     }
@@ -764,7 +764,7 @@ TASK: After the conversation, provide:
           <Button
             variant="secondary"
             style={{ flex: 1 }}
-            onClick={() => router.push('/deploy')}
+            onClick={() => router.push('/admin/deploy')}
             disabled={isSaving}
           >
             Discard

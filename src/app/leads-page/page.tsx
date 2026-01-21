@@ -17,7 +17,6 @@ function EmbedLeadsPageContent() {
       chatbotId={chatbotId}
       showSidebar={true}
       loadFromApi={true}
-      isEmbed={true}
     />
   )
 }

@@ -93,7 +93,7 @@ export function WidgetEditorSidebar() {
           borderBottom: '1px solid var(--op-color-border)',
         }}
       >
-        <Button onClick={() => router.push('/deploy')} variant="ghost" size="md">
+        <Button onClick={() => router.push('/admin/deploy')} variant="ghost" size="md">
           <ArrowLeft01Icon className="icon-sm" />
           Back to Deploy
         </Button>

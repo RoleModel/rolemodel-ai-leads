@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 
 // GET /api/ab-tests - Get all A/B tests with their variants and stats
 export async function GET() {
-  const { data: tests, error: testsError } = await supabase
+  const { data: tests, error: testsError } = await supabaseServer
     .from('ab_tests')
     .select(
       `
@@ -27,7 +27,7 @@ export async function GET() {
 
   // Get stats for each variant
   const testsWithStats = await Promise.all(
-    (tests || []).map(async (test) => {
+    (tests || []).map(async (test: any) => {
       const variants = (test.ab_test_variants || []) as Array<{
         id: string
         name: string
@@ -39,7 +39,7 @@ export async function GET() {
 
       const variantsWithStats = await Promise.all(
         variants.map(async (variant) => {
-          const { data: events } = await supabase
+          const { data: events } = await supabaseServer
             .from('ab_test_events')
             .select('event_type')
             .eq('variant_id', variant.id)
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Create the test
-  const { data: test, error: testError } = await supabase
+  const { data: test, error: testError } = await supabaseServer
     .from('ab_tests')
     .insert({
       name,
@@ -123,13 +123,13 @@ export async function POST(request: NextRequest) {
     })
   )
 
-  const { error: variantsError } = await supabase
+  const { error: variantsError } = await supabaseServer
     .from('ab_test_variants')
     .insert(variantsToInsert)
 
   if (variantsError) {
     // Rollback test creation
-    await supabase.from('ab_tests').delete().eq('id', test.id)
+    await supabaseServer.from('ab_tests').delete().eq('id', test.id)
     return NextResponse.json({ error: variantsError.message }, { status: 500 })
   }
 

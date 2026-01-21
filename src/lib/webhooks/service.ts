@@ -173,7 +173,7 @@ export async function getWebhookDeliveries(
     throw new Error(`Failed to fetch deliveries: ${error.message}`)
   }
 
-  return (data || []).map((d) => ({
+  return (data || []).map((d: any) => ({
     ...d,
     event: d.event as WebhookEvent,
     payload: d.payload as unknown as WebhookPayload,

@@ -40,13 +40,20 @@
   flex-direction: column;
   gap: var(--op-space-small);
   min-height: 0;
-  overflow-y: auto;
   width: 100%;
 }
-/* 
+
 .conversation-wrapper--scrollable {
-  max-height: 600px;
-} */
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--op-space-medium) var(--op-space-small);
+}
+
+@media (max-width: 768px) {
+  .conversation-wrapper--scrollable {
+    padding: var(--op-space-small) 0;
+  }
+}
 
 .conversation-wrapper--flex {
   flex: 1;

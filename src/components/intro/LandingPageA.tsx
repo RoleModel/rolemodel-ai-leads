@@ -100,10 +100,9 @@ function useSessionStorage<T>(key: string): T | null {
 
 export interface LandingPageAProps {
   chatbotId?: string
-  isEmbed?: boolean
 }
 
-export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) {
+export function LandingPageA({ chatbotId }: LandingPageAProps) {
   const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID
   const storedVisitor = useSessionStorage<VisitorData>(STORAGE_KEY)
   // Auto-show chat if there's an existing session
@@ -111,7 +110,9 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
   const [visitorData, setVisitorData] = useState<VisitorData | null>(null)
   const [email, setEmail] = useState('')
   const [name, setName] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [formLoadTime] = useState(Date.now())
   const heroContainerRef = useRef<HTMLDivElement>(null)
 
   // Use stored visitor if available and no local state set yet
@@ -170,6 +171,19 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
   const handleFormSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
+    // Honeypot spam check - if filled, silently reject
+    if (honeypot) {
+      // Silently fail for bots
+      return
+    }
+
+    // Time-based validation - reject submissions faster than 3 seconds
+    const timeTaken = Date.now() - formLoadTime
+    if (timeTaken < 3000) {
+      // Too fast, likely a bot
+      return
+    }
+
     setIsLoading(true)
     try {
       // Submit to API to create conversation and capture lead
@@ -180,6 +194,7 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
           name,
           email,
           chatbotId: activeChatbotId,
+          submissionTime: timeTaken,
         }),
       })
 
@@ -239,14 +254,12 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
       >
         {/* Hero Section */}
         <section className={styles.hero}>
-          {!isEmbed && (
-            <div className={styles.logo}>
-              <Logo
-                variant="white"
-                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
-              />
-            </div>
-          )}
+          <div className={styles.logo}>
+            <Logo
+              variant="white"
+              style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
+            />
+          </div>
           <div className={`container ${styles['hero-container']}`}>
             <div ref={heroContainerRef}>
               <h1 id="heading" className={styles['hero-title']}>
@@ -363,7 +376,7 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
 
         {/* Section Band */}
         <SectionBand
-          autoAnimate={true}
+          autoAnimate={false}
           reverse={true}
           minHeight={12}
           maxHeight={14}
@@ -419,6 +432,23 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
               <form onSubmit={handleFormSubmit} className={styles.form}>
                 <div className={styles['form-card']}>
                   <div className={styles['form-fields']}>
+                    {/* Honeypot field - hidden from real users, but bots will fill it */}
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        left: '-9999px',
+                        width: '1px',
+                        height: '1px',
+                        opacity: 0,
+                      }}
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                    />
                     <input
                       type="text"
                       name="name"
@@ -499,7 +529,6 @@ export function LandingPageA({ chatbotId, isEmbed = false }: LandingPageAProps) 
               chatbotId={activeChatbotId}
               showSidebar={true}
               loadFromApi={true}
-              isEmbed={false}
               visitorName={activeVisitor.name}
               visitorEmail={activeVisitor.email}
               conversationId={activeVisitor.conversationId}

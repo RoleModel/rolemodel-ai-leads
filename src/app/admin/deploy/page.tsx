@@ -184,7 +184,7 @@ export default function DeployPage() {
                 >
                   <Button
                     variant="secondary"
-                    onClick={() => router.push('/deploy/chat-widget')}
+                    onClick={() => router.push('/admin/deploy/chat-widget')}
                   >
                     <span>Manage</span>
                   </Button>
@@ -303,7 +303,7 @@ export default function DeployPage() {
 
                 <button
                   className="btn btn--secondary"
-                  onClick={() => router.push('/deploy/leads-page')}
+                  onClick={() => router.push('/admin/deploy/leads-page')}
                 >
                   Setup
                 </button>
@@ -435,7 +435,7 @@ export default function DeployPage() {
 
                 <Button
                   variant="secondary"
-                  onClick={() => router.push('/deploy/webhooks')}
+                  onClick={() => router.push('/admin/deploy/webhooks')}
                 >
                   <span>Configure</span>
                 </Button>
@@ -564,7 +564,7 @@ export default function DeployPage() {
                   </p>
                 </div>
 
-                <Button variant="secondary" onClick={() => router.push('/deploy/intro')}>
+                <Button variant="secondary" onClick={() => router.push('/admin/deploy/intro')}>
                   <span>View Results</span>
                 </Button>
               </div>
