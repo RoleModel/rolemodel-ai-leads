@@ -173,14 +173,14 @@ export async function POST(req: NextRequest) {
             .select('visitor_name, visitor_email')
             .eq('id', conversationId)
             .single()
-            .then((res) => res.data)
+            .then((res: any) => res.data)
           : Promise.resolve(null),
         supabaseServer
           .from('help_page_settings')
           .select('rag_config')
           .eq('chatbot_id', activeChatbotId)
           .single()
-          .then((res) => res.data),
+          .then((res: any) => res.data),
       ])
 
     if (!chatbot) {

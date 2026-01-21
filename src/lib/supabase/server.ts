@@ -34,7 +34,7 @@ export async function createClient() {
 // Service role client (bypasses RLS) - use with caution
 export function createServiceClient() {
   const { createClient } = require('@supabase/supabase-js')
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+  return createClient(supabaseUrl, supabaseServiceKey, {
     db: { schema: 'public' },
     auth: { persistSession: false },
   })

@@ -63,10 +63,10 @@ export async function retrieveRelevantSources(
         )
 
       const metadataMap = new Map(
-        (metadataRows || []).map((row) => [row.id, row.metadata])
+        (metadataRows || []).map((row: any) => [row.id, row.metadata])
       )
 
-      return data.map((row) => {
+      return data.map((row: any) => {
         const meta = metadataMap.get(row.id)
         return {
           ...row,

@@ -58,9 +58,10 @@ describe('RAG Context Building', () => {
 
     const formatSource = (source: typeof mockSource, index: number) => {
       const numbering = `[${index + 1}] ${source.title || 'Untitled'}`
+      const metadata = source.metadata as Record<string, unknown> | null | undefined
       const url =
-        typeof source.metadata?.url === 'string' && source.metadata.url.trim().length > 0
-          ? `\nURL: ${source.metadata.url}`
+        typeof metadata?.url === 'string' && metadata.url.trim().length > 0
+          ? `\nURL: ${metadata.url}`
           : ''
       return `${numbering}\n${source.content}${url}`
     }

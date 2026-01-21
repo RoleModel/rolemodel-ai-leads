@@ -16,7 +16,7 @@ export async function POST(
   }
 
   // Check if variant with this path already exists for this test
-  const { data: existing } = await supabase
+  const { data: existing } = await supabaseServer
     .from('ab_test_variants')
     .select('id')
     .eq('test_id', id)
@@ -30,7 +30,7 @@ export async function POST(
     )
   }
 
-  const { data: variant, error } = await supabase
+  const { data: variant, error } = await supabaseServer
     .from('ab_test_variants')
     .insert({
       test_id: id,
@@ -67,7 +67,7 @@ export async function PUT(
   // Update each variant
   const updates = await Promise.all(
     variants.map(async (v) => {
-      const { error } = await supabase
+      const { error } = await supabaseServer
         .from('ab_test_variants')
         .update({
           weight: v.weight,
@@ -102,7 +102,7 @@ export async function DELETE(
   }
 
   // Check that we're not deleting the last variant
-  const { data: variants } = await supabase
+  const { data: variants } = await supabaseServer
     .from('ab_test_variants')
     .select('id')
     .eq('test_id', id)
@@ -111,7 +111,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Cannot delete the last variant' }, { status: 400 })
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseServer
     .from('ab_test_variants')
     .delete()
     .eq('id', variantId)

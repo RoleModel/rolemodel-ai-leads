@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Add type to metadata for old sources that don't have it
-  const sourcesWithType = data?.map((source) => {
+  const sourcesWithType = data?.map((source: any) => {
     if (
       source.metadata &&
       typeof source.metadata === 'object' &&

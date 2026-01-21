@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   if (!resolvedVariantId && path) {
     // Find the variant by path from an active test
-    const { data: variant } = await supabase
+    const { data: variant } = await supabaseServer
       .from('ab_test_variants')
       .select(
         `
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert the event
-  const { data: event, error } = await supabase
+  const { data: event, error } = await supabaseServer
     .from('ab_test_events')
     .insert({
       variant_id: resolvedVariantId,
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Get active test with variants
-  const { data: test, error: testError } = await supabase
+  const { data: test, error: testError } = await supabaseServer
     .from('ab_tests')
     .select(
       `
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
   // If visitor has an existing assignment, return it
   if (visitorId) {
-    const { data: existingEvent } = await supabase
+    const { data: existingEvent } = await supabaseServer
       .from('ab_test_events')
       .select('variant_id')
       .eq('visitor_id', visitorId)
