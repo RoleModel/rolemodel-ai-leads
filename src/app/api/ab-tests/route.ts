@@ -39,7 +39,7 @@ export async function GET() {
 
       const variantsWithStats = await Promise.all(
         variants.map(async (variant) => {
-          const { data: events } = await supabase
+          const { data: events } = await supabaseServer
             .from('ab_test_events')
             .select('event_type')
             .eq('variant_id', variant.id)
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Create the test
-  const { data: test, error: testError } = await supabase
+  const { data: test, error: testError } = await supabaseServer
     .from('ab_tests')
     .insert({
       name,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     })
   )
 
-  const { error: variantsError } = await supabase
+  const { error: variantsError } = await supabaseServer
     .from('ab_test_variants')
     .insert(variantsToInsert)
 

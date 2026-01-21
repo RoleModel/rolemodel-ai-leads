@@ -14,7 +14,7 @@ export async function GET(
 ) {
   const { id } = await params
 
-  const { data: test, error: testError } = await supabase
+  const { data: test, error: testError } = await supabaseServer
     .from('ab_tests')
     .select(
       `
@@ -48,7 +48,7 @@ export async function GET(
   // Get stats for each variant
   const variantsWithStats = await Promise.all(
     variants.map(async (variant) => {
-      const { data: events } = await supabase
+      const { data: events } = await supabaseServer
         .from('ab_test_events')
         .select('event_type, created_at')
         .eq('variant_id', variant.id)
@@ -94,7 +94,7 @@ export async function PUT(
 
   const { name, description, status, start_date, end_date } = body
 
-  const { data: test, error } = await supabase
+  const { data: test, error } = await supabaseServer
     .from('ab_tests')
     .update({
       ...(name && { name }),
