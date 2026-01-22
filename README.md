@@ -2,6 +2,94 @@
 
 A lead qualification and chatbot system that uses AI to engage website visitors, collect contact information, and score leads based on configurable qualification workflows.
 
+## Development Setup
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
+
+### Local Development with Supabase
+
+1. **Install Supabase CLI** (if not already installed)
+   ```bash
+   npm install -g supabase
+   ```
+
+2. **Start Local Supabase**
+   ```bash
+   npx supabase start
+   ```
+
+   This will start all Supabase services locally:
+   - **Studio**: http://127.0.0.1:54323
+   - **API**: http://127.0.0.1:54321
+   - **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+   - **Mailpit**: http://127.0.0.1:54324 (email testing)
+
+3. **Get Your Local Credentials**
+   ```bash
+   npx supabase status --output env
+   ```
+
+4. **Configure Environment Variables**
+
+   Create a `.env.local` file in the project root:
+   ```env
+   # Local Supabase
+   NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-local-anon-key>
+   DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+   # API Keys (get from your services)
+   OPENAI_API_KEY=sk-...
+   SENDGRID_API_KEY=SG...
+   ```
+
+5. **Apply Database Migrations**
+   ```bash
+   npx supabase db reset
+   ```
+   This will create all tables and run migrations from the `supabase/migrations/` folder.
+
+6. **Start Next.js Development Server**
+   ```bash
+   npm run dev
+   ```
+
+7. **Create an Admin User**
+
+   Open Supabase Studio at http://127.0.0.1:54323
+   - Navigate to **Authentication** > **Users**
+   - Click **Add User**
+   - Enter email and password for your admin account
+   - Log in at http://localhost:3000/login
+
+### Database Migrations
+
+To create a new migration:
+```bash
+npx supabase migration new <migration_name>
+```
+
+To apply migrations:
+```bash
+npx supabase db reset  # Reset and reapply all migrations
+# OR
+npx supabase migration up  # Apply pending migrations only
+```
+
+### Production vs Local
+
+The system automatically uses the environment variables from `.env.local`:
+- **Local**: Points to `http://127.0.0.1:54321`
+- **Production**: Points to your Supabase project URL (e.g., `https://xxx.supabase.co`)
+
+Always use local Supabase for development to avoid affecting production data.
+
+---
+
 ## Authentication
 
 The admin dashboard (`/admin/*`) is protected by **Supabase Auth**. You must log in to access admin features.
