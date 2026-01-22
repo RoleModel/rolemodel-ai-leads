@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { sendToAlmanac } from '@/lib/almanac/service'
 import { supabaseServer } from '@/lib/supabase/server'
 import { triggerWebhooks } from '@/lib/webhooks/service'
 import type { LeadWebhookData } from '@/lib/webhooks/types'
@@ -93,6 +94,9 @@ export async function POST(req: NextRequest) {
       }
       referer?: string
       userAgent?: string
+      utm_source?: string
+      utm_campaign?: string
+      utm_medium?: string
     } | null
 
     const webhookData: LeadWebhookData = {
@@ -125,6 +129,16 @@ export async function POST(req: NextRequest) {
       conversation?.chatbot_id || undefined
     ).catch((err) => {
       console.error('Webhook trigger error:', err)
+    })
+
+    // Send to Almanac CRM with full summary data (fire and forget)
+    sendToAlmanac(
+      visitor_name || undefined,
+      visitor_email || undefined,
+      summary,
+      visitorMetadata
+    ).catch((err) => {
+      console.error('Almanac integration error:', err)
     })
   } catch (webhookError) {
     console.error('Error preparing webhook data:', webhookError)
