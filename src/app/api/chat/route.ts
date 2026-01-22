@@ -366,7 +366,6 @@ ${sourceContext}`,
       model: openai(modelId),
       messages: fullMessages,
       temperature: effectiveTemperature,
-      maxSteps: 3, // Allow model to continue after tool execution (e.g., send_email_summary)
       toolChoice: 'auto',
       tools: {
         thinking: tool({
@@ -403,7 +402,7 @@ ${sourceContext}`,
               .optional()
               .describe('Brief description of why this case study is relevant'),
           }),
-          execute: async ({ url, title }) => {
+          execute: async ({ url, title }: { url: string; title: string }) => {
             console.log(`[Tool] show_case_study called with: ${url} - ${title}`)
             return { success: true, url, title }
           },
@@ -427,7 +426,7 @@ ${sourceContext}`,
           // No execute function - handled client-side via tool call detection
         }),
       },
-      async onFinish({ text }) {
+      async onFinish({ text }: { text: string }) {
         // Save assistant message
         if (activeConversationId) {
           type MessageInsert = Database['public']['Tables']['messages']['Insert']
