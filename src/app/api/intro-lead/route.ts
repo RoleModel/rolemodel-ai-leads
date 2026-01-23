@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
 
     // Save the initial greeting message so it appears in chat logs
     const greeting = name
-      ? `Hey, ${name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
-      : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
+      ? `Hey, ${name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?\n\nWe often see businesses exploring custom software for a few common reasons:\n- They're looking to scale but current processes are holding them back\n- Off-the-shelf tools get them 90% there but that last 10% is expensive or limiting\n- They're relying heavily on spreadsheets to tie different systems together\n\nDoes any of that resonate with your situation?`
+      : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?\n\nWe often see businesses exploring custom software for a few common reasons:\n- They're looking to scale but current processes are holding them back\n- Off-the-shelf tools get them 90% there but that last 10% is expensive or limiting\n- They're relying heavily on spreadsheets to tie different systems together\n\nDoes any of that resonate with your situation?`
 
     await supabaseServer.from('messages').insert([
       {
