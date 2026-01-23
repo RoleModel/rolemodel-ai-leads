@@ -247,11 +247,25 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
     visible: { filter: 'blur(0px)', opacity: 1 },
   }
 
+  // If chat is active, render only the chat page
+  if (showChat && activeVisitor) {
+    return (
+      <div className="intro-page__chat-fullpage" data-theme-mode="light">
+        <LeadsPageWithProvider
+          chatbotId={activeChatbotId}
+          showSidebar={true}
+          loadFromApi={true}
+          visitorName={activeVisitor.name}
+          visitorEmail={activeVisitor.email}
+          conversationId={activeVisitor.conversationId}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="intro-page">
-      <div
-        className={`intro-page__content${showChat ? ' intro-page__content--exiting' : ''}`}
-      >
+      <div className="intro-page__content">
         {/* Hero Section */}
         <section className={styles.hero}>
           <div className={styles.logo}>
@@ -520,21 +534,6 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
             className="intro-page__footer-links"
           />
         </section>
-      </div>
-
-      <div className={`intro-page__chat${showChat ? ' intro-page__chat--entering' : ''}`}>
-        {activeVisitor && (
-          <div className="intro-page__chat-inner" data-theme-mode="light">
-            <LeadsPageWithProvider
-              chatbotId={activeChatbotId}
-              showSidebar={true}
-              loadFromApi={true}
-              visitorName={activeVisitor.name}
-              visitorEmail={activeVisitor.email}
-              conversationId={activeVisitor.conversationId}
-            />
-          </div>
-        )}
       </div>
     </div>
   )
