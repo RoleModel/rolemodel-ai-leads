@@ -7,7 +7,7 @@ export const runtime = 'edge'
 // GET all agents (chatbots)
 export async function GET() {
   const supabaseServer = await createClient()
-  
+
   const { data: agents, error } = await supabaseServer
     .from('chatbots')
     .select('id, name, display_name, created_at')

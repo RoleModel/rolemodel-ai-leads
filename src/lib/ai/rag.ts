@@ -24,7 +24,7 @@ export async function retrieveRelevantSources(
 ): Promise<Source[]> {
   try {
     const supabaseServer = await createClient()
-    
+
     // Generate embedding for the query
     const queryEmbeddingArray = await generateEmbedding(query)
     // Convert to pgvector string format
@@ -307,7 +307,7 @@ ${qualificationInstructions}
  */
 export async function getChatbot(chatbotId: string): Promise<Chatbot | null> {
   const supabaseServer = await createClient()
-  
+
   const { data, error } = await supabaseServer
     .from('chatbots')
     .select('*')

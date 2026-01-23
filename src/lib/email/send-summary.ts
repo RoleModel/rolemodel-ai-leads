@@ -143,7 +143,7 @@ export async function sendSummaryEmail({
 }: SendSummaryEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
     const supabaseServer = await createClient()
-    
+
     // Check if email was already sent for this conversation
     if (conversationId) {
       const { data: conversation, error: fetchError } = await supabaseServer
