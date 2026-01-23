@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
+import { sendSummaryEmail } from '@/lib/email/send-summary'
 import {
   type Source,
   buildSourceContext,
@@ -423,7 +424,24 @@ ${sourceContext}`,
               .string()
               .describe('The full summary text to include in the email'),
           }),
-          // No execute function - handled client-side via tool call detection
+          execute: async ({
+            recipientEmail,
+            recipientName,
+            summaryText,
+          }: {
+            recipientEmail: string
+            recipientName?: string
+            summaryText: string
+          }) => {
+            const result = await sendSummaryEmail({
+              recipientEmail,
+              recipientName,
+              summaryText,
+              conversationId: activeConversationId || undefined,
+            })
+            console.log('[Tool] send_email_summary result:', result)
+            return result
+          },
         }),
       },
       async onFinish({ text }: { text: string }) {

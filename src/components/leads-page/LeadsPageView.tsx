@@ -182,28 +182,11 @@ export function LeadsPageView({
             }
           }
 
-          // Handle send_email_summary tool
-          if (part.type === 'tool-send_email_summary' && !emailSentForConversation) {
-            const args = toolPart.args || toolPart.input
-            const recipientEmail = args?.recipientEmail as string | undefined
-            const recipientName = args?.recipientName as string | undefined
-            const summaryText = args?.summaryText as string | undefined
-
-            if (recipientEmail && summaryText) {
-              setEmailSentForConversation(true)
-              fetch('/api/email-summary', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  recipientEmail,
-                  recipientName,
-                  summaryText,
-                  conversationId,
-                }),
-              }).catch((error) => {
-                console.error('[LeadsPageView] Failed to send email:', error)
-              })
-            }
+          // Handle send_email_summary tool - now handled server-side
+          if (part.type === 'tool-send_email_summary') {
+            // Email is sent by the tool execution on the server
+            // Just track that it was sent for this conversation
+            setEmailSentForConversation(true)
           }
         }
       }
