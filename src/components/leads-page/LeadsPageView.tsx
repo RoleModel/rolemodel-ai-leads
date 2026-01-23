@@ -3,10 +3,8 @@
 import { useChat } from '@ai-sdk/react'
 import {
   Copy01Icon,
-  Delete02Icon,
   PlusSignIcon,
   Refresh01Icon,
-  Settings02Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
 } from '@hugeicons-pro/core-stroke-standard'
@@ -40,12 +38,8 @@ import {
   PromptInputTools,
 } from '@/components/ai-elements/prompt-input'
 import Favicon from '@/components/intro/Favicon'
-import Logo from '@/components/intro/Logo'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
@@ -58,12 +52,6 @@ import {
 
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
-
-interface Suggestion {
-  id: string
-  text: string
-  isSelected?: boolean
-}
 
 interface ChatHistory {
   id: string
@@ -84,11 +72,6 @@ interface LeadsPageViewProps {
   initialConversationId?: string
 }
 
-const DEFAULT_SUGGESTIONS: Suggestion[] = [
-  { id: '1', text: 'Are we outgrowing our current tools?' },
-  { id: '2', text: 'How do we reduce manual work?' },
-]
-
 export function LeadsPageView({
   chatbotId,
   showSidebar = true,
@@ -103,9 +86,6 @@ export function LeadsPageView({
   useLeadsPageSettings() // Keep the hook for context loading
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(DEFAULT_SUGGESTIONS)
-  const [showSuggestions, setShowSuggestions] = useState(true)
-  const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // Check if we're on the client to avoid SSR issues
@@ -167,21 +147,6 @@ export function LeadsPageView({
       // Check for tool invocations
       for (const part of message.parts) {
         if (part.type.startsWith('tool-') && 'input' in part) {
-          const toolPart = part as { type: string; input?: Record<string, unknown>; args?: Record<string, unknown> }
-
-          // Handle suggest_questions tool
-          if (part.type === 'tool-suggest_questions' && toolPart.input?.questions) {
-            const questions = toolPart.input.questions as string[]
-            if (questions.length > 0) {
-              const newSuggestions: Suggestion[] = questions.map((q, i) => ({
-                id: `suggestion-${Date.now()}-${i}`,
-                text: q,
-              }))
-              setSuggestions(newSuggestions)
-              setShowSuggestions(true)
-            }
-          }
-
           // Handle send_email_summary tool - now handled server-side
           if (part.type === 'tool-send_email_summary') {
             // Email is sent by the tool execution on the server
@@ -287,12 +252,6 @@ export function LeadsPageView({
     if (!message.text.trim()) return
     setShowDemo(false)
 
-    // Check if this was triggered by a suggestion click
-    const isSuggestionClick = suggestions.some((s) => s.text === message.text)
-    if (isSuggestionClick) {
-      setShowSuggestions(false)
-    }
-
     await sendMessage({
       text: message.text,
     })
@@ -304,27 +263,6 @@ export function LeadsPageView({
   }, [])
 
   const isStreaming = status === 'streaming'
-
-  // Suggestion handlers
-  const handleAddSuggestion = () => {
-    const newSuggestion: Suggestion = {
-      id: `suggestion-${Date.now()}`,
-      text: 'Suggestion',
-      isSelected: true,
-    }
-    setSuggestions([
-      ...suggestions.map((s) => ({ ...s, isSelected: false })),
-      newSuggestion,
-    ])
-  }
-
-  const handleDeleteSuggestion = (id: string) => {
-    setSuggestions(suggestions.filter((s) => s.id !== id))
-  }
-
-  const handleUpdateSuggestion = (id: string, newText: string) => {
-    setSuggestions(suggestions.map((s) => (s.id === id ? { ...s, text: newText } : s)))
-  }
 
   // Dark mode handler
   const handleToggleDarkMode = () => {
@@ -535,96 +473,18 @@ export function LeadsPageView({
               </PromptInput>
             </PromptInputProvider>
           </div>
-          {/* Suggestions - always at bottom, hide when clicked */}
-          {showSuggestions && (
-            <div className="leads-page__suggestions">
-              {suggestions.map((suggestion) => (
-                <div key={suggestion.id} className="leads-page__suggestion-wrapper">
-                  <Button
-                    variant="pill"
-                    onClick={() => {
-                      if (editMode) {
-                        setActiveSuggestionId(
-                          suggestion.id === activeSuggestionId ? null : suggestion.id
-                        )
-                      } else {
-                        handlePromptSubmit({ text: suggestion.text, files: [] })
-                      }
-                    }}
-                  >
-                    {suggestion.text}
-                  </Button>
-                  {editMode && activeSuggestionId === suggestion.id && (
-                    <div className="leads-page__suggestion-actions">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="icon" size="sm">
-                            <HugeiconsIcon icon={Settings02Icon} size={12} />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80">
-                          <div className="grid gap-4">
-                            <div className="space-y-2">
-                              <h4 className="font-medium leading-none">
-                                Edit Suggestion
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                Update the suggestion text
-                              </p>
-                            </div>
-                            <div className="grid gap-2">
-                              <div className="grid gap-2">
-                                <Label htmlFor={`suggestion-text-${suggestion.id}`}>
-                                  Text
-                                </Label>
-                                <Input
-                                  id={`suggestion-text-${suggestion.id}`}
-                                  defaultValue={suggestion.text}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      handleUpdateSuggestion(
-                                        suggestion.id,
-                                        e.currentTarget.value
-                                      )
-                                      setActiveSuggestionId(null)
-                                    }
-                                  }}
-                                  onBlur={(e) => {
-                                    handleUpdateSuggestion(suggestion.id, e.target.value)
-                                    setActiveSuggestionId(null)
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                      <Button
-                        variant="icon"
-                        size="sm"
-                        onClick={() => {
-                          handleDeleteSuggestion(suggestion.id)
-                          setActiveSuggestionId(null)
-                        }}
-                      >
-                        <HugeiconsIcon icon={Delete02Icon} size={12} />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              {editMode && (
-                <Button
-                  variant="pill"
-                  onClick={handleAddSuggestion}
-                  style={{ borderStyle: 'dashed' }}
-                >
-                  <HugeiconsIcon icon={PlusSignIcon} size={16} />
-                  Add Suggestion
-                </Button>
-              )}
-            </div>
-          )}
+          {/* Schedule a Call Button */}
+          <div className="leads-page__suggestions">
+            <Button
+              variant="pill"
+              onClick={() => {
+                const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'
+                window.open(calendlyUrl, '_blank')
+              }}
+            >
+              Schedule a Call
+            </Button>
+          </div>
         </div>
       </div>
 
