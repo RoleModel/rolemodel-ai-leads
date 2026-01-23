@@ -99,12 +99,22 @@ function formatSummaryEmailForProspect(
   visitorName: string,
   summaryText: string
 ): string {
+  const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'
+
   // Convert markdown to HTML using marked
   const htmlContent = marked.parse(summaryText, {
     async: false,
     gfm: true,
     breaks: true
   }) as string
+
+  // Check if the summary already contains the Calendly link
+  const hasCalendlyLink = htmlContent.includes(calendlyUrl) || htmlContent.includes('calendly.com')
+
+  // Only add the scheduling link if it's not already in the content
+  const schedulingLink = !hasCalendlyLink
+    ? `<p style="margin-top: 24px;">If you'd like to discuss this further, you can <a href="${calendlyUrl}">schedule a call with our team</a>.</p>`
+    : ''
 
   const html = `
 <!DOCTYPE html>
@@ -171,11 +181,11 @@ function formatSummaryEmailForProspect(
 </head>
 <body>
   <div class="container">
-    <h1>Your Custom Software Assessment</h1>
     <div class="content">
       <p>Hi ${escapeHtml(visitorName)},</p>
-      <p>Thanks for taking the time to explore whether custom software might be the right fit for your needs. Here's the summary from our conversation:</p>
+      <p>Thanks for taking the time to explore whether custom software might be the right fit for your needs.</p>
       <p>${htmlContent}</p>
+      ${schedulingLink}
     </div>
     <div class="footer">
       <p>Thanks again for your interest in RoleModel Software. We're here to help you make the best decision for your business.</p>
