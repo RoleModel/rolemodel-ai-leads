@@ -114,8 +114,16 @@ export function LeadsPageView({
   const [showDemo, setShowDemo] = useState(true)
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
+  const [emailSentForConversation, setEmailSentForConversation] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null)
 
   const handleChatResponse = useCallback((response: Response) => {
+    // Extract conversation ID for email sending
+    const convId = response.headers.get('x-conversation-id')
+    if (convId) {
+      setConversationId(convId)
+    }
+
     const header = response.headers.get('x-sources-used')
     if (!header) {
       setPendingCitations(null)
@@ -159,7 +167,7 @@ export function LeadsPageView({
       // Check for tool invocations
       for (const part of message.parts) {
         if (part.type.startsWith('tool-') && 'input' in part) {
-          const toolPart = part as { type: string; input?: Record<string, unknown> }
+          const toolPart = part as { type: string; input?: Record<string, unknown>; args?: Record<string, unknown> }
 
           // Handle suggest_questions tool
           if (part.type === 'tool-suggest_questions' && toolPart.input?.questions) {
@@ -173,12 +181,19 @@ export function LeadsPageView({
               setShowSuggestions(true)
             }
           }
+
+          // Handle send_email_summary tool - now handled server-side
+          if (part.type === 'tool-send_email_summary') {
+            // Email is sent by the tool execution on the server
+            // Just track that it was sent for this conversation
+            setEmailSentForConversation(true)
+          }
         }
       }
 
       setPendingCitations(null)
     },
-    [pendingCitations]
+    [pendingCitations, emailSentForConversation, conversationId]
   )
 
   const interceptingFetch = useCallback(

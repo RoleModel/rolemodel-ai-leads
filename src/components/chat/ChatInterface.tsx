@@ -75,6 +75,10 @@ interface ToolPart {
     url?: string
     title?: string
     description?: string
+    // For send_email_summary
+    recipientEmail?: string
+    recipientName?: string
+    summaryText?: string
   }
 }
 
@@ -89,9 +93,17 @@ export function ChatInterface({
   >(new Map())
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
+  const [emailSentForConversation, setEmailSentForConversation] = useState(false)
+  const [conversationId, setConversationId] = useState<string | null>(null)
 
   // Handle chat response to extract citations from X-Sources-Used header
   const handleChatResponse = useCallback((response: Response) => {
+    // Extract conversation ID for email sending
+    const convId = response.headers.get('x-conversation-id')
+    if (convId) {
+      setConversationId(convId)
+    }
+
     const header = response.headers.get('x-sources-used')
     if (!header) {
       setPendingCitations(null)
@@ -137,9 +149,35 @@ export function ChatInterface({
         }))
       }
 
+      // Check for send_email_summary tool call and trigger email send
+      const toolParts = message.parts.filter((part) =>
+        part.type.startsWith('tool-')
+      ) as unknown as ToolPart[]
+
+      const emailToolPart = toolParts.find(
+        (tp) => tp.toolName === 'send_email_summary' || tp.type === 'tool-send_email_summary'
+      )
+
+      if (emailToolPart?.args?.recipientEmail && emailToolPart?.args?.summaryText && !emailSentForConversation) {
+        // Fire off email send request
+        setEmailSentForConversation(true)
+        fetch('/api/email-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipientEmail: emailToolPart.args.recipientEmail,
+            recipientName: emailToolPart.args.recipientName,
+            summaryText: emailToolPart.args.summaryText,
+            conversationId: conversationId,
+          }),
+        }).catch((error) => {
+          console.error('[ChatInterface] Failed to send email:', error)
+        })
+      }
+
       setPendingCitations(null)
     },
-    [pendingCitations]
+    [pendingCitations, emailSentForConversation, conversationId]
   )
 
   // Intercepting fetch to capture response headers

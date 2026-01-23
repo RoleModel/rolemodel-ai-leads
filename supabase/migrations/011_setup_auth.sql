@@ -30,4 +30,4 @@ END $$;
 -- The middleware will check auth.users() to verify login
 -- No additional RLS policies needed for admin access via service_role
 
-COMMENT ON SCHEMA auth IS 'Supabase Auth schema - manages user authentication';
+-- Note: The auth schema is managed by Supabase and cannot be modified directly
