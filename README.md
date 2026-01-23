@@ -6,8 +6,8 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 24+
+- npm
 - [Supabase CLI](https://supabase.com/docs/guides/cli)
 
 ### Local Development with Supabase
