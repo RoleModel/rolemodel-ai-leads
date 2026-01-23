@@ -14,7 +14,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 1. **Start Local Supabase**
    ```bash
-   supabase start
+   npx supabase start
    ```
 
    This will start all Supabase services locally:
@@ -25,7 +25,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 2. **Get Your Local Credentials**
    ```bash
-   supabase status --output env
+   npx supabase status --output env
    ```
 
 3. **Configure Environment Variables**
@@ -44,7 +44,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 4. **Apply Database Migrations**
    ```bash
-   supabase db reset
+   npx supabase db reset
    ```
    This will create all tables and run migrations from the `supabase/migrations/` folder.
 
