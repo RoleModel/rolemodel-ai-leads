@@ -115,8 +115,24 @@ CRITICAL:
       ],
     })
 
+    // Clean the response - sometimes AI adds markdown code blocks or extra text
+    let cleanedText = text.trim()
+
+    // Remove markdown code blocks if present
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/i, '').replace(/```\s*$/, '')
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/```\s*$/, '')
+    }
+
+    // Try to extract JSON if there's text before/after
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      cleanedText = jsonMatch[0]
+    }
+
     // Parse the JSON response
-    const leadData = JSON.parse(text) as LeadSummaryData
+    const leadData = JSON.parse(cleanedText) as LeadSummaryData
 
     // Validate that we have at least some meaningful data
     const hasData =
@@ -128,6 +144,9 @@ CRITICAL:
     return hasData ? leadData : null
   } catch (error) {
     console.error('Error extracting lead data:', error)
+    if (error instanceof Error) {
+      console.error('Error details:', error.message)
+    }
     return null
   }
 }

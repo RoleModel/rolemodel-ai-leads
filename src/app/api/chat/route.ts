@@ -16,8 +16,6 @@ import {
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
 import { supabaseServer } from '@/lib/supabase/server'
-import { triggerWebhooks } from '@/lib/webhooks/service'
-import type { LeadWebhookData } from '@/lib/webhooks/types'
 
 export const runtime = 'edge'
 export const maxDuration = 30
@@ -651,46 +649,6 @@ ${sourceContext}`,
                       .eq('id', activeConversationId)
 
                     console.log('[Lead Captured] Conversation:', activeConversationId)
-
-                    // Trigger webhooks in background
-                    if (newLead) {
-                      const webhookData: LeadWebhookData = {
-                        lead_id: newLead.id,
-                        conversation_id: activeConversationId,
-                        visitor: {
-                          name: visitorName || undefined,
-                          email: visitorEmail || undefined,
-                          ip: visitorMetadata?.ip,
-                          location: visitorMetadata?.geo
-                            ? {
-                                city: visitorMetadata.geo.city,
-                                region: visitorMetadata.geo.region,
-                                country: visitorMetadata.geo.country,
-                                timezone: visitorMetadata.geo.timezone,
-                              }
-                            : undefined,
-                          referrer: visitorMetadata?.referer,
-                          user_agent: visitorMetadata?.userAgent,
-                        },
-                        summary: {
-                          budget: enrichedLeadData.budget?.range,
-                          timeline: enrichedLeadData.timeline?.urgency,
-                          needs: enrichedLeadData.need?.painPoints || [],
-                          pain_points: enrichedLeadData.need?.painPoints || [],
-                        },
-                        message_count: conversationData?.message_count || 0,
-                        created_at: newLead.created_at || new Date().toISOString(),
-                      }
-
-                      // Fire and forget - don't block the response
-                      triggerWebhooks(
-                        'lead.created',
-                        webhookData,
-                        conversationData?.chatbot_id || undefined
-                      ).catch((err) => {
-                        console.error('Webhook trigger error:', err)
-                      })
-                    }
                   } else {
                     // Lead already exists but lead_captured wasn't set - just update the lead
                     await supabaseServer
