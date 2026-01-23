@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { generateEmbedding } from '@/lib/ai/embeddings'
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
@@ -10,6 +10,7 @@ type SourceInsert = Database['public']['Tables']['sources']['Insert']
 
 // GET - List all sources
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
@@ -53,6 +54,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Create new source
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const { title, content, url, type, chatbotId } = body
@@ -290,6 +292,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE - Remove source
 export async function DELETE(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const id = searchParams.get('id')
 

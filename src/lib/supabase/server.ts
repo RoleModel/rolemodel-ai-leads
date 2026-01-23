@@ -1,11 +1,10 @@
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
-import type { Database } from './database.types'
+import type { Database } from './types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // Server-side client for Server Components and Route Handlers (with auth support)
 export async function createClient() {
@@ -30,15 +29,3 @@ export async function createClient() {
     },
   })
 }
-
-// Service role client (bypasses RLS) - use with caution
-export function createServiceClient() {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    db: { schema: 'public' },
-    auth: { persistSession: false },
-  })
-}
-
-// Legacy export for backward compatibility
-export const supabaseServer = createServiceClient()

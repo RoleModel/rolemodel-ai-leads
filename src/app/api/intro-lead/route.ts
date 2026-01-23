@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { buildVisitorMetadata } from '@/lib/geolocation'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 // POST - Capture lead from intro form and create conversation
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const { name, email, chatbotId, submissionTime } = body

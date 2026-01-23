@@ -12,12 +12,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 ### Local Development with Supabase
 
-1. **Install Supabase CLI** (if not already installed)
-   ```bash
-   npm install -g supabase
-   ```
-
-2. **Start Local Supabase**
+1. **Start Local Supabase**
    ```bash
    npx supabase start
    ```
@@ -28,12 +23,12 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
    - **Database**: postgresql://postgres:postgres@127.0.0.1:54322/postgres
    - **Mailpit**: http://127.0.0.1:54324 (email testing)
 
-3. **Get Your Local Credentials**
+2. **Get Your Local Credentials**
    ```bash
    npx supabase status --output env
    ```
 
-4. **Configure Environment Variables**
+3. **Configure Environment Variables**
 
    Create a `.env.local` file in the project root:
    ```env
@@ -47,18 +42,18 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
    SENDGRID_API_KEY=SG...
    ```
 
-5. **Apply Database Migrations**
+4. **Apply Database Migrations**
    ```bash
    npx supabase db reset
    ```
    This will create all tables and run migrations from the `supabase/migrations/` folder.
 
-6. **Start Next.js Development Server**
+5. **Start Next.js Development Server**
    ```bash
    npm run dev
    ```
 
-7. **Create an Admin User**
+6. **Create an Admin User**
 
    Open Supabase Studio at http://127.0.0.1:54323
    - Navigate to **Authentication** > **Users**
@@ -70,14 +65,14 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 To create a new migration:
 ```bash
-npx supabase migration new <migration_name>
+supabase migration new <migration_name>
 ```
 
 To apply migrations:
 ```bash
-npx supabase db reset  # Reset and reapply all migrations
+supabase db reset  # Reset and reapply all migrations
 # OR
-npx supabase migration up  # Apply pending migrations only
+supabase migration up  # Apply pending migrations only
 ```
 
 ### Production vs Local

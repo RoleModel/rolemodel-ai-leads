@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'edge'
 
 // GET all agents (chatbots)
 export async function GET() {
+  const supabaseServer = await createClient()
+
   const { data: agents, error } = await supabaseServer
     .from('chatbots')
     .select('id, name, display_name, created_at')
@@ -20,6 +22,7 @@ export async function GET() {
 
 // POST create new agent
 export async function POST(request: Request) {
+  const supabaseServer = await createClient()
   const body = await request.json()
 
   const { name } = body

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
@@ -18,6 +18,7 @@ export async function OPTIONS() {
 
 // GET - Fetch widget configuration
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Save widget configuration
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const chatbotId = body.chatbotId || DEFAULT_CHATBOT_ID
   const config = body

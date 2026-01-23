@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface LeadSummary {
   companyInfo?: {
@@ -46,6 +46,7 @@ interface SlackBlock {
 
 // POST - Share lead summary via email or Slack
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { leadId, method } = body
 

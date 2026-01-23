@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
-import { triggerWebhooks } from '@/lib/webhooks/service'
-import type { LeadWebhookData } from '@/lib/webhooks/types'
+import { sendToAlmanac } from '@/lib/almanac/service'
+import { createClient } from '@/lib/supabase/server'
 
 // GET - List leads with optional date filtering
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const startDate = searchParams.get('startDate')
   const endDate = searchParams.get('endDate')
@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Create a new lead
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { conversation_id, visitor_name, visitor_email, summary } = body
 
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     .select('*, chatbot_id, message_count, visitor_metadata')
     .single()
 
-  // Trigger webhooks for lead.created event
+  // Send to Almanac CRM (fire and forget)
   try {
     const visitorMetadata = conversation?.visitor_metadata as {
       ip?: string
@@ -93,41 +94,21 @@ export async function POST(req: NextRequest) {
       }
       referer?: string
       userAgent?: string
+      utm_source?: string
+      utm_campaign?: string
+      utm_medium?: string
     } | null
 
-    const webhookData: LeadWebhookData = {
-      lead_id: data.id,
-      conversation_id,
-      visitor: {
-        name: visitor_name || undefined,
-        email: visitor_email || undefined,
-        ip: visitorMetadata?.ip,
-        location: visitorMetadata?.geo
-          ? {
-              city: visitorMetadata.geo.city,
-              region: visitorMetadata.geo.region,
-              country: visitorMetadata.geo.country,
-              timezone: visitorMetadata.geo.timezone,
-            }
-          : undefined,
-        referrer: visitorMetadata?.referer,
-        user_agent: visitorMetadata?.userAgent,
-      },
-      summary: summary as LeadWebhookData['summary'],
-      message_count: conversation?.message_count || 0,
-      created_at: data.created_at || new Date().toISOString(),
-    }
-
-    // Fire and forget - don't block the response
-    triggerWebhooks(
-      'lead.created',
-      webhookData,
-      conversation?.chatbot_id || undefined
+    sendToAlmanac(
+      visitor_name || undefined,
+      visitor_email || undefined,
+      summary,
+      visitorMetadata
     ).catch((err) => {
-      console.error('Webhook trigger error:', err)
+      console.error('Almanac integration error:', err)
     })
-  } catch (webhookError) {
-    console.error('Error preparing webhook data:', webhookError)
+  } catch (error) {
+    console.error('Error preparing Almanac data:', error)
   }
 
   return NextResponse.json({ lead: data })
@@ -135,6 +116,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH - Archive or unarchive a lead
 export async function PATCH(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { id, is_archived } = body
 

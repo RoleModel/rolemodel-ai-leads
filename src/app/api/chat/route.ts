@@ -2,6 +2,7 @@ import { streamText, tool } from 'ai'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { sendToAlmanac, type VisitorMetadata } from '@/lib/almanac/service'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
@@ -14,7 +15,7 @@ import {
 } from '@/lib/ai/rag'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'edge'
 export const maxDuration = 30
@@ -146,6 +147,7 @@ IMPORTANT GUARDRAILS:
 `
 
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const { messages, chatbotId, conversationId, model, temperature } = body
@@ -492,7 +494,7 @@ ${sourceContext}`,
                     .order('created_at', { ascending: true }),
                   supabaseServer
                     .from('conversations')
-                    .select('visitor_name, visitor_email, lead_captured')
+                    .select('visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count')
                     .eq('id', activeConversationId)
                     .single(),
                   supabaseServer
@@ -506,8 +508,70 @@ ${sourceContext}`,
               const conversation = conversationResult.data
               const allSources = sourcesResult.data
 
-              // Skip if already captured as a lead
+              const visitorMetadata = conversation?.visitor_metadata as VisitorMetadata | null
+
+              // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
+                // Check if this is the final summary
+                const textLower = text.toLowerCase()
+                const isFinalSummary =
+                  (textLower.includes('summary of our conversation') ||
+                    textLower.includes("here's a summary") ||
+                    textLower.includes('email this summary') ||
+                    textLower.includes('email the summary') ||
+                    (textLower.includes('summary') && textLower.includes('email'))) &&
+                  (textLower.includes('schedule') ||
+                    textLower.includes('calendly') ||
+                    textLower.includes('explore further'))
+
+                if (isFinalSummary && allMessages && allMessages.length > 0) {
+                  // Extract fresh lead data for the final summary
+                  const leadData = await extractLeadData(allMessages, allSources || [])
+                  const visitorName =
+                    leadData?.contactInfo?.name || conversation?.visitor_name || undefined
+                  const visitorEmail =
+                    leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+
+                  const enrichedLeadData = leadData
+                    ? {
+                        ...leadData,
+                        contactInfo: {
+                          ...leadData.contactInfo,
+                          name: visitorName,
+                          email: visitorEmail,
+                        },
+                      }
+                    : null
+
+                  // Update the lead with final data
+                  const { data: existingLead } = await supabaseServer
+                    .from('leads')
+                    .select('id')
+                    .eq('conversation_id', activeConversationId)
+                    .single()
+
+                  if (existingLead && enrichedLeadData) {
+                    await supabaseServer
+                      .from('leads')
+                      .update({
+                        visitor_name: visitorName || null,
+                        visitor_email: visitorEmail || null,
+                        summary:
+                          enrichedLeadData as unknown as Database['public']['Tables']['leads']['Update']['summary'],
+                      })
+                      .eq('id', existingLead.id)
+
+                    console.log('[Lead Final Summary] Sending to Almanac:', activeConversationId)
+                    sendToAlmanac(
+                      visitorName,
+                      visitorEmail,
+                      enrichedLeadData,
+                      visitorMetadata
+                    ).catch((err) => {
+                      console.error('Almanac integration error:', err)
+                    })
+                  }
+                }
                 return
               }
 
@@ -534,7 +598,7 @@ ${sourceContext}`,
                   }
                   : null
 
-                // Check if lead is qualified and hasn't been saved yet
+                // Check if lead is qualified
                 if (enrichedLeadData && isQualifiedLead(enrichedLeadData)) {
                   // Check if lead already exists for this conversation
                   const { data: existingLead } = await supabaseServer
@@ -553,7 +617,11 @@ ${sourceContext}`,
                       summary:
                         enrichedLeadData as unknown as Database['public']['Tables']['leads']['Insert']['summary'],
                     }
-                    await supabaseServer.from('leads').insert([leadInsert])
+                    const { data: newLead } = await supabaseServer
+                      .from('leads')
+                      .insert([leadInsert])
+                      .select()
+                      .single()
 
                     // Update conversation to mark lead as captured
                     await supabaseServer
@@ -562,6 +630,25 @@ ${sourceContext}`,
                       .eq('id', activeConversationId)
 
                     console.log('[Lead Captured] Conversation:', activeConversationId)
+                  } else {
+                    // Lead already exists but lead_captured wasn't set - just update the lead
+                    await supabaseServer
+                      .from('leads')
+                      .update({
+                        visitor_name: visitorName || null,
+                        visitor_email: visitorEmail || null,
+                        summary:
+                          enrichedLeadData as unknown as Database['public']['Tables']['leads']['Update']['summary'],
+                      })
+                      .eq('id', existingLead.id)
+
+                    // Mark as captured if not already
+                    await supabaseServer
+                      .from('conversations')
+                      .update({ lead_captured: true })
+                      .eq('id', activeConversationId)
+
+                    console.log('[Lead Updated] Conversation:', activeConversationId)
                   }
                 }
               }

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 // GET - List conversations
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
   const conversationId = searchParams.get('conversationId')
@@ -58,6 +59,7 @@ export async function GET(req: NextRequest) {
 
 // PATCH - Archive or unarchive a conversation
 export async function PATCH(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { id, is_archived } = body
 
