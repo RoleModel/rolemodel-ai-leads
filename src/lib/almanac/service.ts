@@ -144,8 +144,10 @@ export async function sendToAlmanac(
     return { success: true }
   }
 
-  console.log('[Almanac] Sending lead to:', apiUrl)
-  console.log('[Almanac] Payload:', JSON.stringify(payload, null, 2))
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Almanac] Sending lead to:', apiUrl)
+    console.log('[Almanac] Payload:', JSON.stringify(payload, null, 2))
+  }
 
   try {
     const response = await fetch(apiUrl, {

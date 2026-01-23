@@ -2,7 +2,7 @@ import { streamText, tool } from 'ai'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { sendToAlmanac } from '@/lib/almanac/service'
+import { sendToAlmanac, type VisitorMetadata } from '@/lib/almanac/service'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
@@ -494,7 +494,7 @@ ${sourceContext}`,
                     .order('created_at', { ascending: true }),
                   supabaseServer
                     .from('conversations')
-                    .select('visitor_name, visitor_email, lead_captured')
+                    .select('visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count')
                     .eq('id', activeConversationId)
                     .single(),
                   supabaseServer
@@ -508,27 +508,7 @@ ${sourceContext}`,
               const conversation = conversationResult.data
               const allSources = sourcesResult.data
 
-              // Get conversation data for visitor metadata
-              const { data: conversationData } = await supabaseServer
-                .from('conversations')
-                .select('chatbot_id, message_count, visitor_metadata')
-                .eq('id', activeConversationId)
-                .single()
-
-              const visitorMetadata = conversationData?.visitor_metadata as {
-                ip?: string
-                geo?: {
-                  city?: string
-                  region?: string
-                  country?: string
-                  timezone?: string
-                }
-                referer?: string
-                userAgent?: string
-                utm_source?: string
-                utm_campaign?: string
-                utm_medium?: string
-              } | null
+              const visitorMetadata = conversation?.visitor_metadata as VisitorMetadata | null
 
               // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
