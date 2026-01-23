@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { sendToAlmanac } from '@/lib/almanac/service'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 // GET - List leads with optional date filtering
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const startDate = searchParams.get('startDate')
   const endDate = searchParams.get('endDate')
@@ -45,6 +46,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Create a new lead
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { conversation_id, visitor_name, visitor_email, summary } = body
 
@@ -114,6 +116,7 @@ export async function POST(req: NextRequest) {
 
 // PATCH - Archive or unarchive a lead
 export async function PATCH(req: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await req.json()
   const { id, is_archived } = body
 

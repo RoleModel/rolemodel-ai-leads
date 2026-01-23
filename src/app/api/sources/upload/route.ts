@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { generateEmbedding } from '@/lib/ai/embeddings'
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 type SourceInsert = Database['public']['Tables']['sources']['Insert']
 
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const formData = await req.formData()
     const files = formData.getAll('files') as File[]

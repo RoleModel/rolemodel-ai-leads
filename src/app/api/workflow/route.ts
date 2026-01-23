@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface WorkflowNode {
   id: string
@@ -30,6 +30,7 @@ const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 // GET - Retrieve workflow configuration
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const { searchParams } = new URL(req.url)
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
@@ -138,6 +139,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Save workflow configuration
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const { chatbotId = DEFAULT_CHATBOT_ID, workflow } = body

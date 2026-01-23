@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 // GET /api/ab-tests - Get all A/B tests with their variants and stats
 export async function GET() {
+  const supabaseServer = await createClient()
   const { data: tests, error: testsError } = await supabaseServer
     .from('ab_tests')
     .select(
@@ -81,6 +82,7 @@ export async function GET() {
 
 // POST /api/ab-tests - Create a new A/B test
 export async function POST(request: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await request.json()
   const { name, description, variants } = body
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface Variant {
   id: string
@@ -11,6 +11,7 @@ interface Variant {
 
 // POST /api/ab-tests/track - Track an A/B test event
 export async function POST(request: NextRequest) {
+  const supabaseServer = await createClient()
   const body = await request.json()
 
   const { variant_id, path, event_type, session_id, visitor_id, metadata } = body
@@ -78,6 +79,7 @@ export async function POST(request: NextRequest) {
 
 // GET /api/ab-tests/track - Get variant assignment for a visitor
 export async function GET(request: NextRequest) {
+  const supabaseServer = await createClient()
   const { searchParams } = new URL(request.url)
   const testId = searchParams.get('test_id')
   const visitorId = searchParams.get('visitor_id')

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { decodeHtmlEntities } from '@/lib/utils'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
@@ -10,6 +10,7 @@ const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
  * Returns up to 3 sources formatted as recommendations
  */
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 

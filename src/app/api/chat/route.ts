@@ -15,7 +15,7 @@ import {
 } from '@/lib/ai/rag'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'edge'
 export const maxDuration = 30
@@ -147,6 +147,7 @@ IMPORTANT GUARDRAILS:
 `
 
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const { messages, chatbotId, conversationId, model, temperature } = body

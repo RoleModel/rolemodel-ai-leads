@@ -1,6 +1,6 @@
 import sendgrid from '@sendgrid/mail'
 import { marked } from 'marked'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 if (!process.env.SENDGRID_API_KEY) {
   throw new Error('SENDGRID_API_KEY is not defined')
@@ -142,6 +142,8 @@ export async function sendSummaryEmail({
   conversationId,
 }: SendSummaryEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabaseServer = await createClient()
+    
     // Check if email was already sent for this conversation
     if (conversationId) {
       const { data: conversation, error: fetchError } = await supabaseServer

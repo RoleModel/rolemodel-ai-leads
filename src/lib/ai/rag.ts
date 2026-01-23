@@ -1,5 +1,5 @@
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 import { generateEmbedding } from './embeddings'
 
@@ -23,6 +23,8 @@ export async function retrieveRelevantSources(
   threshold: number = 0.5
 ): Promise<Source[]> {
   try {
+    const supabaseServer = await createClient()
+    
     // Generate embedding for the query
     const queryEmbeddingArray = await generateEmbedding(query)
     // Convert to pgvector string format
@@ -304,6 +306,8 @@ ${qualificationInstructions}
  * Get chatbot configuration
  */
 export async function getChatbot(chatbotId: string): Promise<Chatbot | null> {
+  const supabaseServer = await createClient()
+  
   const { data, error } = await supabaseServer
     .from('chatbots')
     .select('*')

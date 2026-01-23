@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface LeadSummary {
   companyInfo?: {
@@ -32,6 +32,7 @@ interface LeadSummary {
 
 // GET - Export leads as CSV
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const startDate = searchParams.get('startDate')
   const endDate = searchParams.get('endDate')

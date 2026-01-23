@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 // POST /api/ab-tests/[id]/variants - Add a variant to a test
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
   const body = await request.json()
   const { name, path, weight, is_control } = body
@@ -54,6 +55,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
   const body = await request.json()
   const { variants } = body as {
@@ -93,6 +95,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
   const { searchParams } = new URL(request.url)
   const variantId = searchParams.get('variantId')

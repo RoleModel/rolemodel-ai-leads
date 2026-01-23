@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateEmbedding } from '@/lib/ai/embeddings'
 import { categorizeUrl, getFramerUrls, scrapePage } from '@/lib/framer/scraper'
 import type { Database } from '@/lib/supabase/database.types'
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
 
@@ -28,6 +28,7 @@ export interface SyncResult {
 
 // GET - Check sync status / get existing Framer sources
 export async function GET(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
@@ -56,6 +57,7 @@ export async function GET(req: NextRequest) {
 
 // POST - Trigger sync from Framer
 export async function POST(req: NextRequest) {
+  const supabaseServer = await createClient()
   try {
     const body = await req.json()
     const {
@@ -197,6 +199,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE - Remove all Framer-synced sources
 export async function DELETE(req: NextRequest) {
+  const supabaseServer = await createClient()
   const searchParams = req.nextUrl.searchParams
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 

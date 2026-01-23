@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { supabaseServer } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 interface EventWithDate {
   event_type: string
@@ -12,6 +12,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
 
   const { data: test, error: testError } = await supabaseServer
@@ -89,6 +90,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
   const body = await request.json()
 
@@ -119,6 +121,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseServer = await createClient()
   const { id } = await params
 
   const { error } = await supabaseServer.from('ab_tests').delete().eq('id', id)
