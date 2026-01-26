@@ -38,6 +38,7 @@ interface ButtonPillProps {
   style?: CSSProperties
   disabled?: boolean
   className?: string
+  type?: 'button' | 'submit' | 'reset'
   onClick?: MouseEventHandler<HTMLButtonElement>
 }
 
@@ -64,6 +65,7 @@ export default function ButtonPill(props: ButtonPillProps) {
     disabled,
     onClick,
     className,
+    type = 'button',
   } = props
 
   const variants: Record<
@@ -318,7 +320,7 @@ export default function ButtonPill(props: ButtonPillProps) {
         }}
         disabled={disabled}
         onClick={onClick}
-        type="button"
+        type={type}
       >
         {content}
       </MotionButton>
