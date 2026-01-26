@@ -331,6 +331,31 @@
   width: 100%;
 }
 
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px #011418 inset !important;
+  box-shadow: 0 0 0px 1000px #011418 inset !important;
+  -webkit-text-fill-color: var(--op-color-white) !important;
+  caret-color: var(--op-color-white) !important;
+  background-color: #011418 !important;
+  transition: background-color 9999s ease-out !important;
+}
+
+.input:-internal-autofill-selected {
+  background-color: #011418 !important;
+}
+
+/* Override 1Password autofill styling */
+.input[data-com-onepassword-filled],
+.input[data-com-onepassword-filled="dark"],
+.input[data-com-onepassword-filled="light"] {
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0px 1000px #011418 inset !important;
+  box-shadow: 0 0 0px 1000px #011418 inset !important;
+}
+
 .input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
