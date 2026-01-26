@@ -220,7 +220,7 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
 
       // Transition to chat
       setShowChat(true)
-    } catch (error) {
+    } catch {
       setIsLoading(false)
     }
   }
@@ -494,9 +494,7 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
                         />
                       }
                       variant="brightblue"
-                      onClick={(e) => {
-                        void handleFormSubmit(e)
-                      }}
+                      type="submit"
                       disabled={isLoading}
                     />
                   </div>

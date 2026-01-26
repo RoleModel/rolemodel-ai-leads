@@ -13,6 +13,54 @@
   overflow: hidden;
 }
 
+/* ==========================================================================
+   Titlebar
+   ========================================================================== */
+
+.leads-page__titlebar {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--op-space-medium);
+  background-color: var(--op-color-background);
+  border-bottom: var(--op-border-width) solid var(--op-color-border);
+  flex-shrink: 0;
+}
+
+.leads-page__titlebar-content {
+  display: flex;
+  align-items: center;
+  padding: var(--op-space-medium);
+  gap: var(--op-space-medium);
+  &:first-child {
+    border-right: var(--op-border-width) solid var(--op-color-border);
+  }
+}
+
+.leads-page__titlebar-icon {
+  width: calc(var(--op-space-scale-unit) * 3.6); /* 28.8px */
+  height: calc(var(--op-space-scale-unit) * 3.6); /* 28.8px */
+  flex-shrink: 0;
+}
+
+.leads-page__titlebar-text {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-x-small);
+}
+
+.leads-page__titlebar-title {
+  font-size: var(--op-font-large);
+  font-weight: var(--op-font-weight-bold);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.leads-page__titlebar-subtitle {
+  font-size: var(--op-font-medium);
+  line-height: 1.2;
+  margin: 0;
+}
+
 /* App Content Wrapper */
 .app__content {
   display: flex;

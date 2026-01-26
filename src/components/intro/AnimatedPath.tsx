@@ -70,12 +70,16 @@ export default function PathScrollRunner({
   const pathRef2 = React.useRef<SVGPathElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [autoViewBox, setAutoViewBox] = React.useState<string | null>(null)
+  const [isReady, setIsReady] = React.useState(false)
 
   // Auto-fit viewBox if none provided
   React.useLayoutEffect(() => {
     const el = pathRef1.current
     if (!el) return
-    if (viewBox && viewBox.trim().length > 0) return
+    if (viewBox && viewBox.trim().length > 0) {
+      setIsReady(true)
+      return
+    }
 
     try {
       const b = el.getBBox()
@@ -88,6 +92,7 @@ export default function PathScrollRunner({
     } catch {
       setAutoViewBox('0 0 100 100')
     }
+    setIsReady(true)
   }, [d, viewBox])
 
   // GSAP animations
@@ -258,6 +263,7 @@ export default function PathScrollRunner({
         height: resolvedHeight,
         display: 'block',
         overflow: 'visible',
+        visibility: isReady ? 'visible' : 'hidden',
       }}
     >
       <svg
