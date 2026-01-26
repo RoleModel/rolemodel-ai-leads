@@ -9,7 +9,7 @@ import {
   ThumbsUpIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { DefaultChatTransport, type UIMessage, isTextUIPart } from 'ai'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Conversation, ConversationContent } from '@/components/ai-elements/conversation'
@@ -53,13 +53,6 @@ import {
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
 
-interface ChatHistory {
-  id: string
-  title: string
-  messages: UIMessage[]
-  timestamp: number
-}
-
 interface LeadsPageViewProps {
   chatbotId: string
   showSidebar?: boolean
@@ -74,15 +67,20 @@ interface LeadsPageViewProps {
 
 export function LeadsPageView({
   chatbotId,
-  showSidebar = true,
-  forceSidebarCollapsed = false,
-  editMode = false,
+  showSidebar: _showSidebar = true,
+  forceSidebarCollapsed: _forceSidebarCollapsed = false,
+  editMode: _editMode = false,
   theme,
   onThemeChange,
   visitorName,
   visitorEmail,
   initialConversationId,
 }: LeadsPageViewProps) {
+  // Prefixed with _ to indicate intentionally unused (reserved for future use)
+  void _showSidebar
+  void _forceSidebarCollapsed
+  void _editMode
+
   useLeadsPageSettings() // Keep the hook for context loading
   const [liked, setLiked] = useState<Record<string, boolean>>({})
   const [disliked, setDisliked] = useState<Record<string, boolean>>({})
@@ -91,11 +89,11 @@ export function LeadsPageView({
   // Check if we're on the client to avoid SSR issues
   const isClient = typeof window !== 'undefined'
 
-  const [showDemo, setShowDemo] = useState(true)
+  const [, setShowDemo] = useState(true)
   const [messageCitations, setMessageCitations] = useState<Record<string, Citation[]>>({})
   const [pendingCitations, setPendingCitations] = useState<Citation[] | null>(null)
-  const [emailSentForConversation, setEmailSentForConversation] = useState(false)
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null)
+  const [, setEmailSentForConversation] = useState(false)
+  const [, setConversationId] = useState<string | null>(initialConversationId ?? null)
 
   const handleChatResponse = useCallback((response: Response) => {
     // Extract conversation ID for email sending
@@ -158,7 +156,7 @@ export function LeadsPageView({
 
       setPendingCitations(null)
     },
-    [pendingCitations, emailSentForConversation, conversationId]
+    [pendingCitations]
   )
 
   const interceptingFetch = useCallback(
@@ -257,23 +255,25 @@ export function LeadsPageView({
     })
   }
 
-  const getMessageContent = useCallback((message: UIMessage) => {
-    const textParts = message.parts.filter(isTextUIPart)
-    return textParts.map((part) => part.text).join('\n')
-  }, [])
-
   const isStreaming = status === 'streaming'
 
-  // Dark mode handler
-  const handleToggleDarkMode = () => {
-    if (onThemeChange) {
-      const newTheme = theme === 'dark' ? 'light' : 'dark'
-      onThemeChange(newTheme)
-    }
-  }
+  // Suppress unused variable warnings for future use
+  void theme
+  void onThemeChange
 
   return (
     <div className="leads-page">
+      {/* Titlebar */}
+      <div className="leads-page__titlebar" role="banner">
+        <div className="leads-page__titlebar-content">
+          <Favicon className="leads-page__titlebar-icon" aria-hidden="true" />
+          <h1 className="leads-page__titlebar-title">A.I. Consultation</h1>
+        </div>
+        <div className="leads-page__titlebar-content">
+          <p className="leads-page__titlebar-subtitle">Powered by RoleModel Software</p>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="app__content">
         <div className="leads-page__content">
