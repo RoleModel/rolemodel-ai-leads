@@ -11,18 +11,18 @@ interface ButtonPillProps {
   label: string
   useVariant?: boolean
   variant?:
-    | 'dark'
-    | 'light'
-    | 'blue'
-    | 'darkblue'
-    | 'rmbrightblue'
-    | 'brightblue'
-    | 'green'
-    | 'purple'
-    | 'lightpurple'
-    | 'bluegreen'
-    | 'yellow'
-    | 'ghost'
+  | 'dark'
+  | 'light'
+  | 'blue'
+  | 'darkblue'
+  | 'rmbrightblue'
+  | 'brightblue'
+  | 'green'
+  | 'purple'
+  | 'lightpurple'
+  | 'bluegreen'
+  | 'yellow'
+  | 'ghost'
   backgroundColor?: string
   hoverBackground?: boolean
   hoverbackgroundColor?: string
@@ -147,11 +147,11 @@ export default function ButtonPill(props: ButtonPillProps) {
     shouldUseVariant && variant && variants[variant]
       ? variants[variant]
       : {
-          bg: backgroundColor ?? 'transparent',
-          textColor: textColor ?? 'inherit',
-          hoverTextColor: hoverTextColor ?? textColor ?? 'inherit',
-          hoverbackgroundColor: hoverbackgroundColor,
-        }
+        bg: backgroundColor ?? 'transparent',
+        textColor: textColor ?? 'inherit',
+        hoverTextColor: hoverTextColor ?? textColor ?? 'inherit',
+        hoverbackgroundColor: hoverbackgroundColor,
+      }
 
   const MotionButton = motion.button
 
@@ -297,7 +297,7 @@ export default function ButtonPill(props: ButtonPillProps) {
         whileHover="hover"
         whileTap="tap"
         style={{
-          borderRadius: 'var(--op-radius-medium)',
+          borderRadius: 'var(--op-radius-large)',
           backgroundColor: colors.bg,
           color: colors.textColor,
           position: 'relative',
