@@ -597,39 +597,59 @@ ${sourceContext}`,
                       enrichedDataKeys: enrichedLeadData ? Object.keys(enrichedLeadData) : [],
                     })
 
-                    sendToAlmanac(
-                      visitorName,
-                      visitorEmail,
-                      enrichedLeadData,
-                      visitorMetadata
-                    )
-                      .then(() => {
+                    // IMPORTANT: Must await in Edge runtime or promise may not complete
+                    try {
+                      const almanacResult = await sendToAlmanac(
+                        visitorName,
+                        visitorEmail,
+                        enrichedLeadData,
+                        visitorMetadata
+                      )
+
+                      if (almanacResult.success) {
                         console.log('[Lead Final Summary] Successfully sent to Almanac:', {
                           conversationId: activeConversationId,
                           leadId: existingLead.id,
                           visitorEmail,
                         })
-                      })
-                      .catch((err) => {
-                        console.error('[Lead Final Summary] Almanac integration error:', {
+                      } else {
+                        console.error('[Lead Final Summary] Almanac returned failure:', {
                           conversationId: activeConversationId,
                           leadId: existingLead.id,
-                          error: err,
-                          errorMessage: err instanceof Error ? err.message : String(err),
-                          errorStack: err instanceof Error ? err.stack : undefined,
+                          error: almanacResult.error,
                         })
 
-                        // Track failed Almanac sync in analytics (fire and forget - ignore errors)
-                        void supabaseServer.from('analytics_events').insert([{
+                        // Track failed Almanac sync in analytics
+                        await supabaseServer.from('analytics_events').insert([{
                           chatbot_id: activeChatbotId,
                           conversation_id: activeConversationId,
                           event_type: 'almanac_sync_failed',
                           metadata: {
-                            error: err instanceof Error ? err.message : String(err),
+                            error: almanacResult.error || 'Unknown error',
                             lead_id: existingLead.id,
                           } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
-                        }]);
+                        }])
+                      }
+                    } catch (err) {
+                      console.error('[Lead Final Summary] Almanac integration threw error:', {
+                        conversationId: activeConversationId,
+                        leadId: existingLead.id,
+                        error: err,
+                        errorMessage: err instanceof Error ? err.message : String(err),
+                        errorStack: err instanceof Error ? err.stack : undefined,
                       })
+
+                      // Track failed Almanac sync in analytics
+                      await supabaseServer.from('analytics_events').insert([{
+                        chatbot_id: activeChatbotId,
+                        conversation_id: activeConversationId,
+                        event_type: 'almanac_sync_failed',
+                        metadata: {
+                          error: err instanceof Error ? err.message : String(err),
+                          lead_id: existingLead.id,
+                        } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                      }])
+                    }
                   } else {
                     console.log('[Lead Final Summary] Skipping Almanac - conditions not met:', {
                       hasExistingLead: !!existingLead,
