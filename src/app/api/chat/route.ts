@@ -117,7 +117,7 @@ FINAL OUTPUT:
   - Gently indicates whether custom software appears promising, uncertain, or premature
   - Suggests next steps, including alternative paths if ROI appears low
 - Always offer that RoleModel can consult with them to determine whether pursuing custom software makes sense.
-- Invite (but do not pressure) the user to schedule a call if they would like to explore further.
+- REQUIRED: You MUST always invite the user to schedule a call to explore further. This invitation is mandatory in every final summary.
 - IMPORTANT: When suggesting scheduling a call, provide this link: ${process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'}
 - After presenting the summary, offer to send it to their email by asking: "Would you like me to email this summary to you?"
 
@@ -512,6 +512,12 @@ ${sourceContext}`,
 
               // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
+                console.log('[Lead Final Summary] Lead already captured, checking for final summary', {
+                  conversationId: activeConversationId,
+                  messageLength: text.length,
+                  totalMessages,
+                })
+
                 // Check if this is the final summary
                 const textLower = text.toLowerCase()
                 const isFinalSummary =
@@ -524,13 +530,32 @@ ${sourceContext}`,
                     textLower.includes('calendly') ||
                     textLower.includes('explore further'))
 
+                console.log('[Lead Final Summary] Detection result:', {
+                  isFinalSummary,
+                  hasSummaryKeyword: textLower.includes('summary'),
+                  hasEmailKeyword: textLower.includes('email'),
+                  hasScheduleKeyword: textLower.includes('schedule') || textLower.includes('calendly'),
+                })
+
                 if (isFinalSummary && allMessages && allMessages.length > 0) {
+                  console.log('[Lead Final Summary] Processing final summary', {
+                    conversationId: activeConversationId,
+                    messageCount: allMessages.length,
+                  })
+
                   // Extract fresh lead data for the final summary
                   const leadData = await extractLeadData(allMessages, allSources || [])
                   const visitorName =
                     leadData?.contactInfo?.name || conversation?.visitor_name || undefined
                   const visitorEmail =
                     leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+
+                  console.log('[Lead Final Summary] Extracted data:', {
+                    hasLeadData: !!leadData,
+                    visitorName,
+                    visitorEmail,
+                    hasMetadata: !!visitorMetadata,
+                  })
 
                   const enrichedLeadData = leadData
                     ? {
@@ -551,6 +576,7 @@ ${sourceContext}`,
                     .single()
 
                   if (existingLead && enrichedLeadData) {
+                    console.log('[Lead Final Summary] Updating lead record:', existingLead.id)
                     await supabaseServer
                       .from('leads')
                       .update({
@@ -561,14 +587,54 @@ ${sourceContext}`,
                       })
                       .eq('id', existingLead.id)
 
-                    console.log('[Lead Final Summary] Sending to Almanac:', activeConversationId)
+                    console.log('[Lead Final Summary] Attempting to send to Almanac:', {
+                      conversationId: activeConversationId,
+                      leadId: existingLead.id,
+                      hasName: !!visitorName,
+                      hasEmail: !!visitorEmail,
+                      hasEnrichedData: !!enrichedLeadData,
+                      hasVisitorMetadata: !!visitorMetadata,
+                      enrichedDataKeys: enrichedLeadData ? Object.keys(enrichedLeadData) : [],
+                    })
+
                     sendToAlmanac(
                       visitorName,
                       visitorEmail,
                       enrichedLeadData,
                       visitorMetadata
-                    ).catch((err) => {
-                      console.error('Almanac integration error:', err)
+                    )
+                      .then(() => {
+                        console.log('[Lead Final Summary] Successfully sent to Almanac:', {
+                          conversationId: activeConversationId,
+                          leadId: existingLead.id,
+                          visitorEmail,
+                        })
+                      })
+                      .catch((err) => {
+                        console.error('[Lead Final Summary] Almanac integration error:', {
+                          conversationId: activeConversationId,
+                          leadId: existingLead.id,
+                          error: err,
+                          errorMessage: err instanceof Error ? err.message : String(err),
+                          errorStack: err instanceof Error ? err.stack : undefined,
+                        })
+
+                        // Track failed Almanac sync in analytics (fire and forget - ignore errors)
+                        void supabaseServer.from('analytics_events').insert([{
+                          chatbot_id: activeChatbotId,
+                          conversation_id: activeConversationId,
+                          event_type: 'almanac_sync_failed',
+                          metadata: {
+                            error: err instanceof Error ? err.message : String(err),
+                            lead_id: existingLead.id,
+                          } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                        }]);
+                      })
+                  } else {
+                    console.log('[Lead Final Summary] Skipping Almanac - conditions not met:', {
+                      hasExistingLead: !!existingLead,
+                      hasEnrichedLeadData: !!enrichedLeadData,
+                      conversationId: activeConversationId,
                     })
                   }
                 }
