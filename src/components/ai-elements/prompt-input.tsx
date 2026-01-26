@@ -356,6 +356,7 @@ export type PromptInputAttachmentsProps = Omit<
 export function PromptInputAttachments({
   children,
   className,
+  style,
   ...props
 }: PromptInputAttachmentsProps) {
   const attachments = usePromptInputAttachments()
@@ -365,7 +366,17 @@ export function PromptInputAttachments({
   }
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2 p-3', className)} {...props}>
+    <div
+      className={cn('flex flex-wrap items-center gap-2', className)}
+      style={{
+        order: -1,
+        width: '100%',
+        padding: 'var(--op-space-small)',
+        borderBottom: '1px solid var(--op-color-border)',
+        ...style,
+      }}
+      {...props}
+    >
       {attachments.files.map((file) => (
         <Fragment key={file.id}>{children(file)}</Fragment>
       ))}
@@ -1083,6 +1094,7 @@ export const PromptInputSpeechButton = ({
 }: PromptInputSpeechButtonProps) => {
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const controller = useOptionalPromptInputController()
 
   const recognitionSupported = useSyncExternalStore(
     () => () => {},
@@ -1130,14 +1142,23 @@ export const PromptInputSpeechButton = ({
         }
       }
 
-      if (finalTranscript && textareaRef?.current) {
-        const textarea = textareaRef.current
-        const currentValue = textarea.value
-        const newValue = currentValue + (currentValue ? ' ' : '') + finalTranscript
+      if (finalTranscript) {
+        // If using provider, update via the controlled state
+        if (controller) {
+          const currentValue = controller.textInput.value
+          const newValue = currentValue + (currentValue ? ' ' : '') + finalTranscript
+          controller.textInput.setInput(newValue)
+          onTranscriptionChange?.(newValue)
+        } else if (textareaRef?.current) {
+          // Fallback to direct DOM manipulation for uncontrolled usage
+          const textarea = textareaRef.current
+          const currentValue = textarea.value
+          const newValue = currentValue + (currentValue ? ' ' : '') + finalTranscript
 
-        textarea.value = newValue
-        textarea.dispatchEvent(new Event('input', { bubbles: true }))
-        onTranscriptionChange?.(newValue)
+          textarea.value = newValue
+          textarea.dispatchEvent(new Event('input', { bubbles: true }))
+          onTranscriptionChange?.(newValue)
+        }
       }
     }
 
@@ -1157,7 +1178,7 @@ export const PromptInputSpeechButton = ({
       instance.stop()
       recognitionRef.current = null
     }
-  }, [recognitionSupported, textareaRef, onTranscriptionChange])
+  }, [recognitionSupported, textareaRef, onTranscriptionChange, controller])
 
   const toggleListening = useCallback(() => {
     const current = recognitionRef.current
