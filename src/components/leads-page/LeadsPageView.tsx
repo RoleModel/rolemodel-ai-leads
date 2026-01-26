@@ -247,11 +247,12 @@ export function LeadsPageView({
   }, [visitorName, messages.length, setMessages, initialConversationId])
 
   const handlePromptSubmit = async (message: PromptInputMessage) => {
-    if (!message.text.trim()) return
+    if (!message.text.trim() && message.files.length === 0) return
     setShowDemo(false)
 
     await sendMessage({
       text: message.text,
+      files: message.files.length > 0 ? message.files : undefined,
     })
   }
 

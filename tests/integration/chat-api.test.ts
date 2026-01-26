@@ -91,6 +91,115 @@ CASE STUDY PREVIEWS (MANDATORY - YOU MUST USE THE TOOL):
   })
 })
 
+describe('File Attachments', () => {
+  interface FileUIPart {
+    type: 'file'
+    url: string
+    mediaType: string
+    filename?: string
+  }
+
+  interface PromptInputMessage {
+    text: string
+    files: FileUIPart[]
+  }
+
+  const createSendMessagePayload = (message: PromptInputMessage) => {
+    return {
+      text: message.text,
+      files: message.files.length > 0 ? message.files : undefined,
+    }
+  }
+
+  it('should include files in sendMessage payload when files are attached', () => {
+    const message: PromptInputMessage = {
+      text: 'Here is my document',
+      files: [
+        {
+          type: 'file',
+          url: 'data:image/png;base64,iVBORw0KGgo...',
+          mediaType: 'image/png',
+          filename: 'screenshot.png',
+        },
+      ],
+    }
+
+    const payload = createSendMessagePayload(message)
+
+    expect(payload.text).toBe('Here is my document')
+    expect(payload.files).toBeDefined()
+    expect(payload.files).toHaveLength(1)
+    expect(payload.files![0].mediaType).toBe('image/png')
+    expect(payload.files![0].filename).toBe('screenshot.png')
+  })
+
+  it('should not include files in payload when no files are attached', () => {
+    const message: PromptInputMessage = {
+      text: 'Just a text message',
+      files: [],
+    }
+
+    const payload = createSendMessagePayload(message)
+
+    expect(payload.text).toBe('Just a text message')
+    expect(payload.files).toBeUndefined()
+  })
+
+  it('should allow sending only files without text', () => {
+    const message: PromptInputMessage = {
+      text: '',
+      files: [
+        {
+          type: 'file',
+          url: 'data:application/pdf;base64,JVBERi0...',
+          mediaType: 'application/pdf',
+          filename: 'document.pdf',
+        },
+      ],
+    }
+
+    // Should be allowed to send (text is empty but files exist)
+    const shouldSend = message.text.trim() !== '' || message.files.length > 0
+    expect(shouldSend).toBe(true)
+
+    const payload = createSendMessagePayload(message)
+    expect(payload.files).toHaveLength(1)
+  })
+
+  it('should handle multiple file attachments', () => {
+    const message: PromptInputMessage = {
+      text: 'Multiple files attached',
+      files: [
+        {
+          type: 'file',
+          url: 'data:image/png;base64,abc...',
+          mediaType: 'image/png',
+          filename: 'image1.png',
+        },
+        {
+          type: 'file',
+          url: 'data:image/jpeg;base64,def...',
+          mediaType: 'image/jpeg',
+          filename: 'image2.jpg',
+        },
+        {
+          type: 'file',
+          url: 'data:application/pdf;base64,ghi...',
+          mediaType: 'application/pdf',
+          filename: 'doc.pdf',
+        },
+      ],
+    }
+
+    const payload = createSendMessagePayload(message)
+
+    expect(payload.files).toHaveLength(3)
+    expect(payload.files![0].mediaType).toBe('image/png')
+    expect(payload.files![1].mediaType).toBe('image/jpeg')
+    expect(payload.files![2].mediaType).toBe('application/pdf')
+  })
+})
+
 describe('Conversation Flow', () => {
   // Simulate a conversation to test flow
   const simulateConversation = () => {

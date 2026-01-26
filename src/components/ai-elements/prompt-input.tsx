@@ -272,46 +272,90 @@ export function PromptInputAttachment({
     <PromptInputHoverCard>
       <HoverCardTrigger asChild>
         <div
-          className={cn(
-            'group relative flex h-8 cursor-default select-none items-center gap-1.5 rounded-md border border-border px-1.5 font-medium text-sm transition-all hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-            className
-          )}
+          className={cn(className)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--op-space-x-small)',
+            height: 'var(--op-space-x-large)',
+            padding: 'var(--op-space-medium)',
+            borderRadius: 'var(--op-radius-medium)',
+            border: '1px solid var(--op-color-border)',
+            backgroundColor: 'var(--op-color-background)',
+            fontSize: 'var(--op-font-small)',
+            fontWeight: 500,
+            cursor: 'default',
+            userSelect: 'none',
+          }}
           key={data.id}
           {...props}
         >
-          <div className="relative size-5 shrink-0">
-            <div className="absolute inset-0 flex size-5 items-center justify-center overflow-hidden rounded bg-background transition-opacity group-hover:opacity-0">
-              {isImage ? (
-                <Image
-                  alt={filename || 'attachment'}
-                  className="size-5 object-cover"
-                  height={20}
-                  src={data.url}
-                  width={20}
-                  unoptimized
-                />
-              ) : (
-                <div className="flex size-5 items-center justify-center text-muted-foreground">
-                  <PaperclipIcon className="size-3" />
-                </div>
-              )}
-            </div>
-            <Button
-              aria-label="Remove attachment"
-              className="absolute inset-0 size-5 cursor-pointer rounded p-0 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [&>svg]:size-2.5"
-              onClick={(e) => {
-                e.stopPropagation()
-                attachments.remove(data.id)
-              }}
-              type="button"
-              variant="ghost"
-            >
-              <XIcon />
-              <span className="sr-only">Remove</span>
-            </Button>
+          {/* Icon */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 20,
+              height: 20,
+              flexShrink: 0,
+              overflow: 'hidden',
+              borderRadius: 'var(--op-radius-small)',
+              backgroundColor: 'var(--op-color-neutral-plus-six)',
+            }}
+          >
+            {isImage ? (
+              <Image
+                alt={filename || 'attachment'}
+                style={{ width: 20, height: 20, objectFit: 'cover' }}
+                height={20}
+                src={data.url}
+                width={20}
+                unoptimized
+              />
+            ) : (
+              <PaperclipIcon style={{ width: 12, height: 12, color: 'var(--op-color-neutral-on-plus-max)' }} />
+            )}
           </div>
 
-          <span className="flex-1 truncate">{attachmentLabel}</span>
+          {/* Filename */}
+          <span
+            style={{
+              maxWidth: 128,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {attachmentLabel}
+          </span>
+
+          {/* Remove button */}
+          <button
+            aria-label="Remove attachment"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              attachments.remove(data.id)
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 20,
+              height: 20,
+              flexShrink: 0,
+              padding: 0,
+              border: 'none',
+              borderRadius: 'var(--op-radius-small)',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              color: 'var(--op-color-neutral-on-plus-max)',
+            }}
+          >
+            <XIcon style={{ width: 14, height: 14 }} />
+            <span className="sr-only">Remove</span>
+          </button>
         </div>
       </HoverCardTrigger>
       <PromptInputHoverCardContent className="w-auto p-2">
@@ -367,12 +411,17 @@ export function PromptInputAttachments({
 
   return (
     <div
-      className={cn('flex flex-wrap items-center gap-2', className)}
+      className={cn(className)}
       style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 'var(--op-space-small)',
         order: -1,
         width: '100%',
         padding: 'var(--op-space-small)',
-        borderBottom: '1px solid var(--op-color-border)',
+        borderBottom: '1px solid',
+        borderColor: 'inherit',
         ...style,
       }}
       {...props}
