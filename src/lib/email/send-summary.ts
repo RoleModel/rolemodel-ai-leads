@@ -63,6 +63,14 @@ function formatSummaryEmailForProspect(
       padding: 32px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo {
+      width: 200px;
+      height: auto;
+    }
     h1 {
       color: #1a1a1a;
       font-size: 24px;
@@ -106,6 +114,11 @@ function formatSummaryEmailForProspect(
 </head>
 <body>
   <div class="container">
+    <div class="logo-container">
+      <a href="https://rolemodelsoftware.com" target="_blank" rel="noopener noreferrer">
+        <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://consult.rolemodelsoftware.com'}/rolemodel-logo.png" alt="RoleModel Software" class="logo" width="300" height="auto" />
+      </a>
+    </div>
     <div class="content">
       <p>Hi ${escapeHtml(visitorName)},</p>
       <p>Thanks for taking the time to explore whether custom software might be the right fit for your needs.</p>
@@ -113,10 +126,10 @@ function formatSummaryEmailForProspect(
       ${schedulingLink}
     </div>
     <div class="footer">
-      <p>Thanks again for your interest in RoleModel Software. We're here to help you make the best decision for your business.</p>
+      <p>At RoleModel, we believe that businesses should have software that fits.</p>
       <p style="margin-top: 16px;">
         <strong>RoleModel Software</strong><br>
-        Custom Software Development<br>
+        Software that Fits<br>
         <a href="https://rolemodelsoftware.com">rolemodelsoftware.com</a>
       </p>
     </div>

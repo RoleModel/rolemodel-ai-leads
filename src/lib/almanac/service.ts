@@ -169,7 +169,6 @@ export async function sendToAlmanac(
       }
     }
 
-    console.log('[Almanac] Lead sent successfully:', payload.email || payload.name)
     return { success: true }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'

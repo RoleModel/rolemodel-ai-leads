@@ -117,7 +117,7 @@ FINAL OUTPUT:
   - Gently indicates whether custom software appears promising, uncertain, or premature
   - Suggests next steps, including alternative paths if ROI appears low
 - Always offer that RoleModel can consult with them to determine whether pursuing custom software makes sense.
-- Invite (but do not pressure) the user to schedule a call if they would like to explore further.
+- REQUIRED: You MUST always invite the user to schedule a call to explore further. This invitation is mandatory in every final summary.
 - IMPORTANT: When suggesting scheduling a call, provide this link: ${process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'}
 - After presenting the summary, offer to send it to their email by asking: "Would you like me to email this summary to you?"
 
@@ -524,6 +524,7 @@ ${sourceContext}`,
                     textLower.includes('calendly') ||
                     textLower.includes('explore further'))
 
+
                 if (isFinalSummary && allMessages && allMessages.length > 0) {
                   // Extract fresh lead data for the final summary
                   const leadData = await extractLeadData(allMessages, allSources || [])
@@ -561,15 +562,39 @@ ${sourceContext}`,
                       })
                       .eq('id', existingLead.id)
 
-                    console.log('[Lead Final Summary] Sending to Almanac:', activeConversationId)
-                    sendToAlmanac(
-                      visitorName,
-                      visitorEmail,
-                      enrichedLeadData,
-                      visitorMetadata
-                    ).catch((err) => {
-                      console.error('Almanac integration error:', err)
-                    })
+                    // IMPORTANT: Must await in Edge runtime or promise may not complete
+                    try {
+                      const almanacResult = await sendToAlmanac(
+                        visitorName,
+                        visitorEmail,
+                        enrichedLeadData,
+                        visitorMetadata
+                      )
+
+                      if (!almanacResult.success) {
+                        // Track failed Almanac sync in analytics
+                        await supabaseServer.from('analytics_events').insert([{
+                          chatbot_id: activeChatbotId,
+                          conversation_id: activeConversationId,
+                          event_type: 'almanac_sync_failed',
+                          metadata: {
+                            error: almanacResult.error || 'Unknown error',
+                            lead_id: existingLead.id,
+                          } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                        }])
+                      }
+                    } catch (err) {
+                      // Track failed Almanac sync in analytics
+                      await supabaseServer.from('analytics_events').insert([{
+                        chatbot_id: activeChatbotId,
+                        conversation_id: activeConversationId,
+                        event_type: 'almanac_sync_failed',
+                        metadata: {
+                          error: err instanceof Error ? err.message : String(err),
+                          lead_id: existingLead.id,
+                        } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                      }])
+                    }
                   }
                 }
                 return
