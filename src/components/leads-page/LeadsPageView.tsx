@@ -271,7 +271,10 @@ export function LeadsPageView({
           <h1 className="leads-page__titlebar-title">A.I. Consultation</h1>
         </div>
         <div className="leads-page__titlebar-content">
-          <p className="leads-page__titlebar-subtitle">Powered by RoleModel Software</p>
+          <p className="leads-page__titlebar-subtitle">
+            Powered by&nbsp;
+            <a href="https://rolemodelsoftware.com" target="_blank">RoleModel Software</a>
+          </p>
         </div>
       </div>
 
