@@ -119,21 +119,8 @@ export async function sendToAlmanac(
   leadSummary: LeadSummaryData | null | undefined,
   visitorMetadata: VisitorMetadata | null | undefined
 ): Promise<AlmanacResponse> {
-  console.log('[Almanac] sendToAlmanac called with:', {
-    hasName: !!visitorName,
-    hasEmail: !!visitorEmail,
-    hasLeadSummary: !!leadSummary,
-    hasVisitorMetadata: !!visitorMetadata,
-  })
-
   const apiUrl = process.env.ALMANAC_CONTACT_API_URL
   const apiKey = process.env.ALMANAC_API_KEY
-
-  console.log('[Almanac] Environment check:', {
-    hasApiUrl: !!apiUrl,
-    hasApiKey: !!apiKey,
-    nodeEnv: process.env.NODE_ENV,
-  })
 
   // Skip if not configured
   if (!apiUrl || !apiKey) {
@@ -149,13 +136,7 @@ export async function sendToAlmanac(
     return { success: false, error: 'Invalid API URL configuration' }
   }
 
-  console.log('[Almanac] Building payload...')
   const payload = buildAlmanacPayload(visitorName, visitorEmail, leadSummary, visitorMetadata)
-  console.log('[Almanac] Payload built:', {
-    hasName: !!payload.name,
-    hasEmail: !!payload.email,
-    fieldCount: Object.keys(payload).length,
-  })
 
   // Skip if we don't have minimum required data (at least name or email)
   if (!payload.name && !payload.email) {
@@ -168,9 +149,6 @@ export async function sendToAlmanac(
     console.log('[Almanac] Payload:', JSON.stringify(payload, null, 2))
   }
 
-  console.log('[Almanac] Initiating fetch to:', apiUrl)
-  const fetchStartTime = Date.now()
-
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -182,9 +160,6 @@ export async function sendToAlmanac(
       signal: AbortSignal.timeout(10000), // 10 second timeout
     })
 
-    const fetchDuration = Date.now() - fetchStartTime
-    console.log('[Almanac] Fetch completed in', fetchDuration, 'ms - Status:', response.status)
-
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error')
       console.error(`[Almanac] API error: ${response.status} - ${errorText}`)
@@ -194,21 +169,13 @@ export async function sendToAlmanac(
       }
     }
 
-    console.log('[Almanac] Lead sent successfully:', {
-      email: payload.email,
-      name: payload.name,
-      duration: Date.now() - fetchStartTime,
-    })
     return { success: true }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('[Almanac] Failed to send lead:', {
-      error: errorMessage,
-      errorType: error instanceof Error ? error.constructor.name : typeof error,
-      errorCause: error instanceof Error ? error.cause : undefined,
-      errorStack: error instanceof Error ? error.stack : undefined,
-      duration: Date.now() - fetchStartTime,
-    })
+    console.error('[Almanac] Failed to send lead:', errorMessage)
+    if (error instanceof Error && error.cause) {
+      console.error('[Almanac] Error cause:', error.cause)
+    }
     return {
       success: false,
       error: errorMessage,

@@ -512,12 +512,6 @@ ${sourceContext}`,
 
               // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
-                console.log('[Lead Final Summary] Lead already captured, checking for final summary', {
-                  conversationId: activeConversationId,
-                  messageLength: text.length,
-                  totalMessages,
-                })
-
                 // Check if this is the final summary
                 const textLower = text.toLowerCase()
                 const isFinalSummary =
@@ -530,32 +524,14 @@ ${sourceContext}`,
                     textLower.includes('calendly') ||
                     textLower.includes('explore further'))
 
-                console.log('[Lead Final Summary] Detection result:', {
-                  isFinalSummary,
-                  hasSummaryKeyword: textLower.includes('summary'),
-                  hasEmailKeyword: textLower.includes('email'),
-                  hasScheduleKeyword: textLower.includes('schedule') || textLower.includes('calendly'),
-                })
 
                 if (isFinalSummary && allMessages && allMessages.length > 0) {
-                  console.log('[Lead Final Summary] Processing final summary', {
-                    conversationId: activeConversationId,
-                    messageCount: allMessages.length,
-                  })
-
                   // Extract fresh lead data for the final summary
                   const leadData = await extractLeadData(allMessages, allSources || [])
                   const visitorName =
                     leadData?.contactInfo?.name || conversation?.visitor_name || undefined
                   const visitorEmail =
                     leadData?.contactInfo?.email || conversation?.visitor_email || undefined
-
-                  console.log('[Lead Final Summary] Extracted data:', {
-                    hasLeadData: !!leadData,
-                    visitorName,
-                    visitorEmail,
-                    hasMetadata: !!visitorMetadata,
-                  })
 
                   const enrichedLeadData = leadData
                     ? {
@@ -576,7 +552,6 @@ ${sourceContext}`,
                     .single()
 
                   if (existingLead && enrichedLeadData) {
-                    console.log('[Lead Final Summary] Updating lead record:', existingLead.id)
                     await supabaseServer
                       .from('leads')
                       .update({
@@ -587,16 +562,6 @@ ${sourceContext}`,
                       })
                       .eq('id', existingLead.id)
 
-                    console.log('[Lead Final Summary] Attempting to send to Almanac:', {
-                      conversationId: activeConversationId,
-                      leadId: existingLead.id,
-                      hasName: !!visitorName,
-                      hasEmail: !!visitorEmail,
-                      hasEnrichedData: !!enrichedLeadData,
-                      hasVisitorMetadata: !!visitorMetadata,
-                      enrichedDataKeys: enrichedLeadData ? Object.keys(enrichedLeadData) : [],
-                    })
-
                     // IMPORTANT: Must await in Edge runtime or promise may not complete
                     try {
                       const almanacResult = await sendToAlmanac(
@@ -606,19 +571,7 @@ ${sourceContext}`,
                         visitorMetadata
                       )
 
-                      if (almanacResult.success) {
-                        console.log('[Lead Final Summary] Successfully sent to Almanac:', {
-                          conversationId: activeConversationId,
-                          leadId: existingLead.id,
-                          visitorEmail,
-                        })
-                      } else {
-                        console.error('[Lead Final Summary] Almanac returned failure:', {
-                          conversationId: activeConversationId,
-                          leadId: existingLead.id,
-                          error: almanacResult.error,
-                        })
-
+                      if (!almanacResult.success) {
                         // Track failed Almanac sync in analytics
                         await supabaseServer.from('analytics_events').insert([{
                           chatbot_id: activeChatbotId,
@@ -631,14 +584,6 @@ ${sourceContext}`,
                         }])
                       }
                     } catch (err) {
-                      console.error('[Lead Final Summary] Almanac integration threw error:', {
-                        conversationId: activeConversationId,
-                        leadId: existingLead.id,
-                        error: err,
-                        errorMessage: err instanceof Error ? err.message : String(err),
-                        errorStack: err instanceof Error ? err.stack : undefined,
-                      })
-
                       // Track failed Almanac sync in analytics
                       await supabaseServer.from('analytics_events').insert([{
                         chatbot_id: activeChatbotId,
@@ -650,12 +595,6 @@ ${sourceContext}`,
                         } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
                       }])
                     }
-                  } else {
-                    console.log('[Lead Final Summary] Skipping Almanac - conditions not met:', {
-                      hasExistingLead: !!existingLead,
-                      hasEnrichedLeadData: !!enrichedLeadData,
-                      conversationId: activeConversationId,
-                    })
                   }
                 }
                 return
