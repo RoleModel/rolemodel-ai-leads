@@ -52,6 +52,7 @@ import {
 
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
+import { log } from 'console'
 
 interface LeadsPageViewProps {
   chatbotId: string
@@ -185,9 +186,25 @@ export function LeadsPageView({
     [chatbotId, initialConversationId, visitorName, visitorEmail, interceptingFetch]
   )
 
-  const { messages, sendMessage, status, setMessages, regenerate } = useChat<UIMessage>({
+  const { messages, sendMessage, status, setMessages, regenerate, addToolOutput } = useChat<UIMessage>({
     transport: chatTransport,
     onFinish: handleChatFinish,
+
+    async onToolCall({ toolCall }) {
+      if (toolCall.dynamic) {
+        return;
+      }
+      console.log('[ChatInterface] Tool call received:', toolCall)
+      if (toolCall.toolName === 'show_case_study') {
+        // No await - avoids potential deadlocks
+        addToolOutput({
+          tool: 'show_case_study',
+          toolCallId: toolCall.toolCallId,
+          output: 'This is a case study about AI in modern applications.',
+        });
+      }
+    },
+
   })
 
   // Load existing messages when continuing a conversation
@@ -245,6 +262,55 @@ export function LeadsPageView({
       setMessages([greetingMessage])
     }
   }, [visitorName, messages.length, setMessages, initialConversationId])
+
+  const renderCaseStudyPreview = (toolPart: {
+    type: string
+    toolName?: string
+    args?: { url?: string; title?: string; description?: string }
+  }) => {
+    const isShowCaseStudy = toolPart.type === 'tool-show_case_study'
+
+    if (!isShowCaseStudy || !toolPart.output?.url) return null
+
+    return (
+      <div
+        className="case-study-preview"
+        style={{
+          margin: 'var(--op-space-medium) 0',
+          maxWidth: '100%',
+        }}
+      >
+        {toolPart.output.title && (
+          <p
+            style={{
+              marginBottom: 'var(--op-space-small)',
+              fontWeight: 500,
+              color: 'var(--op-color-text)',
+            }}
+          >
+            {toolPart.output.title}
+          </p>
+        )}
+        {/* {toolPart.args.description && (
+          <p
+            style={{
+              marginBottom: 'var(--op-space-small)',
+              fontSize: '0.875rem',
+              color: 'var(--op-color-text-secondary)',
+            }}
+          >
+            {toolPart.args.description}
+          </p>
+        )} */}
+        <WebPreview defaultUrl={toolPart.output.url}>
+          <WebPreviewNavigation>
+            <WebPreviewUrl readOnly />
+          </WebPreviewNavigation>
+          <WebPreviewBody />
+        </WebPreview>
+      </div>
+    )
+  }
 
   const handlePromptSubmit = async (message: PromptInputMessage) => {
     if (!message.text.trim() && message.files.length === 0) return
@@ -376,6 +442,7 @@ export function LeadsPageView({
                         )
                       default: {
                         // Handle tool invocations
+                        console.log('Rendering tool part:', part)
                         if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
                           const toolPart = part as {
                             type: string
@@ -386,52 +453,11 @@ export function LeadsPageView({
                             args?: { url?: string; title?: string; description?: string }
                           }
 
-                          // Check for show_case_study tool
-                          const isShowCaseStudy =
-                            toolPart.toolName === 'show_case_study' ||
-                            part.type === 'tool-show_case_study'
-
-                          if (isShowCaseStudy && toolPart.args?.url) {
-                            return (
-                              <div
-                                key={`${message.id}-${i}`}
-                                className="case-study-preview"
-                                style={{
-                                  margin: 'var(--op-space-medium) 0',
-                                  maxWidth: '100%',
-                                }}
-                              >
-                                {toolPart.args.title && (
-                                  <p
-                                    style={{
-                                      marginBottom: 'var(--op-space-small)',
-                                      fontWeight: 500,
-                                      color: 'var(--op-color-text)',
-                                    }}
-                                  >
-                                    {toolPart.args.title}
-                                  </p>
-                                )}
-                                {toolPart.args.description && (
-                                  <p
-                                    style={{
-                                      marginBottom: 'var(--op-space-small)',
-                                      fontSize: '0.875rem',
-                                      color: 'var(--op-color-text-secondary)',
-                                    }}
-                                  >
-                                    {toolPart.args.description}
-                                  </p>
-                                )}
-                                <WebPreview defaultUrl={toolPart.args.url}>
-                                  <WebPreviewNavigation>
-                                    <WebPreviewUrl readOnly />
-                                  </WebPreviewNavigation>
-                                  <WebPreviewBody />
-                                </WebPreview>
-                              </div>
-                            )
-                          }
+                          return (
+                            <div key={`${message.id}-${i}`}>
+                              {renderCaseStudyPreview(toolPart)}
+                            </div>
+                          )
                         }
                         return null
                       }
