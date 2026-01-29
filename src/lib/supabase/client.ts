@@ -2,6 +2,15 @@ import { createBrowserClient } from '@supabase/ssr'
 
 import type { Database } from './database.types'
 
+// Type for tool invocations stored in the database
+export interface ToolInvocation {
+  toolName: string
+  toolCallId?: string
+  state?: 'partial-call' | 'call' | 'result'
+  input?: Record<string, unknown>
+  output?: Record<string, unknown>
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
@@ -75,6 +84,7 @@ export type DatabaseOld = {
           role: 'user' | 'assistant' | 'system'
           content: string
           sources_used: unknown[]
+          tool_invocations: ToolInvocation[] | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['messages']['Row'], 'id' | 'created_at'>

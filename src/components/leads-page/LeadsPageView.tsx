@@ -43,16 +43,10 @@ import { Button } from '@/components/ui/button'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
 
-import {
-  WebPreview,
-  WebPreviewBody,
-  WebPreviewNavigation,
-  WebPreviewUrl,
-} from '@/components/ai-elements/web-preview'
+import { CaseStudyCard } from '@/components/ui/case-study-card'
 
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
-import { log } from 'console'
 
 interface LeadsPageViewProps {
   chatbotId: string
@@ -186,7 +180,7 @@ export function LeadsPageView({
     [chatbotId, initialConversationId, visitorName, visitorEmail, interceptingFetch]
   )
 
-  const { messages, sendMessage, status, setMessages, regenerate, addToolOutput } = useChat<UIMessage>({
+  const { messages, sendMessage, status, setMessages, regenerate } = useChat<UIMessage>({
     transport: chatTransport,
     onFinish: handleChatFinish,
 
@@ -194,15 +188,8 @@ export function LeadsPageView({
       if (toolCall.dynamic) {
         return;
       }
-      console.log('[ChatInterface] Tool call received:', toolCall)
-      if (toolCall.toolName === 'show_case_study') {
-        // No await - avoids potential deadlocks
-        addToolOutput({
-          tool: 'show_case_study',
-          toolCallId: toolCall.toolCallId,
-          output: 'This is a case study about AI in modern applications.',
-        });
-      }
+      // show_case_study is handled server-side with execute function
+      // Other tools that need client-side handling can be added here
     },
 
   })
@@ -222,13 +209,46 @@ export function LeadsPageView({
 
         const data = await response.json()
         if (data.messages && data.messages.length > 0) {
+          // Type for tool invocations from database
+          interface DbToolInvocation {
+            toolName: string
+            toolCallId?: string
+            state?: string
+            input?: Record<string, unknown>
+            output?: Record<string, unknown>
+          }
+          
           // Convert database messages to UIMessage format
           const uiMessages: UIMessage[] = data.messages.map(
-            (msg: { id: string; role: string; content: string }) => ({
-              id: msg.id,
-              role: msg.role as 'user' | 'assistant',
-              parts: [{ type: 'text', text: msg.content }],
-            })
+            (msg: { id: string; role: string; content: string; tool_invocations?: DbToolInvocation[] | null }) => {
+              // Build parts array: start with text content
+              const parts: Array<{ type: string; text?: string; toolName?: string; toolCallId?: string; state?: string; input?: Record<string, unknown>; output?: Record<string, unknown> }> = []
+              
+              // Add tool invocation parts if present
+              if (msg.tool_invocations && msg.tool_invocations.length > 0) {
+                for (const tool of msg.tool_invocations) {
+                  parts.push({
+                    type: 'tool-invocation',
+                    toolName: tool.toolName,
+                    toolCallId: tool.toolCallId,
+                    state: tool.state || 'result',
+                    input: tool.input,
+                    output: tool.output,
+                  })
+                }
+              }
+              
+              // Add text part
+              if (msg.content) {
+                parts.push({ type: 'text', text: msg.content })
+              }
+              
+              return {
+                id: msg.id,
+                role: msg.role as 'user' | 'assistant',
+                parts,
+              }
+            }
           )
           setMessages(uiMessages)
           setShowDemo(false)
@@ -266,11 +286,44 @@ export function LeadsPageView({
   const renderCaseStudyPreview = (toolPart: {
     type: string
     toolName?: string
+    // AI SDK uses 'input' and 'output' for tool parts
+    input?: { url?: string; title?: string; description?: string }
+    output?: {
+      success?: boolean
+      url?: string
+      title?: string
+      description?: string
+      backgroundImage?: string
+      logo?: string
+    }
+    // Legacy support for 'args' and 'result'
     args?: { url?: string; title?: string; description?: string }
+    result?: {
+      success?: boolean
+      url?: string
+      title?: string
+      description?: string
+      backgroundImage?: string
+      logo?: string
+    }
   }) => {
-    const isShowCaseStudy = toolPart.type === 'tool-show_case_study'
+    // AI SDK uses 'input'/'output', but keep 'args'/'result' as fallback
+    const inputData = toolPart.input || toolPart.args
+    const outputData = toolPart.output || toolPart.result
 
-    if (!isShowCaseStudy || !toolPart.output?.url) return null
+    const isShowCaseStudy =
+      toolPart.type === 'tool-show_case_study' || toolPart.toolName === 'show_case_study'
+
+    // Check for URL in output (enriched) or input (fallback)
+    const url = outputData?.url || inputData?.url
+
+    if (!isShowCaseStudy || !url) return null
+
+    // Use enriched metadata from tool output if available, fallback to input
+    const title = outputData?.title || inputData?.title
+    const description = outputData?.description || inputData?.description
+    const backgroundImage = outputData?.backgroundImage
+    const logo = outputData?.logo
 
     return (
       <div
@@ -280,34 +333,13 @@ export function LeadsPageView({
           maxWidth: '100%',
         }}
       >
-        {toolPart.output.title && (
-          <p
-            style={{
-              marginBottom: 'var(--op-space-small)',
-              fontWeight: 500,
-              color: 'var(--op-color-text)',
-            }}
-          >
-            {toolPart.output.title}
-          </p>
-        )}
-        {/* {toolPart.args.description && (
-          <p
-            style={{
-              marginBottom: 'var(--op-space-small)',
-              fontSize: '0.875rem',
-              color: 'var(--op-color-text-secondary)',
-            }}
-          >
-            {toolPart.args.description}
-          </p>
-        )} */}
-        <WebPreview defaultUrl={toolPart.output.url}>
-          <WebPreviewNavigation>
-            <WebPreviewUrl readOnly />
-          </WebPreviewNavigation>
-          <WebPreviewBody />
-        </WebPreview>
+        <CaseStudyCard
+          backgroundImage={backgroundImage}
+          description={description}
+          logo={logo}
+          title={title}
+          url={url}
+        />
       </div>
     )
   }
@@ -351,6 +383,13 @@ export function LeadsPageView({
               {messages.map((message, messageIndex) => (
                 <Fragment key={message.id}>
                   {message.parts.map((part, i) => {
+                    // Check if this message has a show_case_study tool invocation
+                    const hasShowCaseStudyTool = message.parts.some(
+                      (p) =>
+                        (p.type === 'tool-invocation' || p.type.startsWith('tool-')) &&
+                        (p as { toolName?: string }).toolName === 'show_case_study'
+                    )
+
                     switch (part.type) {
                       case 'text':
                         const isLastMessage = messageIndex === messages.length - 1
@@ -362,6 +401,56 @@ export function LeadsPageView({
                         if (shouldRenderCitations && i > 0) {
                           return null
                         }
+
+                        // Filter out case study markdown if tool already rendered the card
+                        // Also filter if we detect framerusercontent images (case study images)
+                        let displayText = part.text
+                        const containsCaseStudyContent = 
+                          hasShowCaseStudyTool || 
+                          part.text.includes('framerusercontent.com') ||
+                          part.text.includes('case-studies')
+                        
+                        if (containsCaseStudyContent && message.role === 'assistant') {
+                          // Remove ALL markdown images: ![alt](url)
+                          displayText = displayText.replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+                          // Remove markdown links to case studies: [text](https://...case-studies/...)
+                          displayText = displayText.replace(
+                            /\[([^\]]+)\]\(https?:\/\/[^)]*case-studies[^)]*\)/g,
+                            '$1'
+                          )
+                          // Remove markdown links to framerusercontent (case study images)
+                          displayText = displayText.replace(
+                            /\[([^\]]*)\]\(https?:\/\/framerusercontent\.com[^)]*\)/g,
+                            ''
+                          )
+                          // Remove standalone case study URLs
+                          displayText = displayText.replace(
+                            /https?:\/\/[^\s]+case-studies[^\s]*/g,
+                            ''
+                          )
+                          // Remove standalone framerusercontent URLs
+                          displayText = displayText.replace(
+                            /https?:\/\/framerusercontent\.com[^\s]*/g,
+                            ''
+                          )
+                          // Remove markdown heading lines that contain the case study title pattern
+                          // e.g., "### Methodist Home for Children" or "**Methodist Home for Children**"
+                          displayText = displayText.replace(/^###\s+.+$/gm, '')
+                          // Remove bold lines that are just a title (e.g., **Description:** ...)
+                          displayText = displayText.replace(/^\*\*Description:\*\*\s*.+$/gm, '')
+                          // Remove "Description:" lines as those are shown in the card
+                          displayText = displayText.replace(/^Description:\s*.+$/gm, '')
+                          // Clean up extra whitespace and empty lines
+                          displayText = displayText
+                            .replace(/\n{3,}/g, '\n\n')
+                            .trim()
+                        }
+
+                        // Skip rendering if text is now empty after filtering
+                        if (!displayText) {
+                          return null
+                        }
+
                         return (
                           <Fragment key={`${message.id}-${i}`}>
                             <Message from={message.role}>
@@ -377,9 +466,9 @@ export function LeadsPageView({
                                     citations={citations}
                                   />
                                 ) : isClient ? (
-                                  <MessageResponse>{part.text}</MessageResponse>
+                                  <MessageResponse>{displayText}</MessageResponse>
                                 ) : (
-                                  <div>{part.text}</div>
+                                  <div>{displayText}</div>
                                 )}
 
                                 {message.role === 'assistant' && isLastMessage && (
@@ -442,15 +531,32 @@ export function LeadsPageView({
                         )
                       default: {
                         // Handle tool invocations
-                        console.log('Rendering tool part:', part)
                         if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
                           const toolPart = part as {
                             type: string
                             toolName?: string
                             toolCallId?: string
                             state?: string
-                            result?: unknown
+                            // AI SDK uses 'input' and 'output'
+                            input?: { url?: string; title?: string; description?: string }
+                            output?: {
+                              success?: boolean
+                              url?: string
+                              title?: string
+                              description?: string
+                              backgroundImage?: string
+                              logo?: string
+                            }
+                            // Legacy support
                             args?: { url?: string; title?: string; description?: string }
+                            result?: {
+                              success?: boolean
+                              url?: string
+                              title?: string
+                              description?: string
+                              backgroundImage?: string
+                              logo?: string
+                            }
                           }
 
                           return (

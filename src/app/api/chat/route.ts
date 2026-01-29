@@ -1,4 +1,4 @@
-import { streamText, tool } from 'ai'
+import { streamText, tool, stepCountIs } from 'ai'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
@@ -7,6 +7,7 @@ import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
 import { sendSummaryEmail } from '@/lib/email/send-summary'
+import { scrapeCaseStudyMetadata, getAllCaseStudies } from '@/lib/framer/case-study-scraper'
 import {
   type Source,
   buildSourceContext,
@@ -92,11 +93,12 @@ EDUCATION & CONTENT:
 
 CASE STUDY PREVIEWS (MANDATORY - YOU MUST USE THE TOOL):
 - When the user asks about previous work, portfolio, case studies, examples, or "what have you built", you MUST call the show_case_study tool.
-- Look for sources in the Available Knowledge Base that have URLs containing "/case-studies/" or "/portfolio/".
-- ALWAYS call show_case_study with the URL from the knowledge base - NEVER just give a text link.
+- ONLY use URLs from the AVAILABLE CASE STUDIES list below - NEVER invent or guess URLs.
+- ALWAYS call show_case_study with a real URL from the list - NEVER just give a text link.
 - Example tool call: show_case_study(url: "https://rolemodelsoftware.com/case-studies/dock-designer-app", title: "Dock Designer App", description: "A powerful configuration tool for dock design")
-- If the user asks about case studies and you see a URL in the knowledge base, you MUST call the tool.
-- If you cannot find a case study URL, explain that you can describe projects verbally.
+- Match the user's industry/needs to the most relevant case study from the list.
+- If no case study matches well, pick one that demonstrates similar capabilities.
+- CRITICAL: After calling show_case_study, you MUST continue with a text response explaining why this case study is relevant to the user's situation. Never end your response with just a tool call.
 
 EMAIL SUMMARY:
 - When the user asks to receive a summary via email, or wants the conversation sent to them, call the send_email_summary tool.
@@ -267,6 +269,12 @@ IMPORTANT: This contact information has already been provided. Do NOT ask for th
 `
           : ''
         }
+AVAILABLE CASE STUDIES (use ONLY these URLs with show_case_study tool):
+${getAllCaseStudies()
+          .slice(0, 15) // Limit to 15 most recent
+          .map((cs) => `- ${cs.title}: https://rolemodelsoftware.com/case-studies/${cs.slug} - ${cs.description.slice(0, 100)}`)
+          .join('\n')}
+
 ${sourceContext}`,
     }
 
@@ -370,6 +378,7 @@ ${sourceContext}`,
       messages: fullMessages,
       temperature: effectiveTemperature,
       toolChoice: 'auto',
+      stopWhen: stepCountIs(5), // Allow AI to continue generating after tool calls
       tools: {
         thinking: tool({
           description: 'Show chain of thought reasoning process for complex questions',
@@ -396,7 +405,7 @@ ${sourceContext}`,
         }),
         show_case_study: tool({
           description:
-            'REQUIRED: Display an interactive web preview of a case study. You MUST call this tool when the user asks about previous work, examples, portfolio, or case studies.',
+            'REQUIRED: Display an interactive case study card preview. You MUST call this tool when the user asks about previous work, examples, portfolio, or case studies.',
           inputSchema: z.object({
             url: z.string().url().describe('The full URL of the case study page to preview'),
             title: z.string().describe('Title of the case study'),
@@ -405,9 +414,30 @@ ${sourceContext}`,
               .optional()
               .describe('Brief description of why this case study is relevant'),
           }),
-          execute: async ({ url, title }: { url: string; title: string }) => {
-            console.log(`[Tool] show_case_study called with: ${url} - ${title}`)
-            return { success: true, url, title }
+          execute: async ({
+            url,
+            title,
+            description,
+          }: {
+            url: string
+            title: string
+            description?: string
+          }) => {
+            // Fetch enriched metadata from the case study page
+            try {
+              const metadata = await scrapeCaseStudyMetadata(url)
+              return {
+                success: true,
+                url,
+                title: metadata.title || title,
+                description: metadata.description || description,
+                backgroundImage: metadata.backgroundImage,
+                logo: metadata.logo,
+              }
+            } catch {
+              // Return basic data if metadata fetch fails
+              return { success: true, url, title, description }
+            }
           },
         }),
         send_email_summary: tool({
@@ -446,9 +476,51 @@ ${sourceContext}`,
           },
         }),
       },
-      async onFinish({ text }: { text: string }) {
+      async onFinish({ text, finishReason, steps }: { text: string; finishReason?: string; steps?: unknown[] }) {
+        console.log(`[Chat] onFinish - finishReason: ${finishReason}, text length: ${text.length}, steps: ${steps?.length || 0}`)
         // Save assistant message
         if (activeConversationId) {
+          // Extract tool invocations from steps
+          type ToolInvocationData = {
+            toolName: string
+            toolCallId?: string
+            state?: string
+            input?: Record<string, unknown>
+            output?: Record<string, unknown>
+          }
+          const toolInvocations: ToolInvocationData[] = []
+          
+          if (steps && Array.isArray(steps)) {
+            for (const step of steps) {
+              // AI SDK uses step.content array with tool-call and tool-result items
+              interface StepContentItem {
+                type: string
+                toolCallId?: string
+                toolName?: string
+                input?: Record<string, unknown>
+                output?: Record<string, unknown>
+              }
+              const stepContent = (step as { content?: StepContentItem[] }).content
+              
+              if (stepContent && Array.isArray(stepContent)) {
+                // Find tool-result items (they contain both input and output)
+                for (const item of stepContent) {
+                  if (item.type === 'tool-result' && item.toolName) {
+                    toolInvocations.push({
+                      toolName: item.toolName,
+                      toolCallId: item.toolCallId,
+                      state: 'result',
+                      input: item.input,
+                      output: item.output,
+                    })
+                  }
+                }
+              }
+            }
+          }
+          
+          console.log(`[Chat] Tool invocations to save: ${toolInvocations.length}`, toolInvocations.map(t => t.toolName))
+          
           type MessageInsert = Database['public']['Tables']['messages']['Insert']
           const assistantMessage: MessageInsert = {
             conversation_id: activeConversationId,
@@ -458,6 +530,7 @@ ${sourceContext}`,
               id: s.id,
               title: s.title,
             })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
+            tool_invocations: toolInvocations.length > 0 ? toolInvocations : null,
           }
           const { error: msgError } = await supabaseServer.from('messages').insert([assistantMessage])
           if (msgError) {
@@ -534,13 +607,13 @@ ${sourceContext}`,
 
                   const enrichedLeadData = leadData
                     ? {
-                        ...leadData,
-                        contactInfo: {
-                          ...leadData.contactInfo,
-                          name: visitorName,
-                          email: visitorEmail,
-                        },
-                      }
+                      ...leadData,
+                      contactInfo: {
+                        ...leadData.contactInfo,
+                        name: visitorName,
+                        email: visitorEmail,
+                      },
+                    }
                     : null
 
                   // Update the lead with final data

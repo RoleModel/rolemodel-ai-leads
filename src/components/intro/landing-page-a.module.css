@@ -47,7 +47,7 @@
 
 /* ===== HERO SECTION ===== */
 .hero {
-  background-color: var(--blue-green-1000);
+  background-color: var(--blue-green-900);
   background-image: url(/images/halftone.svg);
   background-size: cover;
   background-position: center;
@@ -241,7 +241,7 @@
 
 /* ===== CTA SECTION ===== */
 .cta {
-  background-color: var(--blue-green-1000);
+  background-color: var(--blue-green-900);
   color: white;
   padding: calc(var(--op-size-unit) * 20) 0;
   min-height: min(90vh, var(--rm-embed-vh-cap, 90vh));
@@ -349,8 +349,8 @@
 
 /* Override 1Password autofill styling */
 .input[data-com-onepassword-filled],
-.input[data-com-onepassword-filled="dark"],
-.input[data-com-onepassword-filled="light"] {
+.input[data-com-onepassword-filled='dark'],
+.input[data-com-onepassword-filled='light'] {
   background-color: transparent !important;
   -webkit-box-shadow: 0 0 0px 1000px #011418 inset !important;
   box-shadow: 0 0 0px 1000px #011418 inset !important;

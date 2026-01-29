@@ -56,12 +56,7 @@ import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
-import {
-  WebPreview,
-  WebPreviewBody,
-  WebPreviewNavigation,
-  WebPreviewUrl,
-} from '@/components/ai-elements/web-preview'
+import { CaseStudyCard } from '@/components/ui/case-study-card'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ScrollIndicator from '@/components/ui/ScrollIndicator'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
@@ -564,9 +559,6 @@ export function HeroChat(props: HeroChatProps) {
                         </Fragment>
                       )
                     default: {
-                      // Debug: log all non-text parts
-                      console.log('[LandingPageB] Non-text part:', part.type, JSON.stringify(part).slice(0, 500))
-
                       // Handle tool invocations
                       if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
                         const toolPart = part as {
@@ -574,19 +566,49 @@ export function HeroChat(props: HeroChatProps) {
                           toolName?: string
                           toolCallId?: string
                           state?: string
-                          result?: unknown
+                          // AI SDK uses 'input' and 'output'
+                          input?: { url?: string; title?: string; description?: string }
+                          output?: {
+                            success?: boolean
+                            url?: string
+                            title?: string
+                            description?: string
+                            backgroundImage?: string
+                            logo?: string
+                          }
+                          // Legacy support
                           args?: { url?: string; title?: string; description?: string }
+                          result?: {
+                            success?: boolean
+                            url?: string
+                            title?: string
+                            description?: string
+                            backgroundImage?: string
+                            logo?: string
+                          }
                         }
 
-                        console.log('[LandingPageB] Tool part detected:', toolPart.toolName, toolPart.args)
+                        // AI SDK uses 'input'/'output', but keep 'args'/'result' as fallback
+                        const inputData = toolPart.input || toolPart.args
+                        const outputData = toolPart.output || toolPart.result
+
 
                         // Check for show_case_study tool
                         const isShowCaseStudy =
                           toolPart.toolName === 'show_case_study' ||
                           part.type === 'tool-show_case_study'
 
-                        if (isShowCaseStudy && toolPart.args?.url) {
-                          console.log('[LandingPageB] Rendering case study preview:', toolPart.args.url)
+                        // Check for URL in output (enriched) or input (fallback)
+                        const url = outputData?.url || inputData?.url
+
+                        if (isShowCaseStudy && url) {
+
+                          // Use enriched metadata from tool output if available
+                          const title = outputData?.title || inputData?.title
+                          const description = outputData?.description || inputData?.description
+                          const backgroundImage = outputData?.backgroundImage
+                          const logo = outputData?.logo
+
                           return (
                             <div
                               key={`${message.id}-${index}`}
@@ -596,30 +618,13 @@ export function HeroChat(props: HeroChatProps) {
                                 maxWidth: '100%',
                               }}
                             >
-                              {toolPart.args.title && (
-                                <p style={{
-                                  marginBottom: 'var(--op-space-small)',
-                                  fontWeight: 500,
-                                  color: 'var(--op-color-text)',
-                                }}>
-                                  {toolPart.args.title}
-                                </p>
-                              )}
-                              {toolPart.args.description && (
-                                <p style={{
-                                  marginBottom: 'var(--op-space-small)',
-                                  fontSize: '0.875rem',
-                                  color: 'var(--op-color-text-secondary)',
-                                }}>
-                                  {toolPart.args.description}
-                                </p>
-                              )}
-                              <WebPreview defaultUrl={toolPart.args.url}>
-                                <WebPreviewNavigation>
-                                  <WebPreviewUrl readOnly />
-                                </WebPreviewNavigation>
-                                <WebPreviewBody />
-                              </WebPreview>
+                              <CaseStudyCard
+                                backgroundImage={backgroundImage}
+                                description={description}
+                                logo={logo}
+                                title={title}
+                                url={url}
+                              />
                             </div>
                           )
                         }

@@ -30,13 +30,8 @@ import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
-import {
-  WebPreview,
-  WebPreviewBody,
-  WebPreviewNavigation,
-  WebPreviewUrl,
-} from '@/components/ai-elements/web-preview'
 import { Button } from '@/components/ui/button'
+import { CaseStudyCard } from '@/components/ui/case-study-card'
 
 interface PlaygroundSettings {
   model: string
@@ -64,14 +59,14 @@ interface ThinkingStep {
 }
 
 // Tool part from AI SDK - type is `tool-${toolName}`
+// AI SDK uses 'input' and 'output' for tool data
 interface ToolPart {
   type: string
   toolName?: string
   toolCallId?: string
+  // AI SDK uses 'input' for tool arguments
   input?: {
     steps?: ThinkingStep[]
-  }
-  args?: {
     url?: string
     title?: string
     description?: string
@@ -79,6 +74,32 @@ interface ToolPart {
     recipientEmail?: string
     recipientName?: string
     summaryText?: string
+  }
+  // AI SDK uses 'output' for tool results (enriched metadata for case studies)
+  output?: {
+    success?: boolean
+    url?: string
+    title?: string
+    description?: string
+    backgroundImage?: string
+    logo?: string
+  }
+  // Legacy support for 'args' and 'result'
+  args?: {
+    url?: string
+    title?: string
+    description?: string
+    recipientEmail?: string
+    recipientName?: string
+    summaryText?: string
+  }
+  result?: {
+    success?: boolean
+    url?: string
+    title?: string
+    description?: string
+    backgroundImage?: string
+    logo?: string
   }
 }
 
@@ -343,7 +364,18 @@ export function ChatInterface({
     const isShowCaseStudy =
       toolPart.toolName === 'show_case_study' || toolPart.type === 'tool-show_case_study'
 
-    if (!isShowCaseStudy || !toolPart.args?.url) return null
+    // AI SDK uses 'input'/'output', but keep 'args'/'result' as fallback
+    const inputData = toolPart.input || toolPart.args
+    const outputData = toolPart.output || toolPart.result
+
+    if (!isShowCaseStudy || !inputData?.url) return null
+
+    // Use enriched metadata from tool output if available, fallback to input
+    const url = outputData?.url || inputData.url
+    const title = outputData?.title || inputData.title
+    const description = outputData?.description || inputData.description
+    const backgroundImage = outputData?.backgroundImage
+    const logo = outputData?.logo
 
     return (
       <div
@@ -353,34 +385,13 @@ export function ChatInterface({
           maxWidth: '100%',
         }}
       >
-        {toolPart.args.title && (
-          <p
-            style={{
-              marginBottom: 'var(--op-space-small)',
-              fontWeight: 500,
-              color: 'var(--op-color-text)',
-            }}
-          >
-            {toolPart.args.title}
-          </p>
-        )}
-        {toolPart.args.description && (
-          <p
-            style={{
-              marginBottom: 'var(--op-space-small)',
-              fontSize: '0.875rem',
-              color: 'var(--op-color-text-secondary)',
-            }}
-          >
-            {toolPart.args.description}
-          </p>
-        )}
-        <WebPreview defaultUrl={toolPart.args.url}>
-          <WebPreviewNavigation>
-            <WebPreviewUrl readOnly />
-          </WebPreviewNavigation>
-          <WebPreviewBody />
-        </WebPreview>
+        <CaseStudyCard
+          backgroundImage={backgroundImage}
+          description={description}
+          logo={logo}
+          title={title}
+          url={url}
+        />
       </div>
     )
   }
