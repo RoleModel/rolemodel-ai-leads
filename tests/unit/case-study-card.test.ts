@@ -3,15 +3,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 // Mock the case study scraper module
 vi.mock('@/lib/framer/case-study-scraper', () => ({
   scrapeCaseStudyMetadata: vi.fn(),
-  clearMetadataCache: vi.fn(),
-  getCacheStats: vi.fn(),
 }))
 
-import {
-  scrapeCaseStudyMetadata,
-  clearMetadataCache,
-  getCacheStats,
-} from '@/lib/framer/case-study-scraper'
+import { scrapeCaseStudyMetadata } from '@/lib/framer/case-study-scraper'
 
 describe('CaseStudyCard Props Interface', () => {
   // Test the expected props interface for the CaseStudyCard component
@@ -125,29 +119,7 @@ describe('Case Study Metadata Scraper', () => {
     expect(result.logo).toBeUndefined()
   })
 
-  it('should cache metadata results', async () => {
-    const mockCacheStats = getCacheStats as ReturnType<typeof vi.fn>
-    mockCacheStats.mockReturnValue({
-      size: 2,
-      entries: [
-        'https://rolemodelsoftware.com/case-studies/fieldx-vrt',
-        'https://rolemodelsoftware.com/case-studies/dock-designer',
-      ],
-    })
 
-    const stats = getCacheStats()
-
-    expect(stats.size).toBe(2)
-    expect(stats.entries).toContain('https://rolemodelsoftware.com/case-studies/fieldx-vrt')
-  })
-
-  it('should clear cache when requested', () => {
-    const mockClearCache = clearMetadataCache as ReturnType<typeof vi.fn>
-
-    clearMetadataCache()
-
-    expect(mockClearCache).toHaveBeenCalled()
-  })
 })
 
 describe('Tool Part Detection for Case Study', () => {

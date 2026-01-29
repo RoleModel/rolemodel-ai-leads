@@ -15,7 +15,7 @@ import {
   retrieveRelevantSources,
 } from '@/lib/ai/rag'
 import { buildVisitorMetadata } from '@/lib/geolocation'
-import type { Database } from '@/lib/supabase/database.types'
+import type { Database, Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'edge'
@@ -484,8 +484,8 @@ ${sourceContext}`,
             toolName: string
             toolCallId?: string
             state?: string
-            input?: Record<string, unknown>
-            output?: Record<string, unknown>
+            input?: Json
+            output?: Json
           }
           const toolInvocations: ToolInvocationData[] = []
 
@@ -509,8 +509,8 @@ ${sourceContext}`,
                       toolName: item.toolName,
                       toolCallId: item.toolCallId,
                       state: 'result',
-                      input: item.input,
-                      output: item.output,
+                      input: item.input as Json,
+                      output: item.output as Json,
                     })
                   }
                 }

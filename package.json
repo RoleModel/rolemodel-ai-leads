@@ -13,7 +13,7 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "types": "npx supabase gen types typescript --local > src/lib/supabase/types.ts"
+    "types": "npx supabase gen types typescript --local > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.4",
