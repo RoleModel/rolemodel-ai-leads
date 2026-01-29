@@ -19,7 +19,8 @@ function escapeHtml(unsafe: string): string {
 
 function formatSummaryEmailForProspect(
   visitorName: string,
-  summaryText: string
+  summaryText: string,
+  mode: 'alignment' | 'evaluation' | 'engaged' = 'alignment'
 ): string {
   const calendlyUrl =
     process.env.NEXT_PUBLIC_CALENDLY_URL ||
@@ -35,6 +36,23 @@ function formatSummaryEmailForProspect(
   // Check if the summary already contains the Calendly link
   const hasCalendlyLink =
     htmlContent.includes(calendlyUrl) || htmlContent.includes('calendly.com')
+
+  // Opening greeting varies by mode
+  let greeting = ''
+  switch (mode) {
+    case 'alignment':
+      greeting = `<p>Hi ${escapeHtml(visitorName)},</p>
+      <p>Here's the summary from our conversation:</p>`
+      break
+    case 'evaluation':
+      greeting = `<p>Hi ${escapeHtml(visitorName)},</p>
+      <p>Here's the summary from our conversation as you evaluate your options:</p>`
+      break
+    case 'engaged':
+      greeting = `<p>Hi ${escapeHtml(visitorName)},</p>
+      <p>Thanks for taking the time to explore whether custom software is right for your needs. Here's what we discussed:</p>`
+      break
+  }
 
   // Only add the scheduling link if it's not already in the content
   const schedulingLink = !hasCalendlyLink
@@ -120,16 +138,13 @@ function formatSummaryEmailForProspect(
       </a>
     </div>
     <div class="content">
-      <p>Hi ${escapeHtml(visitorName)},</p>
-      <p>Thanks for taking the time to explore whether custom software might be the right fit for your needs.</p>
-      <p>${htmlContent}</p>
+      ${greeting}
+      ${htmlContent}
       ${schedulingLink}
     </div>
     <div class="footer">
-      <p>At RoleModel, we believe that businesses should have software that fits.</p>
-      <p style="margin-top: 16px;">
+      <p>
         <strong>RoleModel Software</strong><br>
-        Software that Fits<br>
         <a href="https://rolemodelsoftware.com">rolemodelsoftware.com</a>
       </p>
     </div>
@@ -146,6 +161,7 @@ export interface SendSummaryEmailParams {
   recipientName?: string
   summaryText: string
   conversationId?: string
+  summaryMode?: 'alignment' | 'evaluation' | 'engaged'
 }
 
 export async function sendSummaryEmail({
@@ -153,6 +169,7 @@ export async function sendSummaryEmail({
   recipientName,
   summaryText,
   conversationId,
+  summaryMode = 'alignment',
 }: SendSummaryEmailParams): Promise<{ success: boolean; error?: string }> {
   try {
     const supabaseServer = await createClient()
@@ -177,7 +194,7 @@ export async function sendSummaryEmail({
     const visitorName = recipientName || 'there'
 
     // Format email HTML
-    const emailHtml = formatSummaryEmailForProspect(visitorName, summaryText)
+    const emailHtml = formatSummaryEmailForProspect(visitorName, summaryText, summaryMode)
 
     // Send email via SendGrid
     const msg = {
