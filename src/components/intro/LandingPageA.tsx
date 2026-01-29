@@ -271,7 +271,7 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
           <div className={styles.logo}>
             <Logo
               variant="white"
-              style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
+              style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }}
             />
           </div>
           <div className={`container ${styles['hero-container']}`}>

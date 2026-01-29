@@ -193,7 +193,7 @@ export const WebPreviewBody = ({ loading, src, ...props }: WebPreviewBodyProps) 
   return (
     <div style={{ flex: 1, width: '100%', height: '100%' }}>
       <iframe
-        style={{ width: '100%', height: '100%', border: 'none' }}
+        style={{ width: '100%', height: '100vh', border: 'none' }}
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
         src={(src ?? url) || undefined}
         title="Preview"

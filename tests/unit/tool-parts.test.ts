@@ -55,26 +55,77 @@ describe('Tool Part Detection', () => {
     expect(mockToolPart.args.title).toBeTruthy()
     expect((mockToolPart.args as { description?: string }).description).toBeUndefined()
   })
-})
 
-describe('Message Part Rendering Logic', () => {
-  type MessagePart =
-    | { type: 'text'; text: string }
-    | {
-      type: 'tool-invocation'
-      toolName: string
-      args: { url?: string; title?: string; description?: string }
+  it('should extract enriched metadata from tool result', () => {
+    const mockToolPart = {
+      type: 'tool-invocation',
+      toolName: 'show_case_study',
+      toolCallId: 'call-456',
+      state: 'result',
+      args: {
+        url: 'https://rolemodelsoftware.com/case-studies/fieldx-vrt',
+        title: 'FieldX VRT',
+        description: 'Original description',
+      },
+      result: {
+        success: true,
+        url: 'https://rolemodelsoftware.com/case-studies/fieldx-vrt',
+        title: 'FieldX VRT - Enriched',
+        description: 'Enriched description from scraper',
+        backgroundImage: 'https://example.com/fieldx-bg.jpg',
+        logo: 'https://example.com/fieldx-logo.svg',
+        industry: 'Agriculture',
+        tags: ['React Native', 'Mobile App', 'IoT'],
+      },
     }
 
-  const shouldRenderWebPreview = (part: MessagePart): boolean => {
-    if (part.type !== 'tool-invocation') return false
-    const isShowCaseStudy = part.toolName === 'show_case_study'
-    const hasUrl = Boolean(part.args?.url)
-    return isShowCaseStudy && hasUrl
+    // Result should take precedence over args
+    expect(mockToolPart.result.title).toBe('FieldX VRT - Enriched')
+    expect(mockToolPart.result.description).toBe('Enriched description from scraper')
+    expect(mockToolPart.result.backgroundImage).toBeTruthy()
+    expect(mockToolPart.result.logo).toBeTruthy()
+    expect(mockToolPart.result.industry).toBe('Agriculture')
+    expect(mockToolPart.result.tags).toHaveLength(3)
+  })
+})
+
+describe('CaseStudyCard Rendering Logic', () => {
+  type ToolPart = {
+    type: string
+    toolName?: string
+    args?: { url?: string; title?: string; description?: string }
+    result?: {
+      success?: boolean
+      url?: string
+      title?: string
+      description?: string
+      backgroundImage?: string
+      logo?: string
+      industry?: string
+      tags?: string[]
+    }
   }
 
-  it('should render web preview for valid show_case_study tool', () => {
-    const part: MessagePart = {
+  const shouldRenderCaseStudyCard = (toolPart: ToolPart): boolean => {
+    const isShowCaseStudy =
+      toolPart.toolName === 'show_case_study' || toolPart.type === 'tool-show_case_study'
+    // Check for URL in result (enriched) or args (fallback)
+    const url = toolPart.result?.url || toolPart.args?.url
+    return isShowCaseStudy && Boolean(url)
+  }
+
+  const getCardProps = (toolPart: ToolPart) => ({
+    url: toolPart.result?.url || toolPart.args?.url,
+    title: toolPart.result?.title || toolPart.args?.title,
+    description: toolPart.result?.description || toolPart.args?.description,
+    backgroundImage: toolPart.result?.backgroundImage,
+    logo: toolPart.result?.logo,
+    industry: toolPart.result?.industry,
+    tags: toolPart.result?.tags,
+  })
+
+  it('should render CaseStudyCard for valid show_case_study tool', () => {
+    const part: ToolPart = {
       type: 'tool-invocation',
       toolName: 'show_case_study',
       args: {
@@ -83,20 +134,69 @@ describe('Message Part Rendering Logic', () => {
       },
     }
 
-    expect(shouldRenderWebPreview(part)).toBe(true)
+    expect(shouldRenderCaseStudyCard(part)).toBe(true)
   })
 
-  it('should not render web preview for text parts', () => {
-    const part: MessagePart = {
-      type: 'text',
-      text: 'Hello world',
+  it('should render CaseStudyCard with enriched metadata from result', () => {
+    const part: ToolPart = {
+      type: 'tool-invocation',
+      toolName: 'show_case_study',
+      args: {
+        url: 'https://rolemodelsoftware.com/case-studies/test',
+        title: 'Test from Args',
+      },
+      result: {
+        success: true,
+        url: 'https://rolemodelsoftware.com/case-studies/test',
+        title: 'Test from Result',
+        description: 'Enriched description',
+        backgroundImage: 'https://example.com/bg.jpg',
+        logo: 'https://example.com/logo.svg',
+        industry: 'Technology',
+        tags: ['React', 'TypeScript'],
+      },
     }
 
-    expect(shouldRenderWebPreview(part as MessagePart)).toBe(false)
+    expect(shouldRenderCaseStudyCard(part)).toBe(true)
+
+    const props = getCardProps(part)
+    expect(props.title).toBe('Test from Result') // Result takes precedence
+    expect(props.description).toBe('Enriched description')
+    expect(props.backgroundImage).toBe('https://example.com/bg.jpg')
+    expect(props.logo).toBe('https://example.com/logo.svg')
+    expect(props.industry).toBe('Technology')
+    expect(props.tags).toEqual(['React', 'TypeScript'])
   })
 
-  it('should not render web preview if URL is missing', () => {
-    const part: MessagePart = {
+  it('should fallback to args when result is not available', () => {
+    const part: ToolPart = {
+      type: 'tool-invocation',
+      toolName: 'show_case_study',
+      args: {
+        url: 'https://rolemodelsoftware.com/case-studies/test',
+        title: 'Test from Args',
+        description: 'Description from args',
+      },
+    }
+
+    const props = getCardProps(part)
+    expect(props.url).toBe('https://rolemodelsoftware.com/case-studies/test')
+    expect(props.title).toBe('Test from Args')
+    expect(props.description).toBe('Description from args')
+    expect(props.backgroundImage).toBeUndefined()
+    expect(props.logo).toBeUndefined()
+  })
+
+  it('should not render CaseStudyCard for text parts', () => {
+    const part: ToolPart = {
+      type: 'text',
+    }
+
+    expect(shouldRenderCaseStudyCard(part)).toBe(false)
+  })
+
+  it('should not render CaseStudyCard if URL is missing', () => {
+    const part: ToolPart = {
       type: 'tool-invocation',
       toolName: 'show_case_study',
       args: {
@@ -104,7 +204,39 @@ describe('Message Part Rendering Logic', () => {
       },
     }
 
-    expect(shouldRenderWebPreview(part)).toBe(false)
+    expect(shouldRenderCaseStudyCard(part)).toBe(false)
+  })
+
+  it('should not render CaseStudyCard for other tool types', () => {
+    const part: ToolPart = {
+      type: 'tool-invocation',
+      toolName: 'suggest_questions',
+      args: {
+        url: 'https://example.com',
+      },
+    }
+
+    expect(shouldRenderCaseStudyCard(part)).toBe(false)
+  })
+
+  it('should use URL from result when args URL differs', () => {
+    const part: ToolPart = {
+      type: 'tool-invocation',
+      toolName: 'show_case_study',
+      args: {
+        url: 'https://old-url.com/case-study',
+        title: 'Old Title',
+      },
+      result: {
+        success: true,
+        url: 'https://new-url.com/case-study',
+        title: 'New Title',
+      },
+    }
+
+    const props = getCardProps(part)
+    expect(props.url).toBe('https://new-url.com/case-study')
+    expect(props.title).toBe('New Title')
   })
 })
 
