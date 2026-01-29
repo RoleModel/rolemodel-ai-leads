@@ -370,7 +370,6 @@ ${sourceContext}`,
 
     // Combine system message with user messages
     const fullMessages = [systemMessage, ...convertedMessages]
-    console.log('[Chat] System messages: ', systemMessage.content.slice(0, 2000)) // Log first 500 chars
 
     // OPTIMIZATION: Create conversation in background - don't block streaming
     // Use existing conversationId if provided, otherwise create one async
