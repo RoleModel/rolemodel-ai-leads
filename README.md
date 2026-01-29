@@ -65,14 +65,19 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 
 To create a new migration:
 ```bash
-supabase migration new <migration_name>
+npx supabase migration new <migration_name>
 ```
 
 To apply migrations:
 ```bash
-supabase db reset  # Reset and reapply all migrations
+npx supabase db reset  # Reset and reapply all migrations
 # OR
-supabase migration up  # Apply pending migrations only
+npx supabase migration up  # Apply pending migrations only
+```
+
+Then update the types file
+```bash
+npm run types
 ```
 
 ### Production vs Local

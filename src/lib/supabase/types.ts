@@ -397,6 +397,7 @@ export type Database = {
           id: string
           role: string
           sources_used: Json | null
+          tool_invocations: Json | null
         }
         Insert: {
           content: string
@@ -405,6 +406,7 @@ export type Database = {
           id?: string
           role: string
           sources_used?: Json | null
+          tool_invocations?: Json | null
         }
         Update: {
           content?: string
@@ -413,6 +415,7 @@ export type Database = {
           id?: string
           role?: string
           sources_used?: Json | null
+          tool_invocations?: Json | null
         }
         Relationships: [
           {
