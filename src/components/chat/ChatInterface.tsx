@@ -119,12 +119,6 @@ export function ChatInterface({
 
   // Handle chat response to extract citations from X-Sources-Used header
   const handleChatResponse = useCallback((response: Response) => {
-    console.log('[ChatInterface] Response received, headers:', {
-      'x-conversation-id': response.headers.get('x-conversation-id'),
-      'x-sources-used': response.headers.get('x-sources-used'),
-      allHeaders: Array.from(response.headers.entries()),
-    })
-
     // Extract conversation ID for email sending
     const convId = response.headers.get('x-conversation-id')
     if (convId) {
@@ -133,19 +127,16 @@ export function ChatInterface({
 
     const header = response.headers.get('x-sources-used')
     if (!header) {
-      console.log('[ChatInterface] No x-sources-used header found')
       setPendingCitations(null)
       return
     }
 
     try {
-      console.log('[ChatInterface] Parsing x-sources-used header:', header)
       const parsed = JSON.parse(header) as Array<{
         title: string
         url?: string | null
         snippet?: string
       }>
-      console.log('[ChatInterface] Parsed citations:', parsed)
 
       const formatted: Citation[] = parsed
         .map((item) => ({
@@ -155,13 +146,9 @@ export function ChatInterface({
         }))
         .filter((item) => item.title || item.description || item.url)
 
-      console.log('[ChatInterface] Formatted citations:', formatted)
-
       if (formatted.length > 0) {
-        console.log('[ChatInterface] Setting pending citations:', formatted)
         setPendingCitations(formatted)
       } else {
-        console.log('[ChatInterface] No valid citations after formatting')
         setPendingCitations(null)
       }
     } catch (error) {
@@ -173,27 +160,16 @@ export function ChatInterface({
   // Handle chat finish to associate citations with messages
   const handleChatFinish = useCallback(
     ({ message }: { message: UIMessage }) => {
-      console.log('[ChatInterface] Message finished:', {
-        messageId: message.id,
-        role: message.role,
-        pendingCitations,
-        pendingCitationsCount: pendingCitations?.length ?? 0,
-      })
-
       if (message.role !== 'assistant') {
-        console.log('[ChatInterface] Skipping citation association for non-assistant message')
         setPendingCitations(null)
         return
       }
 
       if (pendingCitations && pendingCitations.length > 0) {
-        console.log('[ChatInterface] Associating citations with message:', message.id, pendingCitations)
         setMessageCitations((prev) => ({
           ...prev,
           [message.id]: pendingCitations,
         }))
-      } else {
-        console.log('[ChatInterface] No pending citations to associate')
       }
 
       // Check for send_email_summary tool call and trigger email send
@@ -426,14 +402,6 @@ export function ChatInterface({
               const citations = messageCitations[message.id]
               const hasCitations =
                 message.role === 'assistant' && citations && citations.length > 0
-
-              console.log('[ChatInterface] Rendering message:', {
-                messageId: message.id,
-                role: message.role,
-                citations,
-                hasCitations,
-                allMessageCitations: messageCitations,
-              })
 
               return (
                 <Message
