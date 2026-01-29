@@ -7,27 +7,16 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 export interface CaseStudyCardProps {
-  /** URL to navigate to when card is clicked */
   url?: string
-  /** Title of the case study */
   title?: string
-  /** Description/summary of the case study */
   description?: string
-  /** Background image URL */
   backgroundImage?: string
-  /** Client logo URL */
   logo?: string
-  /** Corner radius in pixels */
   cornerRadius?: number
-  /** Mobile breakpoint in pixels */
   mobileBreakpoint?: number
-  /** Overlay color as RGB values (e.g., "4,36,43") */
   overlayColor?: string
-  /** Force a specific variant instead of auto-detecting. Defaults to 'mobile' so text is always visible */
   variant?: 'auto' | 'idle' | 'hover' | 'mobile'
-  /** Additional CSS classes */
   className?: string
-  /** Loading state */
   isLoading?: boolean
 }
 
@@ -53,7 +42,6 @@ export const CaseStudyCard = ({
   const [isMobile, setIsMobile] = React.useState(false)
   const [isHovered, setIsHovered] = React.useState(false)
 
-  // Don't use defaults - only show images when we have actual data
   const imageSrc = backgroundImage
   const logoSrc = logo
 
@@ -194,7 +182,6 @@ export const CaseStudyCard = ({
         }}
       />
 
-      {/* Content container - uses flexbox for reliable bottom-left positioning */}
       <div
         style={{
           position: 'absolute',
@@ -209,7 +196,6 @@ export const CaseStudyCard = ({
           zIndex: 10,
         }}
       >
-        {/* Logo - only render if we have an actual logo */}
         {logoSrc && (
           <motion.div
             aria-hidden="true"
@@ -233,7 +219,6 @@ export const CaseStudyCard = ({
           </motion.div>
         )}
 
-        {/* Title */}
         {title && (
           <h3
             style={{
@@ -250,7 +235,6 @@ export const CaseStudyCard = ({
           </h3>
         )}
 
-        {/* Description */}
         <motion.div
           style={{
             maxWidth: 512,
