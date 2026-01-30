@@ -103,7 +103,8 @@ export async function POST(req: NextRequest) {
       visitor_name || undefined,
       visitor_email || undefined,
       summary,
-      visitorMetadata
+      visitorMetadata,
+      conversation_id
     ).catch((err) => {
       console.error('Almanac integration error:', err)
     })
