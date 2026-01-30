@@ -714,7 +714,8 @@ ${sourceContext}`,
                         visitorName,
                         visitorEmail,
                         enrichedLeadData,
-                        visitorMetadata
+                        visitorMetadata,
+                        activeConversationId,
                       )
 
                       if (!almanacResult.success) {
