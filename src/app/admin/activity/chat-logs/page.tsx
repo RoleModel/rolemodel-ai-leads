@@ -10,7 +10,7 @@ import {
   UserIcon,
 } from 'hugeicons-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
@@ -65,6 +65,7 @@ export default function ChatLogsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('active')
   const [highlightedConvId, setHighlightedConvId] = useState<string | null>(null)
+  const conversationRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const loadConversations = useCallback(async () => {
     setIsLoading(true)
@@ -96,6 +97,14 @@ export default function ChatLogsPage() {
       }
     }
   }, [searchParams, conversations])
+
+  useEffect(() => {
+    if (!highlightedConvId) return
+    const node = conversationRefs.current[highlightedConvId]
+    if (node) {
+      node.scrollIntoView({ behavior: 'instant', block: 'center' })
+    }
+  }, [highlightedConvId])
 
   function handleViewLead(conversationId: string) {
     router.push(`/admin/activity/leads?conversation=${conversationId}`)
@@ -196,6 +205,9 @@ export default function ChatLogsPage() {
                     {conversations.map((conv) => (
                       <div
                         key={conv.id}
+                        ref={(node) => {
+                          conversationRefs.current[conv.id] = node
+                        }}
                         onClick={() => loadMessages(conv.id)}
                         className={`admin-list-item ${selectedConversation?.id === conv.id
                             ? 'admin-list-item--selected'
