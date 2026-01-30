@@ -2,12 +2,14 @@
 
 import {
   Archive01Icon,
+  File02Icon,
   Location01Icon,
   Mail01Icon,
   Message01Icon,
   RotateClockwiseIcon,
   UserIcon,
 } from 'hugeicons-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/Sidebar'
@@ -53,6 +55,8 @@ interface Message {
 type ArchiveFilter = 'active' | 'archived' | 'all'
 
 export default function ChatLogsPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
     null
@@ -60,6 +64,7 @@ export default function ChatLogsPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('active')
+  const [highlightedConvId, setHighlightedConvId] = useState<string | null>(null)
 
   const loadConversations = useCallback(async () => {
     setIsLoading(true)
@@ -79,6 +84,22 @@ export default function ChatLogsPage() {
   useEffect(() => {
     loadConversations()
   }, [loadConversations])
+
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation')
+    if (conversationId && conversations.length > 0) {
+      const conv = conversations.find(c => c.id === conversationId)
+      if (conv) {
+        loadMessages(conversationId)
+        setHighlightedConvId(conversationId)
+        setTimeout(() => setHighlightedConvId(null), 3000)
+      }
+    }
+  }, [searchParams, conversations])
+
+  function handleViewLead(conversationId: string) {
+    router.push(`/admin/activity/leads?conversation=${conversationId}`)
+  }
 
   async function loadMessages(conversationId: string) {
     try {
@@ -179,7 +200,7 @@ export default function ChatLogsPage() {
                         className={`admin-list-item ${selectedConversation?.id === conv.id
                             ? 'admin-list-item--selected'
                             : ''
-                          }`}
+                          } ${highlightedConvId === conv.id ? 'admin-list-item--highlighted' : ''}`}
                       >
                         <div className="admin-list-item__header">
                           <UserIcon className="icon-sm admin-list-item__icon" />
@@ -254,7 +275,19 @@ export default function ChatLogsPage() {
                   ) : (
                     <div className="admin-content__list">
                       <div className="admin-info-card">
-                        <h3 className="admin-info-card__title">Visitor Details</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                          <h3 className="admin-info-card__title" style={{ margin: 0 }}>Visitor Details</h3>
+                          {selectedConversation.lead_captured && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleViewLead(selectedConversation.id)}
+                            >
+                              <File02Icon className="icon-sm" />
+                              View Lead
+                            </Button>
+                          )}
+                        </div>
                         <div className="admin-info-card__grid">
                           {selectedConversation.visitor_name && (
                             <div className="admin-info-card__field">
