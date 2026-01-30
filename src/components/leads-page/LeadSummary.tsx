@@ -1,11 +1,9 @@
 'use client'
 
 import {
-  Archive01Icon,
-  ChatIcon,
-  Mail01Icon,
+  Message01Icon,
   RotateClockwiseIcon,
-  SlackIcon,
+  ArchiveArrowDownIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
@@ -72,13 +70,13 @@ interface LeadSummaryProps {
   data: LeadSummaryData
   visitorName?: string
   visitorDate?: string
-  onEmailShare?: () => void
-  onSlackShare?: () => void
-  onScheduleConversation?: () => void
+  conversationId?: string
+  onViewChat?: () => void
   onArchive?: () => void
   isArchived?: boolean
   variant?: 'full' | 'compact'
   animated?: boolean
+  expanded?: boolean
 }
 
 function getScoreClass(score: number): string {
@@ -106,12 +104,12 @@ export function LeadSummary({
   data,
   visitorName,
   visitorDate,
-  onEmailShare,
-  onSlackShare,
-  onScheduleConversation,
+  conversationId,
+  onViewChat,
   onArchive,
   isArchived = false,
   animated = false,
+  expanded = false,
 }: LeadSummaryProps) {
   const containerVariants = animated
     ? {
@@ -141,7 +139,7 @@ export function LeadSummary({
       initial={animated ? 'hidden' : undefined}
       animate={animated ? 'visible' : undefined}
     >
-      <Plan>
+      <Plan open={expanded ? true : undefined}>
         <PlanHeader>
           <div>
             <h3 className="lead-summary__header-title">
@@ -366,32 +364,16 @@ export function LeadSummary({
 
         {/* Share Actions */}
         <PlanFooter>
-          {(onEmailShare || onSlackShare || onScheduleConversation || onArchive) && (
+          {( onViewChat || onArchive) && (
             <div className="lead-summary__share-actions">
-              {onEmailShare && (
+              {conversationId && onViewChat && (
                 <Button
                   variant="secondary"
-                  onClick={onEmailShare}
+                  onClick={onViewChat}
                   className="lead-summary__share-button"
                 >
-                  <HugeiconsIcon icon={Mail01Icon} size={18} />
-                  <span>Email this summary</span>
-                </Button>
-              )}
-              {onScheduleConversation && (
-                <Button
-                  variant="secondary"
-                  onClick={onScheduleConversation}
-                  className="lead-summary__share-button"
-                >
-                  <HugeiconsIcon icon={ChatIcon} size={18} />
-                  <span>Schedule a conversation</span>
-                </Button>
-              )}
-              {onSlackShare && (
-                <Button variant="secondary" onClick={onSlackShare}>
-                  <HugeiconsIcon icon={SlackIcon} size={20} />
-                  <span>Share to Slack</span>
+                  <HugeiconsIcon icon={Message01Icon} size={18} />
+                  <span>View Chat</span>
                 </Button>
               )}
               {onArchive && (
@@ -401,7 +383,7 @@ export function LeadSummary({
                   title={isArchived ? 'Restore' : 'Archive'}
                 >
                   <HugeiconsIcon
-                    icon={isArchived ? RotateClockwiseIcon : Archive01Icon}
+                    icon={isArchived ? RotateClockwiseIcon : ArchiveArrowDownIcon}
                     size={18}
                   />
                 </Button>
