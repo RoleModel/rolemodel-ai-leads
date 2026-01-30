@@ -164,11 +164,26 @@
 }
 
 .admin-list-item--selected {
-  background-color: var(--op-color-primary-plus-eight);
+  background-color: var(--op-color-primary-plus-six);
 }
 
 .admin-list-item--selected:hover {
   background-color: var(--op-color-primary-plus-eight);
+}
+
+.admin-list-item--highlighted {
+  animation: highlight-fade 3s ease-out;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: var(--op-color-primary-plus-eight);
+    box-shadow: 0 0 0 3px var(--op-color-primary-plus-eight);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
 }
 
 .admin-list-item__header {
@@ -439,4 +454,20 @@
 
 .admin-card-wrapper--archived {
   opacity: var(--op-opacity-disabled);
+}
+
+.admin-card-wrapper--highlighted {
+  animation: highlight-card-fade 3s ease-out;
+}
+
+@keyframes highlight-card-fade {
+  0% {
+    box-shadow: 0 0 0 3px var(--op-color-primary-plus-eight);
+    background-color: var(--op-color-primary-plus-eight);
+    border-radius: var(--op-radius-large);
+  }
+  100% {
+    box-shadow: none;
+    background-color: transparent;
+  }
 }
