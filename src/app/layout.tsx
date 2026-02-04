@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata } from 'next'
 import type { Viewport } from 'next'
 import { DM_Sans, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 
 import './globals.css'
 
@@ -70,6 +71,20 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-DRMKS1L114"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-DRMKS1L114');
+          `}
+        </Script>
       </head>
       <body className={`${dmSans.variable} ${geistMono.variable} antialiased app-body`}>
         {children}
