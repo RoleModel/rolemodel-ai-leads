@@ -489,7 +489,7 @@ ${sourceContext}`,
             output?: Record<string, unknown>
           }
           const toolInvocations: ToolInvocationData[] = []
-          
+
           if (steps && Array.isArray(steps)) {
             for (const step of steps) {
               // AI SDK uses step.content array with tool-call and tool-result items
@@ -501,7 +501,7 @@ ${sourceContext}`,
                 output?: Record<string, unknown>
               }
               const stepContent = (step as { content?: StepContentItem[] }).content
-              
+
               if (stepContent && Array.isArray(stepContent)) {
                 // Find tool-result items (they contain both input and output)
                 for (const item of stepContent) {
@@ -518,9 +518,9 @@ ${sourceContext}`,
               }
             }
           }
-          
+
           console.log(`[Chat] Tool invocations to save: ${toolInvocations.length}`, toolInvocations.map(t => t.toolName))
-          
+
           type MessageInsert = Database['public']['Tables']['messages']['Insert']
           const assistantMessage: MessageInsert = {
             conversation_id: activeConversationId,
