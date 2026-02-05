@@ -530,7 +530,7 @@ ${sourceContext}`,
               id: s.id,
               title: s.title,
             })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
-            tool_invocations: toolInvocations.length > 0 ? toolInvocations : null,
+            tool_invocations: (toolInvocations.length > 0 ? toolInvocations : null) as Database['public']['Tables']['messages']['Insert']['tool_invocations'],
           }
           const { error: msgError } = await supabaseServer.from('messages').insert([assistantMessage])
           if (msgError) {
