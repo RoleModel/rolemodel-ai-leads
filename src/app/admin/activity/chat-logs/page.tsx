@@ -89,7 +89,7 @@ export default function ChatLogsPage() {
   useEffect(() => {
     const conversationId = searchParams.get('conversation')
     if (conversationId && conversations.length > 0) {
-      const conv = conversations.find(c => c.id === conversationId)
+      const conv = conversations.find((c) => c.id === conversationId)
       if (conv) {
         loadMessages(conversationId)
         setHighlightedConvId(conversationId)
@@ -209,10 +209,11 @@ export default function ChatLogsPage() {
                           conversationRefs.current[conv.id] = node
                         }}
                         onClick={() => loadMessages(conv.id)}
-                        className={`admin-list-item ${selectedConversation?.id === conv.id
+                        className={`admin-list-item ${
+                          selectedConversation?.id === conv.id
                             ? 'admin-list-item--selected'
                             : ''
-                          } ${highlightedConvId === conv.id ? 'admin-list-item--highlighted' : ''}`}
+                        } ${highlightedConvId === conv.id ? 'admin-list-item--highlighted' : ''}`}
                       >
                         <div className="admin-list-item__header">
                           <UserIcon className="icon-sm admin-list-item__icon" />
@@ -287,8 +288,17 @@ export default function ChatLogsPage() {
                   ) : (
                     <div className="admin-content__list">
                       <div className="admin-info-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                          <h3 className="admin-info-card__title" style={{ margin: 0 }}>Visitor Details</h3>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '16px',
+                          }}
+                        >
+                          <h3 className="admin-info-card__title" style={{ margin: 0 }}>
+                            Visitor Details
+                          </h3>
                           {selectedConversation.lead_captured && (
                             <Button
                               variant="secondary"
@@ -389,27 +399,7 @@ export default function ChatLogsPage() {
                       </div>
 
                       {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`admin-message ${message.role === 'user'
-                              ? 'admin-message--user'
-                              : 'admin-message--assistant'
-                            }`}
-                        >
-                          <div
-                            className={`admin-message__bubble ${message.role === 'user'
-                                ? 'admin-message__bubble--user'
-                                : 'admin-message__bubble--assistant'
-                              }`}
-                          >
-                            <div className="admin-message__content">
-                              {message.content}
-                            </div>
-                            <div className="admin-message__time">
-                              {new Date(message.created_at).toLocaleTimeString()}
-                            </div>
-                          </div>
-                        </div>
+                        <MessageBubble key={message.id} message={message} />
                       ))}
                     </div>
                   )}
@@ -418,6 +408,30 @@ export default function ChatLogsPage() {
             </div>
           </div>
         </main>
+      </div>
+    </div>
+  )
+}
+
+function MessageBubble({ message }: { message: Message }) {
+  return (
+    <div
+      key={message.id}
+      className={`admin-message ${
+        message.role === 'user' ? 'admin-message--user' : 'admin-message--assistant'
+      }`}
+    >
+      <div
+        className={`admin-message__bubble ${
+          message.role === 'user'
+            ? 'admin-message__bubble--user'
+            : 'admin-message__bubble--assistant'
+        }`}
+      >
+        <div className="admin-message__content">{message.content}</div>
+        <div className="admin-message__time">
+          {new Date(message.created_at).toLocaleTimeString()}
+        </div>
       </div>
     </div>
   )
