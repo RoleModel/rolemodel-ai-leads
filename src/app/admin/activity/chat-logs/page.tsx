@@ -17,6 +17,7 @@ import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+import { MessageBubble } from './_components/MessageBubble'
 import {
   getLocationString,
   VisitorDetailsCard,
@@ -306,30 +307,6 @@ function NoConversationSelected() {
   return (
     <div className="admin-empty admin-empty--centered">
       Select a conversation to view messages
-    </div>
-  )
-}
-
-function MessageBubble({ message }: { message: Message }) {
-  return (
-    <div
-      key={message.id}
-      className={`admin-message ${
-        message.role === 'user' ? 'admin-message--user' : 'admin-message--assistant'
-      }`}
-    >
-      <div
-        className={`admin-message__bubble ${
-          message.role === 'user'
-            ? 'admin-message__bubble--user'
-            : 'admin-message__bubble--assistant'
-        }`}
-      >
-        <div className="admin-message__content">{message.content}</div>
-        <div className="admin-message__time">
-          {new Date(message.created_at).toLocaleTimeString()}
-        </div>
-      </div>
     </div>
   )
 }
