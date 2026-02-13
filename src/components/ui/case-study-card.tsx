@@ -18,6 +18,7 @@ export interface CaseStudyCardProps {
   variant?: 'auto' | 'idle' | 'hover' | 'mobile'
   className?: string
   isLoading?: boolean
+  height?: number | string
 }
 
 const contentVariants = {
@@ -38,6 +39,7 @@ export const CaseStudyCard = ({
   variant = 'mobile',
   className,
   isLoading = false,
+  height: cardHeight = 320,
 }: CaseStudyCardProps) => {
   const [isMobile, setIsMobile] = React.useState(false)
   const [isHovered, setIsHovered] = React.useState(false)
@@ -85,7 +87,7 @@ export const CaseStudyCard = ({
         className={cn(className)}
         style={{
           position: 'relative',
-          height: 320,
+          height: cardHeight,
           width: '100%',
           overflow: 'hidden',
           borderRadius: cornerRadius,
@@ -144,7 +146,7 @@ export const CaseStudyCard = ({
       role="button"
       style={{
         position: 'relative',
-        height: 320,
+        height: cardHeight,
         width: '100%',
         borderRadius: cornerRadius,
         overflow: 'clip',
@@ -204,17 +206,16 @@ export const CaseStudyCard = ({
             transition={{ duration: 0.3, delay: 0.1 }}
             style={{
               marginBottom: 12,
-              height: 60,
-              width: 200
+              height: 48,
+              width: 160,
+              position: 'relative',
             }}
           >
             <Image
               src={logoSrc}
               alt="Client Logo"
-              width={200}
-              height={60}
-              objectFit="contain"
-              layout="responsive"
+              fill
+              style={{ objectFit: 'contain', objectPosition: 'left center' }}
             />
           </motion.div>
         )}

@@ -3,15 +3,12 @@
 import { useChat } from '@ai-sdk/react'
 import { useGSAP } from '@gsap/react'
 import {
-  ArrowRight02Icon,
   ArtificialIntelligence04Icon,
   Copy01Icon,
   DashboardSpeed01Icon,
   File01Icon,
   Idea01Icon,
   Link01Icon,
-  MaximizeScreenIcon,
-  MinimizeScreenIcon,
   PlusSignIcon,
   Refresh01Icon,
   SecurityCheckIcon,
@@ -55,14 +52,14 @@ import {
 import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
 import AnimatedPath from '@/components/intro/AnimatedPath'
 import Favicon from '@/components/intro/Favicon'
-import Logo from '@/components/intro/Logo'
+import NavBar from '@/components/layout/NavBar'
 import '@/components/leads-page/LeadsPageView.css'
 import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
+import { ButtonPill } from '@/components/ui/ButtonPill'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
 import {
@@ -406,15 +403,19 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
           />
           {/* Modal Card */}
           <Card className={styles['intro-c-lightbox']}>
-            <Button
-              variant="ghost"
-              size="sm"
+            <ButtonPill
               className={styles['intro-c-card__expand-btn']}
               onClick={handleCloseExpanded}
               aria-label="Minimize"
-            >
-              <HugeiconsIcon icon={MinimizeScreenIcon} size={20} />
-            </Button>
+              startIconName="minimize-screen"
+              showStartIcon
+              useVariant={false}
+              backgroundColor="transparent"
+              textColor="currentColor"
+              shapeMode="circle"
+              iconSize={20}
+              height={32}
+            />
             <div className={styles['intro-c-card__content']}>{chatContent}</div>
           </Card>
         </>,
@@ -427,15 +428,19 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
       {/* Inline card (when not expanded or intro step) */}
       <Card className={styles['intro-c-card']}>
         {step === 'chat' && !isExpanded && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <ButtonPill
             className={styles['intro-c-card__expand-btn']}
             onClick={handleToggleExpand}
             aria-label="Maximize"
-          >
-            <HugeiconsIcon icon={MaximizeScreenIcon} size={20} />
-          </Button>
+            startIconName="maximize-screen"
+            showStartIcon
+            useVariant={false}
+            backgroundColor="transparent"
+            textColor="currentColor"
+            shapeMode="circle"
+            iconSize={20}
+            height={32}
+          />
         )}
         <div className={styles['intro-c-card__content']}>
           <AnimatePresence mode="wait">
@@ -508,16 +513,15 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                     />
                   </div>
 
-                  <Button
+                  <ButtonPill
                     type="submit"
-                    size="lg"
-                    variant="primary"
-                    style={{ width: 'fit-content' }}
+                    label={isSubmitting ? 'Starting...' : 'Start Conversation'}
+                    variant="brightblue"
                     disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Starting...' : 'Start Conversation'}
-                    {!isSubmitting && <HugeiconsIcon icon={ArrowRight02Icon} size={20} />}
-                  </Button>
+                    endIconName="arrow-right-02"
+                    showEndIcon={!isSubmitting}
+                    style={{ width: 'fit-content' }}
+                  />
 
                   <p className={styles['intro-c-intro__disclaimer']}>
                     By continuing, you agree to our privacy policy. Your data is secure.
@@ -627,17 +631,26 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
 
   return (
     <div className={styles['intro-c-page']} data-page="intro-c">
+      {/* NavBar */}
+        <NavBar
+          homeLink="https://rolemodelsoftware.com"
+          link3="https://consult.rolemodelsoftware.com"
+          link4="https://rolemodelsoftware.com/contact"
+          bgColor="rgba(255, 255, 255, 0.9)"
+          textColor="#181A18"
+          openTextColor="#FFFFFF"
+          logoTheme="blue-white"
+          openLogoTheme="light"
+          accentColor="#2a84f8"
+          ghostColor="#DADADA"
+          spotlightImageUrl="https://framerusercontent.com/images/8nGc7fE31a5LiyhesQXL0kAAh48.webp?width=2400&height=1792"
+          logoImage="https://framerusercontent.com/images/fq0QpZJihXpp1TCLYctWjKapX8.svg?width=189&height=88"
+          spotlightContent="Branded Mobile PWA and Desktop Web application for business forum and executive coaching firm"
+        />
       <div ref={wrapperRef} className={styles['smooth-wrapper']}>
         <div ref={contentRef} className={styles['smooth-content']}>
           {/* Hero Section */}
           <section ref={heroRef} className={styles['intro-c-hero']}>
-            {/* Logo */}
-            <div className={styles['intro-c-logo']}>
-              <Logo
-                variant="dark"
-                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
-              />
-            </div>
             <div className={styles['intro-c-hero__gradient']} />
 
             <motion.div
@@ -686,10 +699,13 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
               </p>
 
               <div className={styles['intro-c-hero__actions']}>
-                <Button variant="brightblue" size="lg" onClick={handleScrollToTool}>
-                  Start Assessment
-                  <HugeiconsIcon icon={ArrowRight02Icon} size={16} />
-                </Button>
+                <ButtonPill
+                  variant="brightblue"
+                  label="Start Assessment"
+                  onClick={handleScrollToTool}
+                  endIconName="arrow-right-02"
+                  showEndIcon
+                />
               </div>
             </motion.div>
           </section>

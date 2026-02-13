@@ -51,7 +51,7 @@ import {
 } from '@/components/ai-elements/prompt-input'
 import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
 import Favicon from '@/components/intro/Favicon'
-import Logo from '@/components/intro/Logo'
+import NavBar from '@/components/layout/NavBar'
 import {
   type Citation,
   MessageWithCitations,
@@ -59,6 +59,7 @@ import {
 import { CaseStudyCard } from '@/components/ui/case-study-card'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ScrollIndicator from '@/components/ui/ScrollIndicator'
+import { ButtonPill } from '@/components/ui/ButtonPill'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
@@ -453,13 +454,15 @@ export function HeroChat(props: HeroChatProps) {
               />
             </div>
             <CardAction>
-              <button
+              <ButtonPill
                 type="submit"
-                className="btn btn--primary btn--large"
+                label={isSubmitting ? 'Starting...' : 'Start Conversation'}
+                variant="brightblue"
                 disabled={!formData.name || !formData.email || isSubmitting}
-              >
-                {isSubmitting ? 'Starting...' : 'Start Conversation'}
-              </button>
+                endIconName="arrow-right-02"
+                showEndIcon={!isSubmitting}
+                style={{ width: '100%' }}
+              />
             </CardAction>
           </form>
         </CardContent>
@@ -1034,14 +1037,19 @@ function LandingBInner({
 
   return (
     <div className="intro-b-page">
+      {/* NavBar */}
+        <NavBar
+          homeLink="https://rolemodelsoftware.com"
+          link3="https://consult.rolemodelsoftware.com"
+          link4="https://rolemodelsoftware.com/contact"
+          bgColor="var(--blue-green-900)"
+          textColor="#FFFFFF"
+          spotlightImageUrl="https://framerusercontent.com/images/8nGc7fE31a5LiyhesQXL0kAAh48.webp?width=2400&height=1792"
+          logoImage="https://framerusercontent.com/images/fq0QpZJihXpp1TCLYctWjKapX8.svg?width=189&height=88"
+          spotlightContent="Branded Mobile PWA and Desktop Web application for business forum and executive coaching firm"
+        />
       <div ref={containerRef} className={`${styles.root} ${className || ''}`}>
         {showGlow && <div ref={glowRef} className={styles['hero-glow']} />}
-        <div className={styles.logo}>
-          <Logo
-            variant="auto"
-            style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }}
-          />
-        </div>
         <div className={styles['grid-background']} />
         <div ref={gridOpacityRef} className={styles.grid} />
         <div ref={wrapperRef} className={styles['smooth-wrapper']}>
