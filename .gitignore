@@ -31,9 +31,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
 # vercel
 .vercel
 
@@ -51,3 +48,6 @@ next-env.d.ts
 
 screenshots/
 .env*.local
+
+# Sentry Config File
+.env.sentry-build-plugin

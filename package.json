@@ -47,6 +47,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@sendgrid/mail": "^8.1.6",
+    "@sentry/nextjs": "^10.38.0",
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^1.12.6",
     "@supabase/ssr": "^0.8.0",
