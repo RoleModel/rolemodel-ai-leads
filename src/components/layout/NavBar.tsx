@@ -256,7 +256,7 @@ const createStyles = ({
     // Nav link label container
     navLinkLabelContainer: {
         display: "flex",
-        alignItems: "center",
+        alignItems: "start",
         marginBottom: "0.16em",
         position: "relative",
         gap: 8,
@@ -269,6 +269,8 @@ const createStyles = ({
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
+        marginBlockEnd: 4,
+        display: "block",
         minWidth: 0,
     } as React.CSSProperties,
 
@@ -290,7 +292,7 @@ const createStyles = ({
 
     // Description text
     descText: {
-        opacity: 0.7,
+        opacity: 0.85,
         display: isPhone ? "none" : "block",
         fontSize: "clamp(11px, 11px + 0.5vw, 14px)",
         color: textColor,
@@ -642,7 +644,7 @@ function LinkList({
                                   : "none",
                         }}
                     >
-                        <span style={styles.navLinkLabelContainer}>
+                        <div style={styles.navLinkLabelContainer}>
                             {showIcons && item.icon && (
                                 <DynamicIcon
                                     name={item.icon}
@@ -651,14 +653,32 @@ function LinkList({
                                             ? highlightColor
                                             : rowColor
                                     }
-                                    size={isPhone ? 16 : 20}
+                                    size={isPhone ? 16 : 28}
                                     variant="duotone"
                                 />
                             )}
-
-                            <span key="label" style={styles.labelText}>
-                                {item.label || "Link"}
-                            </span>
+                            <div>
+                                <span
+                                    key="label"
+                                    style={{
+                                        ...styles.labelText,
+                                        lineHeight: item.description
+                                            ? 1
+                                            : "28px",
+                                    }}
+                                >
+                                    {item.label || "Link"}
+                                </span>
+                                {item.description && (
+                                    <motion.span
+                                        key="desc"
+                                        className="nav-desc"
+                                        style={styles.descText}
+                                    >
+                                        {item.description}
+                                    </motion.span>
+                                )}
+                            </div>
 
                             {projectNumber !== null && (
                                 <span
@@ -671,17 +691,7 @@ function LinkList({
                                     {projectNumber}
                                 </span>
                             )}
-                        </span>
-
-                        {item.description && (
-                            <motion.span
-                                key="desc"
-                                className="nav-desc"
-                                style={styles.descText}
-                            >
-                                {item.description}
-                            </motion.span>
-                        )}
+                        </div>
                     </motion.a>
                 )
             })}
@@ -925,7 +935,7 @@ export default function NavBar(props: Props) {
         outterPadding = 0,
         col1Title = "About Us",
         col2Title = "Our Approach",
-        col3Title = "Company",
+        col3Title = "People",
         col4Title = "Solutions",
         col1Links = [
             { id: "services", label: "Services", href: "https://rolemodelsoftware.com/services", description: "We craft custom software tailored to your business", icon: "wrench-01" },
