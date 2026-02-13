@@ -2,7 +2,7 @@
 
 // NavBar.tsx
 // NavBar variant with internal scroll-based color changing using IntersectionObserver
-// @ts-nocheck
+
 import * as React from 'react'
 import { motion, useAnimate, useMotionValue, useTransform } from 'motion/react'
 import { usePathname } from 'next/navigation'
@@ -14,7 +14,7 @@ import RMLogoDrawOn from '@/components/ui/RMLogoDrawOn'
 import { ButtonPill } from '@/components/ui/ButtonPill'
 import { CaseStudyCard } from '@/components/ui/case-study-card'
 
-const { useState, useEffect, useRef, useCallback } = React
+const { useState, useEffect, useRef } = React
 
 // ============================================================================
 // DYNAMIC ICON HELPER
@@ -162,7 +162,7 @@ const createStyles = ({
         flexShrink: 0,
         color: finalTextColor,
         paddingInline: isPhone ? 30 : 24,
-        dislay: "grid",
+        display: "grid",
         placeItems: "center",
         placeContent: "center",
         transition: "color 0.2s ease-in-out, background-color 0.2s ease-in-out",
@@ -496,8 +496,8 @@ function useScrollColorChange(
             capture: true,
         })
 
-        // Fallback: poll every 100ms for Framer environments where scroll events don't bubble
-        intervalRef.current = setInterval(checkSections, 100)
+        // Fallback: poll every 250ms for Framer environments where scroll events don't bubble
+        intervalRef.current = setInterval(checkSections, 250)
 
         return () => {
             window.removeEventListener("scroll", handleScroll)
@@ -900,8 +900,6 @@ export default function NavBar(props: Props) {
         openBgColor = "var(--blue-green-900)",
         textColor = "#FFFFFF",
         openTextColor = "#FFFFFF",
-        logoColor = "#000000",
-        openLogoColor = "#FFFFFF",
         accentColor = "#2a84f8",
         rowColor = "#87D4E9",
         contactHoverColor = "#2C83F8",
@@ -929,7 +927,7 @@ export default function NavBar(props: Props) {
         spotlightImageUrl = "https://framerusercontent.com/images/8nGc7fE31a5LiyhesQXL0kAAh48.webp?width=2400&height=1792",
         logoImage = "https://framerusercontent.com/images/fq0QpZJihXpp1TCLYctWjKapX8.svg?width=189&height=88",
         spotlightContent = "Branded Mobile PWA and Desktop Web application for business forum and executive coaching firm",
-        spotlightLink,
+        spotlightLink ="https://rolemodelsoftware.com/case-studies/c12-business-forums",
         highlightColor = "#2A83F7",
         gap = 32,
         outterPadding = 0,
@@ -959,18 +957,14 @@ export default function NavBar(props: Props) {
         ],
         previewOpen,
         previewMode = "auto",
-        shellMaxWidth = "1200px",
         // Scroll-based color change props
         enableScrollColorChange = false,
         colorChangeSections = [],
         altBgColor = "#FFFFFF",
         altTextColor = "#000000",
-        altLogoColor = "#000000",
         altLogoTheme = "dark",
         altAccentColor = "#2a84f8",
-        altContactVariant = "dark",
         altBorder,
-        altBoxShadow,
         navHeight = 80,
         menuPaddingInline: menuPaddingInlineProp = 40,
         menuPaddingBlock: menuPaddingBlockProp = 0,
@@ -1097,9 +1091,6 @@ export default function NavBar(props: Props) {
         : isInAltSection && altBorder
           ? altBorder
           : border
-
-    const currentBoxShadow =
-        isInAltSection && altBoxShadow ? altBoxShadow : boxShadow
 
     const finalTextColor = currentTextColor
     const finalLogoTheme = currentLogoTheme
@@ -1669,7 +1660,7 @@ export default function NavBar(props: Props) {
                                 />
                                 <LinkList
                                     isPhone={isPhone}
-                                    listId="col5"
+                                    listId="col3"
                                     onItemClick={instantCloseMenu}
                                     title={col3Title}
                                     items={col3Links}
@@ -1763,7 +1754,7 @@ export default function NavBar(props: Props) {
                                                         closeMenu()
                                                     }
                                                 }}
-                                                aria-label="Close menu"
+                                                aria-label="View partner spotlight"
                                             />
                                         )}
                                         <span style={styles.ctaArrow}>

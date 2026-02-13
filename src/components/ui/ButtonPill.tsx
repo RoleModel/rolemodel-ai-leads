@@ -10,7 +10,7 @@ import * as HugeIconsDuotone from '@hugeicons-pro/core-duotone-rounded'
 // Helper to get icon component by name
 function getIconComponent(
   iconName: string,
-  variant: 'stroke' | 'solid' | 'duotone' | 'bulk' = 'stroke'
+  variant: 'stroke' | 'solid' | 'duotone' = 'stroke'
 ) {
   // Convert kebab-case to PascalCase and add Icon suffix
   const pascalCase = iconName
@@ -84,7 +84,7 @@ export interface ButtonPillProps {
   iconSize?: number
   circleSize?: number
   iconFontWeight?: number
-  iconVariant?: 'stroke' | 'solid' | 'duotone' | 'bulk'
+  iconVariant?: 'stroke' | 'solid' | 'duotone'
 
   // Shape / behavior
   shapeMode?: 'auto' | 'circle' | 'grow' | 'pill'
@@ -355,13 +355,33 @@ export function ButtonPill(props: ButtonPillProps) {
 
   const renderSvg = (raw: string) => {
     if (!raw) return null
-    const sanitize = (svg: string) =>
-      svg
+
+    const sanitizeSvg = (svg: string): string => {
+      // Strip script tags and event handlers for XSS protection
+      let cleaned = svg
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<script[^>]*\/>/gi, '')
+        .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
+        .replace(/\bon\w+\s*=\s*\S+/gi, '')
+        .replace(/javascript\s*:/gi, '')
+        .replace(/data\s*:/gi, 'data-blocked:')
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<iframe[^>]*\/>/gi, '')
+        .replace(/<object[\s\S]*?<\/object>/gi, '')
+        .replace(/<embed[^>]*\/?>/gi, '')
+        .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+
+      // Replace fill/stroke colors with currentColor
+      cleaned = cleaned
         .replace(/fill="(?!none)[^"]*"/gi, 'fill="currentColor"')
         .replace(/stroke="(?!none)[^"]*"/gi, 'stroke="currentColor"')
         .replace(/fill='(?!none)[^']*'/gi, "fill='currentColor'")
         .replace(/stroke='(?!none)[^']*'/gi, "stroke='currentColor'")
-    const cleaned = sanitize(raw)
+
+      return cleaned
+    }
+
+    const cleaned = sanitizeSvg(raw)
     return (
       <span
         aria-hidden="true"
