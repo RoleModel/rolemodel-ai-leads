@@ -87,7 +87,7 @@ export interface ButtonPillProps {
   iconVariant?: 'stroke' | 'solid' | 'duotone'
 
   // Shape / behavior
-  shapeMode?: 'auto' | 'circle' | 'grow' | 'pill'
+  shapeMode?: 'auto' | 'circle'
   disableGrowOverlay?: boolean
   height?: number
 
@@ -156,6 +156,7 @@ export function ButtonPill(props: ButtonPillProps) {
     onMouseLeave: onMouseLeaveProp,
     shapeMode = 'auto',
     disableGrowOverlay = false,
+    height,
     children,
     type = 'button',
     disabled = false,
@@ -493,8 +494,8 @@ export function ButtonPill(props: ButtonPillProps) {
         display: 'inline-grid',
         placeContent: 'center',
         placeItems: 'center',
-        width: circleSize,
-        height: circleSize,
+        width: height ?? circleSize,
+        height: height ?? circleSize,
         color: 'inherit',
       }}
     >
@@ -579,8 +580,8 @@ export function ButtonPill(props: ButtonPillProps) {
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'inline-flex',
     alignItems: 'center',
-    width: isCircleMode ? circleSize : undefined,
-    height: isCircleMode ? circleSize : 40,
+    width: isCircleMode ? (height ?? circleSize) : undefined,
+    height: isCircleMode ? (height ?? circleSize) : (height ?? 40),
     justifyContent: 'center',
     alignSelf: 'flex-start',
     willChange: 'border-radius, filter',

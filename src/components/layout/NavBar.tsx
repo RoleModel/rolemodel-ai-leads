@@ -1457,7 +1457,7 @@ export default function NavBar(props: Props) {
                                   ? "rgba(0, 0, 0, 0.02)"
                                   : "rgba(255, 255, 255, 0.1)"
                         }
-                        shapeMode="grow"
+                        grow
                         borderRadius={0}
                         style={{ ...styles.logoContainer, height: 80 }}
                         onMouseEnter={() => setIsLogoHovered(true)}
@@ -1582,7 +1582,6 @@ export default function NavBar(props: Props) {
                                 borderRadius={0}
                                 iconGap={4}
                                 style={{ height: 80 }}
-                                shapeMode="grow"
                             />
                         </>
                     )}
