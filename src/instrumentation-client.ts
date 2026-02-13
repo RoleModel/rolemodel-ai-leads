@@ -1,12 +1,11 @@
 // This file configures the initialization of Sentry on the client.
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
-
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
-  dsn: "https://3b3d68601b1f395f0619f09a570dbfdb@o4507464889073664.ingest.us.sentry.io/4510867741016064",
-  enabled: process.env.NODE_ENV === "production",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  enabled: process.env.NODE_ENV === 'production',
 
   // Add optional integrations for additional features
   integrations: [
@@ -28,6 +27,6 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: true,
-});
+})
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
