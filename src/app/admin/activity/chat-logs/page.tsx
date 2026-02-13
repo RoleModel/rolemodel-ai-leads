@@ -17,6 +17,11 @@ import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+import {
+  getLocationString,
+  VisitorDetailsCard,
+} from './_components/VisitorDetailsCard'
+
 interface VisitorMetadata {
   ip?: string
   geo?: {
@@ -138,13 +143,6 @@ export default function ChatLogsPage() {
     } catch (error) {
       console.error('Error archiving conversation:', error)
     }
-  }
-
-  const getLocationString = (metadata: VisitorMetadata | null) => {
-    if (!metadata?.geo) return null
-    return [metadata.geo.city, metadata.geo.region, metadata.geo.country]
-      .filter(Boolean)
-      .join(', ')
   }
 
   return (
@@ -282,122 +280,13 @@ export default function ChatLogsPage() {
               <ScrollArea style={{ flex: 1, minHeight: 0 }}>
                 <div className="admin-content admin-content--muted">
                   {!selectedConversation ? (
-                    <div className="admin-empty admin-empty--centered">
-                      Select a conversation to view messages
-                    </div>
+                    <NoConversationSelected />
                   ) : (
                     <div className="admin-content__list">
-                      <div className="admin-info-card">
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '16px',
-                          }}
-                        >
-                          <h3 className="admin-info-card__title" style={{ margin: 0 }}>
-                            Visitor Details
-                          </h3>
-                          {selectedConversation.lead_captured && (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => handleViewLead(selectedConversation.id)}
-                            >
-                              <File02Icon className="icon-sm" />
-                              View Lead
-                            </Button>
-                          )}
-                        </div>
-                        <div className="admin-info-card__grid">
-                          {selectedConversation.visitor_name && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Name</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_name}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_email && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Email</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_email}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.geo && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Location</span>
-                              <p className="admin-info-card__value">
-                                {getLocationString(
-                                  selectedConversation.visitor_metadata
-                                ) || 'Unknown'}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.ip && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">IP Address</span>
-                              <p className="admin-info-card__value admin-info-card__value--mono">
-                                {selectedConversation.visitor_metadata.ip}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.geo?.timezone && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Timezone</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_metadata.geo.timezone}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.referer && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Referrer</span>
-                              <p
-                                className="admin-info-card__value admin-info-card__value--truncate"
-                                title={selectedConversation.visitor_metadata.referer}
-                              >
-                                {selectedConversation.visitor_metadata.referer}
-                              </p>
-                            </div>
-                          )}
-                          <div className="admin-info-card__field">
-                            <span className="admin-info-card__label">Started</span>
-                            <p className="admin-info-card__value">
-                              {new Date(selectedConversation.started_at).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="admin-info-card__field">
-                            <span className="admin-info-card__label">Status</span>
-                            <p className="admin-info-card__value">
-                              {selectedConversation.lead_captured ? (
-                                <span className="admin-info-card__value--positive">
-                                  Lead Captured
-                                </span>
-                              ) : (
-                                <span className="admin-info-card__value--muted">
-                                  Browsing
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        {selectedConversation.visitor_metadata?.userAgent && (
-                          <div className="admin-info-card__section">
-                            <span className="admin-info-card__label">Browser</span>
-                            <p
-                              className="admin-info-card__value admin-info-card__value--truncate"
-                              title={selectedConversation.visitor_metadata.userAgent}
-                            >
-                              {selectedConversation.visitor_metadata.userAgent}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
+                      <VisitorDetailsCard
+                        conversation={selectedConversation}
+                        onViewLead={handleViewLead}
+                      />
                       {messages.map((message) => (
                         <MessageBubble key={message.id} message={message} />
                       ))}
@@ -409,6 +298,14 @@ export default function ChatLogsPage() {
           </div>
         </main>
       </div>
+    </div>
+  )
+}
+
+function NoConversationSelected() {
+  return (
+    <div className="admin-empty admin-empty--centered">
+      Select a conversation to view messages
     </div>
   )
 }
