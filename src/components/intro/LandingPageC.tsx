@@ -55,7 +55,7 @@ import {
 import { Suggestion, Suggestions } from '@/components/ai-elements/suggestion'
 import AnimatedPath from '@/components/intro/AnimatedPath'
 import Favicon from '@/components/intro/Favicon'
-import Logo from '@/components/intro/Logo'
+import NavBar from '@/components/layout/NavBar'
 import '@/components/leads-page/LeadsPageView.css'
 import {
   type Citation,
@@ -627,17 +627,26 @@ export function LandingPageC({ chatbotId }: LandingPageCProps) {
 
   return (
     <div className={styles['intro-c-page']} data-page="intro-c">
+      {/* NavBar */}
+        <NavBar
+          homeLink="https://rolemodelsoftware.com"
+          link3="https://consult.rolemodelsoftware.com"
+          link4="https://rolemodelsoftware.com/contact"
+          bgColor="rgba(255, 255, 255, 0.9)"
+          textColor="#181A18"
+          openTextColor="#FFFFFF"
+          logoTheme="blue-white"
+          openLogoTheme="light"
+          accentColor="#2a84f8"
+          ghostColor="#DADADA"
+          spotlightImageUrl="https://framerusercontent.com/images/8nGc7fE31a5LiyhesQXL0kAAh48.webp?width=2400&height=1792"
+          logoImage="https://framerusercontent.com/images/fq0QpZJihXpp1TCLYctWjKapX8.svg?width=189&height=88"
+          spotlightContent="Branded Mobile PWA and Desktop Web application for business forum and executive coaching firm"
+        />
       <div ref={wrapperRef} className={styles['smooth-wrapper']}>
         <div ref={contentRef} className={styles['smooth-content']}>
           {/* Hero Section */}
           <section ref={heroRef} className={styles['intro-c-hero']}>
-            {/* Logo */}
-            <div className={styles['intro-c-logo']}>
-              <Logo
-                variant="dark"
-                style={{ width: 'calc(var(--op-size-unit) * 24)', height: 'auto' }}
-              />
-            </div>
             <div className={styles['intro-c-hero__gradient']} />
 
             <motion.div

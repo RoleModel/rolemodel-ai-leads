@@ -11,7 +11,7 @@ import {
   Calendar03Icon,
   DocumentAttachmentIcon,
   Message02Icon,
-} from '@hugeicons-pro/core-twotone-rounded'
+} from '@hugeicons-pro/core-duotone-rounded'
 import { HugeiconsIcon } from '@hugeicons/react'
 import gsap from 'gsap'
 import { SplitText } from 'gsap/SplitText'
@@ -20,8 +20,8 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { HalftoneSwirl } from '@/components/effects/HalftoneSwirl'
 import AnimatedPath from '@/components/intro/AnimatedPath'
-import Logo from '@/components/intro/Logo'
 import SectionBand from '@/components/intro/SectionBand'
+import NavBar from '@/components/layout/NavBar'
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ButtonPill from '@/components/ui/button-animated'
@@ -266,14 +266,20 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
   return (
     <div className="intro-page">
       <div className="intro-page__content">
+        {/* NavBar */}
+          <NavBar
+            homeLink="https://rolemodelsoftware.com"
+            link3="https://consult.rolemodelsoftware.com"
+            link4="https://rolemodelsoftware.com/contact"
+            bgColor="var(--blue-green-900)"
+            textColor="#FFFFFF"
+            spotlightImageUrl="https://framerusercontent.com/images/8nGc7fE31a5LiyhesQXL0kAAh48.webp?width=2400&height=1792"
+            logoImage="https://framerusercontent.com/images/fq0QpZJihXpp1TCLYctWjKapX8.svg?width=189&height=88"
+            spotlightContent="Branded Mobile PWA and Desktop Web application for business forum and executive coaching firm"
+          />
+
         {/* Hero Section */}
         <section className={styles.hero}>
-          <div className={styles.logo}>
-            <Logo
-              variant="white"
-              style={{ width: 'calc(var(--op-size-unit) * 30)', height: 'auto' }}
-            />
-          </div>
           <div className={`container ${styles['hero-container']}`}>
             <div ref={heroContainerRef}>
               <h1 id="heading" className={styles['hero-title']}>
