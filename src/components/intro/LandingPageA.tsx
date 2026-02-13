@@ -3,8 +3,6 @@
 import { useGSAP } from '@gsap/react'
 import {
   AlarmClockIcon,
-  ArrowDownRight01Icon,
-  ArrowRight02Icon,
 } from '@hugeicons-pro/core-stroke-standard'
 import {
   ArtificialIntelligence04Icon,
@@ -24,7 +22,7 @@ import SectionBand from '@/components/intro/SectionBand'
 import NavBar from '@/components/layout/NavBar'
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
-import ButtonPill from '@/components/ui/button-animated'
+import { ButtonPill } from '@/components/ui/ButtonPill'
 import { Card } from '@/components/ui/card'
 
 import { trackConversion, trackEngagement, trackView } from '@/lib/ab-testing/tracking'
@@ -315,17 +313,12 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
 
                 <motion.div className={styles['hero-actions']} variants={actionsVariant}>
                   <ButtonPill
-                    iconRight={
-                      <HugeiconsIcon
-                        icon={ArrowDownRight01Icon}
-                        strokeWidth={2}
-                        size={20}
-                      />
-                    }
                     label="How it works"
                     variant="brightblue"
                     onClick={handleScrollToHowItWorks}
-                  ></ButtonPill>
+                    endIconName="arrow-down-right-01"
+                    showEndIcon
+                  />
                   <div className={styles['time-estimate']}>
                     <HugeiconsIcon icon={AlarmClockIcon} size={20} />
                     <span>Takes 3-5 minutes</span>
@@ -384,11 +377,10 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
             <div className={styles['how-it-works-cta']}>
               <ButtonPill
                 label="Get started"
-                iconRight={
-                  <HugeiconsIcon strokeWidth={2} icon={ArrowDownRight01Icon} size={20} />
-                }
                 variant="brightblue"
                 onClick={handleScrollToGetStarted}
+                endIconName="arrow-down-right-01"
+                showEndIcon
               />
             </div>
           </div>
@@ -442,9 +434,10 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
                 <div className={styles['form-card']}>
                   <ButtonPill
                     label="Continue Conversation"
-                    iconRight={<HugeiconsIcon icon={ArrowRight02Icon} size={20} />}
                     variant="brightblue"
                     onClick={() => setShowChat(true)}
+                    endIconName="arrow-right-02"
+                    showEndIcon
                   />
                 </div>
               </div>
@@ -492,16 +485,11 @@ export function LandingPageA({ chatbotId }: LandingPageAProps) {
                     <ButtonPill
                       className={styles['form-button']}
                       label={isLoading ? 'Starting...' : 'Start'}
-                      iconRight={
-                        <HugeiconsIcon
-                          icon={ArrowRight02Icon}
-                          strokeWidth={2}
-                          size={20}
-                        />
-                      }
                       variant="brightblue"
                       type="submit"
                       disabled={isLoading}
+                      endIconName="arrow-right-02"
+                      showEndIcon={!isLoading}
                     />
                   </div>
                 </div>

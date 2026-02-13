@@ -59,6 +59,7 @@ import {
 import { CaseStudyCard } from '@/components/ui/case-study-card'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ScrollIndicator from '@/components/ui/ScrollIndicator'
+import { ButtonPill } from '@/components/ui/ButtonPill'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
@@ -453,13 +454,15 @@ export function HeroChat(props: HeroChatProps) {
               />
             </div>
             <CardAction>
-              <button
+              <ButtonPill
                 type="submit"
-                className="btn btn--primary btn--large"
+                label={isSubmitting ? 'Starting...' : 'Start Conversation'}
+                variant="brightblue"
                 disabled={!formData.name || !formData.email || isSubmitting}
-              >
-                {isSubmitting ? 'Starting...' : 'Start Conversation'}
-              </button>
+                endIconName="arrow-right-02"
+                showEndIcon={!isSubmitting}
+                style={{ width: '100%' }}
+              />
             </CardAction>
           </form>
         </CardContent>

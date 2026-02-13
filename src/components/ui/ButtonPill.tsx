@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react'
 import * as HugeIconsStroke from '@hugeicons-pro/core-stroke-standard'
 import * as HugeIconsSolid from '@hugeicons-pro/core-solid-standard'
@@ -163,6 +163,10 @@ export function ButtonPill(props: ButtonPillProps) {
 
   // Single source of truth for modes
   const isCircleMode = shapeMode === 'circle' || (shapeMode === 'auto' && Boolean(circle))
+
+  // Ensure icons render only after hydration to avoid mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => { setIsMounted(true) }, [])
 
   // Hover state for grow overlay
   const [isHovered, setIsHovered] = useState(false)
@@ -398,6 +402,7 @@ export function ButtonPill(props: ButtonPillProps) {
   }
 
   const renderIcon = (iconName: string) => {
+    if (!isMounted) return null
     const IconComponent = getIconComponent(iconName, iconVariant)
     if (!IconComponent) return null
     return (
@@ -429,7 +434,7 @@ export function ButtonPill(props: ButtonPillProps) {
         color: 'inherit',
       }}
     >
-      {showStartIcon && (startIconName || startIconSvg) && (
+      {isMounted && showStartIcon && (startIconName || startIconSvg) && (
         <div
           style={{
             display: 'inline-flex',
@@ -460,7 +465,7 @@ export function ButtonPill(props: ButtonPillProps) {
         {displayLabel}
       </span>
 
-      {showEndIcon && (endIconName || endIconSvg) && (
+      {isMounted && showEndIcon && (endIconName || endIconSvg) && (
         <div
           style={{
             display: 'inline-flex',
