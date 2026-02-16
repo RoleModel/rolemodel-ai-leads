@@ -92,6 +92,17 @@ export default function ChatLogsPage() {
     loadConversations()
   }, [loadConversations])
 
+  const loadMessages = useCallback(async (conversationId: string) => {
+    try {
+      const res = await fetch(`/api/conversations?conversationId=${conversationId}`)
+      const data = await res.json()
+      setMessages(data.messages || [])
+      setSelectedConversation(data.conversation)
+    } catch (error) {
+      console.error('Error loading messages:', error)
+    }
+  }, [])
+
   useEffect(() => {
     const conversationId = searchParams.get('conversation')
     if (conversationId && conversations.length > 0) {
@@ -102,7 +113,7 @@ export default function ChatLogsPage() {
         setTimeout(() => setHighlightedConvId(null), 3000)
       }
     }
-  }, [searchParams, conversations])
+  }, [searchParams, conversations, loadMessages])
 
   useEffect(() => {
     if (!highlightedConvId) return
@@ -114,17 +125,6 @@ export default function ChatLogsPage() {
 
   function handleViewLead(conversationId: string) {
     router.push(`/admin/activity/leads?conversation=${conversationId}`)
-  }
-
-  async function loadMessages(conversationId: string) {
-    try {
-      const res = await fetch(`/api/conversations?conversationId=${conversationId}`)
-      const data = await res.json()
-      setMessages(data.messages || [])
-      setSelectedConversation(data.conversation)
-    } catch (error) {
-      console.error('Error loading messages:', error)
-    }
   }
 
   async function handleArchive(conversationId: string, archive: boolean) {
