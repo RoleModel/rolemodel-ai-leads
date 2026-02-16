@@ -55,7 +55,10 @@ export async function GET(req: NextRequest) {
         { headers: corsHeaders }
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders })
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500, headers: corsHeaders }
+    )
   }
 
   return NextResponse.json({ config: data.config }, { headers: corsHeaders })

@@ -8,12 +8,16 @@ import {
   RotateClockwiseIcon,
   UserIcon,
 } from 'hugeicons-react'
-import { Suspense, useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+import { MessageBubble } from './_components/MessageBubble'
+import { VisitorDetailsCard, getLocationString } from './_components/VisitorDetailsCard'
 
 interface VisitorMetadata {
   ip?: string
@@ -53,6 +57,8 @@ interface Message {
 type ArchiveFilter = 'active' | 'archived' | 'all'
 
 export default function ChatLogsPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(
     null
@@ -60,6 +66,8 @@ export default function ChatLogsPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('active')
+  const [highlightedConvId, setHighlightedConvId] = useState<string | null>(null)
+  const conversationRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const loadConversations = useCallback(async () => {
     setIsLoading(true)
@@ -80,7 +88,7 @@ export default function ChatLogsPage() {
     loadConversations()
   }, [loadConversations])
 
-  async function loadMessages(conversationId: string) {
+  const loadMessages = useCallback(async (conversationId: string) => {
     try {
       const res = await fetch(`/api/conversations?conversationId=${conversationId}`)
       const data = await res.json()
@@ -89,6 +97,30 @@ export default function ChatLogsPage() {
     } catch (error) {
       console.error('Error loading messages:', error)
     }
+  }, [])
+
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation')
+    if (conversationId && conversations.length > 0) {
+      const conv = conversations.find((c) => c.id === conversationId)
+      if (conv) {
+        loadMessages(conversationId)
+        setHighlightedConvId(conversationId)
+        setTimeout(() => setHighlightedConvId(null), 3000)
+      }
+    }
+  }, [searchParams, conversations, loadMessages])
+
+  useEffect(() => {
+    if (!highlightedConvId) return
+    const node = conversationRefs.current[highlightedConvId]
+    if (node) {
+      node.scrollIntoView({ behavior: 'instant', block: 'center' })
+    }
+  }, [highlightedConvId])
+
+  function handleViewLead(conversationId: string) {
+    router.push(`/admin/activity/leads?conversation=${conversationId}`)
   }
 
   async function handleArchive(conversationId: string, archive: boolean) {
@@ -108,13 +140,6 @@ export default function ChatLogsPage() {
     } catch (error) {
       console.error('Error archiving conversation:', error)
     }
-  }
-
-  const getLocationString = (metadata: VisitorMetadata | null) => {
-    if (!metadata?.geo) return null
-    return [metadata.geo.city, metadata.geo.region, metadata.geo.country]
-      .filter(Boolean)
-      .join(', ')
   }
 
   return (
@@ -175,11 +200,15 @@ export default function ChatLogsPage() {
                     {conversations.map((conv) => (
                       <div
                         key={conv.id}
+                        ref={(node) => {
+                          conversationRefs.current[conv.id] = node
+                        }}
                         onClick={() => loadMessages(conv.id)}
-                        className={`admin-list-item ${selectedConversation?.id === conv.id
+                        className={`admin-list-item ${
+                          selectedConversation?.id === conv.id
                             ? 'admin-list-item--selected'
                             : ''
-                          }`}
+                        } ${highlightedConvId === conv.id ? 'admin-list-item--highlighted' : ''}`}
                       >
                         <div className="admin-list-item__header">
                           <UserIcon className="icon-sm admin-list-item__icon" />
@@ -248,123 +277,15 @@ export default function ChatLogsPage() {
               <ScrollArea style={{ flex: 1, minHeight: 0 }}>
                 <div className="admin-content admin-content--muted">
                   {!selectedConversation ? (
-                    <div className="admin-empty admin-empty--centered">
-                      Select a conversation to view messages
-                    </div>
+                    <NoConversationSelected />
                   ) : (
                     <div className="admin-content__list">
-                      <div className="admin-info-card">
-                        <h3 className="admin-info-card__title">Visitor Details</h3>
-                        <div className="admin-info-card__grid">
-                          {selectedConversation.visitor_name && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Name</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_name}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_email && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Email</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_email}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.geo && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Location</span>
-                              <p className="admin-info-card__value">
-                                {getLocationString(
-                                  selectedConversation.visitor_metadata
-                                ) || 'Unknown'}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.ip && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">IP Address</span>
-                              <p className="admin-info-card__value admin-info-card__value--mono">
-                                {selectedConversation.visitor_metadata.ip}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.geo?.timezone && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Timezone</span>
-                              <p className="admin-info-card__value">
-                                {selectedConversation.visitor_metadata.geo.timezone}
-                              </p>
-                            </div>
-                          )}
-                          {selectedConversation.visitor_metadata?.referer && (
-                            <div className="admin-info-card__field">
-                              <span className="admin-info-card__label">Referrer</span>
-                              <p
-                                className="admin-info-card__value admin-info-card__value--truncate"
-                                title={selectedConversation.visitor_metadata.referer}
-                              >
-                                {selectedConversation.visitor_metadata.referer}
-                              </p>
-                            </div>
-                          )}
-                          <div className="admin-info-card__field">
-                            <span className="admin-info-card__label">Started</span>
-                            <p className="admin-info-card__value">
-                              {new Date(selectedConversation.started_at).toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="admin-info-card__field">
-                            <span className="admin-info-card__label">Status</span>
-                            <p className="admin-info-card__value">
-                              {selectedConversation.lead_captured ? (
-                                <span className="admin-info-card__value--positive">
-                                  Lead Captured
-                                </span>
-                              ) : (
-                                <span className="admin-info-card__value--muted">
-                                  Browsing
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        {selectedConversation.visitor_metadata?.userAgent && (
-                          <div className="admin-info-card__section">
-                            <span className="admin-info-card__label">Browser</span>
-                            <p
-                              className="admin-info-card__value admin-info-card__value--truncate"
-                              title={selectedConversation.visitor_metadata.userAgent}
-                            >
-                              {selectedConversation.visitor_metadata.userAgent}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
+                      <VisitorDetailsCard
+                        conversation={selectedConversation}
+                        onViewLead={handleViewLead}
+                      />
                       {messages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`admin-message ${message.role === 'user'
-                              ? 'admin-message--user'
-                              : 'admin-message--assistant'
-                            }`}
-                        >
-                          <div
-                            className={`admin-message__bubble ${message.role === 'user'
-                                ? 'admin-message__bubble--user'
-                                : 'admin-message__bubble--assistant'
-                              }`}
-                          >
-                            <div className="admin-message__content">
-                              {message.content}
-                            </div>
-                            <div className="admin-message__time">
-                              {new Date(message.created_at).toLocaleTimeString()}
-                            </div>
-                          </div>
-                        </div>
+                        <MessageBubble key={message.id} message={message} />
                       ))}
                     </div>
                   )}
@@ -374,6 +295,14 @@ export default function ChatLogsPage() {
           </div>
         </main>
       </div>
+    </div>
+  )
+}
+
+function NoConversationSelected() {
+  return (
+    <div className="admin-empty admin-empty--centered">
+      Select a conversation to view messages
     </div>
   )
 }

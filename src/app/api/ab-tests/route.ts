@@ -28,7 +28,7 @@ export async function GET() {
 
   // Get stats for each variant
   const testsWithStats = await Promise.all(
-    (tests || []).map(async (test: any) => {
+    (tests || []).map(async (test) => {
       const variants = (test.ab_test_variants || []) as Array<{
         id: string
         name: string

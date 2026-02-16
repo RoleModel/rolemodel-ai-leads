@@ -7,7 +7,8 @@ import {
   RefreshIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Suspense } from 'react'
 
 import { NavigationSidebar } from '@/components/layout/Sidebar'
@@ -30,6 +31,8 @@ interface Lead {
 type ArchiveFilter = 'active' | 'archived' | 'all'
 
 export default function LeadsPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('active')
@@ -37,6 +40,9 @@ export default function LeadsPage() {
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0],
   })
+  const [highlightedLeadId, setHighlightedLeadId] = useState<string | null>(null)
+  const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null)
+  const leadRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   const loadLeads = useCallback(async () => {
     setIsLoading(true)
@@ -59,6 +65,29 @@ export default function LeadsPage() {
     loadLeads()
   }, [loadLeads])
 
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation')
+    if (conversationId && leads.length > 0) {
+      const lead = leads.find((l) => l.conversation_id === conversationId)
+      if (lead) {
+        setHighlightedLeadId(lead.id)
+        setExpandedLeadId(lead.id)
+        setTimeout(() => setHighlightedLeadId(null), 3000)
+        // Scroll to the lead
+        setTimeout(() => {
+          const element = leadRefs.current[lead.id]
+          if (element) {
+            element.scrollIntoView({ behavior: 'instant', block: 'center' })
+          }
+        }, 100)
+      }
+    }
+  }, [searchParams, leads])
+
+  function handleViewChat(conversationId: string) {
+    router.push(`/admin/activity/chat-logs?conversation=${conversationId}`)
+  }
+
   async function handleExport() {
     try {
       const res = await fetch(
@@ -75,40 +104,6 @@ export default function LeadsPage() {
       document.body.removeChild(a)
     } catch (error) {
       console.error('Error exporting leads:', error)
-    }
-  }
-
-  async function handleEmailShare(lead: Lead) {
-    try {
-      await fetch('/api/leads/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leadId: lead.id,
-          method: 'email',
-        }),
-      })
-      alert('Lead summary sent via email')
-    } catch (error) {
-      console.error('Error sharing via email:', error)
-      alert('Failed to send email')
-    }
-  }
-
-  async function handleSlackShare(lead: Lead) {
-    try {
-      await fetch('/api/leads/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leadId: lead.id,
-          method: 'slack',
-        }),
-      })
-      alert('Lead summary shared to Slack')
-    } catch (error) {
-      console.error('Error sharing to Slack:', error)
-      alert('Failed to share to Slack')
     }
   }
 
@@ -222,8 +217,15 @@ export default function LeadsPage() {
                   {leads.map((lead) => (
                     <div
                       key={lead.id}
+                      ref={(el) => {
+                        leadRefs.current[lead.id] = el
+                      }}
                       className={`admin-card-wrapper ${
                         lead.is_archived ? 'admin-card-wrapper--archived' : ''
+                      } ${
+                        highlightedLeadId === lead.id
+                          ? 'admin-card-wrapper--highlighted'
+                          : ''
                       }`}
                     >
                       <LeadSummary
@@ -232,11 +234,12 @@ export default function LeadsPage() {
                           lead.visitor_name || lead.visitor_email || 'Anonymous'
                         }
                         visitorDate={new Date(lead.created_at).toLocaleDateString()}
-                        onEmailShare={() => handleEmailShare(lead)}
-                        onSlackShare={() => handleSlackShare(lead)}
+                        conversationId={lead.conversation_id}
+                        onViewChat={() => handleViewChat(lead.conversation_id)}
                         onArchive={() => handleArchive(lead.id, !lead.is_archived)}
                         isArchived={lead.is_archived ?? false}
                         variant="full"
+                        expanded={expandedLeadId === lead.id}
                       />
                     </div>
                   ))}

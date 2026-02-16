@@ -60,7 +60,11 @@ export async function parseSitemap(sitemapUrl: string): Promise<SitemapUrl[]> {
 export function categorizeUrl(url: string): 'case-study' | 'blog' | 'page' | 'skip' {
   const path = new URL(url).pathname
 
-  if (path.startsWith('/case-studies/') || path.startsWith('/portfolio/') || path.startsWith('/our-work/')) {
+  if (
+    path.startsWith('/case-studies/') ||
+    path.startsWith('/portfolio/') ||
+    path.startsWith('/our-work/')
+  ) {
     return 'case-study'
   }
   if (path.startsWith('/blog/') && path !== '/blog') {

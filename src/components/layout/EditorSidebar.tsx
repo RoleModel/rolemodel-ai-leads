@@ -218,13 +218,13 @@ export function EditorSidebar({
         onMouseDown={handleMouseDown}
         onMouseEnter={(e) => {
           if (!isResizing) {
-            ; (e.target as HTMLElement).style.backgroundColor =
+            ;(e.target as HTMLElement).style.backgroundColor =
               'var(--op-color-primary-minus-four)'
           }
         }}
         onMouseLeave={(e) => {
           if (!isResizing) {
-            ; (e.target as HTMLElement).style.backgroundColor = 'transparent'
+            ;(e.target as HTMLElement).style.backgroundColor = 'transparent'
           }
         }}
       />
@@ -388,10 +388,7 @@ export function EditorSidebar({
                     variant="secondary"
                     style={{ flex: 1 }}
                     onClick={() =>
-                      window.open(
-                        `/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`,
-                        '_blank'
-                      )
+                      window.open(`/leads-page?chatbotId=${DEFAULT_CHATBOT_ID}`, '_blank')
                     }
                   >
                     Preview Full Page

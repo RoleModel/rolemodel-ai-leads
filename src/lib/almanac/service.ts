@@ -4,7 +4,6 @@
  * Sends lead data to the Almanac CRM when a lead is created.
  * Uses ALMANAC_CONTACT_API_URL and ALMANAC_API_KEY environment variables.
  */
-
 import type { LeadSummaryData } from '@/components/leads-page/LeadSummary'
 
 export interface AlmanacContact {
@@ -19,6 +18,7 @@ export interface AlmanacContact {
   utm_source?: string
   utm_campaign?: string
   utm_medium?: string
+  referral?: string
 }
 
 export interface VisitorMetadata {
@@ -49,7 +49,8 @@ export function buildAlmanacPayload(
   visitorName: string | undefined,
   visitorEmail: string | undefined,
   leadSummary: LeadSummaryData | null | undefined,
-  visitorMetadata: VisitorMetadata | null | undefined
+  visitorMetadata: VisitorMetadata | null | undefined,
+  conversationId?: string
 ): AlmanacContact {
   const contact: AlmanacContact = {}
 
@@ -103,6 +104,12 @@ export function buildAlmanacPayload(
     contact.utm_medium = visitorMetadata.utm_medium
   }
 
+  // Lead link
+  if (conversationId) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    contact.referral = `${baseUrl}/admin/activity/leads?conversation=${conversationId}`
+  }
+
   // Remove undefined values for cleaner payload
   return Object.fromEntries(
     Object.entries(contact).filter(([, v]) => v !== undefined)
@@ -117,14 +124,17 @@ export async function sendToAlmanac(
   visitorName: string | undefined,
   visitorEmail: string | undefined,
   leadSummary: LeadSummaryData | null | undefined,
-  visitorMetadata: VisitorMetadata | null | undefined
+  visitorMetadata: VisitorMetadata | null | undefined,
+  conversationId?: string
 ): Promise<AlmanacResponse> {
   const apiUrl = process.env.ALMANAC_CONTACT_API_URL
   const apiKey = process.env.ALMANAC_API_KEY
 
   // Skip if not configured
   if (!apiUrl || !apiKey) {
-    console.log('[Almanac] Integration not configured - skipping (missing ALMANAC_CONTACT_API_URL or ALMANAC_API_KEY)')
+    console.log(
+      '[Almanac] Integration not configured - skipping (missing ALMANAC_CONTACT_API_URL or ALMANAC_API_KEY)'
+    )
     return { success: true } // Not an error, just not configured
   }
 
@@ -136,7 +146,13 @@ export async function sendToAlmanac(
     return { success: false, error: 'Invalid API URL configuration' }
   }
 
-  const payload = buildAlmanacPayload(visitorName, visitorEmail, leadSummary, visitorMetadata)
+  const payload = buildAlmanacPayload(
+    visitorName,
+    visitorEmail,
+    leadSummary,
+    visitorMetadata,
+    conversationId
+  )
 
   // Skip if we don't have minimum required data (at least name or email)
   if (!payload.name && !payload.email) {

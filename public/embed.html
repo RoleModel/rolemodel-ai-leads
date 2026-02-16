@@ -1,57 +1,62 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoleModel AI Leads Widget</title>
+    <!-- Load Optics CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RoleModel AI Leads Widget</title>
-  <!-- Load Optics CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@rolemodel/optics@2.2.0/dist/css/optics.min.css" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      body,
+      html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
 
-    body,
-    html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
+      #embed-container {
+        width: 100vw;
+        height: 100vh;
+        border: none;
+      }
 
-    #embed-container {
-      width: 100vw;
-      height: 100vh;
-      border: none;
-    }
+      /* Layer definitions */
+      @layer utilities, overrides, app;
+    </style>
+  </head>
 
+  <body>
+    <iframe
+      id="embed-container"
+      src="/embed/leads-page"
+      frameborder="0"
+      allow="microphone"
+    ></iframe>
 
-    /* Layer definitions */
-    @layer utilities, overrides, app;
-  </style>
-</head>
+    <script>
+      // Get chatbot ID from URL parameters
+      const urlParams = new URLSearchParams(window.location.search)
+      const chatbotId =
+        urlParams.get('chatbotId') || 'a0000000-0000-0000-0000-000000000001'
 
-<body>
-  <iframe id="embed-container" src="/embed/leads-page" frameborder="0" allow="microphone"></iframe>
+      // Set iframe source with chatbot ID
+      const iframe = document.getElementById('embed-container')
+      iframe.src = `/embed/leads-page?chatbotId=${chatbotId}`
 
-  <script>
-    // Get chatbot ID from URL parameters
-    const urlParams = new URLSearchParams(window.location.search)
-    const chatbotId =
-      urlParams.get('chatbotId') || 'a0000000-0000-0000-0000-000000000001'
-
-    // Set iframe source with chatbot ID
-    const iframe = document.getElementById('embed-container')
-    iframe.src = `/embed/leads-page?chatbotId=${chatbotId}`
-
-    // Optional: Post message communication with parent window
-    window.addEventListener('message', function (event) {
-      // Handle messages from parent window if needed
-      console.log('Received message:', event.data)
-    })
-  </script>
-</body>
-
+      // Optional: Post message communication with parent window
+      window.addEventListener('message', function (event) {
+        // Handle messages from parent window if needed
+        console.log('Received message:', event.data)
+      })
+    </script>
+  </body>
 </html>

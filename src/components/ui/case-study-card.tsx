@@ -1,8 +1,8 @@
 'use client'
 
-import * as React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -205,7 +205,7 @@ export const CaseStudyCard = ({
             style={{
               marginBottom: 12,
               height: 60,
-              width: 200
+              width: 200,
             }}
           >
             <Image

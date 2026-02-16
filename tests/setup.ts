@@ -12,5 +12,3 @@ vi.stubEnv('AI_GATEWAY_API_KEY', 'test-gateway-key')
 afterEach(() => {
   vi.clearAllMocks()
 })
-
-

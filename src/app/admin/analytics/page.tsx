@@ -238,53 +238,53 @@ export default function AnalyticsPage() {
   // Prepare funnel data for bar chart
   const funnelChartData = analytics?.funnelAnalytics
     ? [
-      {
-        stage: 'Started',
-        count: analytics.funnelAnalytics.started,
-        fill: 'var(--op-color-primary-plus-two)',
-      },
-      {
-        stage: 'Engaged',
-        count: analytics.funnelAnalytics.engaged,
-        fill: 'var(--op-color-primary-base)',
-      },
-      {
-        stage: 'Contact',
-        count: analytics.funnelAnalytics.contactCaptured,
-        fill: 'var(--op-color-primary-minus-two)',
-      },
-      {
-        stage: 'Qualified',
-        count: analytics.funnelAnalytics.qualified,
-        fill: 'var(--op-color-alerts-notice-base)',
-      },
-    ]
+        {
+          stage: 'Started',
+          count: analytics.funnelAnalytics.started,
+          fill: 'var(--op-color-primary-plus-two)',
+        },
+        {
+          stage: 'Engaged',
+          count: analytics.funnelAnalytics.engaged,
+          fill: 'var(--op-color-primary-base)',
+        },
+        {
+          stage: 'Contact',
+          count: analytics.funnelAnalytics.contactCaptured,
+          fill: 'var(--op-color-primary-minus-two)',
+        },
+        {
+          stage: 'Qualified',
+          count: analytics.funnelAnalytics.qualified,
+          fill: 'var(--op-color-alerts-notice-base)',
+        },
+      ]
     : []
 
   // Engagement breakdown for pie/bar chart
   const engagementBreakdownData = analytics?.engagementLevels
     ? [
-      {
-        name: 'Bounced',
-        value: analytics.engagementLevels.bounced,
-        fill: 'var(--purple-200, #3c194a)',
-      },
-      {
-        name: 'Low',
-        value: analytics.engagementLevels.low,
-        fill: 'var(--orange, #ffcd74)',
-      },
-      {
-        name: 'Medium',
-        value: analytics.engagementLevels.medium,
-        fill: 'var(--light-blue, #87d4e9)',
-      },
-      {
-        name: 'High',
-        value: analytics.engagementLevels.high,
-        fill: 'var(--light-green, #86c774)',
-      },
-    ]
+        {
+          name: 'Bounced',
+          value: analytics.engagementLevels.bounced,
+          fill: 'var(--purple-200, #3c194a)',
+        },
+        {
+          name: 'Low',
+          value: analytics.engagementLevels.low,
+          fill: 'var(--orange, #ffcd74)',
+        },
+        {
+          name: 'Medium',
+          value: analytics.engagementLevels.medium,
+          fill: 'var(--light-blue, #87d4e9)',
+        },
+        {
+          name: 'High',
+          value: analytics.engagementLevels.high,
+          fill: 'var(--light-green, #86c774)',
+        },
+      ]
     : []
 
   return (

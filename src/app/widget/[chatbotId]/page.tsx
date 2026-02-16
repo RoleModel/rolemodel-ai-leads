@@ -7,7 +7,6 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 
 interface WidgetConfig {
   displayName: string
@@ -28,7 +27,8 @@ interface WidgetConfig {
 
 const DEFAULT_CONFIG: WidgetConfig = {
   displayName: 'RoleModel Software',
-  initialMessage: "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?",
+  initialMessage:
+    "Hi! I'm here to help you assess whether custom software might be right for your business. What problem or opportunity is prompting you to consider custom software?",
   theme: 'light',
   primaryColor: '#007BFF',
   buttonColor: '#000000',
@@ -187,7 +187,13 @@ export default function WidgetPage() {
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--op-space-small)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--op-space-small)',
+            }}
+          >
             <div
               style={{
                 width: '32px',
@@ -195,7 +201,7 @@ export default function WidgetPage() {
                 borderRadius: 'var(--op-radius-small)',
                 backgroundColor:
                   config.profilePicture?.startsWith('data:') ||
-                    config.profilePicture?.startsWith('http')
+                  config.profilePicture?.startsWith('http')
                     ? 'transparent'
                     : 'white',
                 color: config.primaryColor,
@@ -207,7 +213,7 @@ export default function WidgetPage() {
                 overflow: 'hidden',
                 backgroundImage:
                   config.profilePicture?.startsWith('data:') ||
-                    config.profilePicture?.startsWith('http')
+                  config.profilePicture?.startsWith('http')
                     ? `url(${config.profilePicture})`
                     : 'none',
                 backgroundSize: 'cover',
@@ -297,7 +303,7 @@ export default function WidgetPage() {
               style={{
                 width: '100%',
                 backgroundColor: config.primaryColor,
-                boxShadow: `var(--op-border-all) ${config.primaryColor}`
+                boxShadow: `var(--op-border-all) ${config.primaryColor}`,
               }}
               disabled={isSubmitting}
             >

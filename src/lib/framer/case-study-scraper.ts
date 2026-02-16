@@ -3,7 +3,6 @@
  * Provides metadata for case study cards using data from case-studies.json
  * Images are hosted on Framer CDN (framerusercontent.com)
  */
-
 import caseStudies from '@/data/case-studies.json'
 
 export interface CaseStudyMetadata {
@@ -42,7 +41,9 @@ const extractSlug = (url: string): string | null => {
  * Get case study metadata from local JSON data
  * Uses Framer CDN URLs for images
  */
-export const scrapeCaseStudyMetadata = async (url: string): Promise<CaseStudyMetadata> => {
+export const scrapeCaseStudyMetadata = async (
+  url: string
+): Promise<CaseStudyMetadata> => {
   const slug = extractSlug(url)
 
   if (slug && caseStudyMap.has(slug)) {
@@ -60,7 +61,11 @@ export const scrapeCaseStudyMetadata = async (url: string): Promise<CaseStudyMet
   // Return basic metadata if case study not found in JSON
   return {
     url,
-    title: slug?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Case Study',
+    title:
+      slug
+        ?.split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ') || 'Case Study',
   }
 }
 

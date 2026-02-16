@@ -81,7 +81,9 @@ describe('RAG Context Building', () => {
 
     const isCaseStudyUrl = (url: string) => {
       return (
-        url.includes('/case-studies/') || url.includes('/portfolio/') || url.includes('/our-work/')
+        url.includes('/case-studies/') ||
+        url.includes('/portfolio/') ||
+        url.includes('/our-work/')
       )
     }
 
@@ -93,4 +95,3 @@ describe('RAG Context Building', () => {
     expect(isCaseStudyUrl('https://rolemodelsoftware.com/about')).toBe(false)
   })
 })
-

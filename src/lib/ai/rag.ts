@@ -65,10 +65,10 @@ export async function retrieveRelevantSources(
         )
 
       const metadataMap = new Map(
-        (metadataRows || []).map((row: any) => [row.id, row.metadata])
+        (metadataRows || []).map((row) => [row.id, row.metadata])
       )
 
-      return data.map((row: any) => {
+      return data.map((row) => {
         const meta = metadataMap.get(row.id)
         return {
           ...row,
@@ -197,13 +197,13 @@ export function buildSourceContext(
       ? `
 Questions to weave into the conversation naturally:
 ${workflowQuestions
-        .map(
-          (q, i: number) => `
+  .map(
+    (q, i: number) => `
 ${i + 1}. ${q.question}
    - ${q.required ? 'Important to understand' : 'Ask if relevant to the conversation'}
 `
-        )
-        .join('')}`
+  )
+  .join('')}`
       : ''
 
   // Build primary questions section based on PROMPTS.md conversation structure
@@ -286,11 +286,12 @@ ${sourceTexts}
 ---
 
 CRITICAL INSTRUCTIONS:
-- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${enablePersonalization
+- You MUST answer questions using ONLY the information provided in the Available Knowledge Base above${citationInstructions}${caseStudyInstructions}${
+    enablePersonalization
       ? `
 - Be highly personalized: Use the prospect's name, industry context, and prior answers from the conversation`
       : ''
-    }
+  }
 - Be natural and conversational when using the knowledge base information
 - If the knowledge base contains relevant information, use it to provide a complete, detailed answer
 - NEVER use phrases like "connect you with a specialist" or "I'd be happy to help you explore"

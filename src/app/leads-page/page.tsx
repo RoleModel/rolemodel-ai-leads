@@ -13,11 +13,7 @@ function EmbedLeadsPageContent() {
   const chatbotId = searchParams.get('chatbotId') || DEFAULT_CHATBOT_ID
 
   return (
-    <LeadsPageWithProvider
-      chatbotId={chatbotId}
-      showSidebar={true}
-      loadFromApi={true}
-    />
+    <LeadsPageWithProvider chatbotId={chatbotId} showSidebar={true} loadFromApi={true} />
   )
 }
 

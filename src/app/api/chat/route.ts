@@ -1,19 +1,22 @@
-import { streamText, tool, stepCountIs } from 'ai'
+import { stepCountIs, streamText, tool } from 'ai'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { sendToAlmanac, type VisitorMetadata } from '@/lib/almanac/service'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
-import { sendSummaryEmail } from '@/lib/email/send-summary'
-import { scrapeCaseStudyMetadata, getAllCaseStudies } from '@/lib/framer/case-study-scraper'
 import {
   type Source,
   buildSourceContext,
   getChatbot,
   retrieveRelevantSources,
 } from '@/lib/ai/rag'
+import { type VisitorMetadata, sendToAlmanac } from '@/lib/almanac/service'
+import { sendSummaryEmail } from '@/lib/email/send-summary'
+import {
+  getAllCaseStudies,
+  scrapeCaseStudyMetadata,
+} from '@/lib/framer/case-study-scraper'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
@@ -22,6 +25,9 @@ export const runtime = 'edge'
 export const maxDuration = 30
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
+const CALENDLY_URL =
+  process.env.NEXT_PUBLIC_CALENDLY_URL ||
+  'https://calendly.com/rolemodel-software/45-minute-conversation'
 
 type SourceHeaderPayload = {
   index: number
@@ -81,7 +87,7 @@ CONVERSATION STRUCTURE:
 
 ROLEMODEL'S SERVICES (WHAT WE OFFER):
 RoleModel Software is a custom software development company. We offer:
-1. **Custom Software Development**: Building tailored software solutions from scratch ($50k-$75k+ for initial delivery)
+1. **Custom Software Development**: Building tailored software solutions from scratch ($25k-$75k+ for initial delivery)
 2. **Discover Phase**: A focused exploration to assess feasibility, analyze requirements, and create a strategic roadmap specifically for a potential custom software project ($5k-10k). This is NOT standalone consulting - it's the first phase of a custom software engagement.
 3. **Enhancements to Existing Custom Software**: Working with clients who already have custom software to improve, extend, or maintain it
 
@@ -105,14 +111,16 @@ TONE & BEHAVIOR:
 - Push back respectfully on unrealistic expectations to demonstrate expertise and set proper expectations.
 
 BUDGET REALITY CHECKS:
-- RoleModel's typical custom software projects start at $50,000-$75,000 for initial delivery.
+- RoleModel's typical custom software projects start at $25,000-$75,000 for initial delivery.
 - If a prospect mentions budgets under $10,000, acknowledge this may not align with custom development costs. You can mention the Discover Phase ($5k-10k) - but ONLY as the first step toward a full custom software project, not as a standalone engagement.
 - The Discover Phase includes: Codebase or Feasibility Assessments, Business Process Analysis, or UI/UX Design Research, culminating in an actionable report with findings, recommendations, and strategic next steps FOR A SOFTWARE PROJECT.
 - When budget signals are far below realistic ranges, explain cost drivers honestly. You can mention a phased approach (building incrementally over time), but DO NOT suggest off-the-shelf software, process consulting, or other services RoleModel doesn't provide.
 - Position budget conversations as helping them understand the investment level required for custom software, and invite them to schedule a call to explore if there's a fit.
+- If a user is UNCERTAIN about budget or says they "aren't sure", acknowledge that's normal and suggest scheduling a call to discuss their needs and get a realistic range: "That's completely understandable - budget often depends on scope. The best next step would be to schedule a call with our team. They'll review everything you've shared with me and will be prepared to have a focused conversation about your specific situation and what a realistic investment might look like."
+- If a user asks for a PROPOSAL or mentions wanting to "see a proposal", explain that proposals come after a discovery conversation, and offer to schedule: "I'd be happy to help with that. Our team typically puts together proposals after an initial conversation to understand your specific needs. Let's schedule a call - the team will review everything we've discussed here so you won't need to repeat yourself, and you can dive right into the details and next steps."
 
 DISQUALIFICATION SIGNALS (when to suggest custom software may not be the right fit):
-- Budget far below minimum viable project costs ($50k+)
+- Budget far below minimum viable project costs ($25k+)
 - No clear business case or ROI expectation
 - Very early stage - still validating the problem
 - Looking for quick fixes or immediate solutions (custom software takes time)
@@ -164,24 +172,24 @@ SUMMARY MODES:
 - If poor fit: explain why clearly and suggest alternatives
 - If good fit: outline potential value and typical next steps
 - Avoid marketing language - stay objective and analytical
-- Close with: "If you'd like to discuss this assessment with our team, you can schedule a call at [calendly link]."
+- Close with: "If you'd like to discuss this assessment with our team, you can schedule a call at ${CALENDLY_URL}. The team will review everything you've shared here, so you won't need to repeat yourself - they'll be prepared to have a focused conversation about your specific situation."
 
 **EVALUATION CHECKPOINT** (use when user is comparing options or not ready to commit):
 - Summarize what they're evaluating and where custom software fits
 - Honest assessment of trade-offs vs. other approaches
 - Identify key questions still to answer
 - Frame scheduling a call as "exploratory" not "next step to buy"
-- Close with: "When you're ready to explore this further, you can schedule a consultation at [calendly link]."
+- Close with: "When you're ready to explore this further, you can schedule a consultation at ${CALENDLY_URL}. Our team will review all the details you've shared, so when you're ready to talk, they'll be prepared to dive right into answering your questions without making you repeat everything."
 
 **ENGAGED PROSPECT** (use when strong fit, clear need, realistic budget, ready to move forward):
 - Reflect their opportunity and align to RoleModel's strengths
 - Frame potential ROI using investment mindset
 - Express genuine interest in partnering with them
 - Provide clear call to action with urgency
-- Close with: "Let's continue this conversation - schedule a call with our team at [calendly link]."
+- Close with: "Let's continue this conversation - schedule a call with our team at ${CALENDLY_URL}. They'll review everything you've shared here and come prepared to discuss your specific needs, so you can pick up right where we left off."
 
 ALL SUMMARIES:
-- REQUIRED: All summaries must include the scheduling link: ${process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'}
+- REQUIRED: All summaries must include the scheduling link: ${CALENDLY_URL}
 - Match the CTA intensity to the prospect's readiness level
 - Never misrepresent what the user said - quote or paraphrase accurately
 - After presenting the summary, offer to send it to their email by asking: "Would you like me to email this summary to you?"
@@ -248,18 +256,18 @@ export async function POST(req: NextRequest) {
           : Promise.resolve([]),
         conversationId
           ? supabaseServer
-            .from('conversations')
-            .select('visitor_name, visitor_email')
-            .eq('id', conversationId)
-            .single()
-            .then((res: any) => res.data)
+              .from('conversations')
+              .select('visitor_name, visitor_email')
+              .eq('id', conversationId)
+              .single()
+              .then((res) => res.data)
           : Promise.resolve(null),
         supabaseServer
           .from('help_page_settings')
           .select('rag_config')
           .eq('chatbot_id', activeChatbotId)
           .single()
-          .then((res: any) => res.data),
+          .then((res) => res.data),
       ])
 
     if (!chatbot) {
@@ -287,7 +295,9 @@ export async function POST(req: NextRequest) {
     // Log sources for debugging
     console.log('[Chat] Retrieved sources:', relevantSources.length)
     relevantSources.forEach((s, i) => {
-      console.log(`[Chat] Source ${i + 1}: ${s.title} - URL: ${s.metadata?.url || 'none'}`)
+      console.log(
+        `[Chat] Source ${i + 1}: ${s.title} - URL: ${s.metadata?.url || 'none'}`
+      )
     })
 
     const sourceContext = buildSourceContext(relevantSources, chatbot, ragConfig)
@@ -322,21 +332,25 @@ After each response, use the 'suggest_questions' tool to provide 2 relevant foll
 - Focus on helping the user explore their business needs further
 - Make questions specific to what was just discussed
 
-${existingConversation?.visitor_name || existingConversation?.visitor_email
-          ? `
+${
+  existingConversation?.visitor_name || existingConversation?.visitor_email
+    ? `
 VISITOR INFORMATION (already collected from intro form):
 ${existingConversation.visitor_name ? `- Name: ${existingConversation.visitor_name}` : ''}
 ${existingConversation.visitor_email ? `- Email: ${existingConversation.visitor_email}` : ''}
 
 IMPORTANT: This contact information has already been provided. Do NOT ask for their name or email again. Instead, use their name naturally in conversation and focus on understanding their business needs.
 `
-          : ''
-        }
+    : ''
+}
 AVAILABLE CASE STUDIES (use ONLY these URLs with show_case_study tool):
 ${getAllCaseStudies()
-          .slice(0, 15) // Limit to 15 most recent
-          .map((cs) => `- ${cs.title}: https://rolemodelsoftware.com/case-studies/${cs.slug} - ${cs.description.slice(0, 100)}`)
-          .join('\n')}
+  .slice(0, 15) // Limit to 15 most recent
+  .map(
+    (cs) =>
+      `- ${cs.title}: https://rolemodelsoftware.com/case-studies/${cs.slug} - ${cs.description.slice(0, 100)}`
+  )
+  .join('\n')}
 
 ${sourceContext}`,
     }
@@ -470,7 +484,10 @@ ${sourceContext}`,
           description:
             'REQUIRED: Display an interactive case study card preview. You MUST call this tool when the user asks about previous work, examples, portfolio, or case studies.',
           inputSchema: z.object({
-            url: z.string().url().describe('The full URL of the case study page to preview'),
+            url: z
+              .string()
+              .url()
+              .describe('The full URL of the case study page to preview'),
             title: z.string().describe('Title of the case study'),
             description: z
               .string()
@@ -546,8 +563,15 @@ ${sourceContext}`,
           },
         }),
       },
-      async onFinish({ text, finishReason, steps }: { text: string; finishReason?: string; steps?: unknown[] }) {
-
+      async onFinish({
+        text,
+        finishReason,
+        steps,
+      }: {
+        text: string
+        finishReason?: string
+        steps?: unknown[]
+      }) {
         // Save assistant message
         if (activeConversationId) {
           // Extract tool invocations from steps
@@ -589,7 +613,10 @@ ${sourceContext}`,
             }
           }
 
-          console.log(`[Chat] Tool invocations to save: ${toolInvocations.length}`, toolInvocations.map(t => t.toolName))
+          console.log(
+            `[Chat] Tool invocations to save: ${toolInvocations.length}`,
+            toolInvocations.map((t) => t.toolName)
+          )
 
           type MessageInsert = Database['public']['Tables']['messages']['Insert']
           const assistantMessage: MessageInsert = {
@@ -602,11 +629,16 @@ ${sourceContext}`,
             })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
             tool_invocations: toolInvocations.length > 0 ? toolInvocations : null,
           }
-          const { error: msgError } = await supabaseServer.from('messages').insert([assistantMessage])
+          const { error: msgError } = await supabaseServer
+            .from('messages')
+            .insert([assistantMessage])
           if (msgError) {
             console.error('[Chat] Error saving assistant message:', msgError)
           } else {
-            console.log('[Chat] Assistant message saved for conversation:', activeConversationId)
+            console.log(
+              '[Chat] Assistant message saved for conversation:',
+              activeConversationId
+            )
           }
 
           // Track analytics event
@@ -637,7 +669,9 @@ ${sourceContext}`,
                     .order('created_at', { ascending: true }),
                   supabaseServer
                     .from('conversations')
-                    .select('visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count')
+                    .select(
+                      'visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count'
+                    )
                     .eq('id', activeConversationId)
                     .single(),
                   supabaseServer
@@ -651,7 +685,8 @@ ${sourceContext}`,
               const conversation = conversationResult.data
               const allSources = sourcesResult.data
 
-              const visitorMetadata = conversation?.visitor_metadata as VisitorMetadata | null
+              const visitorMetadata =
+                conversation?.visitor_metadata as VisitorMetadata | null
 
               // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
@@ -667,24 +702,25 @@ ${sourceContext}`,
                     textLower.includes('calendly') ||
                     textLower.includes('explore further'))
 
-
                 if (isFinalSummary && allMessages && allMessages.length > 0) {
                   // Extract fresh lead data for the final summary
                   const leadData = await extractLeadData(allMessages, allSources || [])
                   const visitorName =
                     leadData?.contactInfo?.name || conversation?.visitor_name || undefined
                   const visitorEmail =
-                    leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+                    leadData?.contactInfo?.email ||
+                    conversation?.visitor_email ||
+                    undefined
 
                   const enrichedLeadData = leadData
                     ? {
-                      ...leadData,
-                      contactInfo: {
-                        ...leadData.contactInfo,
-                        name: visitorName,
-                        email: visitorEmail,
-                      },
-                    }
+                        ...leadData,
+                        contactInfo: {
+                          ...leadData.contactInfo,
+                          name: visitorName,
+                          email: visitorEmail,
+                        },
+                      }
                     : null
 
                   // Update the lead with final data
@@ -711,32 +747,37 @@ ${sourceContext}`,
                         visitorName,
                         visitorEmail,
                         enrichedLeadData,
-                        visitorMetadata
+                        visitorMetadata,
+                        activeConversationId
                       )
 
                       if (!almanacResult.success) {
                         // Track failed Almanac sync in analytics
-                        await supabaseServer.from('analytics_events').insert([{
+                        await supabaseServer.from('analytics_events').insert([
+                          {
+                            chatbot_id: activeChatbotId,
+                            conversation_id: activeConversationId,
+                            event_type: 'almanac_sync_failed',
+                            metadata: {
+                              error: almanacResult.error || 'Unknown error',
+                              lead_id: existingLead.id,
+                            } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                          },
+                        ])
+                      }
+                    } catch (err) {
+                      // Track failed Almanac sync in analytics
+                      await supabaseServer.from('analytics_events').insert([
+                        {
                           chatbot_id: activeChatbotId,
                           conversation_id: activeConversationId,
                           event_type: 'almanac_sync_failed',
                           metadata: {
-                            error: almanacResult.error || 'Unknown error',
+                            error: err instanceof Error ? err.message : String(err),
                             lead_id: existingLead.id,
                           } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
-                        }])
-                      }
-                    } catch (err) {
-                      // Track failed Almanac sync in analytics
-                      await supabaseServer.from('analytics_events').insert([{
-                        chatbot_id: activeChatbotId,
-                        conversation_id: activeConversationId,
-                        event_type: 'almanac_sync_failed',
-                        metadata: {
-                          error: err instanceof Error ? err.message : String(err),
-                          lead_id: existingLead.id,
-                        } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
-                      }])
+                        },
+                      ])
                     }
                   }
                 }
@@ -757,13 +798,13 @@ ${sourceContext}`,
                 // Merge conversation visitor info into leadData for qualification check
                 const enrichedLeadData = leadData
                   ? {
-                    ...leadData,
-                    contactInfo: {
-                      ...leadData.contactInfo,
-                      name: visitorName,
-                      email: visitorEmail,
-                    },
-                  }
+                      ...leadData,
+                      contactInfo: {
+                        ...leadData.contactInfo,
+                        name: visitorName,
+                        email: visitorEmail,
+                      },
+                    }
                   : null
 
                 // Check if lead is qualified

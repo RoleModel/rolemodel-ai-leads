@@ -178,10 +178,15 @@ export function ChatInterface({
       ) as unknown as ToolPart[]
 
       const emailToolPart = toolParts.find(
-        (tp) => tp.toolName === 'send_email_summary' || tp.type === 'tool-send_email_summary'
+        (tp) =>
+          tp.toolName === 'send_email_summary' || tp.type === 'tool-send_email_summary'
       )
 
-      if (emailToolPart?.args?.recipientEmail && emailToolPart?.args?.summaryText && !emailSentForConversation) {
+      if (
+        emailToolPart?.args?.recipientEmail &&
+        emailToolPart?.args?.summaryText &&
+        !emailSentForConversation
+      ) {
         // Fire off email send request
         setEmailSentForConversation(true)
         fetch('/api/email-summary', {
@@ -221,10 +226,10 @@ export function ChatInterface({
           ...(chatbotId ? { chatbotId } : {}),
           ...(playgroundSettings
             ? {
-              model: playgroundSettings.model,
-              temperature: playgroundSettings.temperature,
-              instructions: playgroundSettings.instructions,
-            }
+                model: playgroundSettings.model,
+                temperature: playgroundSettings.temperature,
+                instructions: playgroundSettings.instructions,
+              }
             : {}),
         },
         fetch: interceptingFetch,
@@ -397,7 +402,8 @@ export function ChatInterface({
               const toolParts = getToolParts(message)
               const chainOfThought = toolParts.find((tp) => tp.type === 'tool-thinking')
               const caseStudyParts = toolParts.filter(
-                (tp) => tp.toolName === 'show_case_study' || tp.type === 'tool-show_case_study'
+                (tp) =>
+                  tp.toolName === 'show_case_study' || tp.type === 'tool-show_case_study'
               )
               const citations = messageCitations[message.id]
               const hasCitations =

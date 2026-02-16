@@ -316,16 +316,11 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                                     color={disliked[message.id] ? 'currentColor' : 'none'}
                                   />
                                 </MessageAction>
-                                <MessageAction
-                                  onClick={() => regenerate()}
-                                  label="Retry"
-                                >
+                                <MessageAction onClick={() => regenerate()} label="Retry">
                                   <HugeiconsIcon icon={Refresh01Icon} size={16} />
                                 </MessageAction>
                                 <MessageAction
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(part.text)
-                                  }
+                                  onClick={() => navigator.clipboard.writeText(part.text)}
                                   label="Copy"
                                 >
                                   <HugeiconsIcon icon={Copy01Icon} size={16} />
@@ -397,29 +392,29 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
   const expandedModal =
     step === 'chat' && isExpanded && portalContainer
       ? createPortal(
-        <>
-          {/* Backdrop */}
-          <div
-            className={styles['intro-c-lightbox-backdrop']}
-            onClick={handleCloseExpanded}
-            aria-hidden="true"
-          />
-          {/* Modal Card */}
-          <Card className={styles['intro-c-lightbox']}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={styles['intro-c-card__expand-btn']}
+          <>
+            {/* Backdrop */}
+            <div
+              className={styles['intro-c-lightbox-backdrop']}
               onClick={handleCloseExpanded}
-              aria-label="Minimize"
-            >
-              <HugeiconsIcon icon={MinimizeScreenIcon} size={20} />
-            </Button>
-            <div className={styles['intro-c-card__content']}>{chatContent}</div>
-          </Card>
-        </>,
-        portalContainer
-      )
+              aria-hidden="true"
+            />
+            {/* Modal Card */}
+            <Card className={styles['intro-c-lightbox']}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={styles['intro-c-card__expand-btn']}
+                onClick={handleCloseExpanded}
+                aria-label="Minimize"
+              >
+                <HugeiconsIcon icon={MinimizeScreenIcon} size={20} />
+              </Button>
+              <div className={styles['intro-c-card__content']}>{chatContent}</div>
+            </Card>
+          </>,
+          portalContainer
+        )
       : null
 
   return (
@@ -482,9 +477,7 @@ const AssessmentToolInner = ({ chatbotId }: AssessmentToolProps) => {
                       autoComplete="name"
                       required
                       value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="form-control form-control--large"
                       placeholder="Jane Doe"
                       disabled={isSubmitting}

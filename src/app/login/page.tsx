@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -36,7 +37,7 @@ export default function LoginPage() {
         router.push(redirectTo)
         router.refresh()
       }
-    } catch (err) {
+    } catch (error) {
       setError('An unexpected error occurred')
       setLoading(false)
     }
@@ -48,9 +49,7 @@ export default function LoginPage() {
         <div className="card card--padded" style={{ padding: '2rem' }}>
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
-            <p className="text-sm opacity-70">
-              Sign in to access the admin dashboard
-            </p>
+            <p className="text-sm opacity-70">Sign in to access the admin dashboard</p>
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-6">

@@ -1,22 +1,17 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-
 import './PrivacyTermsLinks.css'
 
 interface PrivacyTermsLinksProps {
   className?: string
   style?: React.CSSProperties
   variant?: 'light' | 'dark'
-  /** Use compact mode for widget/iframe contexts with limited space */
-  compact?: boolean
 }
 
 export function PrivacyTermsLinks({
   className,
   style,
   variant = 'light',
-  compact = false,
 }: PrivacyTermsLinksProps) {
   const buttonStyle: React.CSSProperties = {
     color:

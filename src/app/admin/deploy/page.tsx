@@ -147,7 +147,8 @@ export default function DeployPage() {
                         color: 'var(--op-color-neutral-on-plus-four)',
                       }}
                     >
-                      What problem or opportunity is prompting you to consider custom software?
+                      What problem or opportunity is prompting you to consider custom
+                      software?
                     </div>
                   </div>
                 </div>
@@ -432,7 +433,10 @@ export default function DeployPage() {
                   </p>
                 </div>
 
-                <Button variant="secondary" onClick={() => router.push('/admin/deploy/intro')}>
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/admin/deploy/intro')}
+                >
                   <span>View Results</span>
                 </Button>
               </div>

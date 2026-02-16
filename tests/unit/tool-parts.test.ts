@@ -18,9 +18,13 @@ describe('Tool Part Detection', () => {
   })
 
   it('should identify show_case_study tool', () => {
-    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'show_case_study' })).toBe(true)
+    expect(
+      isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'show_case_study' })
+    ).toBe(true)
     expect(isShowCaseStudyTool({ type: 'tool-show_case_study' })).toBe(true)
-    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'other_tool' })).toBe(false)
+    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'other_tool' })).toBe(
+      false
+    )
   })
 
   it('should extract args from tool part', () => {
@@ -36,7 +40,9 @@ describe('Tool Part Detection', () => {
       },
     }
 
-    expect(mockToolPart.args.url).toBe('https://rolemodelsoftware.com/case-studies/fieldx-vrt')
+    expect(mockToolPart.args.url).toBe(
+      'https://rolemodelsoftware.com/case-studies/fieldx-vrt'
+    )
     expect(mockToolPart.args.title).toBe('FieldX VRT')
     expect(mockToolPart.args.description).toBeTruthy()
   })
@@ -239,4 +245,3 @@ describe('CaseStudyCard Rendering Logic', () => {
     expect(props.title).toBe('New Title')
   })
 })
-

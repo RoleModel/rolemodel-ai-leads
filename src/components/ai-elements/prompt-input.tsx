@@ -36,7 +36,6 @@ import {
   useSyncExternalStore,
 } from 'react'
 
-import { Button } from '@/components/ui/button'
 import {
   Command,
   CommandEmpty,
@@ -314,7 +313,13 @@ export function PromptInputAttachment({
                 unoptimized
               />
             ) : (
-              <PaperclipIcon style={{ width: 12, height: 12, color: 'var(--op-color-neutral-on-plus-max)' }} />
+              <PaperclipIcon
+                style={{
+                  width: 12,
+                  height: 12,
+                  color: 'var(--op-color-neutral-on-plus-max)',
+                }}
+              />
             )}
           </div>
 
@@ -1150,7 +1155,7 @@ export const PromptInputSpeechButton = ({
     () =>
       Boolean(
         typeof window !== 'undefined' &&
-          (window.SpeechRecognition || window.webkitSpeechRecognition)
+        (window.SpeechRecognition || window.webkitSpeechRecognition)
       ),
     () => false
   )
