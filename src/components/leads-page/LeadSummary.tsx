@@ -1,9 +1,9 @@
 'use client'
 
 import {
+  ArchiveArrowDownIcon,
   Message01Icon,
   RotateClockwiseIcon,
-  ArchiveArrowDownIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { motion } from 'motion/react'
@@ -113,20 +113,20 @@ export function LeadSummary({
 }: LeadSummaryProps) {
   const containerVariants = animated
     ? {
-      hidden: { opacity: 0, y: 20 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.4, staggerChildren: 0.1 },
-      },
-    }
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.4, staggerChildren: 0.1 },
+        },
+      }
     : undefined
 
   const itemVariants = animated
     ? {
-      hidden: { opacity: 0, x: -20 },
-      visible: { opacity: 1, x: 0 },
-    }
+        hidden: { opacity: 0, x: -20 },
+        visible: { opacity: 1, x: 0 },
+      }
     : undefined
 
   const Container = animated ? motion.div : 'div'
@@ -181,113 +181,113 @@ export function LeadSummary({
           {(data.companyInfo?.name ||
             data.companyInfo?.size ||
             data.companyInfo?.industry) && (
-              <Item className="lead-summary_section" variants={itemVariants}>
-                <h4 className="lead-summary__section-title">Company</h4>
-                {data.companyInfo.name && (
-                  <p className="lead-summary__value">{data.companyInfo.name}</p>
-                )}
-                {(data.companyInfo.industry || data.companyInfo.size) && (
-                  <p className="lead-summary__value lead-summary__value--muted">
-                    {[data.companyInfo.industry, data.companyInfo.size]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                )}
-              </Item>
-            )}
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Company</h4>
+              {data.companyInfo.name && (
+                <p className="lead-summary__value">{data.companyInfo.name}</p>
+              )}
+              {(data.companyInfo.industry || data.companyInfo.size) && (
+                <p className="lead-summary__value lead-summary__value--muted">
+                  {[data.companyInfo.industry, data.companyInfo.size]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              )}
+            </Item>
+          )}
 
           {/* Budget */}
           {(data.budget?.range ||
             data.budget?.timeline ||
             data.budget?.approved !== undefined) && (
-              <Item className="lead-summary_section" variants={itemVariants}>
-                <h4 className="lead-summary__section-title">Budget</h4>
-                {data.budget.range && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Range</span>
-                    <p className="lead-summary__value">{data.budget.range}</p>
-                  </div>
-                )}
-                {data.budget.timeline && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Budget Timeline</span>
-                    <p className="lead-summary__value">{data.budget.timeline}</p>
-                  </div>
-                )}
-                {data.budget.approved !== undefined && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Approved</span>
-                    <p className="lead-summary__value">
-                      {data.budget.approved ? 'Yes' : 'No'}
-                    </p>
-                  </div>
-                )}
-              </Item>
-            )}
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Budget</h4>
+              {data.budget.range && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Range</span>
+                  <p className="lead-summary__value">{data.budget.range}</p>
+                </div>
+              )}
+              {data.budget.timeline && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Budget Timeline</span>
+                  <p className="lead-summary__value">{data.budget.timeline}</p>
+                </div>
+              )}
+              {data.budget.approved !== undefined && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Approved</span>
+                  <p className="lead-summary__value">
+                    {data.budget.approved ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              )}
+            </Item>
+          )}
 
           {/* Need / Problem */}
           {(data.need?.problem ||
             data.need?.currentSolution ||
             (data.need?.painPoints && data.need.painPoints.length > 0)) && (
-              <Item className="lead-summary_section" variants={itemVariants}>
-                <h4 className="lead-summary__section-title">Need</h4>
-                {data.need.problem && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Problem</span>
-                    <p className="lead-summary__value">{data.need.problem}</p>
-                  </div>
-                )}
-                {data.need.currentSolution && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Current Solution</span>
-                    <p className="lead-summary__value">{data.need.currentSolution}</p>
-                  </div>
-                )}
-                {data.need.painPoints && data.need.painPoints.length > 0 && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Pain Points</span>
-                    <ul className="lead-summary__list">
-                      {data.need.painPoints.map((point, i) => (
-                        <li key={i} className="lead-summary__list-item">
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </Item>
-            )}
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Need</h4>
+              {data.need.problem && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Problem</span>
+                  <p className="lead-summary__value">{data.need.problem}</p>
+                </div>
+              )}
+              {data.need.currentSolution && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Current Solution</span>
+                  <p className="lead-summary__value">{data.need.currentSolution}</p>
+                </div>
+              )}
+              {data.need.painPoints && data.need.painPoints.length > 0 && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Pain Points</span>
+                  <ul className="lead-summary__list">
+                    {data.need.painPoints.map((point, i) => (
+                      <li key={i} className="lead-summary__list-item">
+                        {point}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Item>
+          )}
 
           {/* Authority */}
           {(data.authority?.role ||
             data.authority?.decisionMaker !== undefined ||
             (data.authority?.stakeholders && data.authority.stakeholders.length > 0)) && (
-              <Item className="lead-summary_section" variants={itemVariants}>
-                <h4 className="lead-summary__section-title">Authority</h4>
-                {data.authority.role && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Role</span>
-                    <p className="lead-summary__value">{data.authority.role}</p>
-                  </div>
-                )}
-                {data.authority.decisionMaker !== undefined && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Decision Maker</span>
-                    <p className="lead-summary__value">
-                      {data.authority.decisionMaker ? 'Yes' : 'No'}
-                    </p>
-                  </div>
-                )}
-                {data.authority.stakeholders && data.authority.stakeholders.length > 0 && (
-                  <div className="lead-summary__field">
-                    <span className="lead-summary__label">Other Stakeholders</span>
-                    <p className="lead-summary__value">
-                      {data.authority.stakeholders.join(', ')}
-                    </p>
-                  </div>
-                )}
-              </Item>
-            )}
+            <Item className="lead-summary_section" variants={itemVariants}>
+              <h4 className="lead-summary__section-title">Authority</h4>
+              {data.authority.role && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Role</span>
+                  <p className="lead-summary__value">{data.authority.role}</p>
+                </div>
+              )}
+              {data.authority.decisionMaker !== undefined && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Decision Maker</span>
+                  <p className="lead-summary__value">
+                    {data.authority.decisionMaker ? 'Yes' : 'No'}
+                  </p>
+                </div>
+              )}
+              {data.authority.stakeholders && data.authority.stakeholders.length > 0 && (
+                <div className="lead-summary__field">
+                  <span className="lead-summary__label">Other Stakeholders</span>
+                  <p className="lead-summary__value">
+                    {data.authority.stakeholders.join(', ')}
+                  </p>
+                </div>
+              )}
+            </Item>
+          )}
 
           {/* Timeline */}
           {(data.timeline?.urgency || data.timeline?.implementationDate) && (
@@ -364,7 +364,7 @@ export function LeadSummary({
 
         {/* Share Actions */}
         <PlanFooter>
-          {( onViewChat || onArchive) && (
+          {(onViewChat || onArchive) && (
             <div className="lead-summary__share-actions">
               {conversationId && onViewChat && (
                 <Button

@@ -13,6 +13,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 ### Local Development with Supabase
 
 1. **Start Local Supabase**
+
    ```bash
    npx supabase start
    ```
@@ -24,6 +25,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
    - **Mailpit**: http://127.0.0.1:54324 (email testing)
 
 2. **Get Your Local Credentials**
+
    ```bash
    npx supabase status --output env
    ```
@@ -31,6 +33,7 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 3. **Configure Environment Variables**
 
    Create a `.env.local` file in the project root:
+
    ```env
    # Local Supabase
    NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
@@ -43,12 +46,15 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
    ```
 
 4. **Apply Database Migrations**
+
    ```bash
    npx supabase db reset
    ```
+
    This will create all tables and run migrations from the `supabase/migrations/` folder.
 
 5. **Start Next.js Development Server**
+
    ```bash
    npm run dev
    ```
@@ -64,11 +70,13 @@ A lead qualification and chatbot system that uses AI to engage website visitors,
 ### Database Migrations
 
 To create a new migration:
+
 ```bash
 npx supabase migration new <migration_name>
 ```
 
 To apply migrations:
+
 ```bash
 npx supabase db reset  # Reset and reapply all migrations
 # OR
@@ -76,6 +84,7 @@ npx supabase migration up  # Apply pending migrations only
 ```
 
 Then update the types file
+
 ```bash
 npm run types
 ```
@@ -83,6 +92,7 @@ npm run types
 ### Production vs Local
 
 The system automatically uses the environment variables from `.env.local`:
+
 - **Local**: Points to `http://127.0.0.1:54321`
 - **Production**: Points to your Supabase project URL (e.g., `https://xxx.supabase.co`)
 
@@ -97,11 +107,11 @@ The admin dashboard (`/admin/*`) is protected by **Supabase Auth**. You must log
 ### Quick Setup
 
 1. Create an Admin User (Using Supabase Dashboard)
-  a. Go to your Supabase project dashboard
-  b. Navigate to **Authentication** > **Users**
-  c. Click **Add User** (or **Invite User**)
-  d. Enter the email and password for your admin account
-  e. Click **Create User**
+   a. Go to your Supabase project dashboard
+   b. Navigate to **Authentication** > **Users**
+   c. Click **Add User** (or **Invite User**)
+   d. Enter the email and password for your admin account
+   e. Click **Create User**
 
 2. Environment Variables
 

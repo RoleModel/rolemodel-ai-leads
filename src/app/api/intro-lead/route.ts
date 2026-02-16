@@ -30,12 +30,21 @@ export async function POST(req: NextRequest) {
 
     // Block common disposable email domains
     const disposableDomains = [
-      'tempmail.com', 'throwaway.email', '10minutemail.com', 'guerrillamail.com',
-      'mailinator.com', 'trashmail.com', 'temp-mail.org', 'getnada.com'
+      'tempmail.com',
+      'throwaway.email',
+      '10minutemail.com',
+      'guerrillamail.com',
+      'mailinator.com',
+      'trashmail.com',
+      'temp-mail.org',
+      'getnada.com',
     ]
     const emailDomain = email.split('@')[1]?.toLowerCase()
     if (emailDomain && disposableDomains.includes(emailDomain)) {
-      return NextResponse.json({ error: 'Please use a valid email address' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Please use a valid email address' },
+        { status: 400 }
+      )
     }
 
     const activeChatbotId = chatbotId || DEFAULT_CHATBOT_ID

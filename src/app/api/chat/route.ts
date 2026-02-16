@@ -1,19 +1,22 @@
-import { streamText, tool, stepCountIs } from 'ai'
+import { stepCountIs, streamText, tool } from 'ai'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
-import { sendToAlmanac, type VisitorMetadata } from '@/lib/almanac/service'
 import { openai } from '@/lib/ai/gateway'
 import { extractLeadData, isQualifiedLead } from '@/lib/ai/lead-extraction'
 import { getModelById } from '@/lib/ai/models'
-import { sendSummaryEmail } from '@/lib/email/send-summary'
-import { scrapeCaseStudyMetadata, getAllCaseStudies } from '@/lib/framer/case-study-scraper'
 import {
   type Source,
   buildSourceContext,
   getChatbot,
   retrieveRelevantSources,
 } from '@/lib/ai/rag'
+import { type VisitorMetadata, sendToAlmanac } from '@/lib/almanac/service'
+import { sendSummaryEmail } from '@/lib/email/send-summary'
+import {
+  getAllCaseStudies,
+  scrapeCaseStudyMetadata,
+} from '@/lib/framer/case-study-scraper'
 import { buildVisitorMetadata } from '@/lib/geolocation'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
@@ -22,7 +25,9 @@ export const runtime = 'edge'
 export const maxDuration = 30
 
 const DEFAULT_CHATBOT_ID = 'a0000000-0000-0000-0000-000000000001'
-const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'
+const CALENDLY_URL =
+  process.env.NEXT_PUBLIC_CALENDLY_URL ||
+  'https://calendly.com/rolemodel-software/45-minute-conversation'
 
 type SourceHeaderPayload = {
   index: number
@@ -251,18 +256,18 @@ export async function POST(req: NextRequest) {
           : Promise.resolve([]),
         conversationId
           ? supabaseServer
-            .from('conversations')
-            .select('visitor_name, visitor_email')
-            .eq('id', conversationId)
-            .single()
-            .then((res: any) => res.data)
+              .from('conversations')
+              .select('visitor_name, visitor_email')
+              .eq('id', conversationId)
+              .single()
+              .then((res) => res.data)
           : Promise.resolve(null),
         supabaseServer
           .from('help_page_settings')
           .select('rag_config')
           .eq('chatbot_id', activeChatbotId)
           .single()
-          .then((res: any) => res.data),
+          .then((res) => res.data),
       ])
 
     if (!chatbot) {
@@ -290,7 +295,9 @@ export async function POST(req: NextRequest) {
     // Log sources for debugging
     console.log('[Chat] Retrieved sources:', relevantSources.length)
     relevantSources.forEach((s, i) => {
-      console.log(`[Chat] Source ${i + 1}: ${s.title} - URL: ${s.metadata?.url || 'none'}`)
+      console.log(
+        `[Chat] Source ${i + 1}: ${s.title} - URL: ${s.metadata?.url || 'none'}`
+      )
     })
 
     const sourceContext = buildSourceContext(relevantSources, chatbot, ragConfig)
@@ -325,21 +332,25 @@ After each response, use the 'suggest_questions' tool to provide 2 relevant foll
 - Focus on helping the user explore their business needs further
 - Make questions specific to what was just discussed
 
-${existingConversation?.visitor_name || existingConversation?.visitor_email
-          ? `
+${
+  existingConversation?.visitor_name || existingConversation?.visitor_email
+    ? `
 VISITOR INFORMATION (already collected from intro form):
 ${existingConversation.visitor_name ? `- Name: ${existingConversation.visitor_name}` : ''}
 ${existingConversation.visitor_email ? `- Email: ${existingConversation.visitor_email}` : ''}
 
 IMPORTANT: This contact information has already been provided. Do NOT ask for their name or email again. Instead, use their name naturally in conversation and focus on understanding their business needs.
 `
-          : ''
-        }
+    : ''
+}
 AVAILABLE CASE STUDIES (use ONLY these URLs with show_case_study tool):
 ${getAllCaseStudies()
-          .slice(0, 15) // Limit to 15 most recent
-          .map((cs) => `- ${cs.title}: https://rolemodelsoftware.com/case-studies/${cs.slug} - ${cs.description.slice(0, 100)}`)
-          .join('\n')}
+  .slice(0, 15) // Limit to 15 most recent
+  .map(
+    (cs) =>
+      `- ${cs.title}: https://rolemodelsoftware.com/case-studies/${cs.slug} - ${cs.description.slice(0, 100)}`
+  )
+  .join('\n')}
 
 ${sourceContext}`,
     }
@@ -473,7 +484,10 @@ ${sourceContext}`,
           description:
             'REQUIRED: Display an interactive case study card preview. You MUST call this tool when the user asks about previous work, examples, portfolio, or case studies.',
           inputSchema: z.object({
-            url: z.string().url().describe('The full URL of the case study page to preview'),
+            url: z
+              .string()
+              .url()
+              .describe('The full URL of the case study page to preview'),
             title: z.string().describe('Title of the case study'),
             description: z
               .string()
@@ -549,8 +563,15 @@ ${sourceContext}`,
           },
         }),
       },
-      async onFinish({ text, finishReason, steps }: { text: string; finishReason?: string; steps?: unknown[] }) {
-
+      async onFinish({
+        text,
+        finishReason,
+        steps,
+      }: {
+        text: string
+        finishReason?: string
+        steps?: unknown[]
+      }) {
         // Save assistant message
         if (activeConversationId) {
           // Extract tool invocations from steps
@@ -592,7 +613,10 @@ ${sourceContext}`,
             }
           }
 
-          console.log(`[Chat] Tool invocations to save: ${toolInvocations.length}`, toolInvocations.map(t => t.toolName))
+          console.log(
+            `[Chat] Tool invocations to save: ${toolInvocations.length}`,
+            toolInvocations.map((t) => t.toolName)
+          )
 
           type MessageInsert = Database['public']['Tables']['messages']['Insert']
           const assistantMessage: MessageInsert = {
@@ -605,11 +629,16 @@ ${sourceContext}`,
             })) as Database['public']['Tables']['messages']['Insert']['sources_used'],
             tool_invocations: toolInvocations.length > 0 ? toolInvocations : null,
           }
-          const { error: msgError } = await supabaseServer.from('messages').insert([assistantMessage])
+          const { error: msgError } = await supabaseServer
+            .from('messages')
+            .insert([assistantMessage])
           if (msgError) {
             console.error('[Chat] Error saving assistant message:', msgError)
           } else {
-            console.log('[Chat] Assistant message saved for conversation:', activeConversationId)
+            console.log(
+              '[Chat] Assistant message saved for conversation:',
+              activeConversationId
+            )
           }
 
           // Track analytics event
@@ -640,7 +669,9 @@ ${sourceContext}`,
                     .order('created_at', { ascending: true }),
                   supabaseServer
                     .from('conversations')
-                    .select('visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count')
+                    .select(
+                      'visitor_name, visitor_email, lead_captured, visitor_metadata, chatbot_id, message_count'
+                    )
                     .eq('id', activeConversationId)
                     .single(),
                   supabaseServer
@@ -654,7 +685,8 @@ ${sourceContext}`,
               const conversation = conversationResult.data
               const allSources = sourcesResult.data
 
-              const visitorMetadata = conversation?.visitor_metadata as VisitorMetadata | null
+              const visitorMetadata =
+                conversation?.visitor_metadata as VisitorMetadata | null
 
               // If lead already captured, check for final summary to send update to Almanac
               if (conversation?.lead_captured) {
@@ -670,24 +702,25 @@ ${sourceContext}`,
                     textLower.includes('calendly') ||
                     textLower.includes('explore further'))
 
-
                 if (isFinalSummary && allMessages && allMessages.length > 0) {
                   // Extract fresh lead data for the final summary
                   const leadData = await extractLeadData(allMessages, allSources || [])
                   const visitorName =
                     leadData?.contactInfo?.name || conversation?.visitor_name || undefined
                   const visitorEmail =
-                    leadData?.contactInfo?.email || conversation?.visitor_email || undefined
+                    leadData?.contactInfo?.email ||
+                    conversation?.visitor_email ||
+                    undefined
 
                   const enrichedLeadData = leadData
                     ? {
-                      ...leadData,
-                      contactInfo: {
-                        ...leadData.contactInfo,
-                        name: visitorName,
-                        email: visitorEmail,
-                      },
-                    }
+                        ...leadData,
+                        contactInfo: {
+                          ...leadData.contactInfo,
+                          name: visitorName,
+                          email: visitorEmail,
+                        },
+                      }
                     : null
 
                   // Update the lead with final data
@@ -715,32 +748,36 @@ ${sourceContext}`,
                         visitorEmail,
                         enrichedLeadData,
                         visitorMetadata,
-                        activeConversationId,
+                        activeConversationId
                       )
 
                       if (!almanacResult.success) {
                         // Track failed Almanac sync in analytics
-                        await supabaseServer.from('analytics_events').insert([{
+                        await supabaseServer.from('analytics_events').insert([
+                          {
+                            chatbot_id: activeChatbotId,
+                            conversation_id: activeConversationId,
+                            event_type: 'almanac_sync_failed',
+                            metadata: {
+                              error: almanacResult.error || 'Unknown error',
+                              lead_id: existingLead.id,
+                            } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
+                          },
+                        ])
+                      }
+                    } catch (err) {
+                      // Track failed Almanac sync in analytics
+                      await supabaseServer.from('analytics_events').insert([
+                        {
                           chatbot_id: activeChatbotId,
                           conversation_id: activeConversationId,
                           event_type: 'almanac_sync_failed',
                           metadata: {
-                            error: almanacResult.error || 'Unknown error',
+                            error: err instanceof Error ? err.message : String(err),
                             lead_id: existingLead.id,
                           } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
-                        }])
-                      }
-                    } catch (err) {
-                      // Track failed Almanac sync in analytics
-                      await supabaseServer.from('analytics_events').insert([{
-                        chatbot_id: activeChatbotId,
-                        conversation_id: activeConversationId,
-                        event_type: 'almanac_sync_failed',
-                        metadata: {
-                          error: err instanceof Error ? err.message : String(err),
-                          lead_id: existingLead.id,
-                        } as Database['public']['Tables']['analytics_events']['Insert']['metadata'],
-                      }])
+                        },
+                      ])
                     }
                   }
                 }
@@ -761,13 +798,13 @@ ${sourceContext}`,
                 // Merge conversation visitor info into leadData for qualification check
                 const enrichedLeadData = leadData
                   ? {
-                    ...leadData,
-                    contactInfo: {
-                      ...leadData.contactInfo,
-                      name: visitorName,
-                      email: visitorEmail,
-                    },
-                  }
+                      ...leadData,
+                      contactInfo: {
+                        ...leadData.contactInfo,
+                        name: visitorName,
+                        email: visitorEmail,
+                      },
+                    }
                   : null
 
                 // Check if lead is qualified

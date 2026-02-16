@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 import type { Database } from './database.types'
 
@@ -20,7 +20,7 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options)
           })
-        } catch (error) {
+        } catch {
           // The `setAll` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
           // user sessions.

@@ -4,7 +4,6 @@
  * Sends lead data to the Almanac CRM when a lead is created.
  * Uses ALMANAC_CONTACT_API_URL and ALMANAC_API_KEY environment variables.
  */
-
 import type { LeadSummaryData } from '@/components/leads-page/LeadSummary'
 
 export interface AlmanacContact {
@@ -133,7 +132,9 @@ export async function sendToAlmanac(
 
   // Skip if not configured
   if (!apiUrl || !apiKey) {
-    console.log('[Almanac] Integration not configured - skipping (missing ALMANAC_CONTACT_API_URL or ALMANAC_API_KEY)')
+    console.log(
+      '[Almanac] Integration not configured - skipping (missing ALMANAC_CONTACT_API_URL or ALMANAC_API_KEY)'
+    )
     return { success: true } // Not an error, just not configured
   }
 
@@ -145,7 +146,13 @@ export async function sendToAlmanac(
     return { success: false, error: 'Invalid API URL configuration' }
   }
 
-  const payload = buildAlmanacPayload(visitorName, visitorEmail, leadSummary, visitorMetadata, conversationId)
+  const payload = buildAlmanacPayload(
+    visitorName,
+    visitorEmail,
+    leadSummary,
+    visitorMetadata,
+    conversationId
+  )
 
   // Skip if we don't have minimum required data (at least name or email)
   if (!payload.name && !payload.email) {

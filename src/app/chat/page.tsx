@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 import { LeadsPageWithProvider } from '@/components/leads-page/LeadsPageWithProvider'
@@ -33,11 +33,7 @@ function ChatPageContent() {
   }
 
   return (
-    <LeadsPageWithProvider
-      chatbotId={chatbotId}
-      showSidebar={true}
-      loadFromApi={true}
-    />
+    <LeadsPageWithProvider chatbotId={chatbotId} showSidebar={true} loadFromApi={true} />
   )
 }
 

@@ -68,7 +68,7 @@ export default function LeadsPage() {
   useEffect(() => {
     const conversationId = searchParams.get('conversation')
     if (conversationId && leads.length > 0) {
-      const lead = leads.find(l => l.conversation_id === conversationId)
+      const lead = leads.find((l) => l.conversation_id === conversationId)
       if (lead) {
         setHighlightedLeadId(lead.id)
         setExpandedLeadId(lead.id)
@@ -217,11 +217,15 @@ export default function LeadsPage() {
                   {leads.map((lead) => (
                     <div
                       key={lead.id}
-                      ref={(el) => { leadRefs.current[lead.id] = el }}
+                      ref={(el) => {
+                        leadRefs.current[lead.id] = el
+                      }}
                       className={`admin-card-wrapper ${
                         lead.is_archived ? 'admin-card-wrapper--archived' : ''
                       } ${
-                        highlightedLeadId === lead.id ? 'admin-card-wrapper--highlighted' : ''
+                        highlightedLeadId === lead.id
+                          ? 'admin-card-wrapper--highlighted'
+                          : ''
                       }`}
                     >
                       <LeadSummary

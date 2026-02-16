@@ -245,9 +245,9 @@ export default function SourcesPage() {
     activeSection === 'workflow'
       ? [] // No sources to show for workflow section
       : sources.filter((s) => {
-        // Only show sources that have the matching type
-        return s.metadata?.type === getSectionType(activeSection)
-      })
+          // Only show sources that have the matching type
+          return s.metadata?.type === getSectionType(activeSection)
+        })
   console.log('[Sources Page] Active section:', activeSection)
   console.log('[Sources Page] Looking for type:', getSectionType(activeSection))
   console.log('[Sources Page] Filtered sources:', filteredSources.length)
@@ -599,10 +599,11 @@ export default function SourcesPage() {
                                 backgroundColor: framerSyncResult.success
                                   ? 'var(--op-color-success-background)'
                                   : 'var(--op-color-error-background)',
-                                border: `1px solid ${framerSyncResult.success
-                                  ? 'var(--op-color-success-border)'
-                                  : 'var(--op-color-error-border)'
-                                  }`,
+                                border: `1px solid ${
+                                  framerSyncResult.success
+                                    ? 'var(--op-color-success-border)'
+                                    : 'var(--op-color-error-border)'
+                                }`,
                                 borderRadius: 'var(--op-radius-small)',
                                 marginBottom: 'var(--op-space-medium)',
                               }}
@@ -887,10 +888,11 @@ export default function SourcesPage() {
                         workflowControls.saveStatus.type === 'success'
                           ? 'var(--op-color-success-background)'
                           : 'var(--op-color-error-background)',
-                      border: `1px solid ${workflowControls.saveStatus.type === 'success'
-                        ? 'var(--op-color-success-border)'
-                        : 'var(--op-color-error-border)'
-                        }`,
+                      border: `1px solid ${
+                        workflowControls.saveStatus.type === 'success'
+                          ? 'var(--op-color-success-border)'
+                          : 'var(--op-color-error-border)'
+                      }`,
                       borderRadius: 'var(--op-radius-small)',
                       marginBottom: 'var(--op-space-medium)',
                     }}

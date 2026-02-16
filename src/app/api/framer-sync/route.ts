@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Filter to only Framer sources
-  const framerSources = data?.filter((source: any) => {
+  const framerSources = data?.filter((source) => {
     const metadata = source.metadata as Record<string, unknown> | null
     const url = metadata?.url as string | undefined
     return url?.includes('.framer.app') || url?.includes('framer.website')
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
         .select('metadata')
         .eq('chatbot_id', chatbotId)
 
-      existingSources?.forEach((source: any) => {
+      existingSources?.forEach((source) => {
         const metadata = source.metadata as Record<string, unknown> | null
         const url = metadata?.url as string | undefined
         if (url) existingUrls.add(url)
@@ -215,11 +215,11 @@ export async function DELETE(req: NextRequest) {
 
   // Filter to only Framer-synced sources
   const framerSourceIds = sources
-    ?.filter((source: any) => {
+    ?.filter((source) => {
       const metadata = source.metadata as Record<string, unknown> | null
       return metadata?.source === 'framer-sync'
     })
-    .map((s: any) => s.id)
+    .map((s) => s.id)
 
   if (!framerSourceIds || framerSourceIds.length === 0) {
     return NextResponse.json({ success: true, deleted: 0 })

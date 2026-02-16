@@ -16,13 +16,14 @@ import {
   UserIcon,
 } from '@hugeicons-pro/core-stroke-standard'
 import { HugeiconsIcon } from '@hugeicons/react'
+import type { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import type { User } from '@supabase/supabase-js'
+import { useEffect, useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import { LogoutButton } from '@/components/admin/LogoutButton'
+import { Button } from '@/components/ui/button'
+
 import { createClient } from '@/lib/supabase/client'
 
 const styles = {
@@ -267,6 +268,7 @@ export function NavigationSidebar() {
           </span>
           <LogoutButton />
         </div>
-      )}    </aside>
+      )}{' '}
+    </aside>
   )
 }

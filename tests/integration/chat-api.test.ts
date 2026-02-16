@@ -80,7 +80,11 @@ CASE STUDY PREVIEWS (MANDATORY - YOU MUST USE THE TOOL):
         inputSchema: {
           url: { type: 'string', description: 'The full URL of the case study page' },
           title: { type: 'string', description: 'Title of the case study' },
-          description: { type: 'string', optional: true, description: 'Brief description' },
+          description: {
+            type: 'string',
+            optional: true,
+            description: 'Brief description',
+          },
         },
       }
 
@@ -231,13 +235,15 @@ describe('Conversation Flow', () => {
     // User responds to problem
     addUserMessage("We're struggling with manual time tracking using spreadsheets")
     addAssistantMessage(
-      "That sounds frustrating. What approaches have you tried so far to address this?"
+      'That sounds frustrating. What approaches have you tried so far to address this?'
     )
 
     // User responds to alternatives
-    addUserMessage("We've looked at some off-the-shelf solutions but they don't fit our workflow")
+    addUserMessage(
+      "We've looked at some off-the-shelf solutions but they don't fit our workflow"
+    )
     addAssistantMessage(
-      "I see. Could you tell me more about your business and what makes your workflow unique?"
+      'I see. Could you tell me more about your business and what makes your workflow unique?'
     )
 
     expect(messages.length).toBe(5)
@@ -267,4 +273,3 @@ describe('Conversation Flow', () => {
     expect(shouldShowCaseStudy(messages[0].content)).toBe(true)
   })
 })
-

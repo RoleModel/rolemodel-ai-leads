@@ -2,7 +2,6 @@
 
 import {
   Archive01Icon,
-  File02Icon,
   Location01Icon,
   Mail01Icon,
   Message01Icon,
@@ -18,10 +17,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { MessageBubble } from './_components/MessageBubble'
-import {
-  getLocationString,
-  VisitorDetailsCard,
-} from './_components/VisitorDetailsCard'
+import { VisitorDetailsCard, getLocationString } from './_components/VisitorDetailsCard'
 
 interface VisitorMetadata {
   ip?: string

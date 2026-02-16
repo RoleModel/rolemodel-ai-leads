@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 /**
  * Conversation Simulator
@@ -12,12 +12,12 @@ interface Message {
   parts: Array<
     | { type: 'text'; text: string }
     | {
-      type: 'tool-invocation'
-      toolName: string
-      args: Record<string, unknown>
-      state: 'call' | 'result'
-      result?: unknown
-    }
+        type: 'tool-invocation'
+        toolName: string
+        args: Record<string, unknown>
+        state: 'call' | 'result'
+        result?: unknown
+      }
   >
 }
 
@@ -67,7 +67,11 @@ const detectCoveredArea = (content: string): ConversationArea | null => {
   if (lower.includes('goal') || lower.includes('success') || lower.includes('outcome')) {
     return 'goals'
   }
-  if (lower.includes('budget') || lower.includes('investment') || lower.includes('timeline')) {
+  if (
+    lower.includes('budget') ||
+    lower.includes('investment') ||
+    lower.includes('timeline')
+  ) {
     return 'investment'
   }
 
@@ -100,7 +104,11 @@ describe('Conversation Simulator', () => {
     coveredAreas: new Set(),
   })
 
-  const addMessage = (state: ConversationState, role: 'user' | 'assistant', content: string) => {
+  const addMessage = (
+    state: ConversationState,
+    role: 'user' | 'assistant',
+    content: string
+  ) => {
     const message: Message = {
       id: `msg-${Date.now()}-${Math.random()}`,
       role,
@@ -127,7 +135,11 @@ describe('Conversation Simulator', () => {
     expect(state.messages[0].content).toContain('problem')
 
     // User answers about their problem
-    addMessage(state, 'user', "We're struggling with manual data entry that takes hours each day")
+    addMessage(
+      state,
+      'user',
+      "We're struggling with manual data entry that takes hours each day"
+    )
 
     // Should now ask about alternatives
     expect(getNextQuestion(state.coveredAreas)).toContain('tried')
@@ -141,10 +153,18 @@ describe('Conversation Simulator', () => {
     addMessage(state, 'user', 'Our main problem is inefficient inventory tracking')
 
     addMessage(state, 'assistant', getNextQuestion(state.coveredAreas))
-    addMessage(state, 'user', "We've tried Excel and looked at some off-the-shelf solutions")
+    addMessage(
+      state,
+      'user',
+      "We've tried Excel and looked at some off-the-shelf solutions"
+    )
 
     addMessage(state, 'assistant', getNextQuestion(state.coveredAreas))
-    addMessage(state, 'user', "We're a manufacturing company with unique workflow requirements")
+    addMessage(
+      state,
+      'user',
+      "We're a manufacturing company with unique workflow requirements"
+    )
 
     addMessage(state, 'assistant', getNextQuestion(state.coveredAreas))
     addMessage(state, 'user', 'Our goal is to reduce inventory errors by 90%')
@@ -191,7 +211,9 @@ describe('Conversation Simulator', () => {
     expect(toolPart).toBeDefined()
     if (toolPart && toolPart.type === 'tool-invocation') {
       expect(toolPart.toolName).toBe('show_case_study')
-      expect(toolPart.args.url).toBe('https://rolemodelsoftware.com/case-studies/fieldx-vrt')
+      expect(toolPart.args.url).toBe(
+        'https://rolemodelsoftware.com/case-studies/fieldx-vrt'
+      )
     }
   })
 })
@@ -217,7 +239,9 @@ describe('User Input Triggers', () => {
   it('should trigger case study tool for relevant queries', () => {
     expect(shouldTriggerCaseStudyTool('Can you show me some case studies?')).toBe(true)
     expect(shouldTriggerCaseStudyTool("What's in your portfolio?")).toBe(true)
-    expect(shouldTriggerCaseStudyTool('Show me examples of your previous work')).toBe(true)
+    expect(shouldTriggerCaseStudyTool('Show me examples of your previous work')).toBe(
+      true
+    )
     expect(shouldTriggerCaseStudyTool('What projects have you done?')).toBe(true)
   })
 
@@ -227,4 +251,3 @@ describe('User Input Triggers', () => {
     expect(shouldTriggerCaseStudyTool('Tell me about your team')).toBe(false)
   })
 })
-

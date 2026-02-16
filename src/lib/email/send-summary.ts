@@ -1,5 +1,6 @@
 import sendgrid from '@sendgrid/mail'
 import { marked } from 'marked'
+
 import { createClient } from '@/lib/supabase/server'
 
 if (!process.env.SENDGRID_API_KEY) {

@@ -940,7 +940,7 @@ export function AnimatedConversationDemo({ onInterrupt }: AnimatedConversationDe
         <div className="gradient" />
         <PromptInputProvider>
           <PromptInput
-            onSubmit={() => { }} // No-op during demo
+            onSubmit={() => {}} // No-op during demo
             style={{ width: '100%', zIndex: 1 }}
           >
             <PromptInputAttachments>

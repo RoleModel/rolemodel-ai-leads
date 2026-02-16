@@ -40,10 +40,9 @@ import {
 import Favicon from '@/components/intro/Favicon'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import { Button } from '@/components/ui/button'
+import { CaseStudyCard } from '@/components/ui/case-study-card'
 
 import { useLeadsPageSettings } from '@/contexts/LeadsPageSettingsContext'
-
-import { CaseStudyCard } from '@/components/ui/case-study-card'
 
 import './LeadsPageView.css'
 import { type Citation, MessageWithCitations } from './MessageWithCitations'
@@ -186,12 +185,11 @@ export function LeadsPageView({
 
     async onToolCall({ toolCall }) {
       if (toolCall.dynamic) {
-        return;
+        return
       }
       // show_case_study is handled server-side with execute function
       // Other tools that need client-side handling can be added here
     },
-
   })
 
   // Load existing messages when continuing a conversation
@@ -217,13 +215,26 @@ export function LeadsPageView({
             input?: Record<string, unknown>
             output?: Record<string, unknown>
           }
-          
+
           // Convert database messages to UIMessage format
           const uiMessages: UIMessage[] = data.messages.map(
-            (msg: { id: string; role: string; content: string; tool_invocations?: DbToolInvocation[] | null }) => {
+            (msg: {
+              id: string
+              role: string
+              content: string
+              tool_invocations?: DbToolInvocation[] | null
+            }) => {
               // Build parts array: start with text content
-              const parts: Array<{ type: string; text?: string; toolName?: string; toolCallId?: string; state?: string; input?: Record<string, unknown>; output?: Record<string, unknown> }> = []
-              
+              const parts: Array<{
+                type: string
+                text?: string
+                toolName?: string
+                toolCallId?: string
+                state?: string
+                input?: Record<string, unknown>
+                output?: Record<string, unknown>
+              }> = []
+
               // Add tool invocation parts if present
               if (msg.tool_invocations && msg.tool_invocations.length > 0) {
                 for (const tool of msg.tool_invocations) {
@@ -237,12 +248,12 @@ export function LeadsPageView({
                   })
                 }
               }
-              
+
               // Add text part
               if (msg.content) {
                 parts.push({ type: 'text', text: msg.content })
               }
-              
+
               return {
                 id: msg.id,
                 role: msg.role as 'user' | 'assistant',
@@ -371,7 +382,9 @@ export function LeadsPageView({
         <div className="leads-page__titlebar-content">
           <p className="leads-page__titlebar-subtitle">
             Powered by&nbsp;
-            <a href="https://rolemodelsoftware.com" target="_blank">RoleModel Software</a>
+            <a href="https://rolemodelsoftware.com" target="_blank">
+              RoleModel Software
+            </a>
           </p>
         </div>
       </div>
@@ -408,11 +421,11 @@ export function LeadsPageView({
                         // Filter out case study markdown if tool already rendered the card
                         // Also filter if we detect framerusercontent images (case study images)
                         let displayText = part.text
-                        const containsCaseStudyContent = 
-                          hasShowCaseStudyTool || 
+                        const containsCaseStudyContent =
+                          hasShowCaseStudyTool ||
                           part.text.includes('framerusercontent.com') ||
                           part.text.includes('case-studies')
-                        
+
                         if (containsCaseStudyContent && message.role === 'assistant') {
                           // Remove ALL markdown images: ![alt](url)
                           displayText = displayText.replace(/!\[[^\]]*\]\([^)]+\)/g, '')
@@ -440,13 +453,14 @@ export function LeadsPageView({
                           // e.g., "### Methodist Home for Children" or "**Methodist Home for Children**"
                           displayText = displayText.replace(/^###\s+.+$/gm, '')
                           // Remove bold lines that are just a title (e.g., **Description:** ...)
-                          displayText = displayText.replace(/^\*\*Description:\*\*\s*.+$/gm, '')
+                          displayText = displayText.replace(
+                            /^\*\*Description:\*\*\s*.+$/gm,
+                            ''
+                          )
                           // Remove "Description:" lines as those are shown in the card
                           displayText = displayText.replace(/^Description:\s*.+$/gm, '')
                           // Clean up extra whitespace and empty lines
-                          displayText = displayText
-                            .replace(/\n{3,}/g, '\n\n')
-                            .trim()
+                          displayText = displayText.replace(/\n{3,}/g, '\n\n').trim()
                         }
 
                         // Skip rendering if text is now empty after filtering
@@ -534,7 +548,10 @@ export function LeadsPageView({
                         )
                       default: {
                         // Handle tool invocations
-                        if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
+                        if (
+                          part.type === 'tool-invocation' ||
+                          part.type.startsWith('tool-')
+                        ) {
                           const toolPart = part as {
                             type: string
                             toolName?: string
@@ -614,7 +631,9 @@ export function LeadsPageView({
             <Button
               variant="pill"
               onClick={() => {
-                const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/rolemodel-software/45-minute-conversation'
+                const calendlyUrl =
+                  process.env.NEXT_PUBLIC_CALENDLY_URL ||
+                  'https://calendly.com/rolemodel-software/45-minute-conversation'
                 window.open(calendlyUrl, '_blank')
               }}
             >

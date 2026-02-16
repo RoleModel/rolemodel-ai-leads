@@ -56,10 +56,10 @@ import {
   type Citation,
   MessageWithCitations,
 } from '@/components/leads-page/MessageWithCitations'
-import { CaseStudyCard } from '@/components/ui/case-study-card'
 import { PrivacyTermsLinks } from '@/components/ui/PrivacyTermsLinks'
 import ScrollIndicator from '@/components/ui/ScrollIndicator'
 import { Card, CardAction, CardContent, CardHeader } from '@/components/ui/card'
+import { CaseStudyCard } from '@/components/ui/case-study-card'
 import { Input } from '@/components/ui/input'
 
 import { trackConversion, trackEngagement, trackView } from '@/lib/ab-testing/tracking'
@@ -273,19 +273,22 @@ export function HeroChat(props: HeroChatProps) {
       ? `Welcome back, ${storedVisitor.name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
       : `Hi! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`
 
-    return [{
-      id: `greeting-${Date.now()}`,
-      role: 'assistant' as const,
-      parts: [{ type: 'text' as const, text: greeting }],
-    }]
+    return [
+      {
+        id: `greeting-${Date.now()}`,
+        role: 'assistant' as const,
+        parts: [{ type: 'text' as const, text: greeting }],
+      },
+    ]
   }, [storedVisitor])
 
-  const { messages, setMessages, sendMessage, regenerate, status, error } = useChat<UIMessage>({
-    transport: chatTransport,
-    messages: initialGreetingMessages,
-    onFinish: handleChatFinish,
-    onError: (err) => console.error('[Chat] Error:', err),
-  })
+  const { messages, setMessages, sendMessage, regenerate, status, error } =
+    useChat<UIMessage>({
+      transport: chatTransport,
+      messages: initialGreetingMessages,
+      onFinish: handleChatFinish,
+      onError: (err) => console.error('[Chat] Error:', err),
+    })
 
   useEffect(() => {
     if (error) console.error('[Chat] Hook error state:', error)
@@ -339,10 +342,12 @@ export function HeroChat(props: HeroChatProps) {
       const greeting: UIMessage = {
         id: `greeting-${Date.now()}`,
         role: 'assistant',
-        parts: [{
-          type: 'text',
-          text: `Hi ${formData.name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
-        }],
+        parts: [
+          {
+            type: 'text',
+            text: `Hi ${formData.name}! I'm here to help you thoughtfully assess whether custom software might be a worthwhile investment for your business.\n\nTo get started: What problem or opportunity is prompting you to consider custom software?`,
+          },
+        ],
       }
       setMessages([greeting])
 
@@ -391,297 +396,299 @@ export function HeroChat(props: HeroChatProps) {
     return () => window.removeEventListener('hero-submit-suggestion', listener)
   }, [handleExternalSuggestion])
 
-  return (<>
+  return (
+    <>
+      {step === 'intro' ? (
+        <Card
+          variant="dark"
+          borderBottom="var(--brand-Light-Purple)"
+          className={styles['lead-card']}
+        >
+          <CardHeader>
+            <h2 className={styles['card-title']}>
+              <span>Let&apos;s see if we&apos;re a </span>
+              <span className={styles['chat-title-text']}>
+                fit.
+                <span className={styles['chat-title-underline']}></span>
+              </span>
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <p className={styles['lead-form__subtitle']}>
+              Share a few details and we&apos;ll help you explore whether custom software
+              makes sense for your business.
+            </p>
+            <form
+              className={styles['lead-form__form']}
+              onSubmit={(e) => {
+                e.preventDefault()
+                void handleStartChat()
+              }}
+            >
+              <div className="form-group form-group--on-dark">
+                <label className="form-label" htmlFor="lead-name">
+                  Full Name
+                </label>
+                <Input
+                  id="lead-name"
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="form-control--large form-control--no-border form-control-border-bottom"
+                  placeholder="Jane Doe"
+                />
+              </div>
+              <div className="form-group form-group--on-dark">
+                <label className="form-label" htmlFor="lead-email">
+                  Work Email
+                </label>
+                <Input
+                  id="lead-email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="form-control--large form-control--no-border form-control-border-bottom"
+                  placeholder="jane@company.com"
+                />
+              </div>
+              <CardAction>
+                <button
+                  type="submit"
+                  className="btn btn--primary btn--large"
+                  disabled={!formData.name || !formData.email || isSubmitting}
+                >
+                  {isSubmitting ? 'Starting...' : 'Start Conversation'}
+                </button>
+              </CardAction>
+            </form>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className={`chat-container ${styles['chat-container']}`}>
+          <Conversation className="conversation-wrapper conversation-wrapper--flex">
+            <ConversationContent>
+              {messages.map((message) => (
+                <Fragment key={message.id}>
+                  {message.parts.map((part, index) => {
+                    switch (part.type) {
+                      case 'text':
+                        return (
+                          <Fragment key={`${message.id}-${index}`}>
+                            <Message from={message.role}>
+                              {message.role === 'assistant' && (
+                                <div className="message-avatar">
+                                  <Favicon
+                                    className="message-avatar__image"
+                                    style={{
+                                      width: 'var(--op-space-x-large)',
+                                      height: 'var(--op-space-x-large)',
+                                    }}
+                                  />
+                                </div>
+                              )}
+                              <MessageContent>
+                                {isClient ? (
+                                  messageCitations[message.id]?.length ? (
+                                    <MessageWithCitations
+                                      message={message}
+                                      citations={messageCitations[message.id]}
+                                    />
+                                  ) : (
+                                    <MessageResponse>{part.text}</MessageResponse>
+                                  )
+                                ) : (
+                                  <div>{part.text}</div>
+                                )}
+                                {message.role === 'assistant' && (
+                                  <MessageActions>
+                                    <MessageAction
+                                      label="Like"
+                                      onClick={() =>
+                                        setLiked((prev) => ({
+                                          ...prev,
+                                          [message.id]: !prev[message.id],
+                                        }))
+                                      }
+                                      tooltip="Like this response"
+                                    >
+                                      <HugeiconsIcon
+                                        icon={ThumbsUpIcon}
+                                        size={16}
+                                        color={
+                                          liked[message.id] ? 'currentColor' : 'none'
+                                        }
+                                      />
+                                    </MessageAction>
+                                    <MessageAction
+                                      label="Dislike"
+                                      onClick={() =>
+                                        setDisliked((prev) => ({
+                                          ...prev,
+                                          [message.id]: !prev[message.id],
+                                        }))
+                                      }
+                                      tooltip="Dislike this response"
+                                    >
+                                      <HugeiconsIcon
+                                        icon={ThumbsDownIcon}
+                                        size={16}
+                                        color={
+                                          disliked[message.id] ? 'currentColor' : 'none'
+                                        }
+                                      />
+                                    </MessageAction>
+                                    <MessageAction
+                                      onClick={() => regenerate()}
+                                      label="Retry"
+                                    >
+                                      <HugeiconsIcon icon={Refresh01Icon} size={16} />
+                                    </MessageAction>
+                                    <MessageAction
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(part.text)
+                                      }
+                                      label="Copy"
+                                    >
+                                      <HugeiconsIcon icon={Copy01Icon} size={16} />
+                                    </MessageAction>
+                                  </MessageActions>
+                                )}
+                              </MessageContent>
+                            </Message>
+                          </Fragment>
+                        )
+                      default: {
+                        // Handle tool invocations
+                        if (
+                          part.type === 'tool-invocation' ||
+                          part.type.startsWith('tool-')
+                        ) {
+                          const toolPart = part as {
+                            type: string
+                            toolName?: string
+                            toolCallId?: string
+                            state?: string
+                            // AI SDK uses 'input' and 'output'
+                            input?: { url?: string; title?: string; description?: string }
+                            output?: {
+                              success?: boolean
+                              url?: string
+                              title?: string
+                              description?: string
+                              backgroundImage?: string
+                              logo?: string
+                            }
+                            // Legacy support
+                            args?: { url?: string; title?: string; description?: string }
+                            result?: {
+                              success?: boolean
+                              url?: string
+                              title?: string
+                              description?: string
+                              backgroundImage?: string
+                              logo?: string
+                            }
+                          }
 
-    {step === 'intro' ? (
-      <Card
-        variant="dark"
-        borderBottom="var(--brand-Light-Purple)"
-        className={styles['lead-card']}
-      >
-        <CardHeader>
-          <h2 className={styles['card-title']}>
-            <span>Let&apos;s see if we&apos;re a </span>
-            <span className={styles['chat-title-text']}>
-              fit.
-              <span className={styles['chat-title-underline']}></span>
-            </span>
-          </h2>
-        </CardHeader>
-        <CardContent>
-          <p className={styles['lead-form__subtitle']}>
-            Share a few details and we&apos;ll help you explore whether custom software
-            makes sense for your business.
-          </p>
-          <form
-            className={styles['lead-form__form']}
-            onSubmit={(e) => {
-              e.preventDefault()
-              void handleStartChat()
-            }}
-          >
-            <div className="form-group form-group--on-dark">
-              <label className="form-label" htmlFor="lead-name">
-                Full Name
-              </label>
-              <Input
-                id="lead-name"
-                type="text"
-                name="name"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="form-control--large form-control--no-border form-control-border-bottom"
-                placeholder="Jane Doe"
-              />
-            </div>
-            <div className="form-group form-group--on-dark">
-              <label className="form-label" htmlFor="lead-email">
-                Work Email
-              </label>
-              <Input
-                id="lead-email"
-                type="email"
-                name="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="form-control--large form-control--no-border form-control-border-bottom"
-                placeholder="jane@company.com"
-              />
-            </div>
-            <CardAction>
-              <button
-                type="submit"
-                className="btn btn--primary btn--large"
-                disabled={!formData.name || !formData.email || isSubmitting}
-              >
-                {isSubmitting ? 'Starting...' : 'Start Conversation'}
-              </button>
-            </CardAction>
-          </form>
-        </CardContent>
-      </Card>
-    ) : (
-      <div className={`chat-container ${styles['chat-container']}`}>
-        <Conversation className="conversation-wrapper conversation-wrapper--flex">
-          <ConversationContent>
-            {messages.map((message) => (
-              <Fragment key={message.id}>
-                {message.parts.map((part, index) => {
-                  switch (part.type) {
-                    case 'text':
-                      return (
-                        <Fragment key={`${message.id}-${index}`}>
-                          <Message from={message.role}>
-                            {message.role === 'assistant' && (
-                              <div className="message-avatar">
-                                <Favicon
-                                  className="message-avatar__image"
-                                  style={{
-                                    width: 'var(--op-space-x-large)',
-                                    height: 'var(--op-space-x-large)',
-                                  }}
+                          // AI SDK uses 'input'/'output', but keep 'args'/'result' as fallback
+                          const inputData = toolPart.input || toolPart.args
+                          const outputData = toolPart.output || toolPart.result
+
+                          // Check for show_case_study tool
+                          const isShowCaseStudy =
+                            toolPart.toolName === 'show_case_study' ||
+                            part.type === 'tool-show_case_study'
+
+                          // Check for URL in output (enriched) or input (fallback)
+                          const url = outputData?.url || inputData?.url
+
+                          if (isShowCaseStudy && url) {
+                            // Use enriched metadata from tool output if available
+                            const title = outputData?.title || inputData?.title
+                            const description =
+                              outputData?.description || inputData?.description
+                            const backgroundImage = outputData?.backgroundImage
+                            const logo = outputData?.logo
+
+                            return (
+                              <div
+                                key={`${message.id}-${index}`}
+                                className="case-study-preview"
+                                style={{
+                                  margin: 'var(--op-space-medium) 0',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                <CaseStudyCard
+                                  backgroundImage={backgroundImage}
+                                  description={description}
+                                  logo={logo}
+                                  title={title}
+                                  url={url}
                                 />
                               </div>
-                            )}
-                            <MessageContent>
-                              {isClient ? (
-                                messageCitations[message.id]?.length ? (
-                                  <MessageWithCitations
-                                    message={message}
-                                    citations={messageCitations[message.id]}
-                                  />
-                                ) : (
-                                  <MessageResponse>{part.text}</MessageResponse>
-                                )
-                              ) : (
-                                <div>{part.text}</div>
-                              )}
-                              {message.role === 'assistant' && (
-                                <MessageActions>
-                                  <MessageAction
-                                    label="Like"
-                                    onClick={() =>
-                                      setLiked((prev) => ({
-                                        ...prev,
-                                        [message.id]: !prev[message.id],
-                                      }))
-                                    }
-                                    tooltip="Like this response"
-                                  >
-                                    <HugeiconsIcon
-                                      icon={ThumbsUpIcon}
-                                      size={16}
-                                      color={
-                                        liked[message.id] ? 'currentColor' : 'none'
-                                      }
-                                    />
-                                  </MessageAction>
-                                  <MessageAction
-                                    label="Dislike"
-                                    onClick={() =>
-                                      setDisliked((prev) => ({
-                                        ...prev,
-                                        [message.id]: !prev[message.id],
-                                      }))
-                                    }
-                                    tooltip="Dislike this response"
-                                  >
-                                    <HugeiconsIcon
-                                      icon={ThumbsDownIcon}
-                                      size={16}
-                                      color={
-                                        disliked[message.id] ? 'currentColor' : 'none'
-                                      }
-                                    />
-                                  </MessageAction>
-                                  <MessageAction
-                                    onClick={() => regenerate()}
-                                    label="Retry"
-                                  >
-                                    <HugeiconsIcon icon={Refresh01Icon} size={16} />
-                                  </MessageAction>
-                                  <MessageAction
-                                    onClick={() =>
-                                      navigator.clipboard.writeText(part.text)
-                                    }
-                                    label="Copy"
-                                  >
-                                    <HugeiconsIcon icon={Copy01Icon} size={16} />
-                                  </MessageAction>
-                                </MessageActions>
-                              )}
-                            </MessageContent>
-                          </Message>
-                        </Fragment>
-                      )
-                    default: {
-                      // Handle tool invocations
-                      if (part.type === 'tool-invocation' || part.type.startsWith('tool-')) {
-                        const toolPart = part as {
-                          type: string
-                          toolName?: string
-                          toolCallId?: string
-                          state?: string
-                          // AI SDK uses 'input' and 'output'
-                          input?: { url?: string; title?: string; description?: string }
-                          output?: {
-                            success?: boolean
-                            url?: string
-                            title?: string
-                            description?: string
-                            backgroundImage?: string
-                            logo?: string
-                          }
-                          // Legacy support
-                          args?: { url?: string; title?: string; description?: string }
-                          result?: {
-                            success?: boolean
-                            url?: string
-                            title?: string
-                            description?: string
-                            backgroundImage?: string
-                            logo?: string
+                            )
                           }
                         }
-
-                        // AI SDK uses 'input'/'output', but keep 'args'/'result' as fallback
-                        const inputData = toolPart.input || toolPart.args
-                        const outputData = toolPart.output || toolPart.result
-
-
-                        // Check for show_case_study tool
-                        const isShowCaseStudy =
-                          toolPart.toolName === 'show_case_study' ||
-                          part.type === 'tool-show_case_study'
-
-                        // Check for URL in output (enriched) or input (fallback)
-                        const url = outputData?.url || inputData?.url
-
-                        if (isShowCaseStudy && url) {
-
-                          // Use enriched metadata from tool output if available
-                          const title = outputData?.title || inputData?.title
-                          const description = outputData?.description || inputData?.description
-                          const backgroundImage = outputData?.backgroundImage
-                          const logo = outputData?.logo
-
-                          return (
-                            <div
-                              key={`${message.id}-${index}`}
-                              className="case-study-preview"
-                              style={{
-                                margin: 'var(--op-space-medium) 0',
-                                maxWidth: '100%',
-                              }}
-                            >
-                              <CaseStudyCard
-                                backgroundImage={backgroundImage}
-                                description={description}
-                                logo={logo}
-                                title={title}
-                                url={url}
-                              />
-                            </div>
-                          )
-                        }
+                        return null
                       }
-                      return null
                     }
-                  }
-                })}
-              </Fragment>
-            ))}
-          </ConversationContent>
-        </Conversation>
-
-        <div className="prompt-input-wrapper">
-          <div className="gradient" style={{ top: '80%' }} />
-          <PromptInputProvider>
-            <PromptInput onSubmit={handlePromptSubmit}>
-              <PromptInputBody>
-                <PromptInputTextarea
-                  ref={textareaRef}
-                  placeholder="Ask a question..."
-                />
-              </PromptInputBody>
-              <PromptInputFooter>
-                <PromptInputTools>
-                  <PromptInputActionMenu>
-                    <PromptInputActionMenuTrigger>
-                      <HugeiconsIcon icon={PlusSignIcon} size={20} />
-                    </PromptInputActionMenuTrigger>
-                    <PromptInputActionMenuContent>
-                      <PromptInputActionAddAttachments />
-                    </PromptInputActionMenuContent>
-                  </PromptInputActionMenu>
-                  <PromptInputSpeechButton textareaRef={textareaRef} />
-                </PromptInputTools>
-                <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
-              </PromptInputFooter>
-            </PromptInput>
-          </PromptInputProvider>
-        </div>
-        {messages.length < 3 && (
-          <div className="suggestions-container">
-            <Suggestions>
-              {suggestions.map((suggestion) => (
-                <Suggestion
-                  key={suggestion}
-                  size="lg"
-                  onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
-                  suggestion={suggestion}
-                />
+                  })}
+                </Fragment>
               ))}
-            </Suggestions>
+            </ConversationContent>
+          </Conversation>
+
+          <div className="prompt-input-wrapper">
+            <div className="gradient" style={{ top: '80%' }} />
+            <PromptInputProvider>
+              <PromptInput onSubmit={handlePromptSubmit}>
+                <PromptInputBody>
+                  <PromptInputTextarea
+                    ref={textareaRef}
+                    placeholder="Ask a question..."
+                  />
+                </PromptInputBody>
+                <PromptInputFooter>
+                  <PromptInputTools>
+                    <PromptInputActionMenu>
+                      <PromptInputActionMenuTrigger>
+                        <HugeiconsIcon icon={PlusSignIcon} size={20} />
+                      </PromptInputActionMenuTrigger>
+                      <PromptInputActionMenuContent>
+                        <PromptInputActionAddAttachments />
+                      </PromptInputActionMenuContent>
+                    </PromptInputActionMenu>
+                    <PromptInputSpeechButton textareaRef={textareaRef} />
+                  </PromptInputTools>
+                  <PromptInputSubmit status={isStreaming ? 'streaming' : undefined} />
+                </PromptInputFooter>
+              </PromptInput>
+            </PromptInputProvider>
           </div>
-        )}
-      </div>
-    )}
-  </>
+          {messages.length < 3 && (
+            <div className="suggestions-container">
+              <Suggestions>
+                {suggestions.map((suggestion) => (
+                  <Suggestion
+                    key={suggestion}
+                    size="lg"
+                    onClick={() => handlePromptSubmit({ text: suggestion, files: [] })}
+                    suggestion={suggestion}
+                  />
+                ))}
+              </Suggestions>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   )
 }
 

@@ -1,11 +1,11 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { scrapeCaseStudyMetadata } from '@/lib/framer/case-study-scraper'
 
 // Mock the case study scraper module
 vi.mock('@/lib/framer/case-study-scraper', () => ({
   scrapeCaseStudyMetadata: vi.fn(),
 }))
-
-import { scrapeCaseStudyMetadata } from '@/lib/framer/case-study-scraper'
 
 describe('CaseStudyCard Props Interface', () => {
   // Test the expected props interface for the CaseStudyCard component
@@ -118,8 +118,6 @@ describe('Case Study Metadata Scraper', () => {
     expect(result.backgroundImage).toBeUndefined()
     expect(result.logo).toBeUndefined()
   })
-
-
 })
 
 describe('Tool Part Detection for Case Study', () => {
@@ -140,9 +138,13 @@ describe('Tool Part Detection for Case Study', () => {
   })
 
   it('should identify show_case_study tool', () => {
-    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'show_case_study' })).toBe(true)
+    expect(
+      isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'show_case_study' })
+    ).toBe(true)
     expect(isShowCaseStudyTool({ type: 'tool-show_case_study' })).toBe(true)
-    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'other_tool' })).toBe(false)
+    expect(isShowCaseStudyTool({ type: 'tool-invocation', toolName: 'other_tool' })).toBe(
+      false
+    )
   })
 })
 
